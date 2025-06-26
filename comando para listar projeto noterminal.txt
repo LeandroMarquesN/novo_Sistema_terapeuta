@@ -1,0 +1,172 @@
+comando para listar o projeto no terminal desde que vc esteja na raiz do projeto  :
+
+
+
+find . -path "./backend/node_modules" -prune -o -type f \
+\( -name "*.js" -o -name "*.json" -o -name "*.yml" -o -name "*.env" -o -name "*.sql" \) \
+! -name "package-lock.json" \
+-exec echo "===== {} =====" \; -exec cat {} \;
+
+
+
+assim a IA consegue indentificar os possiveis erros no codigo 
+
+comando para verificar e mostrar a estrutura do projeto como uma arvore:
+
+tree -L 3
+
+
+ai ele retorna isso : 
+
+
+.
+├── backend
+│   ├── app.js
+│   ├── config
+│   │   └── db.js
+│   ├── controllers
+│   │   └── pacienteController.js
+│   ├── docker
+│   │   └── mysql-init
+│   ├── models
+│   │   └── pacienteModel.js
+│   ├── node_modules
+│   │   ├── accepts
+│   │   ├── anymatch
+│   │   ├── array-flatten
+│   │   ├── aws-ssl-profiles
+│   │   ├── balanced-match
+│   │   ├── binary-extensions
+│   │   ├── body-parser
+│   │   ├── brace-expansion
+│   │   ├── braces
+│   │   ├── bytes
+│   │   ├── call-bind-apply-helpers
+│   │   ├── call-bound
+│   │   ├── chokidar
+│   │   ├── concat-map
+│   │   ├── content-disposition
+│   │   ├── content-type
+│   │   ├── cookie
+│   │   ├── cookie-signature
+│   │   ├── cors
+│   │   ├── debug
+│   │   ├── denque
+│   │   ├── depd
+│   │   ├── destroy
+│   │   ├── dotenv
+│   │   ├── dunder-proto
+│   │   ├── ee-first
+│   │   ├── encodeurl
+│   │   ├── escape-html
+│   │   ├── es-define-property
+│   │   ├── es-errors
+│   │   ├── es-object-atoms
+│   │   ├── etag
+│   │   ├── express
+│   │   ├── fill-range
+│   │   ├── finalhandler
+│   │   ├── forwarded
+│   │   ├── fresh
+│   │   ├── function-bind
+│   │   ├── generate-function
+│   │   ├── get-intrinsic
+│   │   ├── get-proto
+│   │   ├── glob-parent
+│   │   ├── gopd
+│   │   ├── has-flag
+│   │   ├── hasown
+│   │   ├── has-symbols
+│   │   ├── http-errors
+│   │   ├── iconv-lite
+│   │   ├── ignore-by-default
+│   │   ├── inherits
+│   │   ├── ipaddr.js
+│   │   ├── is-binary-path
+│   │   ├── is-extglob
+│   │   ├── is-glob
+│   │   ├── is-number
+│   │   ├── is-property
+│   │   ├── long
+│   │   ├── lru-cache
+│   │   ├── lru.min
+│   │   ├── math-intrinsics
+│   │   ├── media-typer
+│   │   ├── merge-descriptors
+│   │   ├── methods
+│   │   ├── mime
+│   │   ├── mime-db
+│   │   ├── mime-types
+│   │   ├── minimatch
+│   │   ├── ms
+│   │   ├── mysql2
+│   │   ├── named-placeholders
+│   │   ├── negotiator
+│   │   ├── nodemon
+│   │   ├── normalize-path
+│   │   ├── object-assign
+│   │   ├── object-inspect
+│   │   ├── on-finished
+│   │   ├── parseurl
+│   │   ├── path-to-regexp
+│   │   ├── picomatch
+│   │   ├── proxy-addr
+│   │   ├── pstree.remy
+│   │   ├── qs
+│   │   ├── range-parser
+│   │   ├── raw-body
+│   │   ├── readdirp
+│   │   ├── safe-buffer
+│   │   ├── safer-buffer
+│   │   ├── semver
+│   │   ├── send
+│   │   ├── seq-queue
+│   │   ├── serve-static
+│   │   ├── setprototypeof
+│   │   ├── side-channel
+│   │   ├── side-channel-list
+│   │   ├── side-channel-map
+│   │   ├── side-channel-weakmap
+│   │   ├── simple-update-notifier
+│   │   ├── sqlstring
+│   │   ├── statuses
+│   │   ├── supports-color
+│   │   ├── toidentifier
+│   │   ├── to-regex-range
+│   │   ├── touch
+│   │   ├── type-is
+│   │   ├── undefsafe
+│   │   ├── unpipe
+│   │   ├── utils-merge
+│   │   └── vary
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── Passo-a-Passo-Sistema-terapeuta.txt
+│   ├── routes
+│   │   └── pacienteRoutes.js
+│   ├── server.js
+│   └── services
+├── comando para listar projeto noterminal.txt
+├── docker-compose.yml
+├── Dockerfile
+├── frontend
+│   ├── assets
+│   │   ├── css
+│   │   ├── img
+│   │   └── js
+│   └── pages
+│       ├── agendamento.html
+│       ├── confirmacao.html
+│       ├── dashBoard.html
+│       ├── historico.html
+│       ├── index.html
+│       ├── login.html
+│       ├── pacientes.html
+│       ├── prontuario.html
+│       └── testes-energeticos.html
+├── LICENSE
+├── README.md
+└── Readme Sistema Terapeuta.pdf
+
+124 directories, 24 files
+usuario@marques:~/sistema-Terapeuta$ 
