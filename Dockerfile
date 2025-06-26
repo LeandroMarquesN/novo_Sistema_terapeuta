@@ -1,18 +1,18 @@
-# Dockerfile
+# Usa imagem oficial do Node
 FROM node:18
 
+# Cria o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Copia o package.json e package-lock.json do backend
+# Copia package.json e instala dependências
 COPY backend/package*.json ./
-
-# Instala as dependências do backend
 RUN npm install
 
-# Copia todo o conteúdo da pasta backend para o container
+# Copia todo o backend
 COPY backend/ .
 
+# Expõe a porta
 EXPOSE 3000
 
-# Executa o servidor
+# Comando para iniciar o app
 CMD ["node", "server.js"]
