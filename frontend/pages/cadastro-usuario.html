@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cadastrar Novo Usuário</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container py-5">
+  <h2 class="mb-4">Cadastro de Novo Usuário</h2>
+  <form id="formUsuario">
+    <div class="mb-3">
+      <input class="form-control" name="nome" placeholder="Nome do usuário" required />
+    </div>
+    <div class="mb-3">
+      <input class="form-control" name="senha" type="password" placeholder="Senha" required />
+    </div>
+    <button class="btn btn-success" type="submit">Cadastrar</button>
+    <a href="index.html" class="btn btn-secondary ms-2">Voltar</a>
+  </form>
+
+  <script>
+    document.getElementById('formUsuario').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const novoUsuario = {
+        nome: form.nome.value,
+        senha: form.senha.value
+      };
+
+      const res = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(novoUsuario)
+      });
+
+      if (res.ok) {
+        alert('Usuário cadastrado com sucesso!');
+        form.reset();
+      } else {
+        alert('Erro ao cadastrar usuário.');
+      }
+    });
+  </script>
+</body>
+</html>

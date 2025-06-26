@@ -1,58 +1,173 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Pacientes</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Gerenciar Pacientes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    input:invalid, textarea:invalid {
+      border: 2px solid red;
+    }
+    input:valid, textarea:valid {
+      border: 2px solid green;
+    }
+    .erro {
+      color: red;
+      font-size: 0.8rem;
+    }
+  </style>
 </head>
-<body>
-  <div class="container mt-5">
-    <h2>Cadastrar Paciente</h2>
-    <form class="row g-3">
-      <div class="col-md-6">
-        <label class="form-label">Nome</label>
-        <input type="text" class="form-control">
+<body class="bg-light">
+  <div class="container py-5">
+    <h1 class="mb-4">Pacientes</h1>
+
+    <ul id="lista-pacientes" class="list-group mb-5"></ul>
+
+    <h2 id="form-title" class="mb-3">Adicionar Paciente</h2>
+    <form id="formPaciente" novalidate>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <input class="form-control" name="nome" placeholder="Nome" required />
+          <span class="erro" id="erro-nome"></span>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" name="email" type="email" placeholder="Email" required />
+          <span class="erro" id="erro-email"></span>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" name="telefone" placeholder="Telefone" required />
+          <span class="erro" id="erro-telefone"></span>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" name="data_nascimento" type="date" required />
+          <span class="erro" id="erro-data"></span>
+        </div>
       </div>
-      <div class="col-md-6">
-        <label class="form-label">E-mail</label>
-        <input type="email" class="form-control">
+      <div class="mb-3">
+        <textarea class="form-control" name="historico" placeholder="Histórico" rows="4"></textarea>
       </div>
-      <div class="col-md-6">
-        <label class="form-label">Telefone</label>
-        <input type="tel" class="form-control">
-      </div>
-      <div class="col-md-6">
-        <label class="form-label">Data de nascimento</label>
-        <input type="date" class="form-control">
-      </div>
-      <div class="col-12">
-        <label class="form-label">Histórico</label>
-        <textarea class="form-control" rows="3"></textarea>
-      </div>
-      <div class="col-12">
-        <button type="submit" class="btn btn-success">Salvar</button>
+
+      <div>
+        <button class="btn btn-primary me-2" type="submit">Salvar</button>
+        <button class="btn btn-secondary" type="button" id="cancelarEdicao" style="display:none;">Cancelar</button>
       </div>
     </form>
-
-    <hr class="my-5">
-
-    <h3>Pacientes cadastrados</h3>
-    <table class="table table-bordered mt-3">
-      <thead>
-        <tr>
-          <th>Nome</th>
-          <th>Telefone</th>
-          <th>Ações</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Maria Silva</td>
-          <td>(11) 99999-9999</td>
-          <td><a href="prontuario.html" class="btn btn-sm btn-primary">Ver prontuário</a></td>
-        </tr>
-      </tbody>
-    </table>
   </div>
+
+  <script>
+    let editandoId = null;
+
+    function mostrarErro(campo, mensagem) {
+      document.getElementById(`erro-${campo}`).innerText = mensagem || '';
+    }
+
+    async function carregarPacientes() {
+      const res = await fetch('/api');
+      const pacientes = await res.json();
+      const lista = document.getElementById('lista-pacientes');
+      lista.innerHTML = pacientes.map(p => `
+        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+          <div class="flex-grow-1">
+            <strong>${p.nome}</strong> - ${p.email} - ${p.telefone} - ${p.data_nascimento}
+          </div>
+          <div class="mt-2 mt-md-0">
+            <button class="btn btn-sm btn-warning me-2" onclick="editarPaciente(${p.id})">Editar</button>
+            <button class="btn btn-sm btn-danger" onclick="deletarPaciente(${p.id})">Excluir</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    document.getElementById('formPaciente').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      let valido = true;
+
+      mostrarErro('nome');
+      mostrarErro('email');
+      mostrarErro('telefone');
+      mostrarErro('data');
+
+      if (!form.nome.value.trim()) {
+        mostrarErro('nome', 'Nome é obrigatório');
+        valido = false;
+      }
+      if (!form.email.value.trim()) {
+        mostrarErro('email', 'Email é obrigatório');
+        valido = false;
+      }
+      if (!form.telefone.value.trim()) {
+        mostrarErro('telefone', 'Telefone é obrigatório');
+        valido = false;
+      }
+      if (!form.data_nascimento.value.trim()) {
+        mostrarErro('data', 'Data de nascimento é obrigatória');
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      const paciente = {
+        nome: form.nome.value,
+        email: form.email.value,
+        telefone: form.telefone.value,
+        data_nascimento: form.data_nascimento.value,
+        historico: form.historico.value
+      };
+
+      if (editandoId) {
+        await fetch(`/api/${editandoId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paciente)
+        });
+        editandoId = null;
+        document.getElementById('form-title').innerText = 'Adicionar Paciente';
+        document.getElementById('cancelarEdicao').style.display = 'none';
+      } else {
+        await fetch('/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paciente)
+        });
+      }
+
+      form.reset();
+      carregarPacientes();
+    });
+
+    async function editarPaciente(id) {
+      const res = await fetch(`/api/${id}`);
+      const paciente = await res.json();
+
+      const form = document.getElementById('formPaciente');
+      form.nome.value = paciente.nome;
+      form.email.value = paciente.email;
+      form.telefone.value = paciente.telefone;
+      form.data_nascimento.value = paciente.data_nascimento;
+      form.historico.value = paciente.historico;
+
+      editandoId = id;
+      document.getElementById('form-title').innerText = 'Editar Paciente';
+      document.getElementById('cancelarEdicao').style.display = 'inline-block';
+    }
+
+    async function deletarPaciente(id) {
+      if (confirm('Deseja realmente excluir este paciente?')) {
+        await fetch(`/api/${id}`, { method: 'DELETE' });
+        carregarPacientes();
+      }
+    }
+
+    document.getElementById('cancelarEdicao').addEventListener('click', () => {
+      document.getElementById('formPaciente').reset();
+      document.getElementById('form-title').innerText = 'Adicionar Paciente';
+      document.getElementById('cancelarEdicao').style.display = 'none';
+      editandoId = null;
+    });
+
+    carregarPacientes();
+  </script>
 </body>
 </html>

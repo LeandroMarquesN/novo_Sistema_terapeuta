@@ -1,12 +1,29 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
-const routes = require('./routes/pacienteRoutes');
 
+const pacienteRoutes = require('./routes/pacienteRoutes');
+const usuarioRoutes = require('./routes/usuarioRoutes');
 
 const app = express();
 
+// Libera CORS
 app.use(cors());
+
+// Permite JSON no corpo das requisições
 app.use(express.json());
-app.use('/api', routes); // todas as rotas começam com /api
+
+// Rotas da API
+app.use('/api', pacienteRoutes);            // Ex: /api/pacientes
+app.use('/api/usuarios', usuarioRoutes);    // Ex: /api/usuarios
+
+// Servir arquivos estáticos
+app.use('/assets', express.static(path.join(__dirname, '..', 'frontend', 'assets')));
+app.use('/', express.static(path.join(__dirname, '..', 'frontend', 'pages')));
+
+// Redireciona a raiz para index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'index.html'));
+});
 
 module.exports = app;

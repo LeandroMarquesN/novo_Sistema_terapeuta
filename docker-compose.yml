@@ -5,6 +5,7 @@ services:
       - "3000:3000"
     volumes:
       - ./backend:/app
+      - ./frontend:/app/frontend # ✅ Agora está no lugar certo!
     env_file:
       - .env
     depends_on:
