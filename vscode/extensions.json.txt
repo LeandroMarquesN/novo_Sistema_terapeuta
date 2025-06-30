@@ -1,0 +1,40 @@
+{
+  "recommendations": [
+    // Essenciais e produtividade
+    "esbenp.prettier-vscode",
+    "formulahendry.code-runner",
+    "aaron-bond.better-comments",
+    "christian-kohler.path-intellisense",
+    "coenraads.bracket-pair-colorizer-2",
+    "formulahendry.auto-rename-tag",
+
+    // Node.js / JavaScript
+    "dbaeumer.vscode-eslint",
+    "xabikos.JavaScriptSnippets",
+    "waderyan.nodejs-extension-pack",
+    "christian-kohler.npm-intellisense",
+
+    // HTML / CSS
+    "ecmel.vscode-html-css",
+    "zignd.html-css-class-completion",
+
+    // Docker
+    "ms-azuretools.vscode-docker",
+
+    // Banco de dados MySQL
+    "mtxr.sqltools",
+    "mtxr.sqltools-driver-mysql",
+
+    // Git e versionamento
+    "eamodio.gitlens",
+
+    // Live Server
+    "ritwickdey.LiveServer",
+
+    // Variáveis de ambiente
+    "mikestead.dotenv",
+
+    // Teste de APIs
+    "humao.rest-client"
+  ]
+}
