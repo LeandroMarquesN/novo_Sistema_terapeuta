@@ -18,7 +18,7 @@ app.use('/api', pacienteRoutes);            // Ex: /api/pacientes
 app.use('/api/usuarios', usuarioRoutes);    // Ex: /api/usuarios
 
 // Servir arquivos estáticos
-app.use('/assets', express.static(path.join(__dirname, '..', 'frontend', 'assets')));
+app.use('/assets', express.static(path.join(__dirname, '..', 'frontend', 'pages')));
 app.use('/', express.static(path.join(__dirname, '..', 'frontend', 'pages')));
 
 // Redireciona a raiz para index.html

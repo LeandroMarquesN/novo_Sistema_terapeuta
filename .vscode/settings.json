@@ -1,36 +1,24 @@
 {
-  // Prettier como formatador padrão
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-
-  // Formata ao salvar
-  "editor.formatOnSave": true,
-
-  // Organiza imports ao salvar
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": "explicit"
-  },
-
-  // Tamanho da indentação
-  "editor.tabSize": 2,
-
-  // Suporte a arquivos .env
-  "files.associations": {
-    ".env*": "dotenv"
-  },
-
-  // Evita aviso de formatação para arquivos grandes
-  "editor.largeFileOptimizations": false,
-
-  // Prettier: aspas simples e ponto e vírgula
-  "prettier.singleQuote": true,
-  "prettier.semi": true,
-
-  // Controla linhas máximas (opcional)
-  "editor.rulers": [100],
-
-  // Suporte melhorado para SQLTools
-  "sqltools.connections": [],
-
-  // Remove trailing spaces ao salvar
-  "files.trimTrailingWhitespace": true
+    "search.exclude":  {
+                           "**/node_modules":  true
+                       },
+    "editor.quickSuggestions":  {
+                                    "strings":  true
+                                },
+    "typescript.autoImportSuggestions.enabled":  true,
+    "git.enableSmartCommit":  true,
+    "editor.tabSize":  2,
+    "terminal.integrated.scrollback":  10000,
+    "breadcrumbs.enabled":  true,
+    "terminal.integrated.fontSize":  14,
+    "files.trimTrailingWhitespace":  true,
+    "files.exclude":  {
+                          "**/node_modules":  true,
+                          "**/.git":  true
+                      },
+    "workbench.iconTheme":  "material-icon-theme",
+    "workbench.colorTheme":  "Default Dark Modern",
+    "git.autofetch":  true,
+    "editor.renderWhitespace":  "all",
+    "editor.formatOnSave":  true
 }
