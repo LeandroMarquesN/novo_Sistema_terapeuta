@@ -1,4 +1,4 @@
-﻿{
+{
   // Prettier como formatador padrão
   "editor.defaultFormatter": "esbenp.prettier-vscode",
 
@@ -7,7 +7,7 @@
 
   // Organiza imports ao salvar
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+    "source.organizeImports": "explicit"
   },
 
   // Tamanho da indentação
