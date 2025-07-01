@@ -1,3 +1,5 @@
+// backend/app.js
+
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
@@ -14,16 +16,17 @@ app.use(cors());
 app.use(express.json());
 
 // Rotas da API
-app.use('/api', pacienteRoutes);            // Ex: /api/pacientes
-app.use('/api/usuarios', usuarioRoutes);    // Ex: /api/usuarios
+app.use('/api', pacienteRoutes);
+app.use('/api/usuarios', usuarioRoutes);
 
 // Servir arquivos estáticos
-app.use('/assets', express.static(path.join(__dirname, '..', 'frontend', 'pages')));
-app.use('/', express.static(path.join(__dirname, '..', 'frontend', 'pages')));
+app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));
+app.use(express.static(path.join(__dirname, 'frontend', 'pages')));
 
-// Redireciona a raiz para index.html
+// Rota principal (redireciona para index.html)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'frontend', 'pages', 'index.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'index.html'));
 });
+
 
 module.exports = app;
