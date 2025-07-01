@@ -19,27 +19,34 @@
   </form>
 
   <script>
-    document.getElementById('formUsuario').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const novoUsuario = {
-        nome: form.nome.value,
-        senha: form.senha.value
-      };
 
-      const res = await fetch('/api/usuarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(novoUsuario)
-      });
+  document.getElementById('formUsuario').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const novoUsuario = {
+      nome: form.nome.value,
+      senha: form.senha.value
+    };
 
-      if (res.ok) {
-        alert('Usuário cadastrado com sucesso!');
-        form.reset();
-      } else {
-        alert('Erro ao cadastrar usuário.');
-      }
+    console.log('Enviando dados...', novoUsuario);
+
+    const res = await fetch('http://localhost:3000/api/usuarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(novoUsuario)
     });
+
+    if (res.ok) {
+      console.log('Usuário cadastrado com sucesso!');
+      alert('Usuário cadastrado com sucesso!');
+      form.reset();
+    } else {
+      console.error('Erro ao cadastrar usuário:', await res.text());
+      alert('Erro ao cadastrar usuário.');
+    }
+  });
+
+
   </script>
 </body>
 </html>
