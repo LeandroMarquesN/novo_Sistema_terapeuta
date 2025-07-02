@@ -16,7 +16,7 @@
                           "**/node_modules":  true,
                           "**/.git":  true
                       },
-    "workbench.iconTheme":  "material-icon-theme",
+    "workbench.iconTheme":  "material-icon-theme-simon",
     "workbench.colorTheme":  "Default Dark Modern",
     "git.autofetch":  true,
     "editor.renderWhitespace":  "all",

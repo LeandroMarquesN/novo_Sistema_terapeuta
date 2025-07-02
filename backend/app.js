@@ -21,6 +21,7 @@ app.use('/api/usuarios', usuarioRoutes);
 
 // Servir arquivos estáticos
 app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));
+
 app.use(express.static(path.join(__dirname, 'frontend', 'pages')));
 
 // Rota principal (redireciona para index.html)

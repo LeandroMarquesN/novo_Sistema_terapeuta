@@ -18,12 +18,38 @@
   </nav>
 
   <div class="container mt-5">
-    <h2>Bem-vindo ao Painel</h2>
+    <div class="container mt-5">
+      <h1 id="boasVindas" class="text-center">Bem-vinda! 💖</h1>
+
+      <p class="text-center">Você está logada no sistema do terapeuta!</p>
+    </div>
     <p>Aqui você poderá visualizar seus agendamentos.</p>
     <!-- Placeholder de calendário -->
     <div class="border p-5 text-center bg-light">
       [ Calendário será exibido aqui ]
     </div>
   </div>
+  <script>
+    const usuario = localStorage.getItem('usuarioLogado');
+
+    if (usuario) {
+      // Usa o primeiro nome para verificar
+      const nomeParts = usuario.trim().split(' ');
+      const primeiroNome = nomeParts[0].toLowerCase();
+      const terminaComA = primeiroNome.endsWith('a');
+
+      const saudacao = terminaComA
+        ? `Bem-vinda, ${usuario}! 💖`
+        : `Bem-vindo, ${usuario}! 💪`;
+
+      document.getElementById('boasVindas').textContent = saudacao;
+    } else {
+      // Se não estiver logado, redireciona para o login
+      window.location.href = 'login.html';
+    }
+  </script>
+
+
+
 </body>
 </html>
