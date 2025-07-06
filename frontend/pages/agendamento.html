@@ -10,37 +10,37 @@
   <div class="container mt-5">
     <h2 class="mb-4">Agendamento de Consulta</h2>
 
-    <form class="row g-3">
+    <form class="row g-3" id="formAgendamento" enctype="multipart/form-data">
 
-      <!-- Dados Básicos -->
+      <!-- Dados do paciente -->
       <div class="col-md-6">
         <label class="form-label">Nome do Paciente</label>
-        <input type="text" class="form-control" required>
+        <input type="text" name="nome" class="form-control" required>
       </div>
 
       <div class="col-md-3">
         <label class="form-label">Data de Nascimento</label>
-        <input type="date" class="form-control" required>
+        <input type="date" name="data_nascimento" class="form-control" required>
       </div>
 
       <div class="col-md-3">
         <label class="form-label">Idade</label>
-        <input type="number" class="form-control" required>
+        <input type="number" name="idade" class="form-control" required>
       </div>
 
       <div class="col-md-4">
         <label class="form-label">Peso (kg)</label>
-        <input type="number" step="0.1" class="form-control">
+        <input type="number" name="peso" step="0.1" class="form-control">
       </div>
 
       <div class="col-md-4">
         <label class="form-label">Altura (cm)</label>
-        <input type="number" step="0.1" class="form-control">
+        <input type="number" name="altura" step="0.1" class="form-control">
       </div>
 
       <div class="col-md-4">
         <label class="form-label">Tipo Sanguíneo</label>
-        <select class="form-select">
+        <select class="form-select" name="tipo_sanguineo">
           <option value="">Selecione</option>
           <option>A+</option><option>A-</option>
           <option>B+</option><option>B-</option>
@@ -49,10 +49,10 @@
         </select>
       </div>
 
-      <!-- Tipo de Terapia e Horário -->
+      <!-- Dados da consulta -->
       <div class="col-md-6">
         <label class="form-label">Tipo de Terapia</label>
-        <select class="form-select" required>
+        <select class="form-select" name="tipo_terapia" required>
           <option value="">Escolha uma opção</option>
           <option>Terapia Clark</option>
           <option>Biofísica</option>
@@ -63,18 +63,17 @@
 
       <div class="col-md-6">
         <label class="form-label">Data e Hora</label>
-        <input type="datetime-local" class="form-control" required>
+        <input type="datetime-local" name="data" class="form-control" required>
       </div>
 
-      <!-- Motivo e Origem -->
       <div class="col-12">
         <label class="form-label">Motivo da Consulta</label>
-        <textarea class="form-control" rows="2"></textarea>
+        <textarea class="form-control" name="motivo" rows="2"></textarea>
       </div>
 
       <div class="col-12">
         <label class="form-label">Como conheceu o consultório?</label>
-        <select class="form-select">
+        <select class="form-select" name="origem">
           <option>Indicação</option>
           <option>Instagram</option>
           <option>Google</option>
@@ -83,61 +82,67 @@
         </select>
       </div>
 
-      <!-- Checkboxes - Histórico de Saúde -->
-      <!-- Checkboxes - Histórico de Saúde Expandido -->
-<div class="col-12">
-  <h5 class="mt-4">Condições de Saúde (marque as que se aplicam):</h5>
-  <div class="row">
+      <!-- Histórico de Saúde -->
+      <div class="col-12">
+        <h5 class="mt-4">Condições de Saúde</h5>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Hipertensão"><label class="form-check-label">Hipertensão</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Diabetes"><label class="form-check-label">Diabetes</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Resistência Insulínica"><label class="form-check-label">Resistência Insulínica</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Hipotireoidismo"><label class="form-check-label">Hipotireoidismo</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Problemas Cardíacos"><label class="form-check-label">Problemas Cardíacos</label></div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Neurológico"><label class="form-check-label">Neurológico</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Disfunção Hepática"><label class="form-check-label">Disfunção Hepática</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Renal"><label class="form-check-label">Problemas Renais</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="TDAH"><label class="form-check-label">TDAH</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="TEA"><label class="form-check-label">TEA (Espectro Autista)</label></div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Fibromialgia"><label class="form-check-label">Fibromialgia</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Ansiedade"><label class="form-check-label">Ansiedade</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Depressão"><label class="form-check-label">Depressão</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Autoimune"><label class="form-check-label">Doença Autoimune</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Alergias"><label class="form-check-label">Alergias</label></div>
+          </div>
+        </div>
+      </div>
 
-    <div class="col-md-4">
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="hipertensao"><label class="form-check-label" for="hipertensao">Hipertensão</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="diabetes"><label class="form-check-label" for="diabetes">Diabetes</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="resistencia"><label class="form-check-label" for="resistencia">Resistência Insulínica</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="hipotireoidismo"><label class="form-check-label" for="hipotireoidismo">Hipotireoidismo</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="cardiaco"><label class="form-check-label" for="cardiaco">Problemas Cardíacos</label></div>
-    </div>
+      <!-- Upload de arquivo -->
+      <div class="col-12 mt-4">
+        <label class="form-label">Anexar Exames ou Imagens (opcional)</label>
+        <input type="file" name="anexo" class="form-control">
+      </div>
 
-    <div class="col-md-4">
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="neurologico"><label class="form-check-label" for="neurologico">Problemas Neurológicos</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="hepatica"><label class="form-check-label" for="hepatica">Disfunção Hepática</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="renal"><label class="form-check-label" for="renal">Problemas Renais</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="tdah"><label class="form-check-label" for="tdah">TDAH</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="teia"><label class="form-check-label" for="teia">TEA (Espectro Autista)</label></div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="fibromialgia"><label class="form-check-label" for="fibromialgia">Fibromialgia</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="ansiedade"><label class="form-check-label" for="ansiedade">Ansiedade</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="depressao"><label class="form-check-label" for="depressao">Depressão</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="autoimune"><label class="form-check-label" for="autoimune">Doença Autoimune</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="alergias"><label class="form-check-label" for="alergias">Alergias</label></div>
-    </div>
-
-    <div class="col-md-4 mt-3">
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="enxaqueca"><label class="form-check-label" for="enxaqueca">Enxaqueca</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="articulares"><label class="form-check-label" for="articulares">Dores Articulares</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="candidiase"><label class="form-check-label" for="candidiase">Candidíase de Repetição</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="intestino"><label class="form-check-label" for="intestino">Intestino preso ou solto</label></div>
-    </div>
-
-    <div class="col-md-4 mt-3">
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="antibioticos"><label class="form-check-label" for="antibioticos">Uso frequente de antibióticos</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="medicamentos"><label class="form-check-label" for="medicamentos">Uso contínuo de medicamentos</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="cancer"><label class="form-check-label" for="cancer">Histórico de câncer na família</label></div>
-      <div class="form-check"><input class="form-check-input" type="checkbox" id="canal"><label class="form-check-label" for="canal">Canal/Próteses Dentárias</label></div>
-    </div>
-
-  </div>
-</div>
-
-
-      <!-- Botão Final -->
+      <!-- Botão de envio -->
       <div class="col-12 text-end">
-        <button type="submit" class="btn btn-success mt-3">Pagar e Agendar</button>
+        <button type="submit" class="btn btn-primary mt-3">Salvar Agendamento</button>
       </div>
     </form>
   </div>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.getElementById('formAgendamento').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const response = await fetch('/api/agendamentos', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        alert('Agendamento salvo com sucesso!');
+        form.reset();
+      } else {
+        alert('Erro ao salvar agendamento.');
+      }
+    });
+  </script>
 </body>
 </html>
