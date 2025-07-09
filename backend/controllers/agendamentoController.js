@@ -32,7 +32,7 @@ exports.criarAgendamento = (req, res) => {
 
   db.query(sql, valores, (err, result) => {
     if (err) {
-      console.error('Erro ao salvar agendamento:', err);
+      console.error('Erro ao salvar agendamento precisa resolver leandro:', err);
       return res.status(500).json({ erro: 'Erro ao salvar agendamento' });
     }
     res.status(201).json({ mensagem: 'Agendamento salvo com sucesso!' });

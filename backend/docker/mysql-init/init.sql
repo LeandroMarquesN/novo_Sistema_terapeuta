@@ -65,4 +65,4 @@ CREATE TABLE usuarios (
 );
 -- Inserindo terapeuta padrão
 INSERT INTO usuarios (nome, senha)
-VALUES ('Karla Marques', 'eu amo o leandro');
+VALUES ('karla', 'leandro');
