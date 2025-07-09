@@ -1,0 +1,51 @@
+/* Container principal */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333333;
+}
+
+/* Título principal */
+#boasVindas {
+  color: #3a78b7;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+/* Texto centralizado */
+.text-center {
+  text-align: center;
+}
+
+/* Parágrafo de boas-vindas */
+p {
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+  color: #555;
+}
+
+/* Placeholder do calendário */
+.border {
+  border: 1.5px solid #6688bb;
+  border-radius: 10px;
+  background-color: #f5faff;
+  padding: 40px;
+  font-size: 1.2rem;
+  color: #3a78b7;
+  font-weight: 600;
+}
+
+/* Espaçamento vertical extra */
+.mt-5 {
+  margin-top: 3rem !important;
+}
+
+/* Background do body para manter a identidade visual */
+body {
+  background-color: #a2c9f2;
+}

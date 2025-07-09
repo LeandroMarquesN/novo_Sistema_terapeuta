@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <title>Dashboard</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/dashBordStyle.css">
+  <link rel="stylesheet" href="/css/animacaoBack.css">
+  <link rel="stylesheet" href="/css/maquinaEscrever.css">
 </head>
 <body>
   <nav class="navbar navbar-expand-lg bg-light">
@@ -19,7 +24,7 @@
 
   <div class="container mt-5">
     <div class="container mt-5">
-      <h1 id="boasVindas" class="text-center">Bem-vinda! 💖</h1>
+      <h1 id="boasVindas" class="text-center">Bem-vinda! </h1>
 
       <p class="text-center">Você está logada no sistema do terapeuta!</p>
     </div>
@@ -29,24 +34,41 @@
       [ Calendário será exibido aqui ]
     </div>
   </div>
+
   <script>
-    const usuario = localStorage.getItem('usuarioLogado');
+   const usuario = localStorage.getItem('usuarioLogado');
 
-    if (usuario) {
-      // Usa o primeiro nome para verificar
-      const nomeParts = usuario.trim().split(' ');
-      const primeiroNome = nomeParts[0].toLowerCase();
-      const terminaComA = primeiroNome.endsWith('a');
+function escreverTextoComMaquinaEscrever(texto, elementoId) {
+  const elemento = document.getElementById(elementoId);
+  elemento.textContent = "";
+  elemento.classList.remove("typewriter"); // remove classe se já existir
 
-      const saudacao = terminaComA
-        ? `Bem-vinda, ${usuario}! 💖`
-        : `Bem-vindo, ${usuario}! 💪`;
-
-      document.getElementById('boasVindas').textContent = saudacao;
-    } else {
-      // Se não estiver logado, redireciona para o login
-      window.location.href = 'login.html';
+  let i = 0;
+  const intervalo = setInterval(() => {
+    elemento.textContent += texto.charAt(i);
+    i++;
+    if (i >= texto.length) {
+      clearInterval(intervalo);
+      elemento.classList.add("typewriter");
     }
+  }, 100);
+}
+
+if (usuario) {
+  const nomeParts = usuario.trim().split(' ');
+  const primeiroNome = nomeParts[0].toLowerCase();
+  const terminaComA = primeiroNome.endsWith('a');
+
+  // Ícones mais sóbrios e profissionais
+  const icone = terminaComA ? "👩‍⚕️" : "👨‍⚕️";  // mulher/homem profissional da saúde
+  const saudacao = terminaComA
+    ? `Bem-vinda, ${usuario} ${icone}`
+    : `Bem-vindo, ${usuario} ${icone}`;
+
+  escreverTextoComMaquinaEscrever(saudacao, 'boasVindas');
+} else {
+  window.location.href = 'login.html';
+}
   </script>
 
 

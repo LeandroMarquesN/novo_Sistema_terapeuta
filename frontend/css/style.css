@@ -1,94 +1,101 @@
-/* === VARIÁVEIS BASE === */
-:root {
-  --bg-color: #ffffff;
-  --text-color: #212529;
-  --container-bg: #f8f9fa;
-  --input-bg: #ffffff;
-  --input-text: #212529;
-  --primary-color: #0d6efd;
-  --primary-hover: #0b5ed7;
-}
 
-/* === TEMA ESCURO === */
-body.dark-mode {
-  --bg-color: #2b2f3a;
-  --text-color: #f9f9f9;
-  --container-bg: #343a40;
-  --input-bg: #f5f5f5;
-  --input-text: #000000;
-  --primary-color: #0d6efd;
-  --primary-hover: #084298;
-}
-
-/* === RESET / GERAL === */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* Fundo suave azul clarinho */
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
-  font-family: 'Segoe UI', sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
-  padding-bottom: 80px;
+  background-color: #a2c9f2;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333333;
+  line-height: 1.6;
+  padding-bottom: 40px;
 }
 
+/* Container centralizado e com sombra sutil */
 .container {
-  background-color: var(--container-bg);
-  padding: 30px;
-  border-radius: 12px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
 }
 
-/* === FORM === */
-.form-label {
-  color: var(--text-color);
-  font-weight: 500;
+/* Título com cor azul moderado e espaçamento */
+h2 {
+  color: #3a78b7;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-align: center;
 }
 
-.form-control,
-.form-select {
-  background-color: var(--input-bg);
-  color: var(--input-text);
-  border: 1px solid #ccc;
+/* Labels com cor suave */
+label.form-label {
+  color: #4a4a4a;
+  font-weight: 600;
 }
 
-.form-control:focus,
-.form-select:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+/* Inputs e selects arredondados com borda suave */
+input.form-control,
+select.form-select,
+textarea.form-control {
+  border-radius: 8px;
+  border: 1.5px solid #6688bb;
+  padding: 10px;
+  transition: border-color 0.3s ease;
 }
 
+/* Foco nos inputs com borda azul vibrante */
+input.form-control:focus,
+select.form-select:focus,
+textarea.form-control:focus {
+  border-color: #2367ab;
+  box-shadow: 0 0 6px #2c649daa;
+  outline: none;
+}
+
+/* Checkbox label melhor alinhada e com cursor pointer */
 .form-check-label {
-  color: var(--text-color);
+  cursor: pointer;
+  user-select: none;
+  color: #555555;
 }
 
+/* Checkbox customizados com cor azul ao marcar */
+.form-check-input:checked {
+  background-color: #3a78b7;
+  border-color: #3a78b7;
+}
+
+/* Botão primário com cor azul e cantos arredondados */
 .btn-primary {
-  background-color: var(--primary-color);
-  border: none;
+  background-color: #3a78b7;
+  border-color: #2e669d;
+  border-radius: 8px;
+  padding: 10px 30px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
+  background-color: #2e5c90;
+  border-color: #2e5c90;
 }
 
-/* === BOTÃO MODO ESCURO === */
-#toggleTheme {
-  position: fixed;
-  top: 15px;
-  right: 15px;
-  z-index: 9999;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 5px;
-  padding: 8px 14px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+/* Seção de condições de saúde com margem */
+h5.mt-4 {
+  color: #3a78b7;
+  font-weight: 700;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #3d5982;
+  padding-bottom: 5px;
 }
 
-#toggleTheme:hover {
-  background-color: var(--primary-hover);
+/* Espaçamento extra entre checkboxes */
+.form-check {
+  margin-bottom: 8px;
 }
+
+/* Ajustes responsivos para telas pequenas */
+@media (max-width: 576px) {
+  .container {
+    padding: 20px;
+  }
+}
+

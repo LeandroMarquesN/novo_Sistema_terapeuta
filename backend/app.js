@@ -22,6 +22,9 @@ app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));
 app.use(express.static(path.join(__dirname, 'frontend', 'pages')));
 
+app.use('/css', express.static(path.join(__dirname, 'frontend', 'css')));
+
+
 // 🆕 Servir uploads (exames, imagens, etc.)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
