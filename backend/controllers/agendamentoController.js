@@ -38,3 +38,29 @@ exports.criarAgendamento = (req, res) => {
     res.status(201).json({ mensagem: 'Agendamento salvo com sucesso!' });
   });
 };
+
+//-------------- Função para retornar os agendamentos----------.
+
+exports.listarAgendamentos = (req, res) => {
+  const sql = `
+    SELECT id, data, tipo_terapia, nome
+    FROM agendamentos
+    ORDER BY data ASC
+  `;
+
+  db.query(sql, (err, resultados) => {
+    if (err) {
+      console.error('Erro ao listar agendamentos:', err);
+      return res.status(500).json({ erro: 'Erro ao listar agendamentos' });
+    }
+
+    // Adaptar ao formato esperado pelo FullCalendar
+    const eventos = resultados.map(item => ({
+      id: item.id,
+      title: `${item.tipo_terapia} - ${item.nome}`,
+      start: item.data
+    }));
+
+    res.json(eventos);
+  });
+};

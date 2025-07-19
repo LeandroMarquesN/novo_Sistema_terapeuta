@@ -8,17 +8,42 @@
   <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
 
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animacaoBack.css">
+  <style>
+    div.container{
+       background: linear-gradient(45deg,
+              #c1d6ec,  /* Azul profundo */
+              #a2c9f2,  /* Azul claro */
+              #2252b9,  /* Verde-água médio */
+              #50aad7,  /* Azul muito claro */
+              #dadfe4,  /* Azul médio mais saturado */
+              #99c2d8   /* Azul suave claro */
+            );
+            background-size: 500% 500%;
+            animation: gradientFlow 18s ease-in-out infinite;
+            z-index: -1;
+            opacity: 0.7
+    }
+       @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+  </style>
 </head>
 <body>
   <div class='container mt-5'>
-    <h2 class='text-center'>Login do Sistema</h2>
+    <h2 class='text-center text-white
+' >Login do Sistema</h2>
     <form id="loginForm" class='mx-auto' style='max-width: 400px;'>
       <div class='mb-3'>
-        <label for='nome' class='form-label'>Nome</label>
+        <label for='nome' class='form-label text-white
+'>Nome</label>
         <input type='text' class='form-control' id='nome' required>
       </div>
       <div class='mb-3'>
-        <label for='senha' class='form-label'>Senha</label>
+        <label for='senha' class='form-label text-white
+'>Senha</label>
         <input type='password' class='form-control' id='senha' required>
       </div>
       <button type='submit' class='btn btn-primary w-100'>Entrar</button>

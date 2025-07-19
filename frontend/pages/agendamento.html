@@ -131,25 +131,49 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.getElementById('formAgendamento').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
+ <script>
+  document.getElementById('formAgendamento').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
 
-      const response = await fetch('/api/agendamentos', {
-        method: 'POST',
-        body: formData
-      });
+    const condicoesSelecionadas = formData.getAll('condicoes[]');
 
-      if (response.ok) {
-        alert('Agendamento salvo com sucesso!');
-        form.reset();
-      } else {
-        alert('Erro ao salvar agendamento.');
-      }
+    const dados = {
+      nome: formData.get('nome'),
+      email: "", // Se quiser, pode adicionar campo de email no formulário
+      telefone: "", // Mesmo caso
+      data_nascimento: formData.get('data_nascimento'),
+      idade: formData.get('idade'),
+      peso: formData.get('peso'),
+      altura: formData.get('altura'),
+      tipo_sanguineo: formData.get('tipo_sanguineo'),
+      tipo_terapia: formData.get('tipo_terapia'),
+      data_agendamento: formData.get('data'),
+      motivo: formData.get('motivo'),
+      origem: formData.get('origem'),
+      condicoes: condicoesSelecionadas.join(', '), // Armazena como texto separado por vírgula
+      historico: "", // se quiser coletar histórico completo
+      status_pagamento: "pendente", // ou "pago", se tiver opção
+      observacoes: "",
+      anexo: "", // não está tratando anexo ainda, posso te ajudar depois com isso
+    };
+
+    const response = await fetch('/api/com-agendamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dados)
     });
-  </script>
+
+    if (response.ok) {
+      alert('Agendamento e paciente salvos com sucesso!');
+      form.reset();
+    } else {
+      alert('Erro ao salvar agendamento.');
+    }
+  });
+</script>
+
 
 </body>
 </html>

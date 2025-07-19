@@ -18,5 +18,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/', upload.single('anexo'), agendamentoController.criarAgendamento);
+router.get('/', agendamentoController.listarAgendamentos);
+
 
 module.exports = router;

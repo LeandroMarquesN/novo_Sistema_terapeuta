@@ -66,3 +66,15 @@ CREATE TABLE usuarios (
 -- Inserindo terapeuta padrão
 INSERT INTO usuarios (nome, senha)
 VALUES ('karla', 'leandro');
+-- Modificar tabela de agendamentos
+ALTER TABLE agendamentos
+ADD COLUMN nome VARCHAR(100)
+AFTER paciente_id,
+  ADD COLUMN motivo TEXT
+AFTER tipo_sanguineo,
+  ADD COLUMN origem VARCHAR(100)
+AFTER motivo,
+  ADD COLUMN condicoes TEXT
+AFTER origem,
+  ADD COLUMN anexo VARCHAR(255)
+AFTER condicoes;
