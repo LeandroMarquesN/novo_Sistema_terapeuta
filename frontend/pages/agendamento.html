@@ -419,15 +419,23 @@
             method: 'DELETE'
           });
           if (!resposta.ok) {
-            throw new Error('Erro ao excluir agendamento');
+            // Se a resposta não foi OK, tente obter o texto do erro
+            const errorText = await resposta.text();
+            console.error('Erro de resposta do servidor:', resposta.status, errorText);
+            // Mensagem mais específica para 404
+            if (resposta.status === 404) {
+                throw new Error('Erro 404: A rota de exclusão no servidor não foi encontrada. Verifique o backend.');
+            } else {
+                throw new Error(`Erro ao excluir agendamento: ${errorText || resposta.statusText}`);
+            }
           }
           carregarAgendamentos(); // Recarrega a lista após a exclusão
           // Alerta de sucesso com Toastr.js
           toastr.success('O agendamento foi excluído com sucesso!', 'Excluído!');
         } catch (erro) {
           console.error('Erro ao excluir:', erro);
-          // Alerta de erro com modal customizado
-          showClinicalAlert('Erro!', 'Ocorreu um erro ao excluir o agendamento.', 'error');
+          // Alerta de erro com modal customizado, usando a mensagem mais específica do throw
+          showClinicalAlert('Erro!', erro.message || 'Ocorreu um erro ao excluir o agendamento.', 'error');
         }
       }
     }
