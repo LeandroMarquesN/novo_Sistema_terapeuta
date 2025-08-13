@@ -75,7 +75,7 @@ exports.criarPacienteComAgendamento = async (req, res) => {
 
     // 2. Inserir agendamento com o paciente_id
     await conn.query(`
-      INSERT INTO agendamentos (paciente_id, data, tipo_terapia, observacoes, status_pagamento, peso)
+      INSERT INTO agendamentos (paciente_id, data_agendamento, tipo_terapia, observacoes, status_pagamento, peso)
       VALUES (?, ?, ?, ?, ?, ?)`,
       [pacienteId, data_agendamento, tipo_terapia, observacoes, status_pagamento, peso]
     );
@@ -83,7 +83,7 @@ exports.criarPacienteComAgendamento = async (req, res) => {
     await conn.commit();
     conn.release();
 
-    res.status(201).json({ mensagem: 'Paciente e agendamento criados com sucesso!' });
+    res.status(201).json({ mensagem: 'Paciente e agendamento criados com sucesso!', pacienteId });
   } catch (err) {
     await conn.rollback();
     conn.release();

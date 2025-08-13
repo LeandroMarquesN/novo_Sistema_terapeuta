@@ -8,10 +8,12 @@ services:
     volumes:
       - ./backend:/app
       - ./frontend:/app/frontend
+      - ./backend/uploads:/app/uploads # Mapeamento explícito para uploads
     env_file:
       - .env
     depends_on:
-      - db
+      db: # Certifique-se de que 'db:' está alinhado com 'app:' e 'phpmyadmin:'
+        condition: service_healthy # Indentado corretamente sob 'db:'
 
   db:
     image: mysql:8
@@ -23,6 +25,12 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./backend/docker/mysql-init:/docker-entrypoint-initdb.d
+    healthcheck: # <--- ESTA LINHA DEVE ESTAR ALINHADA COM 'image:', 'ports:', 'environment:', 'volumes:'
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 20s # Tempo para o DB iniciar antes de começar a verificar
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

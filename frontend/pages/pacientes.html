@@ -85,7 +85,7 @@
       mostrarErro('nome');
       mostrarErro('email');
       mostrarErro('telefone');
-      mostrarErro('data');
+      mostrarErro('data_nascimento');
 
       if (!form.nome.value.trim()) {
         mostrarErro('nome', 'Nome é obrigatório');
@@ -150,13 +150,45 @@
       document.getElementById('form-title').innerText = 'Editar Paciente';
       document.getElementById('cancelarEdicao').style.display = 'inline-block';
     }
+   // Funcao Carregar agendamentos
+   async function carregarAgendamentos() {
+  try {
+    const response = await fetch('/api/agendamentos');
+    const agendamentos = await response.json();
+
+    const tabela = document.getElementById('tabela-agendamentos');
+    tabela.innerHTML = ''; // limpa antes de recarregar
+
+    agendamentos.forEach(ag => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${ag.id}</td>
+        <td>${ag.nome}</td>
+        <td>${new Date(ag.data).toLocaleString('pt-BR')}</td>
+        <td>${ag.tipo_terapia}</td>
+        <td>${ag.status_pagamento}</td>
+      `;
+      tabela.appendChild(tr);
+    });
+  } catch (error) {
+    console.error('Erro ao carregar agendamentos:', error);
+  }
+}
 
     async function deletarPaciente(id) {
-      if (confirm('Deseja realmente excluir este paciente?')) {
-        await fetch(`/api/${id}`, { method: 'DELETE' });
-        carregarPacientes();
-      }
+  if (confirm('Deseja realmente excluir este paciente?')) {
+    await fetch(`/api/${id}`, { method: 'DELETE' });
+
+    // Atualiza lista de pacientes
+    carregarPacientes();
+
+    // Atualiza lista de agendamentos (se estiver na mesma página)
+    if (typeof carregarAgendamentos === "function") {
+        carregarAgendamentos();
     }
+  }
+}
+
 
     document.getElementById('cancelarEdicao').addEventListener('click', () => {
       document.getElementById('formPaciente').reset();

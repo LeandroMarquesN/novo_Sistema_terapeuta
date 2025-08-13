@@ -28,10 +28,28 @@ async function atualizarPaciente(id, paciente) {
     return result;
 }
 
+// pacienteModel.js
 async function deletarPaciente(id) {
-    const [result] = await db.query('DELETE FROM pacientes WHERE id = ?', [id]);
-    return result;
+    const conn = await db.getConnection();
+    try {
+        await conn.beginTransaction();
+
+        // Apaga agendamentos desse paciente
+        await conn.query('DELETE FROM agendamentos WHERE paciente_id = ?', [id]);
+
+        // Apaga o paciente
+        await conn.query('DELETE FROM pacientes WHERE id = ?', [id]);
+
+        await conn.commit();
+        conn.release();
+        return { sucesso: true };
+    } catch (err) {
+        await conn.rollback();
+        conn.release();
+        throw err;
+    }
 }
+
 
 module.exports = {
     getTodosPacientes,
