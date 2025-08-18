@@ -12,8 +12,26 @@
   <!-- Arquivos css personalizados (certifique-se de que os caminhos estão corretos) -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/animacaoBack.css">
+  <link rel="stylesheet" href="/css/transicaoTela.css">
 
   <style>
+    /* Estilo para a nav Bar e a Logo */
+    span.logo-img {
+      height: 280px; /* Aumentado para deixar o logo maior */
+      width: 650px; /* Aumentado para manter a proporção, ajuste conforme necessário */
+      background-image: url('../logo/logoFinal.png'); /* Caminho da imagem */
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block; /* Para que o span respeite as dimensões de height e width */
+      text-indent: -9999px; /* Esconde o texto, se houver, para acessibilidade */
+      overflow: hidden; /* Oculta qualquer conteúdo extra */
+    }
+    .bg-transparente {
+      background-color: transparent !important;
+    }
+
+    /* ============================== */
     /* Estilo para o botão flutuante de voltar */
     .btn-voltar-flutuante {
       position: fixed;
@@ -113,10 +131,24 @@
   </style>
 </head>
 <body class="menosClaro">
+  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
+      </a>
+      <div>
+        <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
+        <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+        <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+        <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
+      </div>
+    </div>
+  </nav>
   <div class="container mt-5">
-    <h2 class="mb-4">Agendamento de Consulta</h2>
 
-    <form class="row g-3" id="formAgendamento" enctype="multipart/form-data">
+    <h2 class="mb-4 fade-in-element">Agendamento de Consulta</h2>
+
+    <form class="row g-3 fade-in-element" id="formAgendamento" enctype="multipart/form-data">
 
       <!-- Dados do paciente e consulta -->
       <div class="col-md-6">
@@ -238,7 +270,7 @@
 
   ---
 
-  <div class="container mt-5">
+  <div class="container mt-5 fade-in-element">
       <div class="mt-5">
         <h4 class="mb-3">Agendamentos Registrados</h4>
         <div class="table-responsive">
