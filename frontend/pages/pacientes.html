@@ -9,20 +9,48 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/validacaoPaciente.css">
   <link rel="stylesheet" href="/css/animacaoBack.css">
+  <link rel="stylesheet" href="/css/transicaoTela.css">
    <style>
     div.container {
         margin-top: 3%;
+    }
+    span.logo-img {
+      height: 280px; /* Aumentado para deixar o logo maior */
+      width: 650px; /* Aumentado para manter a proporção, ajuste conforme necessário */
+      background-image: url('../logo/logoFinal.png'); /* Caminho da imagem */
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block; /* Para que o span respeite as dimensões de height e width */
+      text-indent: -9999px; /* Esconde o texto, se houver, para acessibilidade */
+      overflow: hidden; /* Oculta qualquer conteúdo extra */
+    }
+    .bg-transparente {
+      background-color: transparent !important;
     }
    </style>
 
 </head>
 <body class="bg-light">
+  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <span class="logo-img"href="dashboard.html">Sistema Terapeuta</span>
+      </a>
+      <div>
+        <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
+        <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+        <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+        <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
+      </div>
+    </div>
+  </nav>
   <div class="container py-5">
     <h1 class="mb-4">Pacientes</h1>
 
     <ul id="lista-pacientes" class="list-group mb-5"></ul>
 
-    <h2 id="form-title" class="mb-3">Adicionar Paciente</h2>
+    <h2 id="form-title" class="mb-3">Editar informações do Paciente</h2>
     <form id="formPaciente" novalidate>
       <div class="row g-3 mb-3">
         <div class="col-md-6">
@@ -85,7 +113,7 @@
       mostrarErro('nome');
       mostrarErro('email');
       mostrarErro('telefone');
-      mostrarErro('data');
+      mostrarErro('data_nascimento');
 
       if (!form.nome.value.trim()) {
         mostrarErro('nome', 'Nome é obrigatório');
@@ -150,13 +178,45 @@
       document.getElementById('form-title').innerText = 'Editar Paciente';
       document.getElementById('cancelarEdicao').style.display = 'inline-block';
     }
+   // Funcao Carregar agendamentos
+   async function carregarAgendamentos() {
+  try {
+    const response = await fetch('/api/agendamentos');
+    const agendamentos = await response.json();
+
+    const tabela = document.getElementById('tabela-agendamentos');
+    tabela.innerHTML = ''; // limpa antes de recarregar
+
+    agendamentos.forEach(ag => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${ag.id}</td>
+        <td>${ag.nome}</td>
+        <td>${new Date(ag.data).toLocaleString('pt-BR')}</td>
+        <td>${ag.tipo_terapia}</td>
+        <td>${ag.status_pagamento}</td>
+      `;
+      tabela.appendChild(tr);
+    });
+  } catch (error) {
+    console.error('Erro ao carregar agendamentos:', error);
+  }
+}
 
     async function deletarPaciente(id) {
-      if (confirm('Deseja realmente excluir este paciente?')) {
-        await fetch(`/api/${id}`, { method: 'DELETE' });
-        carregarPacientes();
-      }
+  if (confirm('Deseja realmente excluir este paciente?')) {
+    await fetch(`/api/${id}`, { method: 'DELETE' });
+
+    // Atualiza lista de pacientes
+    carregarPacientes();
+
+    // Atualiza lista de agendamentos (se estiver na mesma página)
+    if (typeof carregarAgendamentos === "function") {
+        carregarAgendamentos();
     }
+  }
+}
+
 
     document.getElementById('cancelarEdicao').addEventListener('click', () => {
       document.getElementById('formPaciente').reset();

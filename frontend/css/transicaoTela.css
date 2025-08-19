@@ -1,0 +1,39 @@
+/* transicaoTela.css - Transição mais evidente */
+@keyframes fadeInSlideUp {
+  from {
+    /* Aumenta o deslocamento para 40px para um efeito mais dramático */
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-element {
+  /* Aumenta a duração para 1.2s para uma animação mais lenta e suave */
+  animation: fadeInSlideUp 1.2s ease-out forwards;
+  opacity: 0; /* Garante que os elementos comecem invisíveis */
+}
+
+/* Atrasos para os elementos aparecerem em sequência (atraso maior) */
+.fade-in-element:nth-child(1) {
+  animation-delay: 0.4s;
+}
+
+.fade-in-element:nth-child(2) {
+  animation-delay: 0.8s;
+}
+
+.fade-in-element:nth-child(3) {
+  animation-delay: 1.2s;
+}
+
+.fade-in-element:nth-child(4) {
+  animation-delay: 1.6s;
+}
+
+.fade-in-element:nth-child(5) {
+  animation-delay: 2s;
+}

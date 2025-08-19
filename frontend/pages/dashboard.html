@@ -3,92 +3,241 @@
 <head>
   <meta charset="UTF-8">
   <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Estilos personalizados -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/dashBordStyle.css">
   <link rel="stylesheet" href="/css/animacaoBack.css">
   <link rel="stylesheet" href="/css/maquinaEscrever.css">
+  <link rel="stylesheet" href="/css/transicaoTela.css">
 
   <style>
-    #calendar {
-      min-height: 500px;
+    /* Fonte da menssagem de boas vindas */
+    @font-face {
+      font-family: 'FonteDoLogo';
+      src: url('/fonts/nome-da-sua-fonte.woff2') format('woff2'),
+          url('/fonts/nome-da-sua-fonte.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    #boasVindas {
+      font-family: 'FonteDoLogo', sans-serif;
+      /* Garante que a fonte seja aplicada */
+    }
+    /* Fim da menssagem */
+    /* Estilização da Navbar (já estava funcionando) */
+    span.logo-img {
+      height: 280px;
+      width: 650px;
+      background-image: url('../logo/logoFinal.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+    .bg-transparente {
+      background-color: transparent !important;
+    }
+
+    /* Estilos para as caixas com transparência e bordas arredondadas */
+    .dashboard-box {
+      /* Fundo branco com opacidade reduzida (quase transparente) */
+      background-color: rgba(255, 255, 255, 0.3);
+      /* Borda sutil para definir o elemento */
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 1rem;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      padding: 1.5rem;
+      backdrop-filter: blur(5px); /* Efeito de vidro fosco, opcional */
+    }
+
+    /* Esconde o cabeçalho da tabela */
+    .dashboard-box .table thead {
+        display: none;
+    }
+
+    /* Remove o fundo branco padrão do Bootstrap nas linhas da tabela */
+    .dashboard-box .table-striped tbody tr:nth-of-type(odd) {
+        background-color: transparent !important;
+    }
+    /* Estilo para as linhas da tabela (item de notificação) */
+    .dashboard-box .table tbody tr {
+        /* Fundo suavemente transparente para cada linha */
+        background-color: rgba(255, 255, 255, 0.2);
+        margin-bottom: 1rem; /* Espaçamento entre as linhas */
+        border-radius: 0.5rem; /* Bordas arredondadas para cada linha */
+        border: none; /* Remove a borda da tabela */
+        transition: transform 0.2s ease-in-out;
+    }
+    .dashboard-box .table tbody tr:hover {
+        transform: scale(1.02); /* Efeito sutil ao passar o mouse */
+    }
+    /* Garante que o espaçamento seja aplicado corretamente */
+    .dashboard-box .table tbody tr td {
+        border-top: none;
+        padding: 1rem;
+    }
+
+    /* Customizações do FullCalendar para o estilo clean */
+    .fc .fc-toolbar.fc-header-toolbar {
+      margin-bottom: 1.5em;
+      cursor:pointer;
+    }
+    .fc-toolbar-title {
+      font-size: 1.75em;
+      font-weight: 500;
+      color: #333;
+    }
+    .fc .fc-button-primary {
+      background-color: transparent;
+      border: 1px solid #ccc;
+      color: #555;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+    }
+    .fc .fc-button-primary:hover,
+    .fc .fc-button-primary:not(:disabled):active {
+      background-color: #f0f0f0;
+      border-color: #bbb;
+      box-shadow: none;
+    }
+    .fc-theme-standard th {
+      font-weight: 600;
+      color: #6c757d;
+      background-color: transparent;
+      border: none;
+    }
+    .fc-daygrid-day {
+      border: 1px solid #e9ecef;
+    }
+    .fc-event {
+      border: none;
+      font-size: 0.85rem;
+      padding: 3px 5px;
+      border-radius: 4px;
+    }
+    .fc-event[style*="background-color: rgb(25, 135, 84);"] {
+      background-color: #28a745 !important;
+      color: #fff;
+    }
+    .fc-event[style*="background-color: rgb(160, 196, 255);"] {
+      background-color: #a0c4ff !important;
+      color: #343a40;
+    }
+    .fc-event[style*="background-color: rgb(208, 191, 255);"] {
+      background-color: #d0bfff !important;
+      color: #343a40;
     }
   </style>
 
-  <!-- FullCalendar v5 CSS e JS -->
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
 </head>
 
 <body>
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg bg-light">
+
+  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Sistema Terapeuta</a>
-      <div>
-        <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
-        <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
-        <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
+      <a class="navbar-brand" href="#">
+        <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
+      </a>
+
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="btn btn-outline-primary me-2" href="pacientes.html">Pacientes</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-success me-2" href="agendamento.html">Agendar</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-outline-secondary" href="historico.html">Histórico</a>
+          </li>
+        </ul>
       </div>
     </div>
   </nav>
 
-  <!-- Conteúdo -->
-  <div class="container mt-5">
-    <div class="text-center mb-4">
+  <div class="container-fluid mt-5">
+    <div class="text-center mb-4 fade-in-element">
       <h1 id="boasVindas" class="fs-2 fw-bold">Bem-vinda!</h1>
       <p class="fs-5">Você está logada no sistema do terapeuta!</p>
     </div>
 
-    <p class="fs-5">Aqui você poderá visualizar seus agendamentos.</p>
+    <p class="fs-5 fade-in-element">Próximos agendamentos:</p>
 
-    <div class="border p-4 bg-white rounded shadow-sm mt-4 overflow-auto">
+    <div class="dashboard-box mt-4 fade-in-element">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+          <thead class="table-dark">
+            <tr>
+              <th>Paciente</th>
+              <th>Data e Hora</th>
+              <th>Terapia</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaAgendamentos">
+            <tr>
+              <td colspan="3" class="text-center text-muted">Carregando agendamentos...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="dashboard-box mt-4 fade-in-element">
       <div id="calendar"></div>
     </div>
   </div>
 
-  <!-- Boas-vindas -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
     const usuario = localStorage.getItem('usuarioLogado');
 
-    function escreverTextoComMaquinaEscrever(texto, elementoId) {
-      const elemento = document.getElementById(elementoId);
-      elemento.textContent = "";
-      elemento.classList.remove("typewriter");
+function escreverTextoComMaquinaEscrever(texto, elementoId) {
+  const elemento = document.getElementById(elementoId);
+  elemento.textContent = "";
+  // Adiciona a classe da fonte ao elemento antes de começar a escrever
+  elemento.classList.add("font-logo");
+  elemento.classList.remove("typewriter");
 
-      let i = 0;
-      const intervalo = setInterval(() => {
-        elemento.textContent += texto.charAt(i);
-        i++;
-        if (i >= texto.length) {
-          clearInterval(intervalo);
-          elemento.classList.add("typewriter");
-        }
-      }, 100);
+  let i = 0;
+  const intervalo = setInterval(() => {
+    elemento.textContent += texto.charAt(i);
+    i++;
+    if (i >= texto.length) {
+      clearInterval(intervalo);
+      elemento.classList.add("typewriter");
     }
+  }, 100);
+}
 
-    if (usuario) {
-      const nomeParts = usuario.trim().split(' ');
-      const primeiroNome = nomeParts[0].toLowerCase();
-      const terminaComA = primeiroNome.endsWith('a');
+if (usuario) {
+  const nomeParts = usuario.trim().split(' ');
+  const primeiroNome = nomeParts[0].toLowerCase();
+  const terminaComA = primeiroNome.endsWith('a');
 
-      const icone = terminaComA ? "👩‍⚕️" : "👨‍⚕️";
-      const saudacao = terminaComA
-        ? `Bem-vinda, ${usuario} ${icone}`
-        : `Bem-vindo, ${usuario} ${icone}`;
+  const icone = terminaComA ? "👩‍⚕️" : "👨‍⚕️";
+  const saudacao = terminaComA
+    ? `Bem-vinda, ${usuario} ${icone}`
+    : `Bem-vindo, ${usuario} ${icone}`;
 
-      escreverTextoComMaquinaEscrever(saudacao, 'boasVindas');
-    } else {
-      window.location.href = 'login.html';
-    }
+  escreverTextoComMaquinaEscrever(saudacao, 'boasVindas');
+} else {
+  window.location.href = 'login.html';
+}
   </script>
 
-  <!-- Calendário -->
   <script>
     document.addEventListener('DOMContentLoaded', async function () {
       const calendarEl = document.getElementById('calendar');
@@ -98,16 +247,14 @@
       try {
         const resposta = await fetch('/api/agendamentos');
         const agendamentos = await resposta.json();
-        console.log('Agendamentos recebidos da API:', agendamentos);
 
         eventosApi = agendamentos.map(item => ({
           title: item.nome + ' - ' + item.tipo_terapia,
-          start: item.data, // Ex: "2025-07-15T14:00:00"
-          color: '#198754'
+          start: new Date(item.data_agendamento).toISOString(),
+          color: '#28a745'
         }));
       } catch (error) {
-        console.error('Erro ao buscar agendamentos:', error);
-        alert('Não foi possível carregar os agendamentos.');
+        console.error('Erro ao buscar agendamentos para o calendário:', error);
       }
 
       const luas = [
@@ -121,15 +268,74 @@
         initialView: 'dayGridMonth',
         height: 500,
         locale: 'pt-br',
+        themeSystem: 'bootstrap5',
         headerToolbar: {
-          start: 'title',
-          center: '',
-          end: 'today prev,next'
+          left: 'prev,next today',
+          center: 'title',
+          right: ''
         },
         events: [...eventosApi, ...luas]
       });
 
       calendar.render();
+    });
+  </script>
+
+  <script>
+    async function carregarTabelaAgendamentos() {
+      const tabelaBody = document.getElementById('tabelaAgendamentos');
+      tabelaBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Carregando agendamentos...</td></tr>';
+
+      try {
+        const resposta = await fetch('/api/agendamentos');
+        if (!resposta.ok) {
+          throw new Error(`Erro HTTP: ${resposta.status}`);
+        }
+        const agendamentos = await resposta.json();
+        tabelaBody.innerHTML = '';
+
+        if (agendamentos.length === 0) {
+          tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>`;
+          return;
+        }
+
+        const agendamentosFuturos = agendamentos.filter(agendamento => {
+          const dataAgendamento = new Date(agendamento.data_agendamento);
+          return dataAgendamento > new Date();
+        }).sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
+
+        if (agendamentosFuturos.length === 0) {
+          tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>`;
+          return;
+        }
+
+        const proximosAgendamentos = agendamentosFuturos.slice(0, 10);
+
+        proximosAgendamentos.forEach(agendamento => {
+          const tr = document.createElement('tr');
+          const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          tr.innerHTML = `
+            <td>${agendamento.nome || 'N/A'}</td>
+            <td>${dataFormatada}</td>
+            <td>${agendamento.tipo_terapia || 'N/A'}</td>
+          `;
+          tabelaBody.appendChild(tr);
+        });
+      } catch (erro) {
+        console.error('Erro ao carregar agendamentos para a tabela:', erro);
+        tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Erro ao carregar a lista de agendamentos.</td></tr>`;
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      carregarTabelaAgendamentos();
     });
   </script>
 </body>

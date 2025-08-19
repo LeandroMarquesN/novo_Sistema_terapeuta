@@ -12,20 +12,21 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Rotas da API
+app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api', pacienteRoutes);
 app.use('/api/usuarios', usuarioRoutes);
-app.use('/api/agendamentos', agendamentoRoutes);
 
 // Servir arquivos estáticos
 app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));
 app.use(express.static(path.join(__dirname, 'frontend', 'pages')));
-
 app.use('/css', express.static(path.join(__dirname, 'frontend', 'css')));
 
+// Nova linha para servir a pasta 'logo'
+app.use('/logo', express.static(path.join(__dirname, 'frontend', 'logo')));
 
-// 🆕 Servir uploads (exames, imagens, etc.)
+// Servir uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Página inicial
