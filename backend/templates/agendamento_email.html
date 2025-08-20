@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Confirmação de Agendamento</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .header {
+      background: linear-gradient(135deg, #5f9ea0, #4682b4);
+      padding: 20px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .header .logo {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .content {
+      padding: 20px;
+      color: #333333;
+    }
+    .content h3 {
+      color: #4682b4;
+    }
+    .footer {
+      background-color: #f4f6f8;
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #777777;
+    }
+    /* Estilo da Logo */
+    span.logo-img {
+      height: 280px;
+      width: 650px;
+      background-image: url('../../frontend/logo/logoFinal.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Cabeçalho -->
+    <div class="header">
+      <span class="logo-img" >Sistema Terapeuta</span>
+
+    </div>
+
+    <!-- Conteúdo -->
+    <div class="content">
+      <h3>Olá, {{nome_paciente}}!</h3>
+      <p>Seu agendamento para uma sessão de <strong>{{tipo_terapia}}</strong> foi confirmado!</p>
+      <p><strong>Detalhes do agendamento:</strong></p>
+      <ul>
+        <li><strong>Data:</strong> {{data_agendamento}}</li>
+        <li><strong>Horário:</strong> {{hora_agendamento}}</li>
+        <li><strong>Motivo:</strong> {{motivo_consulta}}</li>
+      </ul>
+      <p>Se tiver alguma dúvida, por favor, entre em contato.</p>
+      <p>Atenciosamente,</p>
+      <p><strong>Sua Terapeuta</strong></p>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+      © {{ano_atual}} Sistema Terapeuta - Todos os direitos reservados.
+    </div>
+  </div>
+</body>
+</html>

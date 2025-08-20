@@ -486,7 +486,6 @@
       });
 
       escreverTextoComMaquinaEscrever(mensagem, 'mensagemLuas');
-      modalLuas.show();
     }
 
     document.getElementById('modalAtendimento').addEventListener('hidden.bs.modal', function (event) {
@@ -579,18 +578,17 @@
             document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
             document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
 
-            // Lógica CORRIGIDA para exibir os anexos
+            // Lógica CORRIGIDA para exibir os anexos de forma otimizada
             const infoAnexo = document.getElementById('infoAnexo');
-            infoAnexo.innerHTML = ''; // Limpa o conteúdo anterior
+            let anexosHtml = '';
 
             // Verifica se a propriedade 'anexos' existe e se tem pelo menos um item
             if (agendamento.anexos && agendamento.anexos.length > 0) {
-                // Itera sobre o array de anexos para criar um link para cada um
+                // Itera sobre o array de anexos para construir a string HTML
                 agendamento.anexos.forEach(anexo => {
-                    const divAnexo = document.createElement('div');
-                    divAnexo.innerHTML = `<a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a>`;
-                    infoAnexo.appendChild(divAnexo);
+                    anexosHtml += `<div><a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a></div>`;
                 });
+                infoAnexo.innerHTML = anexosHtml;
             } else {
                 infoAnexo.textContent = 'N/A';
             }
