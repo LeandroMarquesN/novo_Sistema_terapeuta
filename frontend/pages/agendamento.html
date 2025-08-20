@@ -305,7 +305,6 @@
           <video id="camera-stream" autoplay playsinline style="display:none;"></video>
           <canvas id="photo-canvas" style="display:none;"></canvas>
           <img id="captured-photo" src="" alt="Foto do Paciente" style="display:none;">
-          <input type="hidden" id="patient-photo-data" name="patient_photo">
           <button type="button" class="btn btn-info" id="btn-open-camera">
             <i class="fas fa-camera me-2"></i> Abrir Câmera
           </button>
@@ -350,7 +349,7 @@
 
       <div class="col-12 mt-4">
         <label for="anexoInput" class="form-label">Anexar Exames ou Imagens (opcional)</label>
-        <input type="file" id="anexoInput" name="anexos[]" class="form-control" multiple>
+        <input type="file" id="anexoInput" name="anexos" class="form-control" multiple>
       </div>
 
       <div class="col-12 text-end">
@@ -358,8 +357,6 @@
       </div>
     </form>
   </div>
-
-  ---
 
   <div class="agendamento-container mt-5 fade-in-element">
       <div class="mt-5">
@@ -621,9 +618,9 @@
     const btnOpenCamera = document.getElementById('btn-open-camera');
     const btnTakePhoto = document.getElementById('btn-take-photo');
     const btnRetakePhoto = document.getElementById('btn-retake-photo');
-    const patientPhotoData = document.getElementById('patient-photo-data');
 
     let currentStream;
+    let patientPhotoBlob = null; // Variável para armazenar o blob da foto
 
     btnOpenCamera.addEventListener('click', async () => {
         try {
@@ -634,6 +631,7 @@
             btnOpenCamera.style.display = 'none';
             btnTakePhoto.style.display = 'block';
             photo.style.display = 'none';
+            patientPhotoBlob = null; // Reseta o blob ao abrir a câmera
         } catch (err) {
             console.error('Erro ao acessar a câmera:', err);
             showClinicalAlert('Erro', 'Não foi possível acessar a câmera. Verifique as permissões do navegador.', 'error');
@@ -645,14 +643,15 @@
         canvas.height = video.videoHeight;
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        const imageData = canvas.toDataURL('image/jpeg');
-        patientPhotoData.value = imageData;
-        photo.src = imageData;
-
-        photo.style.display = 'block';
-        video.style.display = 'none';
-        btnTakePhoto.style.display = 'none';
-        btnRetakePhoto.style.display = 'block';
+        canvas.toBlob((blob) => {
+            patientPhotoBlob = blob;
+            const imageDataUrl = URL.createObjectURL(blob);
+            photo.src = imageDataUrl;
+            photo.style.display = 'block';
+            video.style.display = 'none';
+            btnTakePhoto.style.display = 'none';
+            btnRetakePhoto.style.display = 'block';
+        }, 'image/jpeg');
 
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
@@ -660,8 +659,9 @@
     });
 
     btnRetakePhoto.addEventListener('click', () => {
-        patientPhotoData.value = '';
+        patientPhotoBlob = null;
         photo.style.display = 'none';
+        photo.src = '';
         btnRetakePhoto.style.display = 'none';
         btnOpenCamera.style.display = 'block';
     });
@@ -681,6 +681,19 @@
           const form = e.target;
           const formData = new FormData(form);
 
+          // Remover o campo de anexos do FormData original, pois será adicionado novamente
+          // Se o campo for 'anexos[]', o FormData.delete pode não funcionar corretamente
+          // O melhor é criar um FormData do zero.
+          const finalFormData = new FormData();
+
+          // Adicionar os campos de texto
+          for (const pair of formData.entries()) {
+            // Ignorar os campos de arquivo para tratá-los separadamente
+            if (pair[0] !== 'anexos[]') {
+              finalFormData.append(pair[0], pair[1]);
+            }
+          }
+
           const errors = [];
 
           let nomePaciente = form.querySelector('input[name="nome"]').value.trim();
@@ -688,7 +701,7 @@
             errors.push('O campo "Nome do Paciente" é obrigatório.');
           } else {
             nomePaciente = capitalizeWords(nomePaciente);
-            formData.set('nome', nomePaciente);
+            finalFormData.set('nome', nomePaciente);
           }
 
           const tipoTerapia = form.querySelector('select[name="tipo_terapia"]').value;
@@ -711,19 +724,32 @@
           if (pesoValue && (isNaN(parseFloat(pesoValue)) || parseFloat(pesoValue) <= 0)) {
             errors.push('O "Peso" deve ser um número válido e maior que zero.');
           }
-          if (pesoInput) formData.set('peso', pesoValue);
+          if (pesoInput) finalFormData.set('peso', pesoValue);
 
           const alturaInput = form.querySelector('input[name="altura"]');
           let alturaValue = alturaInput ? alturaInput.value.replace(',', '.') : '';
           if (alturaValue && (isNaN(parseFloat(alturaValue)) || parseFloat(alturaValue) <= 0)) {
             errors.push('A "Altura" deve ser um número válido e maior que zero.');
           }
-          if (alturaInput) formData.set('altura', alturaValue);
+          if (alturaInput) finalFormData.set('altura', alturaValue);
 
           // Coletar as condições de saúde
           const condicoesSaude = Array.from(form.querySelectorAll('input[name="condicoes[]"]:checked'))
             .map(checkbox => checkbox.value);
-          formData.set('condicoes', JSON.stringify(condicoesSaude));
+          finalFormData.set('condicoes', JSON.stringify(condicoesSaude));
+
+          // Adicionar os anexos do input de arquivo
+          const anexoInput = document.getElementById('anexoInput');
+          if (anexoInput.files.length > 0) {
+              for (const file of anexoInput.files) {
+                  finalFormData.append('anexos', file);
+              }
+          }
+
+          // Adicionar o blob da foto do paciente (se existir)
+          if (patientPhotoBlob) {
+              finalFormData.append('patient_photo', patientPhotoBlob, 'patient_photo.jpeg');
+          }
 
           if (errors.length > 0) {
             showClinicalAlert('Erro de Validação', errors.join('<br>'), 'warning');
@@ -731,30 +757,47 @@
           }
 
           try {
-              const resposta = await fetch('/api/agendamentos', {
-                  method: 'POST',
-                  body: formData
-              });
+            const resposta = await fetch('/api/agendamentos', {
+              method: 'POST',
+              body: finalFormData
+            });
 
-              if (resposta.ok) {
-                  const resultado = await resposta.json();
-                  console.log('Agendamento salvo:', resultado);
-                  showClinicalAlert('Sucesso!', 'Agendamento salvo com sucesso.', 'success');
-                  form.reset();
-                  carregarAgendamentos();
-              } else {
-                  const errorText = await resposta.text();
-                  throw new Error(`Erro do servidor: ${resposta.status} ${errorText}`);
-              }
+            if (resposta.status === 409) {
+                const errorData = await resposta.json();
+                showClinicalAlert('Conflito de Agendamento', errorData.message, 'warning');
+                return;
+            }
+
+            if (!resposta.ok) {
+              const errorText = await resposta.text();
+              console.error('Erro de resposta do servidor:', resposta.status, errorText);
+              throw new Error(`Erro ao salvar agendamento: ${errorText || resposta.statusText}`);
+            }
+
+            const resultado = await resposta.json();
+            showClinicalAlert('Sucesso!', 'Agendamento salvo com sucesso.', 'success');
+            form.reset();
+            carregarAgendamentos();
+
+            // Opcional: esconder a câmera e a foto após o sucesso
+            video.style.display = 'none';
+            photo.style.display = 'none';
+            btnTakePhoto.style.display = 'none';
+            btnRetakePhoto.style.display = 'none';
+            btnOpenCamera.style.display = 'block';
+            patientPhotoBlob = null;
           } catch (erro) {
-              console.error('Erro ao salvar agendamento:', erro);
-              showClinicalAlert('Erro!', erro.message || 'Não foi possível salvar o agendamento.', 'error');
+            console.error('Erro ao salvar agendamento:', erro);
+            showClinicalAlert('Erro!', erro.message || 'Ocorreu um erro ao salvar o agendamento.', 'error');
           }
         });
+
+      } else {
+        console.error('Elemento formAgendamento não encontrado. O listener de submit não foi anexado.');
       }
+
       carregarAgendamentos();
     });
-
   </script>
 </body>
 </html>

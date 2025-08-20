@@ -96,13 +96,6 @@
         color: #fff;
     }
 
-    /* Estilização para o switch de Modo Escuro */
-    /* O estilo principal é do próprio Bootstrap, só ajustamos a cor */
-    .form-check-input:checked {
-        background-color: #333; /* Cor do switch ativado */
-        border-color: #555;
-    }
-
     /* ==================================== */
     /* ESTILOS GERAIS DA PAGINA E COMPONENTES */
     /* ==================================== */
@@ -148,39 +141,7 @@
         padding: 2rem;
         text-align: center;
     }
-    /* Aumentar o tamanho do switch de modo escuro */
-.form-switch .form-check-input {
-    width: 4.1em;
-    height: 2.6em;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: left center;
-    border-radius: 2em;
-    cursor: pointer;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    -webkit-transition: background-position .25s ease-in-out;
-    transition: background-position .25s ease-in-out;
-}
 
-.form-switch .form-check-input:focus {
-    border-color: #86b7fe;
-    outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-}
-
-.form-switch .form-check-input:checked {
-    background-position: right center;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
-    background-color: #333;
-    border-color: #555;
-}
-
-/* Ajustar o tamanho do label para alinhar verticalmente */
-.form-check-label {
-    line-height: 1.5em;
-}
     /* INÍCIO DAS MODIFICAÇÕES DO FULLCALENDAR */
     .fc .fc-toolbar.fc-header-toolbar {
       margin-bottom: 1.5em;
@@ -287,13 +248,12 @@
 
       <div class="collapse navbar-collapse" id="navbarNav">
         <div class="ms-auto d-flex align-items-center">
-            <div class="form-check form-switch me-2">
-                <input class="form-check-input" type="checkbox" id="darkModeSwitch">
-                <label class="form-check-label" for="darkModeSwitch"></label>
-            </div>
-            <a class="btn btn-outline-primary me-2" href="pacientes.html">Pacientes</a>
-            <a class="btn btn-outline-success me-2" href="agendamento.html">Agendar</a>
-            <a class="btn btn-outline-secondary" href="historico.html">Histórico</a>
+            <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+            <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+            <a href="historico.html" class="btn btn-outline-secondary me-2">Histórico</a>
+            <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
       </div>
     </div>
@@ -723,25 +683,33 @@
         }
       };
 
-      // Lógica do Modo Escuro
-      const darkModeSwitch = document.getElementById('darkModeSwitch');
+      // Lógica do Modo Escuro (CORRIGIDA)
+      const themeToggleBtn = document.getElementById('theme-toggle-btn');
       const body = document.body;
+      const currentTheme = localStorage.getItem('theme');
 
-      // Carrega a preferência do usuário ao carregar a página
-      const isDarkMode = localStorage.getItem('darkMode') === 'true';
-      if (isDarkMode) {
-        body.classList.add('dark-mode');
-        darkModeSwitch.checked = true; // Marca o switch como ativado
+      function applyTheme(theme) {
+          if (theme === 'dark') {
+              body.classList.add('dark-mode');
+              themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+              themeToggleBtn.classList.remove('btn-outline-dark');
+              themeToggleBtn.classList.add('btn-outline-light');
+          } else {
+              body.classList.remove('dark-mode');
+              themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+              themeToggleBtn.classList.remove('btn-outline-light');
+              themeToggleBtn.classList.add('btn-outline-dark');
+          }
       }
 
-      darkModeSwitch.addEventListener('change', () => {
-        const isChecked = darkModeSwitch.checked;
-        if (isChecked) {
-            body.classList.add('dark-mode');
-        } else {
-            body.classList.remove('dark-mode');
-        }
-        localStorage.setItem('darkMode', isChecked);
+      if (currentTheme) {
+          applyTheme(currentTheme);
+      }
+
+      themeToggleBtn.addEventListener('click', () => {
+          const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+          applyTheme(newTheme);
+          localStorage.setItem('theme', newTheme);
       });
     });
   </script>

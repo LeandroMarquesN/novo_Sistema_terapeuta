@@ -6,8 +6,18 @@ const fs = require('fs');
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
+// Assegura que o diretório de uploads existe
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 // --- Função para criar um novo agendamento ---
 exports.criarAgendamento = async (req, res) => {
+  // O Multer já processou os arquivos e campos de texto
+  // Os arquivos estão em req.files e os campos de texto em req.body
+  console.log('Dados do formulário (req.body):', req.body);
+  console.log('Anexos (req.files):', req.files);
+
   const {
     nome,
     email,
@@ -21,45 +31,43 @@ exports.criarAgendamento = async (req, res) => {
     data_agendamento,
     motivo_consulta,
     origem_indicacao,
-    observacoes,
-    patient_photo // Campo da foto em Base64
+    observacoes
   } = req.body;
 
-  let fotoPerfilFilename = null;
-  // Verifica se a foto em Base64 é uma string não vazia
-  if (typeof patient_photo === 'string' && patient_photo.length > 0) {
-    try {
-      const base64Data = patient_photo.replace(/^data:image\/jpeg;base64,/, "");
-      fotoPerfilFilename = `paciente_${Date.now()}_perfil.jpeg`;
-      const filePath = path.join(uploadDir, fotoPerfilFilename);
-      fs.writeFileSync(filePath, base64Data, 'base64');
-      console.log(`Foto de perfil do paciente salva em: ${filePath}`);
-    } catch (err) {
-      console.error('Erro ao salvar foto de perfil do paciente:', err);
-      fotoPerfilFilename = null;
-    }
-  }
+  // Acessa os arquivos enviados pelo Multer
+  const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
+  const anexos = req.files['anexos'] || [];
+
+  let fotoPerfilFilename = patientPhoto ? patientPhoto.filename : null;
 
   let condicoesString = '';
   if (req.body.condicoes) {
-    if (Array.isArray(req.body.condicoes)) {
-      condicoesString = req.body.condicoes.join(', ');
-    } else {
+    // req.body.condicoes vem como uma string JSON do frontend
+    try {
+      const condicoesArray = JSON.parse(req.body.condicoes);
+      if (Array.isArray(condicoesArray)) {
+        condicoesString = condicoesArray.join(', ');
+      }
+    } catch (e) {
+      console.error('Erro ao fazer parse das condições de saúde:', e);
       condicoesString = String(req.body.condicoes);
     }
   }
 
-  console.log('Dados recebidos no backend para criarAgendamento (req.body):', req.body);
-  console.log('Anexos recebidos (req.files):', req.files);
-  console.log('Nome do arquivo da foto de perfil:', fotoPerfilFilename);
+  // Verificar se o nome ou a data de agendamento estão vazios
+  if (!nome || !data_agendamento) {
+    return res.status(400).json({ mensagem: 'Nome e data de agendamento são obrigatórios.' });
+  }
 
+  // Começando a lógica de transação para garantir atomicidade
+  const connection = await db.getConnection();
   try {
-    // Lógica de transação REMOVIDA para evitar o TypeError.
+    await connection.beginTransaction();
 
     let paciente_id;
 
     // 1. Tenta encontrar um paciente existente pelo nome e data de nascimento
-    const [pacientesExistentes] = await db.query(
+    const [pacientesExistentes] = await connection.query(
       'SELECT id FROM pacientes WHERE nome = ? AND data_nascimento = ?',
       [nome, data_nascimento]
     );
@@ -69,8 +77,7 @@ exports.criarAgendamento = async (req, res) => {
       console.log('Paciente existente encontrado, ID:', paciente_id);
     } else {
       // 2. Se o paciente não existir, cria um novo
-      // Nota: A query foi corrigida para corresponder aos valores enviados
-      const [novoPacienteResult] = await db.query(
+      const [novoPacienteResult] = await connection.query(
         `INSERT INTO pacientes (
           nome,
           email,
@@ -83,7 +90,7 @@ exports.criarAgendamento = async (req, res) => {
           email || null,
           telefone || null,
           data_nascimento || null,
-          fotoPerfilFilename || null
+          fotoPerfilFilename || null // Adiciona o nome do arquivo da foto aqui
         ]
       );
       paciente_id = novoPacienteResult.insertId;
@@ -131,14 +138,14 @@ exports.criarAgendamento = async (req, res) => {
       telefone || null
     ];
 
-    const [agendamentoResult] = await db.query(sqlAgendamento, valoresAgendamento);
+    const [agendamentoResult] = await connection.query(sqlAgendamento, valoresAgendamento);
     const agendamentoId = agendamentoResult.insertId;
     console.log('Agendamento inserido, ID:', agendamentoId);
 
     // 4. Insere cada anexo na tabela 'anexos'
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        await db.query(
+    if (anexos.length > 0) {
+      for (const file of anexos) {
+        await connection.query(
           `INSERT INTO anexos (
             agendamento_id,
             nome_original,
@@ -155,16 +162,25 @@ exports.criarAgendamento = async (req, res) => {
           ]
         );
       }
-      console.log(`${req.files.length} anexos inseridos na tabela 'anexos'.`);
+      console.log(`${anexos.length} anexos inseridos na tabela 'anexos'.`);
     }
 
-    // Chamada db.commit() REMOVIDA
+    await connection.commit();
     res.status(201).json({ mensagem: 'Agendamento, paciente e anexos salvos com sucesso!' });
 
   } catch (err) {
-    // Chamada db.rollback() REMOVIDA
+    await connection.rollback();
     console.error('Erro ao salvar agendamento no backend:', err);
+
+    // Se a foto de perfil foi salva, mas a transação falhou, a remove
+    if (patientPhoto && fs.existsSync(patientPhoto.path)) {
+      fs.unlinkSync(patientPhoto.path);
+      console.log(`Arquivo da foto do paciente ${patientPhoto.filename} removido devido a erro.`);
+    }
+
     res.status(500).json({ erro: 'Erro ao salvar agendamento', detalhes: err.message, sql: err.sql, sqlMessage: err.sqlMessage });
+  } finally {
+    connection.release();
   }
 };
 

@@ -7,13 +7,13 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// --- Configuração do Multer para Upload de Anexos ---
+// --- Configuração do Multer para Upload de Anexos e Foto de Perfil ---
 
 // Define o diretório de uploads. 'path.join' garante que o caminho seja compatível com todos os SOs.
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
 // Cria o diretório de uploads se ele não existir.
-// 'recursive: true' cria pastas aninhadas se necessário (útil se você tivesse subdiretórios).
+// 'recursive: true' cria pastas aninhadas se necessário.
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -35,17 +35,18 @@ const storage = multer.diskStorage({
   }
 });
 
-// O nome do campo no seu formulário HTML DEVE ser 'anexos'.
-// A notação '[]' no HTML (`name="anexos[]"`) já informa que é um array,
-// mas o Multer espera o nome base do campo, que é 'anexos'.
-// Por isso, vamos usar `multer({ storage: storage }).array('anexos')`.
-const upload = multer({ storage: storage }).array('anexos');
+// A diferença crucial: usamos .fields() para lidar com múltiplos campos de arquivo.
+// O array de objetos especifica o nome de cada campo do formulário e o número máximo de arquivos.
+const upload = multer({ storage: storage }).fields([
+  { name: 'anexos', maxCount: 10 },
+  { name: 'patient_photo', maxCount: 1 }
+]);
 
 // --- Definição das Rotas da API ---
 
 // Rota POST para criar um novo agendamento.
-// O middleware 'upload' será executado ANTES do 'agendamentoController.criarAgendamento'.
-// Ele processará os arquivos enviados no campo 'anexos' e os disponibilizará em 'req.files'.
+// O middleware 'upload' (agora configurado para campos múltiplos)
+// será executado ANTES do 'agendamentoController.criarAgendamento'.
 router.post('/', upload, agendamentoController.criarAgendamento);
 
 // Rota GET para listar todos os agendamentos.
