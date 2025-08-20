@@ -2,10 +2,11 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <title>Confirmação de Agendamento</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
       background-color: #f4f6f8;
       margin: 0;
       padding: 0;
@@ -17,6 +18,7 @@
       border-radius: 8px;
       overflow: hidden;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative; /* Adicionado para posicionamento absoluto da .footer */
     }
     .header {
       background: linear-gradient(135deg, #5f9ea0, #4682b4);
@@ -55,18 +57,27 @@
       text-indent: -9999px;
       overflow: hidden;
     }
+    span.footer {
+      height: 30px; /* Aproximadamente o tamanho da linha de texto "Sua Terapeuta" */
+      width: 30px; /* Ajustado proporcionalmente à imagem */
+      background-image: url('https://i.imgur.com/X6cHZyN.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      position: absolute;
+      bottom: 10px; /* Distância do fundo */
+      right: 10px;  /* Posicionado no canto direito */
+    }
   </style>
 </head>
 <body>
   <div class="email-container">
     <!-- Cabeçalho -->
     <div class="header">
-      <span class="logo-img" >Sistema Terapeuta</span>
-
+      <span class="logo-img">Sistema Terapeuta</span>
     </div>
-    <div class="header">
+    <!-- <div class="header">
       <img src="https://i.imgur.com/53FW2BV.png" alt="Karla Marques Logo" style="max-width: 300px; height: auto; display: block; margin: 0 auto;">
-    </div>
+    </div> -->
 
     <!-- Conteúdo -->
     <div class="content">
@@ -83,6 +94,7 @@
       <p>Se tiver alguma dúvida, por favor, entre em contato.</p>
       <p>Atenciosamente,</p>
       <p><strong>Sua Terapeuta</strong></p>
+
     </div>
 
     <!-- Rodapé -->
