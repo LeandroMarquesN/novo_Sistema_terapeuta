@@ -17,10 +17,38 @@
     /* Aplica a fonte Poppins a todo o corpo do documento */
     body {
         font-family: 'Poppins', sans-serif;
+        /* Adiciona flexbox para centralizar o conteúdo vertical e horizontalmente */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
     }
 
-    div.container{
-       background: linear-gradient(45deg,
+    /* Estilo do container com transparência */
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.2); /* Fundo branco com 20% de opacidade */
+      border-radius: 15px; /* Bordas arredondadas */
+      padding: 3rem; /* Espaçamento interno */
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
+      backdrop-filter: blur(10px); /* Efeito de vidro fosco */
+      border: 1px solid rgba(255, 255, 255, 0.3); /* Borda sutil */
+      width: 100%;
+      max-width: 500px; /* Aumenta a largura máxima */
+    }
+
+    .form-label {
+      color: #000; /* Cor do texto para contraste */
+      font-weight: 500;
+    }
+
+    h2 {
+        color: #000;
+    }
+
+    /* Adaptação para o fundo animado, se estiver em outro arquivo */
+    div.container-fluid {
+        background: linear-gradient(45deg,
               #c1d6ec,  /* Azul profundo */
               #a2c9f2,  /* Azul claro */
               #2252b9,  /* Verde-água médio */
@@ -30,8 +58,13 @@
             );
             background-size: 500% 500%;
             animation: gradientFlow 18s ease-in-out infinite;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: -1;
-            opacity: 0.7
+            opacity: 0.7;
     }
        @keyframes gradientFlow {
         0% { background-position: 0% 50%; }
@@ -40,16 +73,17 @@
       }
   </style>
 </head>
-<body>
-  <div class='container mt-5'>
-    <h2 class='text-center text-white'>Login do Sistema</h2>
-    <form id="loginForm" class='mx-auto' style='max-width: 400px;'>
+<body class="d-flex justify-content-center align-items-center vh-100">
+  <div class="container-fluid"></div>
+  <div class='login-container'>
+    <h2 class='text-center'>Login do Sistema</h2>
+    <form id="loginForm">
       <div class='mb-3'>
-        <label for='nome' class='form-label text-white'>Nome</label>
+        <label for='nome' class='form-label'>Nome</label>
         <input type='text' class='form-control' id='nome' required>
       </div>
       <div class='mb-3'>
-        <label for='senha' class='form-label text-white'>Senha</label>
+        <label for='senha' class='form-label'>Senha</label>
         <input type='password' class='form-control' id='senha' required>
       </div>
       <button type='submit' class='btn btn-primary w-100'>Entrar</button>

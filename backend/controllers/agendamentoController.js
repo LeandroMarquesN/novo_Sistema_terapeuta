@@ -185,9 +185,11 @@ exports.criarAgendamento = async (req, res) => {
 };
 
 // --- Função para listar todos os agendamentos ---
+// --- Função para listar todos os agendamentos ---
 exports.listarAgendamentos = async (req, res) => {
   try {
-    const sql = `
+    // 1. Query para buscar todos os agendamentos
+    const sqlAgendamentos = `
       SELECT
         id,
         paciente_id,
@@ -210,10 +212,38 @@ exports.listarAgendamentos = async (req, res) => {
       ORDER BY data_agendamento ASC
     `;
 
-    const [resultados] = await db.query(sql);
-    console.log('Resultados brutos da query listarAgendamentos:', resultados);
+    const [agendamentos] = await db.query(sqlAgendamentos);
 
-    res.json(resultados);
+    // 2. Query para buscar todos os anexos de uma vez
+    // Usamos um JOIN para pegar os dados do paciente também
+    const sqlAnexos = `
+      SELECT
+        agendamento_id,
+        nome_original,
+        caminho_servidor,
+        mime_type,
+        tamanho_bytes
+      FROM anexos
+    `;
+    const [anexos] = await db.query(sqlAnexos);
+
+    // 3. Juntar os anexos a seus respectivos agendamentos
+    const agendamentosComAnexos = agendamentos.map(agendamento => {
+      // Filtra a lista de todos os anexos para encontrar os que pertencem a este agendamento
+      const anexosDoAgendamento = anexos.filter(anexo => anexo.agendamento_id === agendamento.id);
+
+      // Adiciona a nova propriedade 'anexos' ao objeto do agendamento
+      // Se não houver anexos, a propriedade será um array vazio
+      return {
+        ...agendamento,
+        anexos: anexosDoAgendamento
+      };
+    });
+
+    console.log('Resultados com anexos para o front-end:', agendamentosComAnexos);
+
+    // 4. Envia a lista completa (com os anexos) para o front-end
+    res.json(agendamentosComAnexos);
   } catch (err) {
     console.error('Erro ao listar agendamentos no backend:', err);
     res.status(500).json({ erro: 'Erro ao listar agendamentos', detalhes: err.message });
