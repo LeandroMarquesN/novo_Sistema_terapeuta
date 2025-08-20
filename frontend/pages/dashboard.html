@@ -612,7 +612,7 @@
 
         const agendamentosFuturos = agendamentos.filter(agendamento => {
           const dataAgendamento = new Date(agendamento.data_agendamento);
-          return dataAgendamento > new Date();
+          return !isNaN(dataAgendamento.getTime()) && dataAgendamento > new Date();
         }).sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
 
         if (agendamentosFuturos.length === 0) {
