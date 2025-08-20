@@ -5,11 +5,7 @@
   <title>Agendar Consulta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Toastr.js CSS (para mensagens rápidas) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
-  <!-- Font Awesome para ícones -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Arquivos css personalizados (certifique-se de que os caminhos estão corretos) -->
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/animacaoBack.css">
   <link rel="stylesheet" href="/css/transicaoTela.css">
@@ -150,7 +146,6 @@
 
     <form class="row g-3 fade-in-element" id="formAgendamento" enctype="multipart/form-data">
 
-      <!-- Dados do paciente e consulta -->
       <div class="col-md-6">
         <label for="nomePaciente" class="form-label">Nome do Paciente</label>
         <input type="text" id="nomePaciente" name="nome" class="form-control" required>
@@ -163,8 +158,7 @@
 
       <div class="col-md-3">
         <label for="idadePaciente" class="form-label">Idade do Paciente</label>
-        <input type="number" id="idadePaciente" name="idade" class="form-control" readonly> <!-- 'readonly' para evitar edição manual -->
-      </div>
+        <input type="number" id="idadePaciente" name="idade" class="form-control" readonly> </div>
 
       <div class="col-md-4">
         <label for="pesoPaciente" class="form-label">Peso (kg)</label>
@@ -220,13 +214,11 @@
         </select>
       </div>
 
-      <!-- Campo de Observações -->
       <div class="col-12">
         <label for="observacoes" class="form-label">Observações</label>
         <textarea class="form-control" id="observacoes" name="observacoes" rows="2"></textarea>
       </div>
 
-      <!-- Condições de Saúde (coletadas como string) -->
       <div class="col-12">
         <h5 class="mt-4">Condições de Saúde</h5>
         <div class="row">
@@ -293,12 +285,9 @@
       </div>
   </div>
 
-  <!-- Botão Flutuante de Voltar à Página Inicial -->
   <a href="/dashboard.html" class="btn-voltar-flutuante" title="Voltar à Página Inicial">
-    <i class="fas fa-arrow-left"></i> <!-- Ícone de seta para a esquerda -->
-  </a>
+    <i class="fas fa-arrow-left"></i> </a>
 
-  <!-- Modal Customizado para Alertas e Confirmações (Bootstrap Modal) -->
   <div class="modal fade clinical-modal" id="customAlertModal" tabindex="-1" aria-labelledby="customAlertModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -310,21 +299,17 @@
           <p id="customAlertModalMessage"></p>
         </div>
         <div class="modal-footer" id="customAlertModalFooter">
-          <!-- Botões serão inseridos via JS -->
-        </div>
+          </div>
       </div>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Toastr.js JS (para mensagens rápidas) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
   <script>
     console.log('Script agendamentos.html carregado.'); // Log de depuração: Primeiro log do script
 
-    // Configuração do Toastr.js para um estilo mais clínico/clean
-    toastr.options = {
+    // REMOVIDO: Configuração do Toastr.js (não será mais usado)
+    /* toastr.options = {
       "closeButton": true,
       "debug": false,
       "newestOnTop": true,
@@ -340,7 +325,7 @@
       "hideEasing": "linear",
       "showMethod": "fadeIn",
       "hideMethod": "fadeOut"
-    };
+    }; */
 
     // Variável global para armazenar os agendamentos atuais (otimização para validação)
     let currentAppointments = [];
@@ -462,8 +447,8 @@
             }
           }
           carregarAgendamentos(); // Recarrega a lista após a exclusão
-          // Alerta de sucesso com Toastr.js
-          toastr.success('O agendamento foi excluído com sucesso!', 'Excluído!');
+          // ATUALIZADO: Alerta de sucesso com modal customizado
+          showClinicalAlert('Excluído!', 'O agendamento foi excluído com sucesso!', 'success');
         } catch (erro) {
           console.error('Erro ao excluir:', erro);
           // Alerta de erro com modal customizado, usando a mensagem mais específica do throw
@@ -642,33 +627,34 @@
             console.log('6. Requisição fetch enviada. Resposta recebida. Status:', response.status); // Log de depuração
 
             if (response.ok) {
-              toastr.success('Agendamento e paciente salvos com sucesso!', 'Sucesso!');
+              // ATUALIZADO: Substituído toastr.success por showClinicalAlert
+              showClinicalAlert('Sucesso!', 'Agendamento e paciente salvos com sucesso!', 'success');
               form.reset(); // Limpa o formulário após o sucesso
               carregarAgendamentos(); // Recarrega a lista para mostrar o novo agendamento
             } else {
               const errorText = await response.text();
-              console.error('7. Erro ao salvar agendamento. Resposta do servidor:', errorText); // Log de erro
-              showClinicalAlert(
-                'Erro ao Salvar',
-                `Ocorreu um erro ao salvar o agendamento. Por favor, tente novamente.<br><pre>${errorText.substring(0, 200)}...</pre>`,
-                'error'
-              );
+              console.error('7. Erro ao salvar agendamento. Resposta do servidor:', errorText);
+              // ATUALIZADO: Substituído o erro Toastr por showClinicalAlert
+              showClinicalAlert('Erro de Conexão', `Não foi possível conectar ao servidor. Verifique sua conexão. Detalhes: ${errorText}`, 'error');
             }
           } catch (erro) {
-            console.error('8. Erro ao enviar o agendamento (catch do fetch):', erro); // Log de erro em caso de falha de rede ou JS
-            showClinicalAlert('Erro de Conexão', 'Não foi possível conectar ao servidor. Verifique sua conexão.', 'error');
+            console.error('8. Erro ao enviar o agendamento (catch do fetch):', erro);
+            // ATUALIZADO: Substituído o erro Toastr por showClinicalAlert
+            showClinicalAlert('Erro de Conexão', `Não foi possível conectar ao servidor. Verifique sua conexão. Detalhes: ${erro.message}`, 'error');
           }
+          console.log('--- SAÍDA DA FUNÇÃO DE SUBMISSÃO DO FORMULÁRIO ---');
         });
       } else {
-        console.error('Erro: Elemento formAgendamento não encontrado!'); // Log de erro se o formulário não for encontrado no DOM
+        console.error('Elemento #formAgendamento não encontrado. O listener não foi anexado.');
       }
 
-      // Adiciona o listener para o campo de data de nascimento para calcular a idade
-      const dataNascimentoInput = document.querySelector('input[name="data_nascimento"]');
+      // Anexar o listener para o cálculo da idade
+      const dataNascimentoInput = document.getElementById('dataNascimentoPaciente');
       if (dataNascimentoInput) {
         dataNascimentoInput.addEventListener('change', calcularIdade);
       }
-      carregarAgendamentos(); // Garante que a listagem carregue ao iniciar a página
+
+      carregarAgendamentos();
     });
   </script>
 </body>

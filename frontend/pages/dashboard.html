@@ -12,22 +12,19 @@
   <link rel="stylesheet" href="/css/maquinaEscrever.css">
   <link rel="stylesheet" href="/css/transicaoTela.css">
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+rL+N7wB1KxJ5s/h6K3jV3F2lQp1F6w7T5fJvC+fQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <style>
-    /* Fonte da menssagem de boas vindas */
-    @font-face {
-      font-family: 'FonteDoLogo';
-      src: url('/fonts/nome-da-sua-fonte.woff2') format('woff2'),
-          url('/fonts/nome-da-sua-fonte.woff') format('woff');
-      font-weight: normal;
-      font-style: normal;
+    /* Aplica a fonte Poppins a todo o corpo do documento */
+    body {
+        font-family: 'Poppins', sans-serif;
     }
 
-    #boasVindas {
-      font-family: 'FonteDoLogo', sans-serif;
-      /* Garante que a fonte seja aplicada */
-    }
-    /* Fim da menssagem */
-    /* Estilização da Navbar (já estava funcionando) */
+    /* Estilização para o LOGO */
     span.logo-img {
       height: 280px;
       width: 650px;
@@ -43,46 +40,148 @@
       background-color: transparent !important;
     }
 
-    /* Estilos para as caixas com transparência e bordas arredondadas */
-    .dashboard-box {
-      /* Fundo branco com opacidade reduzida (quase transparente) */
-      background-color: rgba(255, 255, 255, 0.3);
-      /* Borda sutil para definir o elemento */
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 1rem;
-      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-      padding: 1.5rem;
-      backdrop-filter: blur(5px); /* Efeito de vidro fosco, opcional */
+    /* ==================================== */
+    /* ESTILOS PARA O MODO ESCURO */
+    /* ==================================== */
+    body.dark-mode {
+        background-color: #121212 !important;
+        color: #e0e0e0;
+    }
+    .dark-mode .dashboard-box {
+        background-color: rgba(30, 30, 30, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .dark-mode .dashboard-box .table tbody tr:nth-of-type(even) {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .dark-mode .dashboard-box .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    .dark-mode .text-muted {
+        color: #a0a0a0 !important;
+    }
+    .dark-mode .modal-content {
+      background-color: #212529; /* Cor do fundo do modal no modo escuro */
+      color: #e0e0e0; /* Cor do texto no modal */
+    }
+    .dark-mode .modal-header,
+    .dark-mode .modal-footer {
+      border-color: #444; /* Borda mais escura para o modal */
+    }
+    .dark-mode .modal-title {
+        color: #fff;
+    }
+    .dark-mode .btn-close {
+        filter: invert(1); /* Inverte a cor do 'X' para ser visível no fundo escuro */
+    }
+    .dark-mode .fc-col-header-cell-cushion,
+    .dark-mode .fc-daygrid-day-number {
+        color: #e0e0e0;
+    }
+    .dark-mode .fc-theme-standard td,
+    .dark-mode .fc-theme-standard th {
+        border-color: #333 !important;
+    }
+    .dark-mode .fc-button-primary {
+        background-color: #333;
+        border-color: #555;
+        color: #e0e0e0;
+    }
+    .dark-mode .fc-button-primary:hover,
+    .dark-mode .fc-button-primary:not(:disabled):active {
+        background-color: #555;
+        border-color: #777;
+    }
+    .dark-mode .fc-toolbar-title {
+        color: #fff;
     }
 
-    /* Esconde o cabeçalho da tabela */
+    /* Estilização para o switch de Modo Escuro */
+    /* O estilo principal é do próprio Bootstrap, só ajustamos a cor */
+    .form-check-input:checked {
+        background-color: #333; /* Cor do switch ativado */
+        border-color: #555;
+    }
+
+    /* ==================================== */
+    /* ESTILOS GERAIS DA PAGINA E COMPONENTES */
+    /* ==================================== */
+
+    /* Estilo para as caixas com transparência e bordas arredondadas */
+    .dashboard-box {
+      background-color: rgba(10, 73, 140, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 1rem;
+      padding: 1.5rem;
+    }
+
     .dashboard-box .table thead {
         display: none;
     }
 
-    /* Remove o fundo branco padrão do Bootstrap nas linhas da tabela */
-    .dashboard-box .table-striped tbody tr:nth-of-type(odd) {
+    .dashboard-box .table-striped > tbody > tr:nth-of-type(odd) {
         background-color: transparent !important;
     }
-    /* Estilo para as linhas da tabela (item de notificação) */
-    .dashboard-box .table tbody tr {
-        /* Fundo suavemente transparente para cada linha */
-        background-color: rgba(255, 255, 255, 0.2);
-        margin-bottom: 1rem; /* Espaçamento entre as linhas */
-        border-radius: 0.5rem; /* Bordas arredondadas para cada linha */
-        border: none; /* Remove a borda da tabela */
-        transition: transform 0.2s ease-in-out;
-    }
-    .dashboard-box .table tbody tr:hover {
-        transform: scale(1.02); /* Efeito sutil ao passar o mouse */
-    }
-    /* Garante que o espaçamento seja aplicado corretamente */
-    .dashboard-box .table tbody tr td {
-        border-top: none;
-        padding: 1rem;
+
+    .dashboard-box .table-striped > tbody > tr:nth-of-type(even) {
+        background-color: rgba(255, 255, 255, 0.2) !important;
     }
 
-    /* Customizações do FullCalendar para o estilo clean */
+    .dashboard-box .table tbody tr {
+        margin-bottom: 1rem;
+        border-radius: 0.5rem;
+        transition: transform 0.2s ease-in-out;
+        font-size: larger;
+        font-weight: 400;
+        border-top: none;
+    }
+
+    .dashboard-box .table tbody tr:hover {
+        background-color: #add8e6 !important;
+        transform: scale(1.02);
+        font-weight: bold;
+        cursor:pointer;
+    }
+
+    .dashboard-box .table tbody tr td {
+        border-top: none;
+        padding: 2rem;
+        text-align: center;
+    }
+    /* Aumentar o tamanho do switch de modo escuro */
+.form-switch .form-check-input {
+    width: 4.1em;
+    height: 2.3em;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: left center;
+    border-radius: 2em;
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    -webkit-transition: background-position .25s ease-in-out;
+    transition: background-position .25s ease-in-out;
+}
+
+.form-switch .form-check-input:focus {
+    border-color: #86b7fe;
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.form-switch .form-check-input:checked {
+    background-position: right center;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    background-color: #333;
+    border-color: #555;
+}
+
+/* Ajustar o tamanho do label para alinhar verticalmente */
+.form-check-label {
+    line-height: 1.5em;
+}
+    /* INÍCIO DAS MODIFICAÇÕES DO FULLCALENDAR */
     .fc .fc-toolbar.fc-header-toolbar {
       margin-bottom: 1.5em;
       cursor:pointer;
@@ -91,10 +190,11 @@
       font-size: 1.75em;
       font-weight: 500;
       color: #333;
+      cursor:pointer;
     }
     .fc .fc-button-primary {
       background-color: transparent;
-      border: 1px solid #ccc;
+      border: 3px solid #ccc;
       color: #555;
       font-weight: 500;
       padding: 0.5rem 1rem;
@@ -111,8 +211,9 @@
       background-color: transparent;
       border: none;
     }
-    .fc-daygrid-day {
-      border: 1px solid #e9ecef;
+    .fc-daygrid-day-frame, .fc-daygrid-day {
+        border-radius: 0.5rem;
+        border: 1px solid #e9ecef;
     }
     .fc-event {
       border: none;
@@ -131,6 +232,39 @@
     .fc-event[style*="background-color: rgb(208, 191, 255);"] {
       background-color: #d0bfff !important;
       color: #343a40;
+    }
+
+    /* Estilização do botão de voltar ao topo */
+    #scrollToTopBtn {
+        display: none;
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 99;
+        border: none;
+        outline: none;
+        background-color: rgba(10, 73, 140, 0.7);
+        color: white;
+        cursor: pointer;
+        padding: 15px;
+        border-radius: 50%;
+        font-size: 18px;
+        transition: opacity 0.3s, transform 0.3s;
+        opacity: 0;
+        transform: scale(0);
+    }
+    #scrollToTopBtn.show {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    /* Ajustes para telas menores (responsividade) */
+    @media (max-width: 768px) {
+        span.logo-img {
+            height: 150px;
+            width: 350px;
+            background-position: center;
+        }
     }
   </style>
 
@@ -152,17 +286,15 @@
       </button>
 
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
+        <div class="ms-auto d-flex align-items-center">
+            <div class="form-check form-switch me-2">
+                <input class="form-check-input" type="checkbox" id="darkModeSwitch">
+                <label class="form-check-label" for="darkModeSwitch"></label>
+            </div>
             <a class="btn btn-outline-primary me-2" href="pacientes.html">Pacientes</a>
-          </li>
-          <li class="nav-item">
             <a class="btn btn-outline-success me-2" href="agendamento.html">Agendar</a>
-          </li>
-          <li class="nav-item">
             <a class="btn btn-outline-secondary" href="historico.html">Histórico</a>
-          </li>
-        </ul>
+        </div>
       </div>
     </div>
   </nav>
@@ -173,12 +305,12 @@
       <p class="fs-5">Você está logada no sistema do terapeuta!</p>
     </div>
 
-    <p class="fs-5 fade-in-element">Próximos agendamentos:</p>
+    <h1 class="text-center fs-5 fade-in-element">Próximos agendamentos:</h1>
 
     <div class="dashboard-box mt-4 fade-in-element">
       <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle">
-          <thead class="table-dark">
+        <table class="table table-striped table-hover align-middle table-borderless">
+          <thead class="table-info">
             <tr>
               <th>Paciente</th>
               <th>Data e Hora</th>
@@ -199,49 +331,210 @@
     </div>
   </div>
 
+  <div class="modal fade" id="modalAtendimento" tabindex="-1" aria-labelledby="modalAtendimentoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalAtendimentoLabel">Seu Primeiro Atendimento do Dia</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="mensagemAtendimento" class="fs-5"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalLuas" tabindex="-1" aria-labelledby="modalLuasLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLuasLabel">Fases da Lua do Mês</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="mensagemLuas" class="fs-5"></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalPaciente" tabindex="-1" aria-labelledby="modalPacienteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalPacienteLabel">Detalhes do Agendamento</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="card mb-3">
+              <div class="card-body">
+                <h5 class="card-title">Informações do Paciente</h5>
+                <p class="card-text">
+                  <strong>Nome:</strong> <span id="infoNome"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Data de Nascimento:</strong> <span id="infoDataNascimento"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Idade:</strong> <span id="infoIdade"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Peso:</strong> <span id="infoPeso"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Altura:</strong> <span id="infoAltura"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Tipo Sanguíneo:</strong> <span id="infoTipoSanguineo"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Tipo de Terapia:</strong> <span id="infoTipoTerapia"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Data do Agendamento:</strong> <span id="infoDataAgendamento"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Motivo da Consulta:</strong> <span id="infoMotivoConsulta"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Origem da Indicação:</strong> <span id="infoOrigemIndicacao"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Observações:</strong> <span id="infoObservacoes"></span>
+                </p>
+                <p class="card-text">
+                  <strong>Condições de Saúde:</strong> <span id="infoCondicoes"></span>
+                </p>
+                <p class="card-text">
+                    <strong>Anexo:</strong> <span id="infoAnexo"></span>
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modalVisualizarAnexo" tabindex="-1" aria-labelledby="modalVisualizarAnexoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" id="dialogVisualizarAnexo">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalVisualizarAnexoLabel">Visualizar Anexo</h5>
+          <div class="d-flex align-items-center">
+            <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="maximizeAnexoBtn" title="Maximizar">
+              <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+        </div>
+        <div class="modal-body text-center">
+          <div id="anexo-container" style="max-width: 100%; max-height: 80vh;"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button onclick="scrollToTop()" id="scrollToTopBtn" title="Voltar ao topo">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
     const usuario = localStorage.getItem('usuarioLogado');
 
-function escreverTextoComMaquinaEscrever(texto, elementoId) {
-  const elemento = document.getElementById(elementoId);
-  elemento.textContent = "";
-  // Adiciona a classe da fonte ao elemento antes de começar a escrever
-  elemento.classList.add("font-logo");
-  elemento.classList.remove("typewriter");
+    function escreverTextoComMaquinaEscrever(texto, elementoId) {
+      const elemento = document.getElementById(elementoId);
+      elemento.textContent = "";
 
-  let i = 0;
-  const intervalo = setInterval(() => {
-    elemento.textContent += texto.charAt(i);
-    i++;
-    if (i >= texto.length) {
-      clearInterval(intervalo);
-      elemento.classList.add("typewriter");
+      let i = 0;
+      const intervalo = setInterval(() => {
+        if (i < texto.length) {
+            elemento.textContent += texto.charAt(i);
+            i++;
+        } else {
+            clearInterval(intervalo);
+        }
+      }, 30);
     }
-  }, 100);
-}
 
-if (usuario) {
-  const nomeParts = usuario.trim().split(' ');
-  const primeiroNome = nomeParts[0].toLowerCase();
-  const terminaComA = primeiroNome.endsWith('a');
+    if (usuario) {
+      const nomeParts = usuario.trim().split(' ');
+      const primeiroNome = nomeParts[0].toLowerCase();
+      const terminaComA = primeiroNome.endsWith('a');
 
-  const icone = terminaComA ? "👩‍⚕️" : "👨‍⚕️";
-  const saudacao = terminaComA
-    ? `Bem-vinda, ${usuario} ${icone}`
-    : `Bem-vindo, ${usuario} ${icone}`;
+      const icone = terminaComA ? `<i class="fa-solid fa-user-doctor-female"></i>` : `<i class="fa-solid fa-user-doctor"></i>`;
+      const saudacao = terminaComA
+        ? `Bem-vinda, ${usuario} ${icone}`
+        : `Bem-vindo, ${usuario} ${icone}`;
 
-  escreverTextoComMaquinaEscrever(saudacao, 'boasVindas');
-} else {
-  window.location.href = 'login.html';
-}
-  </script>
+      const boasVindasEl = document.getElementById('boasVindas');
+      boasVindasEl.innerHTML = saudacao;
 
-  <script>
+    } else {
+      window.location.href = 'login.html';
+    }
+
+    function mostrarModalPrimeiroAtendimento(agendamentosFuturos) {
+      const modalAtendimento = new bootstrap.Modal(document.getElementById('modalAtendimento'));
+      const mensagemEl = document.getElementById('mensagemAtendimento');
+
+      if (agendamentosFuturos.length > 0) {
+        const primeiro = agendamentosFuturos[0];
+        const data = new Date(primeiro.data_agendamento);
+        const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+        const mensagem = `Seu primeiro atendimento do dia é com o(a) ${primeiro.nome || 'Paciente'} e está confirmado para a data ${dataFormatada} às ${horaFormatada}.`;
+
+        escreverTextoComMaquinaEscrever(mensagem, 'mensagemAtendimento');
+        modalAtendimento.show();
+      }
+    }
+
+    function mostrarModalLuas() {
+      const modalLuas = new bootstrap.Modal(document.getElementById('modalLuas'));
+      const mensagemLuasEl = document.getElementById('mensagemLuas');
+
+      const dataAtual = new Date();
+      const mesAtual = dataAtual.getMonth();
+      const anoAtual = dataAtual.getFullYear();
+
+      const luasDoMes = [
+          { fase: 'Nova', data: new Date(anoAtual, 6, 6) },
+          { fase: 'Crescente', data: new Date(anoAtual, 6, 13) },
+          { fase: 'Cheia', data: new Date(anoAtual, 6, 21) },
+          { fase: 'Minguante', data: new Date(anoAtual, 6, 28) }
+      ];
+
+      let mensagem = "As fases da lua para este mês são:\n\n";
+      luasDoMes.forEach(lua => {
+          mensagem += `Lua ${lua.fase} - ${lua.data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n`;
+      });
+
+      escreverTextoComMaquinaEscrever(mensagem, 'mensagemLuas');
+      modalLuas.show();
+    }
+
+    document.getElementById('modalAtendimento').addEventListener('hidden.bs.modal', function (event) {
+      mostrarModalLuas();
+    });
+
     document.addEventListener('DOMContentLoaded', async function () {
       const calendarEl = document.getElementById('calendar');
-
       let eventosApi = [];
 
       try {
@@ -279,9 +572,72 @@ if (usuario) {
 
       calendar.render();
     });
-  </script>
 
-  <script>
+    // Função para rolar a página suavemente para o topo
+    function scrollToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
+
+    function abrirModalAnexo(filename) {
+      const anexoContainer = document.getElementById('anexo-container');
+      anexoContainer.innerHTML = '';
+      const url = `/uploads/${filename}`;
+      const extensao = filename.split('.').pop().toLowerCase();
+
+      if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(extensao)) {
+        anexoContainer.innerHTML = `<img src="${url}" class="img-fluid" alt="Anexo do Paciente">`;
+      } else if (extensao === 'pdf') {
+        anexoContainer.innerHTML = `<embed src="${url}" type="application/pdf" width="100%" height="600px" />`;
+      } else {
+        anexoContainer.innerHTML = `<p>Tipo de arquivo não suportado para visualização embutida. <a href="${url}" target="_blank">Clique aqui para baixar.</a></p>`;
+      }
+
+      const modalVisualizarAnexo = new bootstrap.Modal(document.getElementById('modalVisualizarAnexo'));
+      modalVisualizarAnexo.show();
+    }
+
+    function abrirModalPaciente(agendamentoJson) {
+      try {
+        const agendamento = JSON.parse(agendamentoJson);
+        const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
+
+        document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
+        document.getElementById('infoDataNascimento').textContent = agendamento.data_nascimento ? new Date(agendamento.data_nascimento).toLocaleDateString('pt-BR') : 'N/A';
+        document.getElementById('infoIdade').textContent = agendamento.idade || 'N/A';
+        document.getElementById('infoPeso').textContent = agendamento.peso ? `${agendamento.peso} kg` : 'N/A';
+        document.getElementById('infoAltura').textContent = agendamento.altura ? `${agendamento.altura} cm` : 'N/A';
+        document.getElementById('infoTipoSanguineo').textContent = agendamento.tipo_sanguineo || 'N/A';
+        document.getElementById('infoTipoTerapia').textContent = agendamento.tipo_terapia || 'N/A';
+        document.getElementById('infoMotivoConsulta').textContent = agendamento.motivo_consulta || 'N/A';
+        document.getElementById('infoOrigemIndicacao').textContent = agendamento.origem_indicacao || 'N/A';
+        document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
+        document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
+
+        const infoAnexo = document.getElementById('infoAnexo');
+        if (agendamento.anexo) {
+            infoAnexo.innerHTML = `<a href="#" onclick="abrirModalAnexo('${agendamento.anexo}'); return false;">Visualizar Anexo</a>`;
+        } else {
+            infoAnexo.textContent = 'N/A';
+        }
+
+        const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('infoDataAgendamento').textContent = dataFormatada;
+
+        modalPaciente.show();
+      } catch (e) {
+        console.error('Erro ao abrir modal do paciente:', e);
+      }
+    }
+
     async function carregarTabelaAgendamentos() {
       const tabelaBody = document.getElementById('tabelaAgendamentos');
       tabelaBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Carregando agendamentos...</td></tr>';
@@ -294,11 +650,6 @@ if (usuario) {
         const agendamentos = await resposta.json();
         tabelaBody.innerHTML = '';
 
-        if (agendamentos.length === 0) {
-          tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>`;
-          return;
-        }
-
         const agendamentosFuturos = agendamentos.filter(agendamento => {
           const dataAgendamento = new Date(agendamento.data_agendamento);
           return dataAgendamento > new Date();
@@ -306,6 +657,7 @@ if (usuario) {
 
         if (agendamentosFuturos.length === 0) {
           tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>`;
+          mostrarModalLuas();
           return;
         }
 
@@ -321,6 +673,7 @@ if (usuario) {
             minute: '2-digit'
           });
 
+          tr.setAttribute('onclick', `abrirModalPaciente(JSON.stringify(${JSON.stringify(agendamento)}))`);
           tr.innerHTML = `
             <td>${agendamento.nome || 'N/A'}</td>
             <td>${dataFormatada}</td>
@@ -328,14 +681,68 @@ if (usuario) {
           `;
           tabelaBody.appendChild(tr);
         });
+
+        mostrarModalPrimeiroAtendimento(agendamentosFuturos);
       } catch (erro) {
         console.error('Erro ao carregar agendamentos para a tabela:', erro);
         tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Erro ao carregar a lista de agendamentos.</td></tr>`;
+        mostrarModalLuas();
       }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
       carregarTabelaAgendamentos();
+
+      // Lógica do botão de Maximizar/Restaurar do modal de anexo
+      const maximizeBtn = document.getElementById('maximizeAnexoBtn');
+      const dialog = document.getElementById('dialogVisualizarAnexo');
+      const icon = maximizeBtn.querySelector('i');
+
+      if (maximizeBtn) {
+        maximizeBtn.addEventListener('click', () => {
+          dialog.classList.toggle('modal-fullscreen');
+          if (dialog.classList.contains('modal-fullscreen')) {
+            icon.classList.remove('fa-expand-arrows-alt');
+            icon.classList.add('fa-compress-arrows-alt');
+            maximizeBtn.title = "Restaurar";
+          } else {
+            icon.classList.remove('fa-compress-arrows-alt');
+            icon.classList.add('fa-expand-arrows-alt');
+            maximizeBtn.title = "Maximizar";
+          }
+        });
+      }
+
+      // Lógica para mostrar/esconder o botão de voltar ao topo
+      const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+      window.onscroll = function() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+          scrollToTopBtn.classList.add("show");
+        } else {
+          scrollToTopBtn.classList.remove("show");
+        }
+      };
+
+      // Lógica do Modo Escuro
+      const darkModeSwitch = document.getElementById('darkModeSwitch');
+      const body = document.body;
+
+      // Carrega a preferência do usuário ao carregar a página
+      const isDarkMode = localStorage.getItem('darkMode') === 'true';
+      if (isDarkMode) {
+        body.classList.add('dark-mode');
+        darkModeSwitch.checked = true; // Marca o switch como ativado
+      }
+
+      darkModeSwitch.addEventListener('change', () => {
+        const isChecked = darkModeSwitch.checked;
+        if (isChecked) {
+            body.classList.add('dark-mode');
+        } else {
+            body.classList.remove('dark-mode');
+        }
+        localStorage.setItem('darkMode', isChecked);
+      });
     });
   </script>
 </body>

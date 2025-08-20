@@ -1,6 +1,6 @@
 // backend/controllers/agendamentoController.js
 
-console.log('--- agendamentoController.js carregado ---'); // Adicionado para confirmar carregamento
+console.log('--- agendamentoController.js carregado ---');
 
 const db = require('../config/db'); // Certifique-se de que este importa um pool de conexão ou conexão que suporta promessas (ex: mysql2/promise)
 
@@ -18,26 +18,23 @@ exports.criarAgendamento = async (req, res) => {
     data_agendamento,
     motivo_consulta,
     origem_indicacao,
-    // condicoes (manteremos o nome aqui, mas processaremos abaixo)
     observacoes
   } = req.body;
 
   // Lida com o arquivo de anexo, se houver
   const anexo = req.file ? req.file.filename : null;
 
-  // --- CORREÇÃO E DEBOGAGEM PARA 'condicoes' ---
-  // Garante que 'condicoes' seja uma string única, mesmo se vier de forma inesperada do frontend.
   let condicoesString = '';
   if (req.body.condicoes) {
     if (Array.isArray(req.body.condicoes)) {
-      condicoesString = req.body.condicoes.join(', '); // Se por algum motivo ainda for array
+      condicoesString = req.body.condicoes.join(', ');
     } else {
-      condicoesString = String(req.body.condicoes); // Converte para string explicitamente
+      condicoesString = String(req.body.condicoes);
     }
   }
 
   console.log('Dados recebidos no backend para criarAgendamento (req.body):', req.body);
-  console.log('Tipo de condicoes (após processamento):', typeof condicoesString, 'Valor de condicoes (string final):', condicoesString); // Log do valor final de condicoes
+  console.log('Condições (string final):', condicoesString);
   console.log('Anexo recebido (req.file):', req.file);
 
   try {
@@ -53,6 +50,7 @@ exports.criarAgendamento = async (req, res) => {
       paciente_id = pacientesExistentes[0].id;
       console.log('Paciente existente encontrado, ID:', paciente_id);
     } else {
+      // Inserção básica de paciente para agendamento
       const [novoPacienteResult] = await db.query(
         `INSERT INTO pacientes (nome, data_nascimento) VALUES (?, ?)`,
         [nome, data_nascimento]
@@ -62,6 +60,7 @@ exports.criarAgendamento = async (req, res) => {
     }
 
     // 2. Insere os dados na tabela 'agendamentos'
+    // REMOVIDA 'anotacoes' do INSERT statement e dos valores
     const sql = `
       INSERT INTO agendamentos (
         paciente_id,
@@ -96,12 +95,12 @@ exports.criarAgendamento = async (req, res) => {
       tipo_sanguineo || null,
       motivo_consulta || null,
       origem_indicacao || null,
-      condicoesString || null, // Usando a variável 'condicoesString' processada
+      condicoesString || null,
       anexo || null
     ];
 
     console.log('Valores a serem inseridos no agendamento (array final):', valores);
-    console.log('Número de valores no array:', valores.length); // Confirma a contagem
+    console.log('Número de valores no array:', valores.length);
 
     await db.query(sql, valores);
     res.status(201).json({ mensagem: 'Agendamento e paciente salvos com sucesso!' });
@@ -112,11 +111,28 @@ exports.criarAgendamento = async (req, res) => {
   }
 };
 
-// --- Função para listar todos os agendamentos ---
+// --- Função para listar todos os agendamentos (ATUALIZADA para corresponder init.sql) ---
 exports.listarAgendamentos = async (req, res) => {
   try {
+    // Ajustado o SELECT para corresponder EXATAMENTE às colunas do seu init.sql
     const sql = `
-      SELECT id, nome, data_agendamento, tipo_terapia
+      SELECT
+        id,
+        paciente_id,
+        nome,
+        data_agendamento,
+        tipo_terapia,
+        observacoes,
+        status_pagamento,
+        peso,
+        altura,
+        data_nascimento,
+        idade,
+        tipo_sanguineo,
+        motivo_consulta,
+        origem_indicacao,
+        condicoes,
+        anexo
       FROM agendamentos
       ORDER BY data_agendamento ASC
     `;
@@ -127,9 +143,22 @@ exports.listarAgendamentos = async (req, res) => {
 
     const agendamentosFormatados = resultados.map(item => ({
       id: item.id,
+      paciente_id: item.paciente_id,
       nome: item.nome,
       data_agendamento: item.data_agendamento,
-      tipo_terapia: item.tipo_terapia
+      tipo_terapia: item.tipo_terapia,
+      observacoes: item.observacoes,
+      status_pagamento: item.status_pagamento,
+      peso: item.peso,
+      altura: item.altura,
+      data_nascimento: item.data_nascimento,
+      idade: item.idade,
+      tipo_sanguineo: item.tipo_sanguineo,
+      motivo_consulta: item.motivo_consulta,
+      origem_indicacao: item.origem_indicacao,
+      condicoes: item.condicoes,
+      anexo: item.anexo
+      // REMOVIDA 'anotacoes' do objeto retornado
     }));
 
     console.log('Dados formatados para o frontend:', agendamentosFormatados);
@@ -140,3 +169,6 @@ exports.listarAgendamentos = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao listar agendamentos', detalhes: err.message });
   }
 };
+
+// --- REMOVIDA A FUNÇÃO atualizarAgendamento, pois 'anotacoes' não existe na tabela 'agendamentos' ---
+// Para ter funcionalidades de edição, você precisaria de uma tabela ou coluna para isso.
