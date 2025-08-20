@@ -15,18 +15,46 @@
         margin-top: 3%;
     }
     span.logo-img {
-      height: 280px; /* Aumentado para deixar o logo maior */
-      width: 650px; /* Aumentado para manter a proporção, ajuste conforme necessário */
-      background-image: url('../logo/logoFinal.png'); /* Caminho da imagem */
+      height: 280px;
+      width: 650px;
+      background-image: url('../logo/logoFinal.png');
       background-size: contain;
       background-repeat: no-repeat;
       background-position: left;
-      display: inline-block; /* Para que o span respeite as dimensões de height e width */
-      text-indent: -9999px; /* Esconde o texto, se houver, para acessibilidade */
-      overflow: hidden; /* Oculta qualquer conteúdo extra */
+      display: inline-block;
+      text-indent: -9999px;
+      overflow: hidden;
     }
     .bg-transparente {
       background-color: transparent !important;
+    }
+    /* Estilos para o popup de sucesso */
+    .success-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      border: 1px solid #ccc;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px 40px;
+      text-align: center;
+      z-index: 1000;
+      border-radius: 10px;
+      animation: fadeIn 0.5s;
+    }
+    .success-popup .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #aaa;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
     }
    </style>
 
@@ -66,7 +94,8 @@
           <span class="erro" id="erro-telefone"></span>
         </div>
         <div class="col-md-6">
-          <input class="form-control" name="data_nascimento" type="date" placeholder="data de nascimento" required />
+          <input class="form-control" name="data_nascimento" type="date" placeholder="Data de Nascimento" required />
+          <small class="form-text text-muted">Data de Nascimento</small>
           <span class="erro" id="erro-data"></span>
         </div>
       </div>
@@ -81,11 +110,30 @@
     </form>
   </div>
 
+  <div id="successPopup" class="success-popup">
+    <span class="close-btn" onclick="fecharPopup()">&times;</span>
+    <h4 class="text-success">Sucesso!</h4>
+    <p>Os dados foram salvos.</p>
+  </div>
+
   <script>
     let editandoId = null;
 
     function mostrarErro(campo, mensagem) {
       document.getElementById(`erro-${campo}`).innerText = mensagem || '';
+    }
+
+    // Função para mostrar o popup de sucesso
+    function mostrarPopup() {
+      const popup = document.getElementById('successPopup');
+      popup.style.display = 'block';
+      setTimeout(fecharPopup, 3000); // Fecha automaticamente após 3 segundos
+    }
+
+    // Função para fechar o popup de sucesso
+    function fecharPopup() {
+      const popup = document.getElementById('successPopup');
+      popup.style.display = 'none';
     }
 
     async function carregarPacientes() {
@@ -161,6 +209,7 @@
 
       form.reset();
       carregarPacientes();
+      mostrarPopup(); // Chama a função para mostrar o popup
     });
 
     async function editarPaciente(id) {
@@ -178,45 +227,43 @@
       document.getElementById('form-title').innerText = 'Editar Paciente';
       document.getElementById('cancelarEdicao').style.display = 'inline-block';
     }
-   // Funcao Carregar agendamentos
+
    async function carregarAgendamentos() {
-  try {
-    const response = await fetch('/api/agendamentos');
-    const agendamentos = await response.json();
+      try {
+        const response = await fetch('/api/agendamentos');
+        const agendamentos = await response.json();
 
-    const tabela = document.getElementById('tabela-agendamentos');
-    tabela.innerHTML = ''; // limpa antes de recarregar
-
-    agendamentos.forEach(ag => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${ag.id}</td>
-        <td>${ag.nome}</td>
-        <td>${new Date(ag.data).toLocaleString('pt-BR')}</td>
-        <td>${ag.tipo_terapia}</td>
-        <td>${ag.status_pagamento}</td>
-      `;
-      tabela.appendChild(tr);
-    });
-  } catch (error) {
-    console.error('Erro ao carregar agendamentos:', error);
-  }
-}
+        const tabela = document.getElementById('tabela-agendamentos');
+        if (tabela) {
+          tabela.innerHTML = '';
+          agendamentos.forEach(ag => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${ag.id}</td>
+              <td>${ag.nome}</td>
+              <td>${new Date(ag.data).toLocaleString('pt-BR')}</td>
+              <td>${ag.tipo_terapia}</td>
+              <td>${ag.status_pagamento}</td>
+            `;
+            tabela.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar agendamentos:', error);
+      }
+    }
 
     async function deletarPaciente(id) {
-  if (confirm('Deseja realmente excluir este paciente?')) {
-    await fetch(`/api/${id}`, { method: 'DELETE' });
+      if (confirm('Deseja realmente excluir este paciente?')) {
+        await fetch(`/api/${id}`, { method: 'DELETE' });
 
-    // Atualiza lista de pacientes
-    carregarPacientes();
+        carregarPacientes();
 
-    // Atualiza lista de agendamentos (se estiver na mesma página)
-    if (typeof carregarAgendamentos === "function") {
-        carregarAgendamentos();
+        if (typeof carregarAgendamentos === "function") {
+          carregarAgendamentos();
+        }
+      }
     }
-  }
-}
-
 
     document.getElementById('cancelarEdicao').addEventListener('click', () => {
       document.getElementById('formPaciente').reset();

@@ -25,10 +25,9 @@ async function atualizarPaciente(id, paciente) {
         'UPDATE pacientes SET nome = ?, email = ?, telefone = ?, data_nascimento = ?, historico = ? WHERE id = ?',
         [nome, email, telefone, data_nascimento, historico, id]
     );
-    return result;
+    return result.affectedRows; // Retorna o número de linhas afetadas
 }
 
-// pacienteModel.js
 async function deletarPaciente(id) {
     const conn = await db.getConnection();
     try {
@@ -37,19 +36,18 @@ async function deletarPaciente(id) {
         // Apaga agendamentos desse paciente
         await conn.query('DELETE FROM agendamentos WHERE paciente_id = ?', [id]);
 
-        // Apaga o paciente
-        await conn.query('DELETE FROM pacientes WHERE id = ?', [id]);
+        // Apaga o paciente e captura o resultado
+        const [result] = await conn.query('DELETE FROM pacientes WHERE id = ?', [id]);
 
         await conn.commit();
         conn.release();
-        return { sucesso: true };
+        return result.affectedRows; // Retorna o número de linhas afetadas pela exclusão do paciente
     } catch (err) {
         await conn.rollback();
         conn.release();
         throw err;
     }
 }
-
 
 module.exports = {
     getTodosPacientes,

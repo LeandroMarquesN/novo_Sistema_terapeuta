@@ -1,49 +1,53 @@
 CREATE DATABASE IF NOT EXISTS terapia_system;
 USE terapia_system;
 
--- Tabela de Pacientes
-CREATE TABLE pacientes (
+-- Tabela de Pacientes (com nova coluna para foto de perfil)
+CREATE TABLE IF NOT EXISTS pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(100),
+  nome VARCHAR(100) NOT NULL,
   email VARCHAR(100),
   telefone VARCHAR(20),
   data_nascimento DATE,
   historico TEXT,
+  foto_perfil VARCHAR(255), -- Nova coluna para o caminho da foto de perfil do paciente
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabela de Agendamentos (agora totalmente consistente com o frontend)
-CREATE TABLE agendamentos (
+-- Tabela de Agendamentos (com colunas email e telefone, e sem anexo singular)
+CREATE TABLE IF NOT EXISTS agendamentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   paciente_id INT NOT NULL,
-  nome VARCHAR(100),
+  nome VARCHAR(100), -- Mantido como snapshot do nome no momento do agendamento
   data_agendamento DATETIME NOT NULL,
   tipo_terapia VARCHAR(100),
   observacoes TEXT,
   status_pagamento ENUM('pendente', 'pago') DEFAULT 'pendente',
-  peso DECIMAL(5, 2),
-  altura DECIMAL(4, 2),
-  data_nascimento DATE,
-  idade INT,
-  tipo_sanguineo VARCHAR(5),
-  motivo_consulta TEXT, -- Corresponde a 'motivo' do formulário
-  origem_indicacao VARCHAR(100), -- Corresponde a 'origem' do formulário
+  peso DECIMAL(5, 2), -- Mantido como snapshot
+  altura DECIMAL(4, 2), -- Mantido como snapshot
+  data_nascimento DATE, -- Mantido como snapshot
+  idade INT, -- Mantido como snapshot
+  tipo_sanguineo VARCHAR(5), -- Mantido como snapshot
+  motivo_consulta TEXT,
+  origem_indicacao VARCHAR(100),
   condicoes TEXT,
-  anexo VARCHAR(255),
+  email VARCHAR(100),    -- Nova coluna para email do paciente no agendamento
+  telefone VARCHAR(20),  -- Nova coluna para telefone do paciente no agendamento
+  -- Removida a coluna 'anexo' singular, agora substituída pela tabela 'anexos'
   FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
 );
 
 -- Tabela de Atendimentos
-CREATE TABLE atendimentos (
+CREATE TABLE IF NOT EXISTS atendimentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   paciente_id INT,
   data DATETIME,
   descricao TEXT,
-  FOREIGN KEY (paciente_id) REFERENCES pacientes(id)
+  FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
 );
 
--- Tabela de Testes Energéticos
-CREATE TABLE testes_energeticos (
+
+-- Tabela de Testes Energéticos (mantida como está)
+CREATE TABLE IF NOT EXISTS testes_energeticos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   paciente_id INT,
   data DATETIME,
@@ -54,13 +58,25 @@ CREATE TABLE testes_energeticos (
   FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
 );
 
--- Tabela de Usuários
-CREATE TABLE usuarios (
+-- Tabela de Anexos (Nova tabela para gerenciar múltiplos arquivos por agendamento)
+CREATE TABLE IF NOT EXISTS anexos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  agendamento_id INT NOT NULL,
+  nome_original VARCHAR(255) NOT NULL,
+  caminho_servidor VARCHAR(255) NOT NULL, -- Caminho do arquivo no servidor (ex: uploads/12345-exame.pdf)
+  mime_type VARCHAR(100), -- Tipo MIME do arquivo (ex: image/jpeg, application/pdf)
+  tamanho_bytes BIGINT, -- Tamanho do arquivo em bytes
+  data_upload TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
+);
+
+-- Tabela de Usuários (mantida como está)
+CREATE TABLE IF NOT EXISTS usuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome VARCHAR(100) NOT NULL,
   senha VARCHAR(100) NOT NULL
 );
 
--- Inserindo terapeuta padrão
-INSERT INTO usuarios (nome, senha)
+-- Inserindo terapeuta padrão (mantido como está)
+INSERT IGNORE INTO usuarios (nome, senha)
 VALUES ('karla', 'leandro');

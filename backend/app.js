@@ -15,7 +15,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/agendamentos', agendamentoRoutes);
-app.use('/api', pacienteRoutes);
+app.use('/api/pacientes', pacienteRoutes); // <<-- Rota corrigida
 app.use('/api/usuarios', usuarioRoutes);
 
 // Servir arquivos estáticos

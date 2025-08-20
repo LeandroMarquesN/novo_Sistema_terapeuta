@@ -7,6 +7,7 @@ exports.listarPacientes = async (req, res) => {
     const pacientes = await pacienteModel.getTodosPacientes();
     res.json(pacientes);
   } catch (err) {
+    console.error('Erro ao buscar pacientes:', err);
     res.status(500).json({ erro: 'Erro ao buscar pacientes' });
   }
 };
@@ -19,6 +20,7 @@ exports.buscarPaciente = async (req, res) => {
     }
     res.json(paciente);
   } catch (err) {
+    console.error('Erro ao buscar paciente:', err);
     res.status(500).json({ erro: 'Erro ao buscar paciente' });
   }
 };
@@ -28,67 +30,33 @@ exports.criarPaciente = async (req, res) => {
     const novoPacienteId = await pacienteModel.adicionarPaciente(req.body);
     res.status(201).json({ id: novoPacienteId });
   } catch (err) {
+    console.error('Erro ao adicionar paciente:', err);
     res.status(500).json({ erro: 'Erro ao adicionar paciente' });
   }
 };
 
 exports.atualizarPaciente = async (req, res) => {
   try {
-    await pacienteModel.atualizarPaciente(req.params.id, req.body);
+    const pacienteAtualizado = await pacienteModel.atualizarPaciente(req.params.id, req.body);
+    if (pacienteAtualizado === 0) {
+      return res.status(404).json({ erro: 'Paciente não encontrado' });
+    }
     res.json({ mensagem: 'Paciente atualizado com sucesso' });
   } catch (err) {
+    console.error('Erro ao atualizar paciente:', err);
     res.status(500).json({ erro: 'Erro ao atualizar paciente' });
   }
 };
 
 exports.deletarPaciente = async (req, res) => {
   try {
-    await pacienteModel.deletarPaciente(req.params.id);
+    const pacienteDeletado = await pacienteModel.deletarPaciente(req.params.id);
+    if (pacienteDeletado === 0) {
+      return res.status(404).json({ erro: 'Paciente não encontrado' });
+    }
     res.json({ mensagem: 'Paciente deletado com sucesso' });
   } catch (err) {
+    console.error('Erro ao deletar paciente:', err);
     res.status(500).json({ erro: 'Erro ao deletar paciente' });
   }
 };
-
-
-//----ALTERAÇÃO NECESSÁRIA: adicionar criarPacienteComAgendamento no pacienteController.js
-
-exports.criarPacienteComAgendamento = async (req, res) => {
-  const {
-    nome, email, telefone, data_nascimento, historico,
-    data_agendamento, tipo_terapia, observacoes, status_pagamento, peso
-  } = req.body;
-
-  const conn = await db.getConnection(); // Para garantir transação segura
-
-  try {
-    await conn.beginTransaction();
-
-    // 1. Inserir paciente
-    const [pacienteResult] = await conn.query(`
-      INSERT INTO pacientes (nome, email, telefone, data_nascimento, historico)
-      VALUES (?, ?, ?, ?, ?)`,
-      [nome, email, telefone, data_nascimento, historico]
-    );
-
-    const pacienteId = pacienteResult.insertId;
-
-    // 2. Inserir agendamento com o paciente_id
-    await conn.query(`
-      INSERT INTO agendamentos (paciente_id, data_agendamento, tipo_terapia, observacoes, status_pagamento, peso)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [pacienteId, data_agendamento, tipo_terapia, observacoes, status_pagamento, peso]
-    );
-
-    await conn.commit();
-    conn.release();
-
-    res.status(201).json({ mensagem: 'Paciente e agendamento criados com sucesso!', pacienteId });
-  } catch (err) {
-    await conn.rollback();
-    conn.release();
-    console.error(err);
-    res.status(500).json({ erro: 'Erro ao criar paciente e agendamento' });
-  }
-};
-
