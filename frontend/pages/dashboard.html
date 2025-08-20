@@ -559,56 +559,59 @@
       modalVisualizarAnexo.show();
     }
 
-    function abrirModalPaciente(agendamentoJson) {
-        try {
-            const agendamento = JSON.parse(agendamentoJson);
+    // --- Nova versão da função `abrirModalPaciente` ---
+function abrirModalPaciente(agendamentoJson) {
+    try {
+        const agendamento = JSON.parse(agendamentoJson);
 
-            console.log('Anexos do agendamento:', agendamento.anexos);
+        // ADICIONE ESTE LOG PARA VERIFICAR O NOVO VALOR DOS ANEXOS ENVIADO PELO BACKEND
+        console.log('Anexos do agendamento:', agendamento.anexos);
 
-            const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
+        const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
 
-            document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
-            document.getElementById('infoDataNascimento').textContent = agendamento.data_nascimento ? new Date(agendamento.data_nascimento).toLocaleDateString('pt-BR') : 'N/A';
-            document.getElementById('infoIdade').textContent = agendamento.idade || 'N/A';
-            document.getElementById('infoPeso').textContent = agendamento.peso ? `${agendamento.peso} kg` : 'N/A';
-            document.getElementById('infoAltura').textContent = agendamento.altura ? `${agendamento.altura} cm` : 'N/A';
-            document.getElementById('infoTipoSanguineo').textContent = agendamento.tipo_sanguineo || 'N/A';
-            document.getElementById('infoTipoTerapia').textContent = agendamento.tipo_terapia || 'N/A';
-            document.getElementById('infoMotivoConsulta').textContent = agendamento.motivo_consulta || 'N/A';
-            document.getElementById('infoOrigemIndicacao').textContent = agendamento.origem_indicacao || 'N/A';
-            document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
-            document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
+        document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
+        document.getElementById('infoDataNascimento').textContent = agendamento.data_nascimento ? new Date(agendamento.data_nascimento).toLocaleDateString('pt-BR') : 'N/A';
+        document.getElementById('infoIdade').textContent = agendamento.idade || 'N/A';
+        document.getElementById('infoPeso').textContent = agendamento.peso ? `${agendamento.peso} kg` : 'N/A';
+        document.getElementById('infoAltura').textContent = agendamento.altura ? `${agendamento.altura} cm` : 'N/A';
+        document.getElementById('infoTipoSanguineo').textContent = agendamento.tipo_sanguineo || 'N/A';
+        document.getElementById('infoTipoTerapia').textContent = agendamento.tipo_terapia || 'N/A';
+        document.getElementById('infoMotivoConsulta').textContent = agendamento.motivo_consulta || 'N/A';
+        document.getElementById('infoOrigemIndicacao').textContent = agendamento.origem_indicacao || 'N/A';
+        document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
+        document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
 
-            // Lógica CORRIGIDA para exibir os anexos
-            const infoAnexo = document.getElementById('infoAnexo');
-            infoAnexo.innerHTML = ''; // Limpa o conteúdo anterior
+        // Lógica CORRIGIDA para exibir os anexos
+        const infoAnexo = document.getElementById('infoAnexo');
+        infoAnexo.innerHTML = ''; // Limpa o conteúdo anterior
 
-            // Verifica se a propriedade 'anexos' existe e se tem pelo menos um item
-            if (agendamento.anexos && agendamento.anexos.length > 0) {
-                // Itera sobre o array de anexos para criar um link para cada um
-                agendamento.anexos.forEach(anexo => {
-                    const divAnexo = document.createElement('div');
-                    divAnexo.innerHTML = `<a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a>`;
-                    infoAnexo.appendChild(divAnexo);
-                });
-            } else {
-                infoAnexo.textContent = 'N/A';
-            }
-
-            const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+        // Verifica se a propriedade 'anexos' existe e se tem pelo menos um item
+        if (agendamento.anexos && agendamento.anexos.length > 0) {
+            // Itera sobre o array de anexos para criar um link para cada um
+            agendamento.anexos.forEach(anexo => {
+                const divAnexo = document.createElement('div');
+                divAnexo.innerHTML = `<a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a>`;
+                infoAnexo.appendChild(divAnexo);
             });
-            document.getElementById('infoDataAgendamento').textContent = dataFormatada;
-
-            modalPaciente.show();
-        } catch (e) {
-            console.error('Erro ao abrir modal do paciente:', e);
+        } else {
+            infoAnexo.textContent = 'N/A';
         }
+
+        const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('infoDataAgendamento').textContent = dataFormatada;
+
+        modalPaciente.show();
+    } catch (e) {
+        console.error('Erro ao abrir modal do paciente:', e);
     }
+}
+// ..
 
     async function carregarTabelaAgendamentos() {
       const tabelaBody = document.getElementById('tabelaAgendamentos');
@@ -633,4 +636,97 @@
           return;
         }
 
-        const proximosAgendamentos = agendamentosFuturos
+        const proximosAgendamentos = agendamentosFuturos.slice(0, 10);
+
+        proximosAgendamentos.forEach(agendamento => {
+          const tr = document.createElement('tr');
+          const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          tr.setAttribute('onclick', `abrirModalPaciente(JSON.stringify(${JSON.stringify(agendamento)}))`);
+          tr.innerHTML = `
+            <td>${agendamento.nome || 'N/A'}</td>
+            <td>${dataFormatada}</td>
+            <td>${agendamento.tipo_terapia || 'N/A'}</td>
+          `;
+          tabelaBody.appendChild(tr);
+        });
+
+        mostrarModalPrimeiroAtendimento(agendamentosFuturos);
+      } catch (erro) {
+        console.error('Erro ao carregar agendamentos para a tabela:', erro);
+        tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Erro ao carregar a lista de agendamentos.</td></tr>`;
+        mostrarModalLuas();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      carregarTabelaAgendamentos();
+
+      // Lógica do botão de Maximizar/Restaurar do modal de anexo
+      const maximizeBtn = document.getElementById('maximizeAnexoBtn');
+      const dialog = document.getElementById('dialogVisualizarAnexo');
+      const icon = maximizeBtn.querySelector('i');
+
+      if (maximizeBtn) {
+        maximizeBtn.addEventListener('click', () => {
+          dialog.classList.toggle('modal-fullscreen');
+          if (dialog.classList.contains('modal-fullscreen')) {
+            icon.classList.remove('fa-expand-arrows-alt');
+            icon.classList.add('fa-compress-arrows-alt');
+            maximizeBtn.title = "Restaurar";
+          } else {
+            icon.classList.remove('fa-compress-arrows-alt');
+            icon.classList.add('fa-expand-arrows-alt');
+            maximizeBtn.title = "Maximizar";
+          }
+        });
+      }
+
+      // Lógica para mostrar/esconder o botão de voltar ao topo
+      const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+      window.onscroll = function() {
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+          scrollToTopBtn.classList.add("show");
+        } else {
+          scrollToTopBtn.classList.remove("show");
+        }
+      };
+
+      // Lógica do Modo Escuro (CORRIGIDA)
+      const themeToggleBtn = document.getElementById('theme-toggle-btn');
+      const body = document.body;
+      const currentTheme = localStorage.getItem('theme');
+
+      function applyTheme(theme) {
+          if (theme === 'dark') {
+              body.classList.add('dark-mode');
+              themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+              themeToggleBtn.classList.remove('btn-outline-dark');
+              themeToggleBtn.classList.add('btn-outline-light');
+          } else {
+              body.classList.remove('dark-mode');
+              themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+              themeToggleBtn.classList.remove('btn-outline-light');
+              themeToggleBtn.classList.add('btn-outline-dark');
+          }
+      }
+
+      if (currentTheme) {
+          applyTheme(currentTheme);
+      }
+
+      themeToggleBtn.addEventListener('click', () => {
+          const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+          applyTheme(newTheme);
+          localStorage.setItem('theme', newTheme);
+      });
+    });
+  </script>
+</body>
+</html>
