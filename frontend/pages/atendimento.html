@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atendimento ao Paciente</title>
+
+    <!-- Bootstrap CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <!-- Font Awesome para ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- CSS Externo para Animação de Fundo e Transição de Tela -->
+    <link rel="stylesheet" href="/css/animacaoBack.css">
+    <link rel="stylesheet" href="/css/transicaoTela.css">
+
+    <style>
+        /* Variáveis de Cores e Fontes (adaptadas para Bootstrap) */
+        :root {
+            --primary-color: #0d6efd; /* Bootstrap primary blue */
+            --secondary-color: #6c757d; /* Bootstrap secondary gray */
+            --background-color: #f8f9fa; /* Bootstrap light background */
+            --card-background: #ffffff; /* White for cards */
+            --border-color: #dee2e6; /* Bootstrap border color */
+            --text-color: #212529; /* Bootstrap dark text */
+            --light-text-color: #6c757d; /* Bootstrap muted text */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif; /* Mantendo Inter como solicitado */
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            margin-top: 80px; /* Ajuste para o cabeçalho fixo */
+        }
+
+        /* Custom styles for the navbar to match user's provided structure */
+        .navbar.bg-transparente {
+            background-color: var(--card-background) !important; /* Force white background */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .navbar-brand .logo-img {
+            color: var(--primary-color);
+            font-weight: bold;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .navbar-brand .logo-img:hover {
+            color: #0a58ca; /* Darker blue on hover */
+        }
+
+        /* Container principal para Sidebar e Main Content */
+        .page-container {
+            display: flex;
+            min-height: calc(100vh - 80px); /* 80px da altura da navbar */
+        }
+
+        /* Menu Lateral (Sidebar) */
+        .sidebar {
+            width: 250px;
+            background-color: var(--card-background);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            flex-shrink: 0;
+        }
+        .sidebar-title {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-button {
+            width: 100%;
+            text-align: left;
+            background-color: transparent;
+            border: none;
+            padding: 12px 10px;
+            font-size: 1rem;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+        }
+        .sidebar-button i {
+            margin-right: 10px;
+        }
+        .sidebar-button:hover {
+            background-color: var(--primary-color);
+            color: #fff;
+        }
+
+        /* Conteúdo Principal (Main Content) */
+        .main-content {
+            flex-grow: 1;
+            padding: 30px;
+        }
+        section {
+            background-color: var(--card-background);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        h2, h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+        #anotacoes {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        .exames-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .exame-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .exame-input-group label {
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .exame-input-group input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+        }
+
+        /* Responsividade para a Navbar e Layout geral */
+        @media (max-width: 768px) {
+            .navbar .container-fluid {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .navbar-brand {
+                margin-bottom: 10px;
+            }
+            .navbar-buttons {
+                width: 100%;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                margin-top: 10px;
+            }
+            .navbar-buttons .btn {
+                margin-bottom: 5px;
+                margin-right: 5px !important;
+                margin-left: 5px !important;
+            }
+            body {
+                margin-top: 150px; /* Ajuste para o header colapsado */
+            }
+            .page-container {
+                flex-direction: column;
+                min-height: auto;
+            }
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+            .sidebar-menu {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            .sidebar-button {
+                flex: 1 1 auto;
+                width: auto;
+                text-align: center;
+                justify-content: center; /* Center icon and text */
+            }
+            .main-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Cabeçalho (Navbar) -->
+    <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <!-- Substitua 'sua-logo.png' pela sua imagem de logo -->
+                <img src="https://placehold.co/40x40/0d6efd/ffffff?text=LOGO" alt="Logo do Sistema" class="h-10 w-10 me-2 rounded-circle">
+                <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
+            </a>
+            <div class="navbar-buttons d-flex align-items-center">
+                <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
+                <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+                <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+                <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
+                <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-container">
+        <!-- Menu Lateral (Sidebar) -->
+        <aside class="sidebar">
+            <h3 class="sidebar-title">Ações do Atendimento</h3>
+            <ul class="sidebar-menu">
+                <li><button id="btn-salvar" class="sidebar-button"><i class="fas fa-save"></i> Salvar Atendimento</button></li>
+                <li><button id="btn-anexar" class="sidebar-button"><i class="fas fa-paperclip"></i> Anexar Exames</button></li>
+                <li><button id="btn-historico" class="sidebar-button"><i class="fas fa-history"></i> Ver Histórico</button></li>
+                <li><button id="btn-imprimir" class="sidebar-button"><i class="fas fa-print"></i> Imprimir</button></li>
+            </ul>
+        </aside>
+
+        <!-- Conteúdo Principal (Main Content) -->
+        <main class="main-content">
+            <section class="mb-4">
+                <h2>Detalhes do Atendimento</h2>
+                <div id="patient-data" class="text-secondary">
+                    <p>Selecione um agendamento para iniciar o atendimento.</p>
+                </div>
+            </section>
+
+            <section class="mb-4">
+                <h3>Anotações do Atendimento</h3>
+                <textarea id="anotacoes" class="form-control" rows="10" placeholder="Anote aqui as informações do atendimento, observações, evolução, etc."></textarea>
+            </section>
+
+            <section>
+                <h3>Resultados de Exames para Comparativo</h3>
+                <div class="exames-grid">
+                    <div class="exame-input-group">
+                        <label for="exame1">CA 125:</label>
+                        <input type="text" id="exame1" class="form-control" placeholder="Valor do Exame (ex: 25 U/mL)">
+                        <input type="date" id="exame1-data" class="form-control mt-2" placeholder="Data do Exame">
+                    </div>
+                    <div class="exame-input-group">
+                        <label for="exame2">Glicemia:</label>
+                        <input type="text" id="exame2" class="form-control" placeholder="Valor do Exame (ex: 90 mg/dL)">
+                        <input type="date" id="exame2-data" class="form-control mt-2" placeholder="Data do Exame">
+                    </div>
+                    <div class="exame-input-group">
+                        <label for="exame3">Colesterol Total:</label>
+                        <input type="text" id="exame3" class="form-control" placeholder="Valor do Exame (ex: 180 mg/dL)">
+                        <input type="date" id="exame3-data" class="form-control mt-2" placeholder="Data do Exame">
+                    </div>
+                    <div class="exame-input-group">
+                        <label for="exame4">Hemoglobina Glicada (HbA1c):</label>
+                        <input type="text" id="exame4" class="form-control" placeholder="Valor do Exame (ex: 5.5 %)">
+                        <input type="date" id="exame4-data" class="form-control mt-2" placeholder="Data do Exame">
+                    </div>
+                    <!-- Adicione mais campos de exame aqui conforme a necessidade -->
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Bootstrap JS CDN (incluindo Popper.js, necessário para alguns componentes) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Função para buscar e exibir os dados de um agendamento
+            async function loadAppointmentData(appointmentId) {
+                try {
+                    // Este é um exemplo de endpoint. Você precisará implementar
+                    // uma rota no seu backend (ex: /api/atendimento/:id) que
+                    // retorne os dados do paciente e agendamento.
+                    const response = await fetch(`/api/atendimento/${appointmentId}`);
+                    if (!response.ok) {
+                        throw new Error('Erro ao carregar os dados do agendamento.');
+                    }
+                    const data = await response.json();
+
+                    // Exibe as informações do paciente
+                    const patientDataElement = document.getElementById('patient-data');
+                    patientDataElement.innerHTML = `
+                        <p class="fs-5 mb-2"><strong class="fw-bold">Nome:</strong> ${data.paciente.nome}</p>
+                        <p class="mb-2"><strong class="fw-medium">Email:</strong> ${data.paciente.email}</p>
+                        <p class="mb-2"><strong class="fw-medium">Data de Nascimento:</strong> ${new Date(data.paciente.data_nascimento).toLocaleDateString()}</p>
+                        <p class="mb-2"><strong class="fw-medium">Agendamento:</strong> ${new Date(data.agendamento.data_agendamento).toLocaleString()}</p>
+                        <p class="mb-2"><strong class="fw-medium">Motivo da Consulta:</strong> ${data.agendamento.motivo_consulta || 'Não informado'}</p>
+                        <p class="mb-2"><strong class="fw-medium">Condições:</strong> ${data.agendamento.condicoes || 'Não informado'}</p>
+                    `;
+
+                    // Preenche o campo de anotações com dados do agendamento (se existirem)
+                    document.getElementById('anotacoes').value = data.agendamento.observacoes || '';
+
+                    // Exemplo de como preencher resultados de exames (se viessem do backend)
+                    // if (data.exames && data.exames.length > 0) {
+                    //     data.exames.forEach(exame => {
+                    //         if (exame.nome === 'CA 125' && document.getElementById('exame1')) {
+                    //             document.getElementById('exame1').value = exame.valor;
+                    //             document.getElementById('exame1-data').value = exame.data;
+                    //         }
+                    //         // ... para outros exames
+                    //     });
+                    // }
+
+                } catch (error) {
+                    console.error('Falha ao carregar dados:', error);
+                    document.getElementById('patient-data').innerHTML = `<p class="text-danger fw-bold">${error.message}. Por favor, verifique o console para mais detalhes.</p>`;
+                }
+            }
+
+            // Exemplo de como você poderia usar a função (ao clicar em um agendamento na lista)
+            // Supondo que você tenha uma lista de agendamentos em outra página,
+            // o ID do agendamento seria passado via URL, por exemplo: atendimento.html?id=123
+            const urlParams = new URLSearchParams(window.location.search);
+            const agendamentoId = urlParams.get('id');
+
+            if (agendamentoId) {
+                loadAppointmentData(agendamentoId);
+            } else {
+                console.log('Nenhum agendamento selecionado. Carregando dados de exemplo.');
+                // Dados de exemplo caso nenhum ID seja passado
+                document.getElementById('patient-data').innerHTML = `
+                    <p class="fs-5 mb-2"><strong class="fw-bold">Nome:</strong> João da Silva</p>
+                    <p class="mb-2"><strong class="fw-medium">Email:</strong> joao.silva@example.com</p>
+                    <p class="mb-2"><strong class="fw-medium">Data de Nascimento:</strong> 15/03/1985</p>
+                    <p class="mb-2"><strong class="fw-medium">Agendamento:</strong> 25/08/2025 14:00</p>
+                    <p class="mb-2"><strong class="fw-medium">Motivo da Consulta:</strong> Dor nas costas crônica</p>
+                    <p class="mb-2"><strong class="fw-medium">Condições:</strong> Sedentarismo, histórico familiar de hérnia de disco</p>
+                `;
+            }
+
+            // Lógica para o botão "Salvar Atendimento"
+            document.getElementById('btn-salvar').addEventListener('click', () => {
+                const anotacoes = document.getElementById('anotacoes').value;
+                const exame1 = document.getElementById('exame1').value;
+                const exame1Data = document.getElementById('exame1-data').value;
+                const exame2 = document.getElementById('exame2').value;
+                const exame2Data = document.getElementById('exame2-data').value;
+                const exame3 = document.getElementById('exame3').value;
+                const exame3Data = document.getElementById('exame3-data').value;
+                const exame4 = document.getElementById('exame4').value;
+                const exame4Data = document.getElementById('exame4-data').value;
+
+                const dadosAtendimento = {
+                    agendamentoId: agendamentoId, // Será null se nenhum ID for passado
+                    anotacoes: anotacoes,
+                    exames: [
+                        { nome: 'CA 125', valor: exame1, data: exame1Data },
+                        { nome: 'Glicemia', valor: exame2, data: exame2Data },
+                        { nome: 'Colesterol Total', valor: exame3, data: exame3Data },
+                        { nome: 'Hemoglobina Glicada', valor: exame4, data: exame4Data }
+                    ]
+                };
+
+                // Exemplo de como enviar os dados para o seu backend
+                console.log('Dados do Atendimento a serem salvos:', dadosAtendimento);
+                // Você precisará implementar o endpoint /api/salvar-atendimento no seu servidor
+                // fetch('/api/salvar-atendimento', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(dadosAtendimento)
+                // }).then(response => response.json())
+                //   .then(data => {
+                //       console.log('Atendimento salvo com sucesso!', data);
+                //       // Substitua alert() por uma modal customizada
+                //       // alert('Atendimento salvo com sucesso!');
+                //   }).catch(error => {
+                //       console.error('Erro ao salvar o atendimento:', error);
+                //       // Substitua alert() por uma modal customizada
+                //       // alert('Erro ao salvar o atendimento.');
+                //   });
+
+                // Exemplo de feedback temporário sem backend
+                // console.log('Atendimento salvo (simulado)! Verifique o console para os dados.');
+            });
+
+            // Lógica para alternar tema (claro/escuro)
+            document.getElementById('theme-toggle-btn').addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                // Você pode armazenar a preferência do usuário em localStorage
+                // if (document.body.classList.contains('dark-theme')) {
+                //     localStorage.setItem('theme', 'dark');
+                // } else {
+                //     localStorage.setItem('theme', 'light');
+                // }
+            });
+
+            // Carrega o tema preferido do usuário (se houver)
+            // if (localStorage.getItem('theme') === 'dark') {
+            //     document.body.classList.add('dark-theme');
+            // }
+
+            // Lógica para os botões do menu lateral (simulação)
+            document.getElementById('btn-anexar').addEventListener('click', () => {
+                console.log('Botão "Anexar Exames" clicado.');
+                // Aqui você pode abrir uma modal para upload de arquivos
+            });
+
+            document.getElementById('btn-historico').addEventListener('click', () => {
+                console.log('Botão "Ver Histórico" clicado.');
+                // Aqui você pode redirecionar para a página de histórico do paciente ou abrir uma modal
+            });
+
+            document.getElementById('btn-imprimir').addEventListener('click', () => {
+                console.log('Botão "Imprimir" clicado.');
+                window.print(); // Abre a caixa de diálogo de impressão do navegador
+            });
+
+        });
+    </script>
+</body>
+</html>
