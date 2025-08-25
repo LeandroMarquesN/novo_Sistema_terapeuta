@@ -38,7 +38,7 @@ const storage = multer.diskStorage({
 // A diferença crucial: usamos .fields() para lidar com múltiplos campos de arquivo.
 // O array de objetos especifica o nome de cada campo do formulário e o número máximo de arquivos.
 const upload = multer({ storage: storage }).fields([
-  { name: 'anexos', maxCount: 10 },
+  { name: 'anexos', maxCount: 50 },
   { name: 'patient_photo', maxCount: 1 }
 ]);
 
