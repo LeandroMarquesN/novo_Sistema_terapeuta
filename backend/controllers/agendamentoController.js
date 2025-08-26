@@ -93,13 +93,6 @@ exports.criarAgendamento = async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    const valoresAgendamento = [
-      paciente_id, nome, data_agendamento, tipo_terapia, observacoes || null, 'pendente',
-      peso || null, altura || null, tipo_sanguineo || null, motivo_consulta || null, origem_indicacao || null,
-      condicoesString || null, email || null, telefone || null
-    ];
-
-    // Ajusta valoresAgendamento
     const valoresAgendamentoFinal = [
       paciente_id, nome, data_agendamento, tipo_terapia, observacoes || null,
       'pendente', peso || null, altura || null, data_nascimento || null, idade || null, tipo_sanguineo || null,
@@ -374,18 +367,19 @@ exports.reagendarAgendamento = async (req, res) => {
     }
 
     // ==============================================================================================
-    // TRECHO A SER DESCOMENTADO E AJUSTADO:
+    // Busca dados do agendamento para a notificação ANTES do commit
     // ==============================================================================================
     const [agendamento] = await connection.query(
       'SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ?',
       [agendamentoId]
     );
 
+    await connection.commit(); // Commit agora que sabemos que o update foi bem-sucedido
+    res.status(200).json({ mensagem: 'Agendamento reagendado com sucesso!' });
+
+    // Envia a notificação após o commit e a resposta
     if (agendamento.length > 0) {
       const { nome, email, telefone, tipo_terapia } = agendamento[0];
-
-      await connection.commit();
-      res.status(200).json({ mensagem: 'Agendamento reagendado com sucesso!' });
 
       if (email) {
         notificationService.sendEmailNotification({
@@ -404,10 +398,6 @@ exports.reagendarAgendamento = async (req, res) => {
           data_agendamento
         }, true);
       }
-    } else {
-      // Se não encontrar o agendamento para pegar os dados
-      await connection.rollback();
-      return res.status(404).json({ mensagem: 'Agendamento não encontrado para notificação.' });
     }
 
   } catch (err) {
