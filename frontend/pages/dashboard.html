@@ -1,727 +1,776 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css">
-  <link rel="stylesheet" href="/css/dashBordStyle.css">
-  <link rel="stylesheet" href="/css/animacaoBack.css">
-  <link rel="stylesheet" href="/css/maquinaEscrever.css">
-  <link rel="stylesheet" href="/css/transicaoTela.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/dashBordStyle.css">
+    <link rel="stylesheet" href="/css/animacaoBack.css">
+    <link rel="stylesheet" href="/css/maquinaEscrever.css">
+    <link rel="stylesheet" href="/css/transicaoTela.css">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-  <style>
-    /* Aplica a fonte Poppins a todo o corpo do documento */
-    body {
-        font-family: 'Poppins', sans-serif;
-    }
-
-    /* Estilização para o LOGO */
-    span.logo-img {
-      height: 280px;
-      width: 650px;
-      background-image: url('../logo/logoFinal.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: left;
-      display: inline-block;
-      text-indent: -9999px;
-      overflow: hidden;
-    }
-    .bg-transparente {
-      background-color: transparent !important;
-    }
-
-    /* ==================================== */
-    /* ESTILOS PARA O MODO ESCURO */
-    /* ==================================== */
-    body.dark-mode {
-        background-color: #121212 !important;
-        color: #e0e0e0;
-    }
-    .dark-mode .dashboard-box {
-        background-color: rgba(30, 30, 30, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .dark-mode .dashboard-box .table tbody tr:nth-of-type(even) {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-    }
-    .dark-mode .dashboard-box .table tbody tr:hover {
-        background-color: rgba(255, 255, 255, 0.2) !important;
-    }
-    .dark-mode .text-muted {
-        color: #a0a0a0 !important;
-    }
-    .dark-mode .modal-content {
-      background-color: #212529; /* Cor do fundo do modal no modo escuro */
-      color: #e0e0e0; /* Cor do texto no modal */
-    }
-    .dark-mode .modal-header,
-    .dark-mode .modal-footer {
-      border-color: #444; /* Borda mais escura para o modal */
-    }
-    .dark-mode .modal-title {
-        color: #fff;
-    }
-    .dark-mode .btn-close {
-        filter: invert(1); /* Inverte a cor do 'X' para ser visível no fundo escuro */
-    }
-    .dark-mode .fc-col-header-cell-cushion,
-    .dark-mode .fc-daygrid-day-number {
-        color: #e0e0e0;
-    }
-    .dark-mode .fc-theme-standard td,
-    .dark-mode .fc-theme-standard th {
-        border-color: #333 !important;
-    }
-    .dark-mode .fc-button-primary {
-        background-color: #333;
-        border-color: #555;
-        color: #e0e0e0;
-    }
-    .dark-mode .fc-button-primary:hover,
-    .dark-mode .fc-button-primary:not(:disabled):active {
-        background-color: #555;
-        border-color: #777;
-    }
-    .dark-mode .fc-toolbar-title {
-        color: #fff;
-    }
-
-    /* ==================================== */
-    /* ESTILOS GERAIS DA PAGINA E COMPONENTES */
-    /* ==================================== */
-
-    /* Estilo para as caixas com transparência e bordas arredondadas */
-    .dashboard-box {
-      background-color: rgba(10, 73, 140, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 1rem;
-      padding: 1.5rem;
-    }
-
-    .dashboard-box .table thead {
-        display: none;
-    }
-
-    .dashboard-box .table-striped > tbody > tr:nth-of-type(odd) {
-        background-color: transparent !important;
-    }
-
-    .dashboard-box .table-striped > tbody > tr:nth-of-type(even) {
-        background-color: rgba(255, 255, 255, 0.2) !important;
-    }
-
-    .dashboard-box .table tbody tr {
-        margin-bottom: 1rem;
-        border-radius: 0.5rem;
-        transition: transform 0.2s ease-in-out;
-        font-size: larger;
-        font-weight: 400;
-        border-top: none;
-    }
-
-    .dashboard-box .table tbody tr:hover {
-        background-color: #add8e6 !important;
-        transform: scale(1.02);
-        font-weight: bold;
-        cursor:pointer;
-    }
-
-    .dashboard-box .table tbody tr td {
-        border-top: none;
-        padding: 2rem;
-        text-align: center;
-    }
-
-    /* INÍCIO DAS MODIFICAÇÕES DO FULLCALENDAR */
-    .fc .fc-toolbar.fc-header-toolbar {
-      margin-bottom: 1.5em;
-      cursor:pointer;
-    }
-    .fc-toolbar-title {
-      font-size: 1.75em;
-      font-weight: 500;
-      color: #333;
-      cursor:pointer;
-    }
-    .fc .fc-button-primary {
-      background-color: transparent;
-      border: 3px solid #ccc;
-      color: #555;
-      font-weight: 500;
-      padding: 0.5rem 1rem;
-    }
-    .fc .fc-button-primary:hover,
-    .fc .fc-button-primary:not(:disabled):active {
-      background-color: #f0f0f0;
-      border-color: #bbb;
-      box-shadow: none;
-    }
-    .fc-theme-standard th {
-      font-weight: 600;
-      color: #6c757d;
-      background-color: transparent;
-      border: none;
-    }
-    .fc-daygrid-day-frame, .fc-daygrid-day {
-        border-radius: 0.5rem;
-        border: 1px solid #e9ecef;
-    }
-    .fc-event {
-      border: none;
-      font-size: 0.85rem;
-      padding: 3px 5px;
-      border-radius: 4px;
-    }
-    .fc-event[style*="background-color: rgb(25, 135, 84);"] {
-      background-color: #28a745 !important;
-      color: #fff;
-    }
-    .fc-event[style*="background-color: rgb(160, 196, 255);"] {
-      background-color: #a0c4ff !important;
-      color: #343a40;
-    }
-    .fc-event[style*="background-color: rgb(208, 191, 255);"] {
-      background-color: #d0bfff !important;
-      color: #343a40;
-    }
-
-    /* Estilização do botão de voltar ao topo */
-    #scrollToTopBtn {
-        display: none;
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 99;
-        border: none;
-        outline: none;
-        background-color: rgba(10, 73, 140, 0.7);
-        color: white;
-        cursor: pointer;
-        padding: 15px;
-        border-radius: 50%;
-        font-size: 18px;
-        transition: opacity 0.3s, transform 0.3s;
-        opacity: 0;
-        transform: scale(0);
-    }
-    #scrollToTopBtn.show {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    /* Ajustes para telas menores (responsividade) */
-    @media (max-width: 768px) {
-        span.logo-img {
-            height: 150px;
-            width: 350px;
-            background-position: center;
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
         }
-    }
-  </style>
 
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
+        span.logo-img {
+            height: 280px;
+            width: 650px;
+            background-image: url('../logo/logoFinal.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: left;
+            display: inline-block;
+            text-indent: -9999px;
+            overflow: hidden;
+        }
+        .bg-transparente {
+            background-color: transparent !important;
+        }
+
+        /* Estilização para a data e hora */
+        #data-hora-container {
+            font-size: 0.9rem;
+            color: #fff;
+            background-color: rgba(10, 73, 140, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            margin-right: 15px; /* Espaço entre a data/hora e os botões */
+        }
+
+        #data-hora-container i {
+            font-size: 1rem;
+        }
+
+        /* ==================================== */
+        /* ESTILOS PARA O MODO ESCURO */
+        /* ==================================== */
+        body.dark-mode {
+            background-color: #121212 !important;
+            color: #e0e0e0;
+        }
+        .dark-mode .dashboard-box {
+            background-color: rgba(30, 30, 30, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .dark-mode #data-hora-container {
+            background-color: rgba(50, 50, 50, 0.7);
+        }
+        .dark-mode .dashboard-box .table tbody tr:nth-of-type(even) {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        .dark-mode .dashboard-box .table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+        .dark-mode .text-muted {
+            color: #a0a0a0 !important;
+        }
+        .dark-mode .modal-content {
+            background-color: #212529;
+            color: #e0e0e0;
+        }
+        .dark-mode .modal-header,
+        .dark-mode .modal-footer {
+            border-color: #444;
+        }
+        .dark-mode .modal-title {
+            color: #fff;
+        }
+        .dark-mode .btn-close {
+            filter: invert(1);
+        }
+        .dark-mode .fc-col-header-cell-cushion,
+        .dark-mode .fc-daygrid-day-number {
+            color: #e0e0e0;
+        }
+        .dark-mode .fc-theme-standard td,
+        .dark-mode .fc-theme-standard th {
+            border-color: #333 !important;
+        }
+        .dark-mode .fc-button-primary {
+            background-color: #333;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        .dark-mode .fc-button-primary:hover,
+        .dark-mode .fc-button-primary:not(:disabled):active {
+            background-color: #555;
+            border-color: #777;
+        }
+        .dark-mode .fc-toolbar-title {
+            color: #fff;
+        }
+
+        /* ==================================== */
+        /* ESTILOS GERAIS DA PAGINA E COMPONENTES */
+        /* ==================================== */
+        .dashboard-box {
+            background-color: rgba(10, 73, 140, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+
+        .dashboard-box .table thead th {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            background-color: rgba(10, 73, 140, 0.8);
+            border: none;
+            text-align: center;
+        }
+
+        .dashboard-box .table thead {
+            display: table-header-group;
+        }
+
+        .dashboard-box .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: transparent !important;
+        }
+
+        .dashboard-box .table-striped > tbody > tr:nth-of-type(even) {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+        }
+
+        .dashboard-box .table tbody tr {
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            transition: transform 0.2s ease-in-out;
+            font-size: larger;
+            font-weight: 400;
+            border-top: none;
+        }
+
+        .dashboard-box .table tbody tr:hover {
+            background-color: #add8e6 !important;
+            transform: scale(1.02);
+            font-weight: bold;
+            cursor:pointer;
+        }
+
+        .dashboard-box .table tbody tr td {
+            border-top: none;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        /* INÍCIO DAS MODIFICAÇÕES DO FULLCALENDAR */
+        .fc .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 1.5em;
+            cursor:pointer;
+        }
+        .fc-toolbar-title {
+            font-size: 1.75em;
+            font-weight: 500;
+            color: #333;
+            cursor:pointer;
+        }
+        .fc .fc-button-primary {
+            background-color: transparent;
+            border: 3px solid #ccc;
+            color: #555;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+        }
+        .fc .fc-button-primary:hover,
+        .fc .fc-button-primary:not(:disabled):active {
+            background-color: #f0f0f0;
+            border-color: #bbb;
+            box-shadow: none;
+        }
+        .fc-theme-standard th {
+            font-weight: 600;
+            color: #6c757d;
+            background-color: transparent;
+            border: none;
+        }
+        .fc-daygrid-day-frame, .fc-daygrid-day {
+            border-radius: 0.5rem;
+            border: 1px solid #e9ecef;
+        }
+        .fc-event {
+            border: none;
+            font-size: 0.85rem;
+            padding: 3px 5px;
+            border-radius: 4px;
+        }
+        .fc-event[style*="background-color: rgb(25, 135, 84);"] {
+            background-color: #28a745 !important;
+            color: #fff;
+        }
+        .fc-event[style*="background-color: rgb(160, 196, 255);"] {
+            background-color: #a0c4ff !important;
+            color: #343a40;
+        }
+        .fc-event[style*="background-color: rgb(208, 191, 255);"] {
+            background-color: #d0bfff !important;
+            color: #343a40;
+        }
+
+        /* Estilização do botão de voltar ao topo */
+        #scrollToTopBtn {
+            display: none;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 99;
+            border: none;
+            outline: none;
+            background-color: rgba(10, 73, 140, 0.7);
+            color: white;
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 50%;
+            font-size: 18px;
+            transition: opacity 0.3s, transform 0.3s;
+            opacity: 0;
+            transform: scale(0);
+        }
+        #scrollToTopBtn.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Ajustes para telas menores (responsividade) */
+        @media (max-width: 768px) {
+            span.logo-img {
+                height: 150px;
+                width: 350px;
+                background-position: center;
+            }
+            #data-hora-container {
+                display: none; /* Esconde a data/hora em telas pequenas para economizar espaço */
+            }
+        }
+    </style>
+
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
 </head>
 
 <body>
 
-  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
-      </a>
+    <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
+            </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <div class="ms-auto d-flex align-items-center">
-            <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
-            <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
-            <a href="historico.html" class="btn btn-outline-secondary me-2">Histórico</a>
-            <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
-                <i class="fas fa-moon"></i>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
             </button>
-        </div>
-      </div>
-    </div>
-  </nav>
 
-  <div class="container-fluid mt-5">
-    <div class="text-center mb-4 fade-in-element">
-      <h1 id="boasVindas" class="fs-2 fw-bold">Bem-vinda!</h1>
-      <p class="fs-5">Você está logada no sistema do terapeuta!</p>
-    </div>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="ms-auto d-flex align-items-center">
+                    <div id="data-hora-container">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="data-hora"></span>
+                    </div>
 
-    <h1 class="text-center fs-5 fade-in-element">Próximos agendamentos:</h1>
-
-    <div class="dashboard-box mt-4 fade-in-element">
-      <div class="table-responsive">
-        <table class="table table-striped table-hover align-middle table-borderless">
-          <thead class="table-info">
-            <tr>
-              <th>Paciente</th>
-              <th>Data e Hora</th>
-              <th>Terapia</th>
-            </tr>
-          </thead>
-          <tbody id="tabelaAgendamentos">
-            <tr>
-              <td colspan="3" class="text-center text-muted">Carregando agendamentos...</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <div class="dashboard-box mt-4 fade-in-element">
-      <div id="calendar"></div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="modalAtendimento" tabindex="-1" aria-labelledby="modalAtendimentoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalAtendimentoLabel">Seu Primeiro Atendimento do Dia</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p id="mensagemAtendimento" class="fs-5"></p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="modalLuas" tabindex="-1" aria-labelledby="modalLuasLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalLuasLabel">Fases da Lua do Mês</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <p id="mensagemLuas" class="fs-5"></p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ok</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="modalPaciente" tabindex="-1" aria-labelledby="modalPacienteLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalPacienteLabel">Detalhes do Agendamento</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <div class="card mb-3">
-              <div class="card-body">
-                <h5 class="card-title">Informações do Paciente</h5>
-                <p class="card-text">
-                  <strong>Nome:</strong> <span id="infoNome"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Data de Nascimento:</strong> <span id="infoDataNascimento"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Idade:</strong> <span id="infoIdade"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Peso:</strong> <span id="infoPeso"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Altura:</strong> <span id="infoAltura"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Tipo Sanguíneo:</strong> <span id="infoTipoSanguineo"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Tipo de Terapia:</strong> <span id="infoTipoTerapia"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Data do Agendamento:</strong> <span id="infoDataAgendamento"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Motivo da Consulta:</strong> <span id="infoMotivoConsulta"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Origem da Indicação:</strong> <span id="infoOrigemIndicacao"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Observações:</strong> <span id="infoObservacoes"></span>
-                </p>
-                <p class="card-text">
-                  <strong>Condições de Saúde:</strong> <span id="infoCondicoes"></span>
-                </p>
-                <p class="card-text">
-                    <strong>Anexo:</strong> <span id="infoAnexo"></span>
-                </p>
-              </div>
+                    <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+                    <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+                    <a href="historico.html" class="btn btn-outline-secondary me-2">Histórico</a>
+                    <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                </div>
             </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-          </div>
-      </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-5">
+        <div class="text-center mb-4 fade-in-element">
+            <h1 id="boasVindas" class="fs-2 fw-bold">Bem-vinda!</h1>
+            <p class="fs-5">Você está logada no sistema do terapeuta!</p>
+        </div>
+
+        <h1 class="text-center fs-5 fade-in-element">Próximos agendamentos:</h1>
+
+        <div class="dashboard-box mt-4 fade-in-element">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle table-borderless">
+                    <thead class="table-info">
+                        <tr>
+                            <th>Paciente</th>
+                            <th>Data e Hora</th>
+                            <th>Terapia</th>
+                            <th class="text-center">Atender Paciente</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaAgendamentos">
+                        <tr>
+                            <td colspan="4" class="text-center text-muted">Carregando agendamentos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="dashboard-box mt-4 fade-in-element">
+            <div id="calendar"></div>
+        </div>
     </div>
-  </div>
 
-  <div class="modal fade" id="modalVisualizarAnexo" tabindex="-1" aria-labelledby="modalVisualizarAnexoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-centered" id="dialogVisualizarAnexo">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="modalVisualizarAnexoLabel">Visualizar Anexo</h5>
-          <div class="d-flex align-items-center">
-            <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="maximizeAnexoBtn" title="Maximizar">
-              <i class="fas fa-expand-arrows-alt"></i>
-            </button>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
+    <div class="modal fade" id="modalAtendimento" tabindex="-1" aria-labelledby="modalAtendimentoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAtendimentoLabel">Seu Primeiro Atendimento do Dia</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="mensagemAtendimento" class="fs-5"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
+                </div>
+            </div>
         </div>
-        <div class="modal-body text-center">
-          <div id="anexo-container" style="max-width: 100%; max-height: 80vh;"></div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-        </div>
-      </div>
     </div>
-  </div>
 
-  <button onclick="scrollToTop()" id="scrollToTopBtn" title="Voltar ao topo">
-    <i class="fas fa-arrow-up"></i>
-  </button>
+    <div class="modal fade" id="modalLuas" tabindex="-1" aria-labelledby="modalLuasLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalLuasLabel">Fases da Lua do Mês</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="mensagemLuas" class="fs-5"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ok</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <div class="modal fade" id="modalPaciente" tabindex="-1" aria-labelledby="modalPacienteLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalPacienteLabel">Detalhes do Agendamento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">Informações do Paciente</h5>
+                            <p class="card-text">
+                                <strong>Nome:</strong> <span id="infoNome"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Data de Nascimento:</strong> <span id="infoDataNascimento"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Idade:</strong> <span id="infoIdade"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Peso:</strong> <span id="infoPeso"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Altura:</strong> <span id="infoAltura"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Tipo Sanguíneo:</strong> <span id="infoTipoSanguineo"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Tipo de Terapia:</strong> <span id="infoTipoTerapia"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Data do Agendamento:</strong> <span id="infoDataAgendamento"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Motivo da Consulta:</strong> <span id="infoMotivoConsulta"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Origem da Indicação:</strong> <span id="infoOrigemIndicacao"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Observações:</strong> <span id="infoObservacoes"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Condições de Saúde:</strong> <span id="infoCondicoes"></span>
+                            </p>
+                            <p class="card-text">
+                                <strong>Anexo:</strong> <span id="infoAnexo"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <script>
-    const usuario = localStorage.getItem('usuarioLogado');
+    <div class="modal fade" id="modalVisualizarAnexo" tabindex="-1" aria-labelledby="modalVisualizarAnexoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered" id="dialogVisualizarAnexo">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalVisualizarAnexoLabel">Visualizar Anexo</h5>
+                    <div class="d-flex align-items-center">
+                        <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="maximizeAnexoBtn" title="Maximizar">
+                            <i class="fas fa-expand-arrows-alt"></i>
+                        </button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                </div>
+                <div class="modal-body text-center">
+                    <div id="anexo-container" style="max-width: 100%; max-height: 80vh;"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    function escreverTextoComMaquinaEscrever(texto, elementoId) {
-      const elemento = document.getElementById(elementoId);
-      elemento.textContent = "";
+    <button onclick="scrollToTop()" id="scrollToTopBtn" title="Voltar ao topo">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
-      let i = 0;
-      const intervalo = setInterval(() => {
-        if (i < texto.length) {
-            elemento.textContent += texto.charAt(i);
-            i++;
-        } else {
-            clearInterval(intervalo);
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const usuario = localStorage.getItem('usuarioLogado');
+
+        // Função para atualizar a data e hora em tempo real
+        function atualizarDataHora() {
+            const now = new Date();
+            const diaSemana = now.toLocaleDateString('pt-BR', { weekday: 'long' });
+            const dia = now.toLocaleDateString('pt-BR', { day: '2-digit' });
+            const mes = now.toLocaleDateString('pt-BR', { month: 'long' });
+            const ano = now.toLocaleDateString('pt-BR', { year: 'numeric' });
+            const hora = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+            document.getElementById('data-hora').textContent = `${diaSemana}, ${dia} de ${mes} de ${ano} - ${hora}`;
         }
-      }, 30);
-    }
 
-    if (usuario) {
-      const nomeParts = usuario.trim().split(' ');
-      const primeiroNome = nomeParts[0].toLowerCase();
-      const terminaComA = primeiroNome.endsWith('a');
+        // Chama a função imediatamente e depois a cada segundo
+        atualizarDataHora();
+        setInterval(atualizarDataHora, 1000);
 
-      const icone = terminaComA ? `<i class="fa-solid fa-user-doctor-female"></i>` : `<i class="fa-solid fa-user-doctor"></i>`;
-      const saudacao = terminaComA
-        ? `Bem-vinda, ${usuario} ${icone}`
-        : `Bem-vindo, ${usuario} ${icone}`;
+        function escreverTextoComMaquinaEscrever(texto, elementoId) {
+            const elemento = document.getElementById(elementoId);
+            elemento.textContent = "";
 
-      const boasVindasEl = document.getElementById('boasVindas');
-      boasVindasEl.innerHTML = saudacao;
+            let i = 0;
+            const intervalo = setInterval(() => {
+                if (i < texto.length) {
+                    elemento.textContent += texto.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(intervalo);
+                }
+            }, 30);
+        }
 
-    } else {
-      window.location.href = 'login.html';
-    }
+        if (usuario) {
+            const nomeParts = usuario.trim().split(' ');
+            const primeiroNome = nomeParts[0].toLowerCase();
+            const terminaComA = primeiroNome.endsWith('a');
 
-    function mostrarModalPrimeiroAtendimento(agendamentosFuturos) {
-      const modalAtendimento = new bootstrap.Modal(document.getElementById('modalAtendimento'));
-      const mensagemEl = document.getElementById('mensagemAtendimento');
+            const icone = terminaComA ? `<i class="fa-solid fa-user-doctor-female"></i>` : `<i class="fa-solid fa-user-doctor"></i>`;
+            const saudacao = terminaComA
+                ? `Bem-vinda, ${usuario} ${icone}`
+                : `Bem-vindo, ${usuario} ${icone}`;
 
-      if (agendamentosFuturos.length > 0) {
-        const primeiro = agendamentosFuturos[0];
-        const data = new Date(primeiro.data_agendamento);
-        const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            const boasVindasEl = document.getElementById('boasVindas');
+            boasVindasEl.innerHTML = saudacao;
 
-        const mensagem = `Seu primeiro atendimento do dia é com o(a) ${primeiro.nome || 'Paciente'} e está confirmado para a data ${dataFormatada} às ${horaFormatada}.`;
+        } else {
+            window.location.href = 'login.html';
+        }
 
-        escreverTextoComMaquinaEscrever(mensagem, 'mensagemAtendimento');
-        modalAtendimento.show();
-      }
-    }
+        function mostrarModalPrimeiroAtendimento(agendamentosFuturos) {
+            const modalAtendimento = new bootstrap.Modal(document.getElementById('modalAtendimento'));
+            const mensagemEl = document.getElementById('mensagemAtendimento');
 
-    function mostrarModalLuas() {
-      const modalLuas = new bootstrap.Modal(document.getElementById('modalLuas'));
-      const mensagemLuasEl = document.getElementById('mensagemLuas');
+            if (agendamentosFuturos.length > 0) {
+                const primeiro = agendamentosFuturos[0];
+                const data = new Date(primeiro.data_agendamento);
+                const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-      const dataAtual = new Date();
-      const mesAtual = dataAtual.getMonth();
-      const anoAtual = dataAtual.getFullYear();
+                const mensagem = `Seu primeiro atendimento do dia é com o(a) ${primeiro.nome || 'Paciente'} e está confirmado para a data ${dataFormatada} às ${horaFormatada}.`;
 
-      const luasDoMes = [
-          { fase: 'Nova', data: new Date(anoAtual, 6, 6) },
-          { fase: 'Crescente', data: new Date(anoAtual, 6, 13) },
-          { fase: 'Cheia', data: new Date(anoAtual, 6, 21) },
-          { fase: 'Minguante', data: new Date(anoAtual, 6, 28) }
-      ];
+                escreverTextoComMaquinaEscrever(mensagem, 'mensagemAtendimento');
+                modalAtendimento.show();
+            }
+        }
 
-      let mensagem = "As fases da lua para este mês são:\n\n";
-      luasDoMes.forEach(lua => {
-          mensagem += `Lua ${lua.fase} - ${lua.data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n`;
-      });
+        function mostrarModalLuas() {
+            const modalLuas = new bootstrap.Modal(document.getElementById('modalLuas'));
+            const mensagemLuasEl = document.getElementById('mensagemLuas');
 
-      escreverTextoComMaquinaEscrever(mensagem, 'mensagemLuas');
-    }
+            const dataAtual = new Date();
+            const mesAtual = dataAtual.getMonth();
+            const anoAtual = dataAtual.getFullYear();
 
-    document.getElementById('modalAtendimento').addEventListener('hidden.bs.modal', function (event) {
-      mostrarModalLuas();
-    });
+            const luasDoMes = [
+                { fase: 'Nova', data: new Date(anoAtual, 6, 6) },
+                { fase: 'Crescente', data: new Date(anoAtual, 6, 13) },
+                { fase: 'Cheia', data: new Date(anoAtual, 6, 21) },
+                { fase: 'Minguante', data: new Date(anoAtual, 6, 28) }
+            ];
 
-    document.addEventListener('DOMContentLoaded', async function () {
-      const calendarEl = document.getElementById('calendar');
-      let eventosApi = [];
+            let mensagem = "As fases da lua para este mês são:\n\n";
+            luasDoMes.forEach(lua => {
+                mensagem += `Lua ${lua.fase} - ${lua.data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n`;
+            });
 
-      try {
-        const resposta = await fetch('/api/agendamentos');
-        const agendamentos = await resposta.json();
+            escreverTextoComMaquinaEscrever(mensagem, 'mensagemLuas');
+        }
 
-        eventosApi = agendamentos.map(item => ({
-          title: item.nome + ' - ' + item.tipo_terapia,
-          start: new Date(item.data_agendamento).toISOString(),
-          color: '#28a745'
-        }));
-      } catch (error) {
-        console.error('Erro ao buscar agendamentos para o calendário:', error);
-      }
+        document.getElementById('modalAtendimento').addEventListener('hidden.bs.modal', function (event) {
+            mostrarModalLuas();
+        });
 
-      const luas = [
-        { title: '🌕 Lua Cheia', start: '2025-07-21', color: '#a0c4ff' },
-        { title: '🌑 Lua Nova', start: '2025-07-06', color: '#d0bfff' },
-        { title: '🌕 Lua Cheia', start: '2025-08-19', color: '#a0c4ff' },
-        { title: '🌑 Lua Nova', start: '2025-08-04', color: '#d0bfff' }
-      ];
+        document.addEventListener('DOMContentLoaded', async function () {
+            const calendarEl = document.getElementById('calendar');
+            let eventosApi = [];
 
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        height: 500,
-        locale: 'pt-br',
-        themeSystem: 'bootstrap5',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: ''
-        },
-        events: [...eventosApi, ...luas]
-      });
+            try {
+                const resposta = await fetch('/api/agendamentos');
+                const agendamentos = await resposta.json();
 
-      calendar.render();
-    });
-
-    // Função para rolar a página suavemente para o topo
-    function scrollToTop() {
-      window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-
-    function abrirModalAnexo(filename) {
-      const anexoContainer = document.getElementById('anexo-container');
-      anexoContainer.innerHTML = '';
-      const url = `/uploads/${filename}`;
-      const extensao = filename.split('.').pop().toLowerCase();
-
-      if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(extensao)) {
-        anexoContainer.innerHTML = `<img src="${url}" class="img-fluid" alt="Anexo do Paciente">`;
-      } else if (extensao === 'pdf') {
-        anexoContainer.innerHTML = `<embed src="${url}" type="application/pdf" width="100%" height="600px" />`;
-      } else {
-        anexoContainer.innerHTML = `<p>Tipo de arquivo não suportado para visualização embutida. <a href="${url}" target="_blank">Clique aqui para baixar.</a></p>`;
-      }
-
-      const modalVisualizarAnexo = new bootstrap.Modal(document.getElementById('modalVisualizarAnexo'));
-      modalVisualizarAnexo.show();
-    }
-
-    function abrirModalPaciente(agendamentoJson) {
-        try {
-            const agendamento = JSON.parse(agendamentoJson);
-
-            console.log('Anexos do agendamento:', agendamento.anexos);
-
-            const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
-
-            document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
-            document.getElementById('infoDataNascimento').textContent = agendamento.data_nascimento ? new Date(agendamento.data_nascimento).toLocaleDateString('pt-BR') : 'N/A';
-            document.getElementById('infoIdade').textContent = agendamento.idade || 'N/A';
-            document.getElementById('infoPeso').textContent = agendamento.peso ? `${agendamento.peso} kg` : 'N/A';
-            document.getElementById('infoAltura').textContent = agendamento.altura ? `${agendamento.altura} cm` : 'N/A';
-            document.getElementById('infoTipoSanguineo').textContent = agendamento.tipo_sanguineo || 'N/A';
-            document.getElementById('infoTipoTerapia').textContent = agendamento.tipo_terapia || 'N/A';
-            document.getElementById('infoMotivoConsulta').textContent = agendamento.motivo_consulta || 'N/A';
-            document.getElementById('infoOrigemIndicacao').textContent = agendamento.origem_indicacao || 'N/A';
-            document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
-            document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
-
-            // Lógica CORRIGIDA para exibir os anexos de forma otimizada
-            const infoAnexo = document.getElementById('infoAnexo');
-            let anexosHtml = '';
-
-            // Verifica se a propriedade 'anexos' existe e se tem pelo menos um item
-            if (agendamento.anexos && agendamento.anexos.length > 0) {
-                // Itera sobre o array de anexos para construir a string HTML
-                agendamento.anexos.forEach(anexo => {
-                    anexosHtml += `<div><a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a></div>`;
-                });
-                infoAnexo.innerHTML = anexosHtml;
-            } else {
-                infoAnexo.textContent = 'N/A';
+                eventosApi = agendamentos.map(item => ({
+                    title: item.nome + ' - ' + item.tipo_terapia,
+                    start: new Date(item.data_agendamento).toISOString(),
+                    color: '#28a745'
+                }));
+            } catch (error) {
+                console.error('Erro ao buscar agendamentos para o calendário:', error);
             }
 
-            const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            const luas = [
+                { title: '🌕 Lua Cheia', start: '2025-07-21', color: '#a0c4ff' },
+                { title: '🌑 Lua Nova', start: '2025-07-06', color: '#d0bfff' },
+                { title: '🌕 Lua Cheia', start: '2025-08-19', color: '#a0c4ff' },
+                { title: '🌑 Lua Nova', start: '2025-08-04', color: '#d0bfff' }
+            ];
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                height: 500,
+                locale: 'pt-br',
+                themeSystem: 'bootstrap5',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: [...eventosApi, ...luas]
             });
-            document.getElementById('infoDataAgendamento').textContent = dataFormatada;
 
-            modalPaciente.show();
-        } catch (e) {
-            console.error('Erro ao abrir modal do paciente:', e);
-        }
-    }
-
-    async function carregarTabelaAgendamentos() {
-      const tabelaBody = document.getElementById('tabelaAgendamentos');
-      tabelaBody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Carregando agendamentos...</td></tr>';
-
-      try {
-        const resposta = await fetch('/api/agendamentos');
-        if (!resposta.ok) {
-          throw new Error(`Erro HTTP: ${resposta.status}`);
-        }
-        const agendamentos = await resposta.json();
-        tabelaBody.innerHTML = '';
-
-        const agendamentosFuturos = agendamentos.filter(agendamento => {
-          const dataAgendamento = new Date(agendamento.data_agendamento);
-          return !isNaN(dataAgendamento.getTime()) && dataAgendamento > new Date();
-        }).sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
-
-        if (agendamentosFuturos.length === 0) {
-          tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>`;
-          mostrarModalLuas();
-          return;
-        }
-
-        const proximosAgendamentos = agendamentosFuturos.slice(0, 10);
-
-        proximosAgendamentos.forEach(agendamento => {
-          const tr = document.createElement('tr');
-          const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          });
-
-          tr.setAttribute('onclick', `abrirModalPaciente(JSON.stringify(${JSON.stringify(agendamento)}))`);
-          tr.innerHTML = `
-            <td>${agendamento.nome || 'N/A'}</td>
-            <td>${dataFormatada}</td>
-            <td>${agendamento.tipo_terapia || 'N/A'}</td>
-          `;
-          tabelaBody.appendChild(tr);
+            calendar.render();
         });
 
-        mostrarModalPrimeiroAtendimento(agendamentosFuturos);
-      } catch (erro) {
-        console.error('Erro ao carregar agendamentos para a tabela:', erro);
-        tabelaBody.innerHTML = `<tr><td colspan="3" class="text-center text-danger">Erro ao carregar a lista de agendamentos.</td></tr>`;
-        mostrarModalLuas();
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      carregarTabelaAgendamentos();
-
-      // Lógica do botão de Maximizar/Restaurar do modal de anexo
-      const maximizeBtn = document.getElementById('maximizeAnexoBtn');
-      const dialog = document.getElementById('dialogVisualizarAnexo');
-      const icon = maximizeBtn.querySelector('i');
-
-      if (maximizeBtn) {
-        maximizeBtn.addEventListener('click', () => {
-          dialog.classList.toggle('modal-fullscreen');
-          if (dialog.classList.contains('modal-fullscreen')) {
-            icon.classList.remove('fa-expand-arrows-alt');
-            icon.classList.add('fa-compress-arrows-alt');
-            maximizeBtn.title = "Restaurar";
-          } else {
-            icon.classList.remove('fa-compress-arrows-alt');
-            icon.classList.add('fa-expand-arrows-alt');
-            maximizeBtn.title = "Maximizar";
-          }
-        });
-      }
-
-      // Lógica para mostrar/esconder o botão de voltar ao topo
-      const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-      window.onscroll = function() {
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-          scrollToTopBtn.classList.add("show");
-        } else {
-          scrollToTopBtn.classList.remove("show");
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
-      };
 
-      // Lógica do Modo Escuro (CORRIGIDA)
-      const themeToggleBtn = document.getElementById('theme-toggle-btn');
-      const body = document.body;
-      const currentTheme = localStorage.getItem('theme');
+        function abrirModalAnexo(filename) {
+            const anexoContainer = document.getElementById('anexo-container');
+            anexoContainer.innerHTML = '';
+            const url = `/uploads/${filename}`;
+            const extensao = filename.split('.').pop().toLowerCase();
 
-      function applyTheme(theme) {
-          if (theme === 'dark') {
-              body.classList.add('dark-mode');
-              themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-              themeToggleBtn.classList.remove('btn-outline-dark');
-              themeToggleBtn.classList.add('btn-outline-light');
-          } else {
-              body.classList.remove('dark-mode');
-              themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-              themeToggleBtn.classList.remove('btn-outline-light');
-              themeToggleBtn.classList.add('btn-outline-dark');
-          }
-      }
+            if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(extensao)) {
+                anexoContainer.innerHTML = `<img src="${url}" class="img-fluid" alt="Anexo do Paciente">`;
+            } else if (extensao === 'pdf') {
+                anexoContainer.innerHTML = `<embed src="${url}" type="application/pdf" width="100%" height="600px" />`;
+            } else {
+                anexoContainer.innerHTML = `<p>Tipo de arquivo não suportado para visualização embutida. <a href="${url}" target="_blank">Clique aqui para baixar.</a></p>`;
+            }
 
-      if (currentTheme) {
-          applyTheme(currentTheme);
-      }
+            const modalVisualizarAnexo = new bootstrap.Modal(document.getElementById('modalVisualizarAnexo'));
+            modalVisualizarAnexo.show();
+        }
 
-      themeToggleBtn.addEventListener('click', () => {
-          const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
-          applyTheme(newTheme);
-          localStorage.setItem('theme', newTheme);
-      });
-    });
-  </script>
+        function abrirModalPaciente(agendamentoJson) {
+            try {
+                const agendamento = JSON.parse(agendamentoJson);
+
+                console.log('Anexos do agendamento:', agendamento.anexos);
+
+                const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
+
+                document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
+                document.getElementById('infoDataNascimento').textContent = agendamento.data_nascimento ? new Date(agendamento.data_nascimento).toLocaleDateString('pt-BR') : 'N/A';
+                document.getElementById('infoIdade').textContent = agendamento.idade || 'N/A';
+                document.getElementById('infoPeso').textContent = agendamento.peso ? `${agendamento.peso} kg` : 'N/A';
+                document.getElementById('infoAltura').textContent = agendamento.altura ? `${agendamento.altura} cm` : 'N/A';
+                document.getElementById('infoTipoSanguineo').textContent = agendamento.tipo_sanguineo || 'N/A';
+                document.getElementById('infoTipoTerapia').textContent = agendamento.tipo_terapia || 'N/A';
+                document.getElementById('infoMotivoConsulta').textContent = agendamento.motivo_consulta || 'N/A';
+                document.getElementById('infoOrigemIndicacao').textContent = agendamento.origem_indicacao || 'N/A';
+                document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
+                document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
+
+                const infoAnexo = document.getElementById('infoAnexo');
+                let anexosHtml = '';
+
+                if (agendamento.anexos && agendamento.anexos.length > 0) {
+                    agendamento.anexos.forEach(anexo => {
+                        anexosHtml += `<div><a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a></div>`;
+                    });
+                    infoAnexo.innerHTML = anexosHtml;
+                } else {
+                    infoAnexo.textContent = 'N/A';
+                }
+
+                const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                document.getElementById('infoDataAgendamento').textContent = dataFormatada;
+
+                modalPaciente.show();
+            } catch (e) {
+                console.error('Erro ao abrir modal do paciente:', e);
+            }
+        }
+
+        async function carregarTabelaAgendamentos() {
+            const tabelaBody = document.getElementById('tabelaAgendamentos');
+            tabelaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Carregando agendamentos...</td></tr>';
+
+            try {
+                const resposta = await fetch('/api/agendamentos');
+                if (!resposta.ok) {
+                    throw new Error(`Erro HTTP: ${resposta.status}`);
+                }
+                const agendamentos = await resposta.json();
+                tabelaBody.innerHTML = '';
+
+                const agendamentosFuturos = agendamentos.filter(agendamento => {
+                    const dataAgendamento = new Date(agendamento.data_agendamento);
+                    return !isNaN(dataAgendamento.getTime()) && dataAgendamento > new Date();
+                }).sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
+
+                if (agendamentosFuturos.length === 0) {
+                    tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>`;
+                    mostrarModalLuas();
+                    return;
+                }
+
+                const proximosAgendamentos = agendamentosFuturos.slice(0, 10);
+
+                proximosAgendamentos.forEach(agendamento => {
+                    const tr = document.createElement('tr');
+
+                    tr.setAttribute('onclick', `abrirModalPaciente(JSON.stringify(${JSON.stringify(agendamento)}))`);
+
+                    const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+
+                    tr.innerHTML = `
+                        <td>${agendamento.nome || 'N/A'}</td>
+                        <td>${dataFormatada}</td>
+                        <td>${agendamento.tipo_terapia || 'N/A'}</td>
+                        <td>
+                            <a href="atendimento.html?pacienteId=${agendamento.id}" class="btn btn-sm btn-primary">Atender</a>
+                        </td>
+                    `;
+                    tabelaBody.appendChild(tr);
+                });
+
+                mostrarModalPrimeiroAtendimento(agendamentosFuturos);
+            } catch (erro) {
+                console.error('Erro ao carregar agendamentos para a tabela:', erro);
+                tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Erro ao carregar a lista de agendamentos.</td></tr>`;
+                mostrarModalLuas();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            carregarTabelaAgendamentos();
+
+            const maximizeBtn = document.getElementById('maximizeAnexoBtn');
+            const dialog = document.getElementById('dialogVisualizarAnexo');
+            const icon = maximizeBtn.querySelector('i');
+
+            if (maximizeBtn) {
+                maximizeBtn.addEventListener('click', () => {
+                    dialog.classList.toggle('modal-fullscreen');
+                    if (dialog.classList.contains('modal-fullscreen')) {
+                        icon.classList.remove('fa-expand-arrows-alt');
+                        icon.classList.add('fa-compress-arrows-alt');
+                        maximizeBtn.title = "Restaurar";
+                    } else {
+                        icon.classList.remove('fa-compress-arrows-alt');
+                        icon.classList.add('fa-expand-arrows-alt');
+                        maximizeBtn.title = "Maximizar";
+                    }
+                });
+            }
+
+            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+            window.onscroll = function() {
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                    scrollToTopBtn.classList.add("show");
+                } else {
+                    scrollToTopBtn.classList.remove("show");
+                }
+            };
+
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const body = document.body;
+            const currentTheme = localStorage.getItem('theme');
+
+            function applyTheme(theme) {
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+                    themeToggleBtn.classList.remove('btn-outline-dark');
+                    themeToggleBtn.classList.add('btn-outline-light');
+                } else {
+                    body.classList.remove('dark-mode');
+                    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+                    themeToggleBtn.classList.remove('btn-outline-light');
+                    themeToggleBtn.classList.add('btn-outline-dark');
+                }
+            }
+
+            if (currentTheme) {
+                applyTheme(currentTheme);
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+                applyTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+        });
+    </script>
 </body>
 </html>
