@@ -751,55 +751,72 @@
                 if (!agendamento) return;
 
                 const dataAgendamento = new Date(agendamento.data_agendamento).getTime();
-                const diferenca = dataAgendamento - agora;
+                const diff = dataAgendamento - agora;
                 const celulaContagem = tr.querySelector('.countdown-cell');
 
-                if (diferenca > 0) {
-                    const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
-                    const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
-                    const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+                if (diff > 0) {
+                    const dias = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const horas = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const segundos = Math.floor((diff % (1000 * 60)) / 1000);
 
-                    celulaContagem.textContent = `Começa em: ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+                    celulaContagem.textContent = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
                     celulaContagem.classList.remove('countdown-past');
                 } else {
-                    celulaContagem.textContent = 'Aconteceu!';
+                    celulaContagem.textContent = 'Tempo Esgotado';
                     celulaContagem.classList.add('countdown-past');
                 }
             });
         }
 
-        async function carregarTabelaAgendamentos() {
-            const tabelaBody = document.getElementById('tabelaAgendamentos');
-            tabelaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Carregando agendamentos...</td></tr>';
+        // --- Adicionar a função para excluir o agendamento ---
+        async function cancelarAgendamento(agendamentoId) {
+            if (confirm('Tem certeza que deseja cancelar este agendamento? Esta ação não pode ser desfeita.')) {
+                try {
+                    const response = await fetch(`/api/agendamentos/${agendamentoId}`, {
+                        method: 'DELETE'
+                    });
 
+                    if (response.ok) {
+                        alert('Agendamento cancelado com sucesso!');
+                        carregarTabelaAgendamentos();
+                    } else {
+                        const error = await response.json();
+                        alert('Erro ao cancelar agendamento: ' + (error.message || response.statusText));
+                    }
+                } catch (error) {
+                    console.error('Erro ao cancelar agendamento:', error);
+                    alert('Erro ao cancelar agendamento. Tente novamente mais tarde.');
+                }
+            }
+        }
+
+        // Função para carregar e exibir os agendamentos na tabela
+        async function carregarTabelaAgendamentos() {
             try {
                 const resposta = await fetch('/api/agendamentos');
-                if (!resposta.ok) {
-                    throw new Error(`Erro HTTP: ${resposta.status}`);
-                }
+                if (!resposta.ok) throw new Error('Falha ao buscar agendamentos.');
                 const agendamentos = await resposta.json();
+
+                const tabelaBody = document.getElementById('tabelaAgendamentos');
                 tabelaBody.innerHTML = '';
 
-                const agendamentosFuturos = agendamentos.filter(agendamento => {
-                    const dataAgendamento = new Date(agendamento.data_agendamento);
-                    return !isNaN(dataAgendamento.getTime()) && dataAgendamento > new Date();
-                }).sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
-
-                if (agendamentosFuturos.length === 0) {
-                    tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>`;
-                    mostrarModalLuas();
+                if (agendamentos.length === 0) {
+                    tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento encontrado.</td></tr>`;
                     return;
                 }
 
-                const proximosAgendamentos = agendamentosFuturos.slice(0, 10);
+                const agendamentosFuturos = agendamentos
+                    .filter(a => new Date(a.data_agendamento) > new Date())
+                    .sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
 
-                proximosAgendamentos.forEach(agendamento => {
-                    const tr = document.createElement('tr');
+                const agendamentosPassados = agendamentos
+                    .filter(a => new Date(a.data_agendamento) <= new Date())
+                    .sort((a, b) => new Date(b.data_agendamento) - new Date(a.data_agendamento));
 
-                    tr.setAttribute('onclick', `abrirModalPaciente(JSON.stringify(${JSON.stringify(agendamento)}))`);
-
-                    const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+                agendamentosFuturos.forEach(agendamento => {
+                    const dataAgendamento = new Date(agendamento.data_agendamento);
+                    const dataFormatada = dataAgendamento.toLocaleString('pt-BR', {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',
@@ -807,66 +824,78 @@
                         minute: '2-digit'
                     });
 
-                    tr.innerHTML = `
-                        <td>${agendamento.nome || 'N/A'}</td>
-                        <td>${dataFormatada}</td>
-                        <td class="countdown-cell" data-agendamento-data="${agendamento.data_agendamento}"></td>
-                        <td>
-                            <a href="atendimento.html?pacienteId=${agendamento.id}" class="btn btn-sm btn-primary me-2">Atender</a>
-                            <button class="btn btn-sm btn-warning me-2" onclick="abrirModalReagendamento('${encodeURIComponent(JSON.stringify(agendamento))}');">Reagendar</button>
-                        </td>
+                    const agendamentoJson = encodeURIComponent(JSON.stringify(agendamento));
+
+                    tabelaBody.innerHTML += `
+                        <tr onclick="abrirModalPaciente('${agendamentoJson}')">
+                            <td>${agendamento.nome}</td>
+                            <td>${dataFormatada}</td>
+                            <td class="countdown-cell text-center"></td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group" onclick="event.stopPropagation();">
+                                    <button class="btn btn-sm btn-info me-2" onclick="abrirModalReagendamento('${agendamentoJson}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="cancelarAgendamento(${agendamento.id})">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
                     `;
-                    tabelaBody.appendChild(tr);
                 });
 
-                // Iniciar a contagem regressiva para os agendamentos na tabela
-                setInterval(() => atualizarContagemRegressiva(proximosAgendamentos), 1000);
+                // Adicionar agendamentos passados (opcional, mas bom para a visualização)
+                agendamentosPassados.forEach(agendamento => {
+                    const dataAgendamento = new Date(agendamento.data_agendamento);
+                    const dataFormatada = dataAgendamento.toLocaleString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
 
-                mostrarModalPrimeiroAtendimento(agendamentosFuturos);
+                    tabelaBody.innerHTML += `
+                        <tr class="countdown-past" onclick="abrirModalPaciente('${encodeURIComponent(JSON.stringify(agendamento))}')">
+                            <td>${agendamento.nome}</td>
+                            <td>${dataFormatada}</td>
+                            <td class="countdown-cell text-center">Tempo Esgotado</td>
+                            <td class="text-center">
+                                <span class="text-muted">Concluído</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                if (agendamentosFuturos.length > 0) {
+                    mostrarModalPrimeiroAtendimento(agendamentosFuturos);
+                    setInterval(() => atualizarContagemRegressiva(agendamentosFuturos), 1000);
+                } else {
+                    mostrarModalLuas();
+                }
             } catch (erro) {
                 console.error('Erro ao carregar agendamentos:', erro);
-                tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Erro ao carregar agendamentos. Tente novamente mais tarde.</td></tr>`;
+                const tabelaBody = document.getElementById('tabelaAgendamentos');
+                tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Erro ao carregar agendamentos.</td></tr>`;
             }
         }
 
-        carregarTabelaAgendamentos();
+        // Chama a função ao carregar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarTabelaAgendamentos();
+        });
 
-        // Código para o modo escuro
         const themeToggleBtn = document.getElementById('theme-toggle-btn');
-        const body = document.body;
+        themeToggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        });
 
-        function toggleTheme() {
-            body.classList.toggle('dark-mode');
-            const isDarkMode = body.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            updateIcon(isDarkMode);
+        // Aplica o tema salvo ao carregar a página
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
         }
-
-        function loadTheme() {
-            const theme = localStorage.getItem('theme');
-            if (theme === 'dark') {
-                body.classList.add('dark-mode');
-                updateIcon(true);
-            } else {
-                body.classList.remove('dark-mode');
-                updateIcon(false);
-            }
-        }
-
-        function updateIcon(isDarkMode) {
-            const icon = themeToggleBtn.querySelector('i');
-            if (isDarkMode) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            }
-        }
-
-        themeToggleBtn.addEventListener('click', toggleTheme);
-        window.addEventListener('load', loadTheme);
-
     </script>
 </body>
 </html>
