@@ -4,13 +4,10 @@ console.log('--- agendamentoController.js carregado ---');
 const db = require('../config/db');
 const path = require('path');
 const fs = require('fs');
-
-// Importa o serviço de notificações
 const notificationService = require('../services/notificationService');
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
-// Assegura que o diretório de uploads existe
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -188,20 +185,46 @@ exports.listarAgendamentos = async (req, res) => {
   }
 };
 
-// --- Função para deletar um agendamento ---
+// --- Função para deletar um agendamento com notificação ---
 exports.deletarAgendamento = async (req, res) => {
+  const connection = await db.getConnection();
   try {
+    await connection.beginTransaction();
     const { id } = req.params;
-    const [result] = await db.query('DELETE FROM agendamentos WHERE id = ?', [id]);
 
-    if (result.affectedRows === 0) {
+    // 1. Busca os dados do agendamento a ser deletado para notificação
+    const [agendamentoParaDeletar] = await connection.query(
+      'SELECT nome, email, data_agendamento FROM agendamentos WHERE id = ?',
+      [id]
+    );
+
+    if (agendamentoParaDeletar.length === 0) {
+      await connection.rollback();
       return res.status(404).json({ mensagem: 'Agendamento não encontrado.' });
     }
 
+    // 2. Deleta o agendamento
+    const [result] = await connection.query('DELETE FROM agendamentos WHERE id = ?', [id]);
+
+    await connection.commit();
     res.status(200).json({ mensagem: 'Agendamento excluído com sucesso.' });
+
+    // 3. Envia a notificação após o commit
+    const { nome, email, data_agendamento } = agendamentoParaDeletar[0];
+    if (email) {
+      notificationService.sendCancellationEmail({
+        nome,
+        email,
+        data_agendamento
+      });
+    }
+
   } catch (err) {
+    await connection.rollback();
     console.error('Erro ao deletar agendamento:', err);
     res.status(500).json({ erro: 'Erro ao deletar agendamento', detalhes: err.message });
+  } finally {
+    connection.release();
   }
 };
 
@@ -356,48 +379,39 @@ exports.reagendarAgendamento = async (req, res) => {
   try {
     await connection.beginTransaction();
 
+    // 1. Busca os dados do agendamento para a notificação ANTES de atualizar
+    const [agendamento] = await connection.query(
+      'SELECT nome, email, tipo_terapia, data_agendamento FROM agendamentos WHERE id = ?',
+      [agendamentoId]
+    );
+
+    if (agendamento.length === 0) {
+      await connection.rollback();
+      return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser reagendado.' });
+    }
+
+    const { nome, email, tipo_terapia } = agendamento[0];
+    const dataAnterior = agendamento[0].data_agendamento;
+
+    // 2. Atualiza a data do agendamento
     const [updateResult] = await connection.query(
       `UPDATE agendamentos SET data_agendamento = ? WHERE id = ?`,
       [data_agendamento, agendamentoId]
     );
 
-    if (updateResult.affectedRows === 0) {
-      await connection.rollback();
-      return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser reagendado.' });
-    }
-
-    // ==============================================================================================
-    // Busca dados do agendamento para a notificação ANTES do commit
-    // ==============================================================================================
-    const [agendamento] = await connection.query(
-      'SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ?',
-      [agendamentoId]
-    );
-
-    await connection.commit(); // Commit agora que sabemos que o update foi bem-sucedido
+    await connection.commit();
     res.status(200).json({ mensagem: 'Agendamento reagendado com sucesso!' });
 
-    // Envia a notificação após o commit e a resposta
-    if (agendamento.length > 0) {
-      const { nome, email, telefone, tipo_terapia } = agendamento[0];
-
-      if (email) {
-        notificationService.sendEmailNotification({
-          nome,
-          email,
-          tipo_terapia,
-          data_agendamento
-        }, true);
-      }
-
-      if (telefone) {
-        notificationService.sendWhatsAppNotification({
-          nome,
-          telefone,
-          tipo_terapia,
-          data_agendamento
-        }, true);
-      }
+    // 3. Envia a notificação após o commit e a resposta
+    if (email) {
+      // Reutiliza o mesmo serviço de notificação, passando a data anterior e a nova
+      notificationService.sendReschedulingEmail({
+        nome,
+        email,
+        tipo_terapia,
+        data_agendamento, // Nova data
+        dataAnterior // Data anterior
+      });
     }
 
   } catch (err) {

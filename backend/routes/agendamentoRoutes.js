@@ -51,7 +51,7 @@ router.put('/completo/:id', upload, agendamentoController.atualizarAgendamentoCo
 
 // Rota PUT ESPECÍFICA para reagendar uma consulta (somente a data).
 // Esta rota NÃO utiliza o middleware 'upload'.
-router.put('/:id', agendamentoController.reagendarAgendamento);
+router.put('/reagendar/:id', agendamentoController.reagendarAgendamento);
 
 // Exporta o roteador.
 module.exports = router;

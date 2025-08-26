@@ -170,6 +170,10 @@
         .btn-acao i {
             margin-right: 8px;
         }
+        .nome-paciente {
+            cursor: pointer;
+            text-decoration: underline;
+        }
 
 
         /* ==================================== */
@@ -694,10 +698,7 @@
 
         function abrirModalPaciente(agendamentoJson) {
             try {
-                const agendamento = JSON.parse(agendamentoJson);
-
-                console.log('Anexos do agendamento:', agendamento.anexos);
-
+                const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
                 const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
 
                 document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
@@ -865,9 +866,13 @@
                         const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
                         const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
+                        const agendamentoJson = encodeURIComponent(JSON.stringify(agendamento));
+
                         const row = document.createElement('tr');
                         row.innerHTML = `
-                            <td class="align-middle">${agendamento.nome || 'N/A'}</td>
+                            <td class="align-middle">
+                                <span class="nome-paciente" onclick="abrirModalPaciente('${agendamentoJson}')">${agendamento.nome || 'N/A'}</span>
+                            </td>
                             <td class="align-middle">${dataFormatada} ${horaFormatada}</td>
                             <td class="align-middle countdown-cell"></td>
                             <td class="align-middle">
@@ -876,7 +881,7 @@
                                     <i class="fas fa-play"></i> Atender
                                 </button>
                                 <button type="button" class="btn btn-acao btn-reagendar"
-                                        onclick="abrirModalReagendamento('${encodeURIComponent(JSON.stringify(agendamento))}')" title="Reagendar">
+                                        onclick="abrirModalReagendamento('${agendamentoJson}')" title="Reagendar">
                                     <i class="fas fa-calendar-alt"></i> Reagendar
                                 </button>
                                 <button type="button" class="btn btn-acao btn-cancelar"
