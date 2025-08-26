@@ -337,6 +337,33 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalReagendamento" tabindex="-1" aria-labelledby="modalReagendamentoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalReagendamentoLabel">Reagendar Atendimento</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formReagendamento">
+                        <input type="hidden" id="reagendarId">
+                        <div class="mb-3">
+                            <label for="reagendarPaciente" class="form-label">Paciente:</label>
+                            <input type="text" class="form-control" id="reagendarPaciente" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reagendarDataHora" class="form-label">Nova Data e Hora:</label>
+                            <input type="datetime-local" class="form-control" id="reagendarDataHora" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Salvar Reagendamento</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="modalAtendimento" tabindex="-1" aria-labelledby="modalAtendimentoLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -666,6 +693,54 @@
             }
         }
 
+        // Funções adicionadas para o modal de reagendamento
+        function abrirModalReagendamento(agendamentoJson) {
+            try {
+                const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
+                document.getElementById('reagendarId').value = agendamento.id;
+                document.getElementById('reagendarPaciente').value = agendamento.nome;
+
+                const modalReagendamento = new bootstrap.Modal(document.getElementById('modalReagendamento'));
+                modalReagendamento.show();
+            } catch (error) {
+                console.error('Erro ao abrir o modal de reagendamento:', error);
+            }
+        }
+
+        document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const id = document.getElementById('reagendarId').value;
+            const novaDataHora = document.getElementById('reagendarDataHora').value;
+
+            if (!id || !novaDataHora) {
+                console.error('Dados de reagendamento inválidos.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/agendamentos/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ data_agendamento: novaDataHora })
+                });
+
+                if (response.ok) {
+                    alert('Agendamento reagendado com sucesso!');
+                    const modalReagendamento = bootstrap.Modal.getInstance(document.getElementById('modalReagendamento'));
+                    modalReagendamento.hide();
+                    carregarTabelaAgendamentos();
+                } else {
+                    const error = await response.json();
+                    alert('Erro ao reagendar: ' + (error.message || response.statusText));
+                }
+            } catch (error) {
+                console.error('Erro ao reagendar agendamento:', error);
+                alert('Erro ao reagendar agendamento. Tente novamente mais tarde.');
+            }
+        });
+
         // Função para atualizar a contagem regressiva
         function atualizarContagemRegressiva(agendamentos) {
             const agora = new Date().getTime();
@@ -738,7 +813,7 @@
                         <td class="countdown-cell" data-agendamento-data="${agendamento.data_agendamento}"></td>
                         <td>
                             <a href="atendimento.html?pacienteId=${agendamento.id}" class="btn btn-sm btn-primary me-2">Atender</a>
-                            <a href="agendamento.html?pacienteId=${agendamento.id}" class="btn btn-sm btn-warning me-2">Reagendar</a>
+                            <button class="btn btn-sm btn-warning me-2" onclick="abrirModalReagendamento('${encodeURIComponent(JSON.stringify(agendamento))}');">Reagendar</button>
                         </td>
                     `;
                     tabelaBody.appendChild(tr);
@@ -749,71 +824,49 @@
 
                 mostrarModalPrimeiroAtendimento(agendamentosFuturos);
             } catch (erro) {
-                console.error('Erro ao carregar agendamentos para a tabela:', erro);
-                tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Erro ao carregar a lista de agendamentos.</td></tr>`;
-                mostrarModalLuas();
+                console.error('Erro ao carregar agendamentos:', erro);
+                tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Erro ao carregar agendamentos. Tente novamente mais tarde.</td></tr>`;
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            carregarTabelaAgendamentos();
+        carregarTabelaAgendamentos();
 
-            const maximizeBtn = document.getElementById('maximizeAnexoBtn');
-            const dialog = document.getElementById('dialogVisualizarAnexo');
-            const icon = maximizeBtn.querySelector('i');
+        // Código para o modo escuro
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        const body = document.body;
 
-            if (maximizeBtn) {
-                maximizeBtn.addEventListener('click', () => {
-                    dialog.classList.toggle('modal-fullscreen');
-                    if (dialog.classList.contains('modal-fullscreen')) {
-                        icon.classList.remove('fa-expand-arrows-alt');
-                        icon.classList.add('fa-compress-arrows-alt');
-                        maximizeBtn.title = "Restaurar";
-                    } else {
-                        icon.classList.remove('fa-compress-arrows-alt');
-                        icon.classList.add('fa-expand-arrows-alt');
-                        maximizeBtn.title = "Maximizar";
-                    }
-                });
+        function toggleTheme() {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            updateIcon(isDarkMode);
+        }
+
+        function loadTheme() {
+            const theme = localStorage.getItem('theme');
+            if (theme === 'dark') {
+                body.classList.add('dark-mode');
+                updateIcon(true);
+            } else {
+                body.classList.remove('dark-mode');
+                updateIcon(false);
             }
+        }
 
-            const scrollToTopBtn = document.getElementById("scrollToTopBtn");
-            window.onscroll = function() {
-                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-                    scrollToTopBtn.classList.add("show");
-                } else {
-                    scrollToTopBtn.classList.remove("show");
-                }
-            };
-
-            const themeToggleBtn = document.getElementById('theme-toggle-btn');
-            const body = document.body;
-            const currentTheme = localStorage.getItem('theme');
-
-            function applyTheme(theme) {
-                if (theme === 'dark') {
-                    body.classList.add('dark-mode');
-                    themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-                    themeToggleBtn.classList.remove('btn-outline-dark');
-                    themeToggleBtn.classList.add('btn-outline-light');
-                } else {
-                    body.classList.remove('dark-mode');
-                    themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-                    themeToggleBtn.classList.remove('btn-outline-light');
-                    themeToggleBtn.classList.add('btn-outline-dark');
-                }
+        function updateIcon(isDarkMode) {
+            const icon = themeToggleBtn.querySelector('i');
+            if (isDarkMode) {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            } else {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
             }
+        }
 
-            if (currentTheme) {
-                applyTheme(currentTheme);
-            }
+        themeToggleBtn.addEventListener('click', toggleTheme);
+        window.addEventListener('load', loadTheme);
 
-            themeToggleBtn.addEventListener('click', () => {
-                const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
-                applyTheme(newTheme);
-                localStorage.setItem('theme', newTheme);
-            });
-        });
     </script>
 </body>
 </html>

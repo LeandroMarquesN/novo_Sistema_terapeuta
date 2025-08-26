@@ -212,10 +212,13 @@ exports.deletarAgendamento = async (req, res) => {
   }
 };
 
-// --- Função para reagendar um agendamento (NOVA) ---
-exports.reagendarAgendamento = async (req, res) => {
+// ==================================================================================================
+// FUNÇÃO ORIGINAL (agora com um novo nome, se necessário)
+// Esta função lida com a atualização completa, incluindo uploads de arquivos.
+// ==================================================================================================
+exports.atualizarAgendamentoCompleto = async (req, res) => {
   const agendamentoId = req.params.id;
-  console.log(`Reagendando agendamento com ID: ${agendamentoId}`);
+  console.log(`Atualizando agendamento completo com ID: ${agendamentoId}`);
 
   const {
     nome,
@@ -250,10 +253,6 @@ exports.reagendarAgendamento = async (req, res) => {
     }
   }
 
-  if (!nome || !data_agendamento) {
-    return res.status(400).json({ mensagem: 'Nome e data de agendamento são obrigatórios.' });
-  }
-
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
@@ -279,7 +278,7 @@ exports.reagendarAgendamento = async (req, res) => {
 
     if (updateResult.affectedRows === 0) {
       await connection.rollback();
-      return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser reagendado.' });
+      return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser atualizado.' });
     }
 
     // 2. Atualiza a foto de perfil do paciente (se uma nova for enviada)
@@ -307,9 +306,9 @@ exports.reagendarAgendamento = async (req, res) => {
     }
 
     await connection.commit();
-    res.status(200).json({ mensagem: 'Agendamento reagendado com sucesso!' });
+    res.status(200).json({ mensagem: 'Agendamento atualizado com sucesso!' });
 
-    // --- Envia notificações de reagendamento ---
+    // --- Envia notificações de atualização ---
     if (email) {
       notificationService.sendEmailNotification({
         nome,
@@ -317,7 +316,7 @@ exports.reagendarAgendamento = async (req, res) => {
         tipo_terapia,
         data_agendamento,
         motivo_consulta
-      }, true); // O segundo parâmetro 'true' indica reagendamento
+      }, true);
     }
 
     if (telefone) {
@@ -326,12 +325,12 @@ exports.reagendarAgendamento = async (req, res) => {
         telefone,
         tipo_terapia,
         data_agendamento
-      }, true); // O segundo parâmetro 'true' indica reagendamento
+      }, true);
     }
 
   } catch (err) {
     await connection.rollback();
-    console.error('Erro ao reagendar consulta:', err);
+    console.error('Erro ao atualizar agendamento:', err);
     // Limpa os arquivos enviados em caso de erro
     if (patientPhoto && fs.existsSync(patientPhoto.path)) {
       fs.unlinkSync(patientPhoto.path);
@@ -342,7 +341,79 @@ exports.reagendarAgendamento = async (req, res) => {
       }
     });
 
-    res.status(500).json({ erro: 'Erro ao reagendar consulta', detalhes: err.message, sql: err.sql, sqlMessage: err.sqlMessage });
+    res.status(500).json({ erro: 'Erro ao atualizar agendamento', detalhes: err.message, sql: err.sql, sqlMessage: err.sqlMessage });
+  } finally {
+    connection.release();
+  }
+};
+
+// ==================================================================================================
+// FUNÇÃO EXCLUSIVA PARA REAGENDAMENTO (SOMENTE DATA)
+// Esta função lida apenas com a atualização da data e hora.
+// ==================================================================================================
+exports.reagendarAgendamento = async (req, res) => {
+  const agendamentoId = req.params.id;
+  const { data_agendamento } = req.body;
+
+  if (!data_agendamento) {
+    return res.status(400).json({ mensagem: 'Nova data de agendamento é obrigatória.' });
+  }
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    const [updateResult] = await connection.query(
+      `UPDATE agendamentos SET data_agendamento = ? WHERE id = ?`,
+      [data_agendamento, agendamentoId]
+    );
+
+    if (updateResult.affectedRows === 0) {
+      await connection.rollback();
+      return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser reagendado.' });
+    }
+
+    // ==============================================================================================
+    // TRECHO A SER DESCOMENTADO E AJUSTADO:
+    // ==============================================================================================
+    const [agendamento] = await connection.query(
+      'SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ?',
+      [agendamentoId]
+    );
+
+    if (agendamento.length > 0) {
+      const { nome, email, telefone, tipo_terapia } = agendamento[0];
+
+      await connection.commit();
+      res.status(200).json({ mensagem: 'Agendamento reagendado com sucesso!' });
+
+      if (email) {
+        notificationService.sendEmailNotification({
+          nome,
+          email,
+          tipo_terapia,
+          data_agendamento
+        }, true);
+      }
+
+      if (telefone) {
+        notificationService.sendWhatsAppNotification({
+          nome,
+          telefone,
+          tipo_terapia,
+          data_agendamento
+        }, true);
+      }
+    } else {
+      // Se não encontrar o agendamento para pegar os dados
+      await connection.rollback();
+      return res.status(404).json({ mensagem: 'Agendamento não encontrado para notificação.' });
+    }
+
+  } catch (err) {
+    await connection.rollback();
+    console.error('Erro ao reagendar agendamento (somente data):', err);
+    res.status(500).json({ erro: 'Erro ao reagendar agendamento', detalhes: err.message });
   } finally {
     connection.release();
   }
