@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Configuração do Cliente WhatsApp (se você for usar)
+// Configuração do Cliente WhatsApp
 let waClient;
 async function initializeWhatsAppClient() {
   waClient = new Client();
@@ -39,56 +39,90 @@ async function initializeWhatsAppClient() {
 // Inicializa o cliente WhatsApp (pode ser feito uma vez na inicialização do servidor)
 // initializeWhatsAppClient();
 
-// Função para enviar email de confirmação
-exports.sendEmailNotification = async (agendamento) => {
+/**
+ * Funcao para substituir os placeholders em um template.
+ * @param {string} template - O conteúdo do template em string.
+ * @param {object} data - Um objeto com os dados para substituicao.
+ * @returns {string} O template com os dados substituidos.
+ */
+const replacePlaceholders = (template, data) => {
+  let newTemplate = template;
+  for (const key in data) {
+    if (data[key] !== null && data[key] !== undefined) {
+      newTemplate = newTemplate.replace(new RegExp(`{{${key}}}`, 'g'), data[key]);
+    }
+  }
+  return newTemplate;
+};
+
+// =========================================================================
+// FUNÇÃO ADAPTADA PARA ENVIAR E-MAIL DE CONFIRMAÇÃO
+// =========================================================================
+exports.sendEmailNotification = async (agendamento, isReagendamento = false) => {
   try {
-    const templatePath = path.join(__dirname, '..', process.env.TEMPLATE_DIR, 'agendamento_email.html');
+    const templateName = isReagendamento ? 'reagendamento_email.html' : 'agendamento_email.html';
+    const subject = isReagendamento ? 'Confirmação de Reagendamento' : 'Confirmação de Agendamento';
+    const templatePath = path.join(__dirname, '..', 'templates', templateName); // Assumindo que os templates estão em uma pasta chamada 'templates'
+
     let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 
-    // Substituir placeholders
-    htmlTemplate = htmlTemplate.replace('{{nome_paciente}}', agendamento.nome);
-    htmlTemplate = htmlTemplate.replace('{{tipo_terapia}}', agendamento.tipo_terapia);
-    htmlTemplate = htmlTemplate.replace('{{data_agendamento}}', new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR'));
-    htmlTemplate = htmlTemplate.replace('{{hora_agendamento}}', new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
-    htmlTemplate = htmlTemplate.replace('{{motivo_consulta}}', agendamento.motivo_consulta);
+    // Mapeia os dados do agendamento para os placeholders do template
+    const templateData = {
+      nome_paciente: agendamento.nome,
+      tipo_terapia: agendamento.tipo_terapia,
+      data_agendamento: new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR'),
+      hora_agendamento: new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      motivo_consulta: agendamento.motivo_consulta,
+      ano_atual: new Date().getFullYear(),
+    };
+
+    htmlTemplate = replacePlaceholders(htmlTemplate, templateData);
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: agendamento.email,
-      subject: 'Confirmação de Agendamento',
+      subject: subject,
       html: htmlTemplate,
     };
 
     await transporter.sendMail(mailOptions);
-    console.log('Email de confirmação enviado com sucesso para:', agendamento.email);
+    const action = isReagendamento ? 'reagendamento' : 'confirmação';
+    console.log(`Email de ${action} enviado com sucesso para:`, agendamento.email);
 
   } catch (error) {
-    console.error('Erro ao enviar email de confirmação:', error);
+    console.error(`Erro ao enviar email de confirmação/reagendamento:`, error);
   }
 };
 
-// Função para enviar notificação pelo WhatsApp
-exports.sendWhatsAppNotification = async (agendamento) => {
+// =========================================================================
+// FUNÇÃO ADAPTADA PARA ENVIAR NOTIFICAÇÃO VIA WHATSAPP
+// =========================================================================
+exports.sendWhatsAppNotification = async (agendamento, isReagendamento = false) => {
   if (!waClient || !waClient.isReady) {
     console.log('Cliente WhatsApp não está pronto. Ignorando notificação.');
     return;
   }
 
   try {
-    const templatePath = path.join(__dirname, '..', process.env.TEMPLATE_DIR, 'agendamento_whatsapp.txt');
+    const templateName = isReagendamento ? 'reagendamento_whatsapp.txt' : 'agendamento_whatsapp.txt';
+    const templatePath = path.join(__dirname, '..', 'templates', templateName); // Assumindo que os templates estão em uma pasta chamada 'templates'
     let textTemplate = await fs.readFile(templatePath, 'utf-8');
 
-    // Substituir placeholders
-    textTemplate = textTemplate.replace('{{nome_paciente}}', agendamento.nome);
-    textTemplate = textTemplate.replace('{{tipo_terapia}}', agendamento.tipo_terapia);
-    textTemplate = textTemplate.replace('{{data_agendamento}}', new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR'));
-    textTemplate = textTemplate.replace('{{hora_agendamento}}', new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+    const templateData = {
+      nome_paciente: agendamento.nome,
+      tipo_terapia: agendamento.tipo_terapia,
+      data_agendamento: new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR'),
+      hora_agendamento: new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+    };
+
+    textTemplate = replacePlaceholders(textTemplate, templateData);
 
     // Formatar o número do telefone para o formato do WhatsApp
     const phoneNumber = `55${agendamento.telefone}@c.us`; // Adapte o formato conforme a sua necessidade
 
     await waClient.sendMessage(phoneNumber, textTemplate);
-    console.log('Notificação WhatsApp enviada com sucesso para:', agendamento.telefone);
+    const action = isReagendamento ? 'reagendamento' : 'confirmação';
+    console.log(`Notificação WhatsApp de ${action} enviada com sucesso para:`, agendamento.telefone);
 
   } catch (error) {
     console.error('Erro ao enviar notificação WhatsApp:', error);

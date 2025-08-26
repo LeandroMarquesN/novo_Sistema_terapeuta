@@ -56,5 +56,14 @@ router.get('/', agendamentoController.listarAgendamentos);
 // Esta rota espera um ':id' na URL para identificar o agendamento a ser excluído.
 router.delete('/:id', agendamentoController.deletarAgendamento);
 
+// ==================================================================================================
+// NOVA ROTA: Rota PUT para reagendar uma consulta.
+// ==================================================================================================
+// Esta rota espera um ':id' na URL para identificar qual agendamento deve ser atualizado.
+// Ela utiliza o mesmo middleware 'upload' para lidar com possíveis novos arquivos ou foto.
+// O controlador 'reagendarAgendamento' será responsável por atualizar o agendamento no DB
+// e enviar a notificação de reagendamento.
+router.put('/:id', upload, agendamentoController.reagendarAgendamento);
+
 // Exporta o roteador para ser usado em seu arquivo principal do servidor (app.js).
 module.exports = router;
