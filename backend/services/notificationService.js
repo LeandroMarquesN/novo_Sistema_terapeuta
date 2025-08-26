@@ -56,13 +56,26 @@ const replacePlaceholders = (template, data) => {
 };
 
 // =========================================================================
-// FUNÇÃO ADAPTADA PARA ENVIAR E-MAIL DE CONFIRMAÇÃO
+// FUNÇÃO ADAPTADA PARA ENVIAR E-MAIL
+// Agora com suporte para reagendamento e cancelamento.
 // =========================================================================
-exports.sendEmailNotification = async (agendamento, isReagendamento = false) => {
+exports.sendEmailNotification = async (agendamento, isReagendamento = false, isCancelamento = false) => {
   try {
-    const templateName = isReagendamento ? 'reagendamento_email.html' : 'agendamento_email.html';
-    const subject = isReagendamento ? 'Confirmação de Reagendamento' : 'Confirmação de Agendamento';
-    const templatePath = path.join(__dirname, '..', 'templates', templateName); // Assumindo que os templates estão em uma pasta chamada 'templates'
+    let subject;
+    let templateName;
+
+    if (isCancelamento) {
+      subject = 'Cancelamento de Agendamento';
+      templateName = 'cancelamento_agendamento.html';
+    } else if (isReagendamento) {
+      subject = 'Confirmação de Reagendamento';
+      templateName = 'reagendamento_email.html';
+    } else {
+      subject = 'Confirmação de Agendamento';
+      templateName = 'agendamento_email.html';
+    }
+
+    const templatePath = path.join(__dirname, '..', 'templates', templateName);
 
     let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 
@@ -86,11 +99,11 @@ exports.sendEmailNotification = async (agendamento, isReagendamento = false) => 
     };
 
     await transporter.sendMail(mailOptions);
-    const action = isReagendamento ? 'reagendamento' : 'confirmação';
+    const action = isCancelamento ? 'cancelamento' : (isReagendamento ? 'reagendamento' : 'confirmação');
     console.log(`Email de ${action} enviado com sucesso para:`, agendamento.email);
 
   } catch (error) {
-    console.error(`Erro ao enviar email de confirmação/reagendamento:`, error);
+    console.error(`Erro ao enviar email de ${isCancelamento ? 'cancelamento' : (isReagendamento ? 'reagendamento' : 'confirmação')}:`, error);
   }
 };
 
