@@ -56,6 +56,17 @@
             font-size: 1rem;
         }
 
+        /* Estilização para a contagem regressiva */
+        .countdown-cell {
+            font-weight: 500;
+            color: #fff;
+            text-shadow: 1px 1px 2px #000;
+        }
+        .countdown-past {
+            color: #ccc;
+            font-style: italic;
+        }
+
         /* ==================================== */
         /* ESTILOS PARA O MODO ESCURO */
         /* ==================================== */
@@ -308,8 +319,8 @@
                         <tr>
                             <th>Paciente</th>
                             <th>Data e Hora</th>
-                            <th>Terapia</th>
-                            <th class="text-center">Atender Paciente</th>
+                            <th class="text-center">Contagem Regressiva</th>
+                            <th class="text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="tabelaAgendamentos">
@@ -655,6 +666,34 @@
             }
         }
 
+        // Função para atualizar a contagem regressiva
+        function atualizarContagemRegressiva(agendamentos) {
+            const agora = new Date().getTime();
+            const linhas = document.querySelectorAll('#tabelaAgendamentos tr');
+
+            linhas.forEach((tr, index) => {
+                const agendamento = agendamentos[index];
+                if (!agendamento) return;
+
+                const dataAgendamento = new Date(agendamento.data_agendamento).getTime();
+                const diferenca = dataAgendamento - agora;
+                const celulaContagem = tr.querySelector('.countdown-cell');
+
+                if (diferenca > 0) {
+                    const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+                    const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+                    const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+
+                    celulaContagem.textContent = `Começa em: ${dias}d ${horas}h ${minutos}m ${segundos}s`;
+                    celulaContagem.classList.remove('countdown-past');
+                } else {
+                    celulaContagem.textContent = 'Aconteceu!';
+                    celulaContagem.classList.add('countdown-past');
+                }
+            });
+        }
+
         async function carregarTabelaAgendamentos() {
             const tabelaBody = document.getElementById('tabelaAgendamentos');
             tabelaBody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Carregando agendamentos...</td></tr>';
@@ -696,13 +735,17 @@
                     tr.innerHTML = `
                         <td>${agendamento.nome || 'N/A'}</td>
                         <td>${dataFormatada}</td>
-                        <td>${agendamento.tipo_terapia || 'N/A'}</td>
+                        <td class="countdown-cell" data-agendamento-data="${agendamento.data_agendamento}"></td>
                         <td>
-                            <a href="atendimento.html?pacienteId=${agendamento.id}" class="btn btn-sm btn-primary">Atender</a>
+                            <a href="atendimento.html?pacienteId=${agendamento.id}" class="btn btn-sm btn-primary me-2">Atender</a>
+                            <a href="agendamento.html?pacienteId=${agendamento.id}" class="btn btn-sm btn-warning me-2">Reagendar</a>
                         </td>
                     `;
                     tabelaBody.appendChild(tr);
                 });
+
+                // Iniciar a contagem regressiva para os agendamentos na tabela
+                setInterval(() => atualizarContagemRegressiva(proximosAgendamentos), 1000);
 
                 mostrarModalPrimeiroAtendimento(agendamentosFuturos);
             } catch (erro) {
