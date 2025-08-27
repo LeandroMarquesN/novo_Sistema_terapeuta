@@ -137,9 +137,11 @@
         }
 
         .btn-atender {
-            background-color: #198754;
+            margin-right: 10px;
+            background-color: #1c4e9e;
             color: #fff;
-            border-color: #198754;
+            transition: all 0.2s ease-in-out;
+            border-color: #1c4e9e;
         }
         .btn-atender:hover {
             opacity: 0.9;
@@ -148,6 +150,7 @@
         }
 
         .btn-reagendar {
+            margin-right: 10px;
             background-color: #1887af;
             color: #fff;
             border-color: #1887af;
@@ -735,10 +738,33 @@
                 alert('Erro ao cancelar agendamento. Verifique a conexão com o servidor.');
             }
         }
-
+        //======= FUNCAO DE  ATENDIMENTO  =============
         async function atenderAgendamento(agendamentoId) {
-            alert(`Atendimento do agendamento ${agendamentoId} iniciado.`);
+            try {
+                    // Busca a lista de agendamentos no backend
+                    const resposta = await fetch('http://localhost:3000/api/agendamentos');
+                    if (!resposta.ok) throw new Error('Erro ao carregar agendamentos');
+                    const agendamentos = await resposta.json();
+
+                    // Localiza o agendamento correspondente
+                    const agendamento = agendamentos.find(a => a.id === agendamentoId);
+
+                    if (!agendamento) {
+                        alert("Agendamento não encontrado.");
+                        return;
+                    }
+
+                    // Salva os dados do agendamento no sessionStorage
+                    sessionStorage.setItem("atendimento", JSON.stringify(agendamento));
+
+                    // Redireciona para a página de atendimento
+                    window.location.href = "atendimento.html";
+                } catch (error) {
+                    console.error("Erro ao iniciar atendimento:", error);
+                    alert("Não foi possível iniciar o atendimento.");
+                }
         }
+
 
         // CORREÇÃO: Função de Reagendamento
         document.getElementById('formReagendamento').addEventListener('submit', async function(event) {

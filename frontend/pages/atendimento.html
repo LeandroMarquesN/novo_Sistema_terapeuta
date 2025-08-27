@@ -580,7 +580,7 @@
             const maleExams = document.getElementById('male-imaging-exams');
             const femaleExams = document.getElementById('female-imaging-exams');
 
-            // Função para alternar a visibilidade dos exames
+            // 🔹 Função para alternar a visibilidade dos exames
             function toggleExams() {
                 if (genderFemaleRadio.checked) {
                     maleExams.classList.add('d-none');
@@ -591,52 +591,39 @@
                 }
             }
 
-            // Event listeners para os botões de rádio
-            genderMaleRadio.addEventListener('change', toggleExams);
-            genderFemaleRadio.addEventListener('change', toggleExams);
+            // 🔹 Carregar atendimento salvo no sessionStorage
+            const atendimento = JSON.parse(sessionStorage.getItem("atendimento"));
 
-            // Estado inicial ao carregar a página
-            toggleExams();
-
-            // FUNCIONALIDADE PARA CARREGAR AGENDAMENTO //
-            document.addEventListener('DOMContentLoaded', function() {
-    const botoesCarregar = document.querySelectorAll('.carregar-paciente');
-    const patientNameElement = document.getElementById('patient-name'); // Supondo que você tenha um elemento para o nome
-    const patientPhotoElement = document.getElementById('patient-photo-circle');
-
-    botoesCarregar.forEach(botao => {
-        botao.addEventListener('click', function() {
-            const pacienteId = this.getAttribute('data-paciente-id');
-
-            // Aqui você faria a lógica para buscar os dados do paciente (por exemplo, via uma API)
-            // Por enquanto, vamos usar dados de exemplo
-            let nomePaciente = '';
-            let fotoPaciente = '';
-
-            if (pacienteId === '123') {
-                nomePaciente = 'João Silva';
-                fotoPaciente = 'https://placehold.co/100x100/3498db/ffffff?text=JS';
-            } else if (pacienteId === '456') {
-                nomePaciente = 'Maria Oliveira';
-                fotoPaciente = 'https://placehold.co/100x100/e74c3c/ffffff?text=MO';
-            } else if (pacienteId === '789') {
-                nomePaciente = 'Pedro Souza';
-                fotoPaciente = 'https://placehold.co/100x100/2ecc71/ffffff?text=PS';
+            if (!atendimento) {
+                alert("Nenhum atendimento carregado.");
+                window.location.href = "dashboard.html";
+                return;
             }
 
-            // Atualiza a interface com os dados do paciente
-            patientPhotoElement.src = fotoPaciente;
-            // Se você tiver um elemento para o nome do paciente, atualize-o aqui
-            // patientNameElement.textContent = nomePaciente;
+            // Preenche nome e foto
+            document.getElementById("patient-name").textContent = atendimento.nome;
+            if (atendimento.foto_url) {
+                document.getElementById("patient-photo-circle").src = atendimento.foto_url;
+            }
 
-            // Você pode adicionar mais lógica para carregar outros dados
-            // e até mesmo preencher os campos de exames.
+            // Marca gênero e atualiza exames
+            if (atendimento.genero) {
+                if (atendimento.genero.toLowerCase() === "masculino") {
+                    genderMaleRadio.checked = true;
+                } else if (atendimento.genero.toLowerCase() === "feminino") {
+                    genderFemaleRadio.checked = true;
+                }
+            }
 
-            alert(`Paciente ${nomePaciente} (ID: ${pacienteId}) carregado com sucesso!`);
+            // Executa a lógica inicial dos exames
+            toggleExams();
+
+            // 🔹 Event listeners
+            genderMaleRadio.addEventListener('change', toggleExams);
+            genderFemaleRadio.addEventListener('change', toggleExams);
         });
-    });
-});
-        });
-    </script>
+        </script>
+
+
 </body>
 </html>
