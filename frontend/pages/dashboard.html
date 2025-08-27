@@ -751,16 +751,20 @@
             }
         }
 
-        document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
+    //    =======  Funcao reagendamento ============
+
+    document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
             event.preventDefault();
             const id = document.getElementById('reagendarId').value;
             const novaDataHora = document.getElementById('reagendarDataHora').value;
+
             if (!id || !novaDataHora) {
                 console.error('Dados de reagendamento inválidos.');
                 return;
             }
+
             try {
-                const response = await fetch(`http://localhost:3000/api/agendamentos/${id}`, {
+                const response = await fetch(`/api/agendamentos/${id}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json'
@@ -772,7 +776,7 @@
                     alert('Agendamento reagendado com sucesso!');
                     const modalReagendamento = bootstrap.Modal.getInstance(document.getElementById('modalReagendamento'));
                     modalReagendamento.hide();
-                    carregarEAtualizarAgendamentos();
+                    carregarTabelaAgendamentos();
                 } else {
                     const error = await response.json();
                     alert('Erro ao reagendar: ' + (error.message || response.statusText));
