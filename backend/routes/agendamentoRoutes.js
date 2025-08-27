@@ -43,12 +43,12 @@ router.delete('/:id', agendamentoController.deletarAgendamento);
 // ROTAS DE ATUALIZAÇÃO (CORRIGIDAS)
 // ==================================================================================================
 
-// Rota PUT para atualização completa de um agendamento (incluindo upload de arquivos).
-router.put('/completo/:id', upload, agendamentoController.atualizarAgendamentoCompleto);
+// Rota PUT para reagendar uma consulta (somente a data).
+// Agora usa o método PUT, que é o que o seu frontend espera.
+router.put('/:id', agendamentoController.reagendarAgendamento);
 
-// Rota POST ESPECÍFICA para reagendar uma consulta (somente a data).
-// Agora usa POST para corresponder ao seu frontend e uma URL diferente para evitar conflitos.
-router.post('/reagendar/:id', agendamentoController.reagendarAgendamento);
+// Se você ainda precisar da rota de atualização completa, pode mantê-la com outro nome
+// Exemplo: router.put('/completo/:id', upload, agendamentoController.atualizarAgendamentoCompleto);
 
 // Exporta o roteador.
 module.exports = router;

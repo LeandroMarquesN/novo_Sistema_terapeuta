@@ -751,41 +751,43 @@
             }
         }
 
-    //    =======  Funcao reagendamento ============
+        //    =======  Funcao reagendamento ============
 
-    document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const id = document.getElementById('reagendarId').value;
-            const novaDataHora = document.getElementById('reagendarDataHora').value;
+document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    const id = document.getElementById('reagendarId').value;
+    const novaDataHora = document.getElementById('reagendarDataHora').value;
 
-            if (!id || !novaDataHora) {
-                console.error('Dados de reagendamento inválidos.');
-                return;
-            }
+    if (!id || !novaDataHora) {
+        console.error('Dados de reagendamento inválidos.');
+        return;
+    }
 
-            try {
-                const response = await fetch(`/api/agendamentos/${id}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ data_agendamento: novaDataHora })
-                });
-
-                if (response.ok) {
-                    alert('Agendamento reagendado com sucesso!');
-                    const modalReagendamento = bootstrap.Modal.getInstance(document.getElementById('modalReagendamento'));
-                    modalReagendamento.hide();
-                    carregarTabelaAgendamentos();
-                } else {
-                    const error = await response.json();
-                    alert('Erro ao reagendar: ' + (error.message || response.statusText));
-                }
-            } catch (error) {
-                console.error('Erro ao reagendar agendamento:', error);
-                alert('Erro ao reagendar agendamento. Tente novamente mais tarde.');
-            }
+    try {
+        const response = await fetch(`http://localhost:3000/api/agendamentos/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ data_agendamento: novaDataHora })
         });
+
+        if (response.ok) {
+            alert('Agendamento reagendado com sucesso!');
+            const modalReagendamento = bootstrap.Modal.getInstance(document.getElementById('modalReagendamento'));
+            modalReagendamento.hide();
+            // Assumindo que a função para recarregar a tabela se chama carregarEAtualizarAgendamentos
+            // Se o nome for diferente, ajuste-o aqui.
+            carregarEAtualizarAgendamentos();
+        } else {
+            const error = await response.json();
+            alert('Erro ao reagendar: ' + (error.message || response.statusText));
+        }
+    } catch (error) {
+        console.error('Erro ao reagendar agendamento:', error);
+        alert('Erro ao reagendar agendamento. Tente novamente mais tarde.');
+    }
+});
 
         function atualizarContagemRegressiva(agendamentos) {
             const agora = new Date().getTime();
