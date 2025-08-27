@@ -24,16 +24,16 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif; /* Mantendo Inter como solicitado */
+            font-family: 'Inter', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             line-height: 1.6;
-            margin-top: 80px; /* Ajuste para o cabeçalho fixo */
+            margin-top: 80px;
         }
 
         /* Custom styles for the navbar to match user's provided structure */
         .navbar.bg-transparente {
-            background-color: var(--card-background) !important; /* Force white background */
+            background-color: var(--card-background) !important;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: fixed;
             top: 0;
@@ -50,13 +50,13 @@
         }
 
         .navbar-brand .logo-img:hover {
-            color: #0a58ca; /* Darker blue on hover */
+            color: #0a58ca;
         }
 
         /* Container principal para Sidebar e Main Content */
         .page-container {
             display: flex;
-            min-height: calc(100vh - 80px); /* 80px da altura da navbar */
+            min-height: calc(100vh - 80px);
         }
 
         /* Menu Lateral (Sidebar) */
@@ -181,7 +181,7 @@
                 margin-left: 5px !important;
             }
             body {
-                margin-top: 150px; /* Ajuste para o header colapsado */
+                margin-top: 150px;
             }
             .page-container {
                 flex-direction: column;
@@ -202,7 +202,7 @@
                 flex: 1 1 auto;
                 width: auto;
                 text-align: center;
-                justify-content: center; /* Center icon and text */
+                justify-content: center;
             }
             .main-content {
                 padding: 20px;
@@ -249,20 +249,20 @@
                         <img id="patient-photo-circle" src="https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO" alt="Foto do Paciente" class="rounded-circle patient-photo">
                     </div>
                    <div id="patient-data" class="flex-grow-1">
-    <h4>Próximos Agendamentos</h4>
-    <p class="text-secondary">Clique em um agendamento para carregar os dados do paciente.</p>
-    <ul class="list-group">
-        <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-                <strong>João Silva</strong>
-                <br>
-                <small class="text-muted">10:00 - Consulta de Rotina</small>
-            </div>
-            <button class="btn btn-sm btn-outline-primary carregar-paciente" data-paciente-id="123">Carregar</button>
-        </li>
-
-    </ul>
-</div>
+                        <h4>Paciente: <span id="infoNome"></span></h4>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><strong>Data e Hora:</strong> <span id="infoDataHora"></span></li>
+                            <li class="list-group-item"><strong>Data de Nascimento:</strong> <span id="infoDataNascimento"></span></li>
+                            <li class="list-group-item"><strong>Idade:</strong> <span id="infoIdade"></span></li>
+                            <li class="list-group-item"><strong>Peso:</strong> <span id="infoPeso"></span></li>
+                            <li class="list-group-item"><strong>Altura:</strong> <span id="infoAltura"></span></li>
+                            <li class="list-group-item"><strong>IMC:</strong> <span id="infoIMC"></span></li>
+                            <li class="list-group-item"><strong>Motivo da Consulta:</strong> <span id="infoMotivoConsulta"></span></li>
+                            <li class="list-group-item"><strong>Tipo de Terapia:</strong> <span id="infoTipoTerapia"></span></li>
+                            <li class="list-group-item"><strong>Observações:</strong> <span id="infoObservacoes"></span></li>
+                            <li class="list-group-item"><strong>Condições de Saúde:</strong> <span id="infoCondicoes"></span></li>
+                        </ul>
+                    </div>
                 </div>
             </section>
 
@@ -581,49 +581,132 @@
             const femaleExams = document.getElementById('female-imaging-exams');
 
             // 🔹 Função para alternar a visibilidade dos exames
-            function toggleExams() {
-                if (genderFemaleRadio.checked) {
+            function toggleExams(gender) {
+                if (gender === 'feminino' || gender === 'Feminino') {
                     maleExams.classList.add('d-none');
                     femaleExams.classList.remove('d-none');
+                    genderFemaleRadio.checked = true;
                 } else {
                     maleExams.classList.remove('d-none');
                     femaleExams.classList.add('d-none');
+                    genderMaleRadio.checked = true;
                 }
+            }
+
+            // 🔹 Função para calcular a idade
+            function calcularIdade(dataNascimento) {
+                const hoje = new Date();
+                let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+                const mes = hoje.getMonth() - dataNascimento.getMonth();
+                if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) {
+                    idade--;
+                }
+                return idade;
+            }
+
+            // 🔹 **FUNÇÃO CORRIGIDA: Calcular e classificar o IMC**
+            function calcularIMC(peso, altura) {
+                // A altura já deve estar em metros. Se estiver em cm, divida por 100 antes de passar para esta função.
+                // Exemplo: calcularIMC(85, 1.8)
+                const imc = peso / (altura * altura);
+
+                let classificacao = '';
+                if (imc < 18.5) {
+                    classificacao = 'Abaixo do peso';
+                } else if (imc >= 18.5 && imc < 24.9) {
+                    classificacao = 'Peso normal';
+                } else if (imc >= 25 && imc < 29.9) {
+                    classificacao = 'Sobrepeso';
+                } else if (imc >= 30 && imc < 34.9) {
+                    classificacao = 'Obesidade Grau I';
+                } else if (imc >= 35 && imc < 39.9) {
+                    classificacao = 'Obesidade Grau II';
+                } else {
+                    classificacao = 'Obesidade Grau III (mórbida)';
+                }
+
+                return `<strong>${imc.toFixed(2)}</strong> (${classificacao})`;
             }
 
             // 🔹 Carregar atendimento salvo no sessionStorage
             const atendimento = JSON.parse(sessionStorage.getItem("atendimento"));
 
-            if (!atendimento) {
-                alert("Nenhum atendimento carregado.");
-                window.location.href = "dashboard.html";
-                return;
-            }
+            if (atendimento) {
+                try {
+                    // Preencher os dados do paciente
+                    document.getElementById('infoNome').textContent = atendimento.nome || 'N/A';
 
-            // Preenche nome e foto
-            document.getElementById("patient-name").textContent = atendimento.nome;
-            if (atendimento.foto_url) {
-                document.getElementById("patient-photo-circle").src = atendimento.foto_url;
-            }
+                    // Formatar e preencher a data de nascimento e calcular a idade
+                    const dataNascimento = atendimento.data_nascimento ? new Date(atendimento.data_nascimento) : null;
+                    if (dataNascimento && !isNaN(dataNascimento)) {
+                        const dataNascimentoFormatada = dataNascimento.toLocaleDateString('pt-BR');
+                        const idade = calcularIdade(dataNascimento);
+                        document.getElementById('infoDataNascimento').textContent = dataNascimentoFormatada;
+                        document.getElementById('infoIdade').textContent = idade;
+                    } else {
+                        document.getElementById('infoDataNascimento').textContent = 'N/A';
+                        document.getElementById('infoIdade').textContent = 'N/A';
+                    }
 
-            // Marca gênero e atualiza exames
-            if (atendimento.genero) {
-                if (atendimento.genero.toLowerCase() === "masculino") {
-                    genderMaleRadio.checked = true;
-                } else if (atendimento.genero.toLowerCase() === "feminino") {
-                    genderFemaleRadio.checked = true;
+                    // Preencher peso e altura
+                    document.getElementById('infoPeso').textContent = atendimento.peso || 'N/A';
+                    document.getElementById('infoAltura').textContent = atendimento.altura || 'N/A';
+
+                    // 🔹 **Calcular e preencher o IMC**
+                    const peso = parseFloat(atendimento.peso);
+                    const altura = parseFloat(atendimento.altura);
+                    if (!isNaN(peso) && !isNaN(altura)) {
+                        // Verifica se a altura é um valor em metros (e.g., 1.8) ou cm (e.g., 180)
+                        // A verificação abaixo é uma heurística para evitar o erro.
+                        let alturaCorrigida = altura;
+                        if (altura > 3 && altura <= 300) { // Assume que valores acima de 3 e abaixo de 300 são em cm e converte
+                             alturaCorrigida = altura / 100;
+                        }
+
+                        document.getElementById('infoIMC').innerHTML = calcularIMC(peso, alturaCorrigida);
+                    } else {
+                        document.getElementById('infoIMC').textContent = 'N/A';
+                    }
+
+                    // Preencher a foto
+                    const patientPhoto = document.getElementById('patient-photo-circle');
+                    if (atendimento.foto_paciente) {
+                        patientPhoto.src = atendimento.foto_paciente;
+                    } else {
+                        // Se não houver foto, mantém a placeholder
+                        patientPhoto.src = "https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO";
+                    }
+
+                    // Formatar e preencher a data e hora do agendamento
+                    const dataAgendamento = atendimento.data_agendamento ? new Date(atendimento.data_agendamento) : null;
+                    if (dataAgendamento && !isNaN(dataAgendamento)) {
+                        const dataHoraFormatada = dataAgendamento.toLocaleDateString('pt-BR') + ' às ' + dataAgendamento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                        document.getElementById('infoDataHora').textContent = dataHoraFormatada;
+                    } else {
+                        document.getElementById('infoDataHora').textContent = 'N/A';
+                    }
+
+                    // Preencher campos de texto
+                    document.getElementById('infoMotivoConsulta').textContent = atendimento.motivo_consulta || 'N/A';
+                    document.getElementById('infoTipoTerapia').textContent = atendimento.tipo_terapia || 'N/A';
+                    document.getElementById('infoObservacoes').textContent = atendimento.observacoes || 'N/A';
+                    document.getElementById('infoCondicoes').textContent = atendimento.condicoes_saude || 'N/A';
+
+                    // Selecionar o gênero para exibir os exames corretos
+                    toggleExams(atendimento.genero_paciente);
+
+                } catch (e) {
+                    console.error("Erro ao carregar dados do agendamento:", e);
+                    alert("Erro ao carregar os dados do atendimento. Verifique o console.");
                 }
+            } else {
+                alert("Nenhum agendamento selecionado. Por favor, volte para o dashboard e selecione um atendimento.");
             }
 
-            // Executa a lógica inicial dos exames
-            toggleExams();
-
-            // 🔹 Event listeners
-            genderMaleRadio.addEventListener('change', toggleExams);
-            genderFemaleRadio.addEventListener('change', toggleExams);
+            // Event listeners para alternar os exames ao clicar nos botões de rádio
+            genderMaleRadio.addEventListener('change', () => toggleExams('masculino'));
+            genderFemaleRadio.addEventListener('change', () => toggleExams('feminino'));
         });
-        </script>
-
-
+    </script>
 </body>
 </html>
