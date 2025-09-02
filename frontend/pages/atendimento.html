@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atendimento ao Paciente</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
     <link rel="stylesheet" href="css/animacaoBack.css">
@@ -159,6 +159,49 @@
             border: 2px solid var(--primary-color);
         }
 
+        /* Estilos para os resultados do exame */
+        #exame-resultado-container {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .resultado-item {
+            margin-bottom: 10px;
+        }
+        .resultado-item span {
+            font-weight: 600;
+        }
+        .resultado-item .valor {
+            font-weight: 400;
+        }
+
+        /* Estilos para a lista de anexos */
+        .anexos-list .list-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Estilos para os ícones de aumento/declínio */
+        .trend-icon {
+            margin-left: 10px;
+            font-size: 1rem;
+        }
+        .trend-up {
+            color: #28a745; /* green */
+        }
+        .trend-down {
+            color: #dc3545; /* red */
+        }
+
+        /* Estilos para a alternância de views */
+        .toggle-view-btn.active {
+            background-color: var(--primary-color);
+            color: #fff;
+            border-color: var(--primary-color);
+        }
+
         /* Responsividade para a Navbar e Layout geral */
         @media (max-width: 768px) {
             .navbar .container-fluid {
@@ -272,326 +315,140 @@
             </section>
 
             <section>
-                <h3>Resultados de Exames para Comparativo</h3>
+                <h3>Anexos do Paciente</h3>
+                <div id="anexos-container" class="anexos-list list-group">
+                    <!-- A lista de anexos será gerada aqui via JavaScript -->
+                </div>
+            </section>
 
-                <div class="mb-4">
-                    <label class="form-label fw-bold">Gênero do Paciente:</label>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="genderMale" value="male" checked>
-                        <label class="form-check-label" for="genderMale">Masculino</label>
-                    </div>
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="gender" id="genderFemale" value="female">
-                        <label class="form-check-label" for="genderFemale">Feminino</label>
-                    </div>
+            <section>
+                <h3>Análise de Exames</h3>
+
+                <div class="btn-group mb-3" role="group">
+                    <button type="button" class="btn btn-outline-primary toggle-view-btn active" data-view="resultados">Resultados</button>
+                    <button type="button" class="btn btn-outline-primary toggle-view-btn" data-view="diagnostico">Diagnóstico</button>
                 </div>
 
-                <div id="male-imaging-exams" class="exames-grid mb-4">
-                    <h4>Exames de Imagem (Masculino)</h4>
-                    <div class="exame-input-group">
-                        <label for="usAbdomenTotalMale">Ultrassom Abdômen Total:</label>
-                        <input type="text" id="usAbdomenTotalMale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usAbdomenTotalMale-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="usTireoideDopplerMale">Ultrassom da Tireoide com Doppler colorido:</label>
-                        <input type="text" id="usTireoideDopplerMale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usTireoideDopplerMale-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="usCarotidasVertebrasMale">Ultrassom das carótidas e vértebras com Doppler colorido:</label>
-                        <input type="text" id="usCarotidasVertebrasMale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usCarotidasVertebrasMale-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="usProstaticaMale">Ultrassonografia Prostática:</label>
-                        <input type="text" id="usProstaticaMale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usProstaticaMale-data" class="form-control mt-2">
-                    </div>
-                </div>
+                <!-- Começo da aplicação de IA -->
+                <div class="card p-4">
+                    <form id="exame-upload-form" class="mb-3">
+                        <div class="input-group">
+                            <input type="file" class="form-control" id="exame-file" accept=".pdf">
+                            <button class="btn btn-primary" type="submit" id="btn-upload-exame">Processar Exame</button>
+                        </div>
+                    </form>
 
-                <div id="female-imaging-exams" class="exames-grid mb-4 d-none">
-                    <h4>Exames de Imagem (Feminino)</h4>
-                    <div class="exame-input-group">
-                        <label for="usAbdomenTotalFemale">Ultrassom Abdômen Total:</label>
-                        <input type="text" id="usAbdomenTotalFemale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usAbdomenTotalFemale-data" class="form-control mt-2">
+                    <!-- Indicador de Carregamento -->
+                    <div id="loading-spinner" class="d-none text-center p-4">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Processando...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Aguarde, processando o exame...</p>
                     </div>
-                    <div class="exame-input-group">
-                        <label for="usTireoideDopplerFemale">Ultrassom da Tireoide com Doppler colorido:</label>
-                        <input type="text" id="usTireoideDopplerFemale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usTireoideDopplerFemale-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="usCarotidasVertebrasFemale">Ultrassom das carótidas e vértebras com Doppler colorido:</label>
-                        <input type="text" id="usCarotidasVertebrasFemale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usCarotidasVertebrasFemale-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="usTransvaginalFemale">Ultrassom Transvaginal:</label>
-                        <input type="text" id="usTransvaginalFemale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usTransvaginalFemale-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="usMamasAxilasFemale">Ultrassom das mamas e axilas:</label>
-                        <input type="text" id="usMamasAxilasFemale" class="form-control" placeholder="Resultado">
-                        <input type="date" id="usMamasAxilasFemale-data" class="form-control mt-2">
-                    </div>
-                </div>
 
-                <h4 class="mt-4">Marcadores Sanguíneos e Urinários</h4>
-                <div class="exames-grid mb-4">
-                    <div class="exame-input-group">
-                        <label for="hemogramaCompleto">Hemograma completo:</label>
-                        <input type="text" id="hemogramaCompleto" class="form-control" placeholder="Resultado">
-                        <input type="date" id="hemogramaCompleto-data" class="form-control mt-2">
+                    <!-- Área para Exibir os Resultados e o Diagnóstico -->
+                    <div id="exame-resultado-container">
+
+                        <!-- VIEW DE RESULTADOS -->
+                        <div id="resultados-view" class="d-none">
+                            <h4>Resultados Extraídos</h4>
+                            <div class="resultado-item">
+                                <span>Nome do Paciente:</span>
+                                <p id="exame-paciente-nome" class="valor"></p>
+                            </div>
+                            <div class="resultado-item">
+                                <span>Tipo do Exame:</span>
+                                <p id="exame-tipo" class="valor"></p>
+                            </div>
+                            <div class="resultado-item">
+                                <h5>Valores Extraídos:</h5>
+                                <ul id="exame-valores" class="list-group list-group-flush">
+                                    <!-- Valores com ícones serão inseridos aqui via JS -->
+                                </ul>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <!-- Seção de Parâmetros -->
+                            <div id="exame-parametros-view">
+                                <h5>Parâmetros de Referência</h5>
+                                <ul id="exame-parametros" class="list-group list-group-flush">
+                                    <!-- Parâmetros de referência serão inseridos aqui via JS -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- VIEW DE DIAGNÓSTICO -->
+                        <div id="diagnostico-view" class="d-none">
+                            <h4>Diagnóstico da IA</h4>
+                            <div class="resultado-item">
+                                <span>Análise de IA:</span>
+                                <p id="exame-diagnostico" class="valor"></p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="exame-input-group">
-                        <label for="dimeroD">Dímero D:</label>
-                        <input type="text" id="dimeroD" class="form-control" placeholder="Resultado">
-                        <input type="date" id="dimeroD-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="pcr">PCR:</label>
-                        <input type="text" id="pcr" class="form-control" placeholder="Resultado">
-                        <input type="date" id="pcr-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="vhs">VHS:</label>
-                        <input type="text" id="vhs" class="form-control" placeholder="Resultado">
-                        <input type="date" id="vhs-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="fibrinogenio">Fibrinogênio:</label>
-                        <input type="text" id="fibrinogenio" class="form-control" placeholder="Resultado">
-                        <input type="date" id="fibrinogenio-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="homocisteina">Homocisteína:</label>
-                        <input type="text" id="homocisteina" class="form-control" placeholder="Resultado">
-                        <input type="date" id="homocisteina-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="coagulograma">Coagulograma:</label>
-                        <input type="text" id="coagulograma" class="form-control" placeholder="Resultado">
-                        <input type="date" id="coagulograma-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="cpk">CPK:</label>
-                        <input type="text" id="cpk" class="form-control" placeholder="Resultado">
-                        <input type="date" id="cpk-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="creatinina">Creatinina:</label>
-                        <input type="text" id="creatinina" class="form-control" placeholder="Resultado">
-                        <input type="date" id="creatinina-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="g6pd">G6PD:</label>
-                        <input type="text" id="g6pd" class="form-control" placeholder="Resultado">
-                        <input type="date" id="g6pd-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="ureia">Ureia:</label>
-                        <input type="text" id="ureia" class="form-control" placeholder="Resultado">
-                        <input type="date" id="ureia-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="eletroforeseProteinas">Eletroforese de Proteínas Séricas:</label>
-                        <input type="text" id="eletroforeseProteinas" class="form-control" placeholder="Resultado">
-                        <input type="date" id="eletroforeseProteinas-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="lipaseAmilase">Lipase e Amilase:</label>
-                        <input type="text" id="lipaseAmilase" class="form-control" placeholder="Resultado">
-                        <input type="date" id="lipaseAmilase-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="hemoglobinaGlicada">Hemoglobina glicada:</label>
-                        <input type="text" id="hemoglobinaGlicada" class="form-control" placeholder="Resultado">
-                        <input type="date" id="hemoglobinaGlicada-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="glicose">Glicose:</label>
-                        <input type="text" id="glicose" class="form-control" placeholder="Resultado">
-                        <input type="date" id="glicose-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="insulinaHoma">Insulina Homa:</label>
-                        <input type="text" id="insulinaHoma" class="form-control" placeholder="Resultado">
-                        <input type="date" id="insulinaHoma-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="triglicerides">Triglicérides:</label>
-                        <input type="text" id="triglicerides" class="form-control" placeholder="Resultado">
-                        <input type="date" id="triglicerides-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="colesterolTotalFracoes">Colesterol total e frações:</label>
-                        <input type="text" id="colesterolTotalFracoes" class="form-control" placeholder="Resultado">
-                        <input type="date" id="colesterolTotalFracoes-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="tgoTgp">TGO e TGP:</label>
-                        <input type="text" id="tgoTgp" class="form-control" placeholder="Resultado">
-                        <input type="date" id="tgoTgp-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="bilirrubinasTotalFracoes">Bilirrubinas totais e frações:</label>
-                        <input type="text" id="bilirrubinasTotalFracoes" class="form-control" placeholder="Resultado">
-                        <input type="date" id="bilirrubinasTotalFracoes-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="gamaGt">Gama GT:</label>
-                        <input type="text" id="gamaGt" class="form-control" placeholder="Resultado">
-                        <input type="date" id="gamaGt-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="ferro">Ferro:</label>
-                        <input type="text" id="ferro" class="form-control" placeholder="Resultado">
-                        <input type="date" id="ferro-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="ferritina">Ferritina:</label>
-                        <input type="text" id="ferritina" class="form-control" placeholder="Resultado">
-                        <input type="date" id="ferritina-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="transferritina">Transferritina:</label>
-                        <input type="text" id="transferritina" class="form-control" placeholder="Resultado">
-                        <input type="date" id="transferritina-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="calcioIonico">Cálcio iônico:</label>
-                        <input type="text" id="calcioIonico" class="form-control" placeholder="Resultado">
-                        <input type="date" id="calcioIonico-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="calcioLivre">Cálcio livre:</label>
-                        <input type="text" id="calcioLivre" class="form-control" placeholder="Resultado">
-                        <input type="date" id="calcioLivre-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="vitB12">Vit. B12:</label>
-                        <input type="text" id="vitB12" class="form-control" placeholder="Resultado">
-                        <input type="date" id="vitB12-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="vitC">Vit. C:</label>
-                        <input type="text" id="vitC" class="form-control" placeholder="Resultado">
-                        <input type="date" id="vitC-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="zinco">Zinco:</label>
-                        <input type="text" id="zinco" class="form-control" placeholder="Resultado">
-                        <input type="date" id="zinco-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="sodio">Sódio:</label>
-                        <input type="text" id="sodio" class="form-control" placeholder="Resultado">
-                        <input type="date" id="sodio-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="potassio">Potássio:</label>
-                        <input type="text" id="potassio" class="form-control" placeholder="Resultado">
-                        <input type="date" id="potassio-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="tshT4T3">TSH, T4Livre, T3Livre, T3Reverso:</label>
-                        <input type="text" id="tshT4T3" class="form-control" placeholder="Resultado">
-                        <input type="date" id="tshT4T3-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="pth">PTH:</label>
-                        <input type="text" id="pth" class="form-control" placeholder="Resultado">
-                        <input type="date" id="pth-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="acth">ACTH:</label>
-                        <input type="text" id="acth" class="form-control" placeholder="Resultado">
-                        <input type="date" id="acth-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="testosterona">Testosterona:</label>
-                        <input type="text" id="testosterona" class="form-control" placeholder="Resultado">
-                        <input type="date" id="testosterona-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="progesterona">Progesterona:</label>
-                        <input type="text" id="progesterona" class="form-control" placeholder="Resultado">
-                        <input type="date" id="progesterona-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="estriol">Estriol:</label>
-                        <input type="text" id="estriol" class="form-control" placeholder="Resultado">
-                        <input type="date" id="estriol-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="estradiol">Estradiol:</label>
-                        <input type="text" id="estradiol" class="form-control" placeholder="Resultado">
-                        <input type="date" id="estradiol-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="estroma">Estroma:</label>
-                        <input type="text" id="estroma" class="form-control" placeholder="Resultado">
-                        <input type="date" id="estroma-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="prolactina">Prolactina:</label>
-                        <input type="text" id="prolactina" class="form-control" placeholder="Resultado">
-                        <input type="date" id="prolactina-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="sulfatoDhea">Sulfato DHEA:</label>
-                        <input type="text" id="sulfatoDhea" class="form-control" placeholder="Resultado">
-                        <input type="date" id="sulfatoDhea-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="antiTireoglobulina">Anti-Tireoglobulina (TG):</label>
-                        <input type="text" id="antiTireoglobulina" class="form-control" placeholder="Resultado">
-                        <input type="date" id="antiTireoglobulina-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="antiTireoperoxidase">Anti-Tireoperoxidase (TPO):</label>
-                        <input type="text" id="antiTireoperoxidase" class="form-control" placeholder="Resultado">
-                        <input type="date" id="antiTireoperoxidase-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="antiReceptoresTsh">Anti-Receptores de TSH (TRAb):</label>
-                        <input type="text" id="antiReceptoresTsh" class="form-control" placeholder="Resultado">
-                        <input type="date" id="antiReceptoresTsh-data" class="form-control mt-2">
-                    </div>
-                    <div class="exame-input-group">
-                        <label for="magnesio">Magnésio:</label>
-                        <input type="text" id="magnesio" class="form-control" placeholder="Resultado">
-                        <input type="date" id="magnesio-data" class="form-control mt-2">
+
+                    <!-- Mensagem de Erro -->
+                    <div id="exame-error-message" class="alert alert-danger d-none" role="alert">
+                        <!-- Mensagens de erro serão exibidas aqui -->
                     </div>
                 </div>
+                <!-- Fim da aplicação  -->
             </section>
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             const genderMaleRadio = document.getElementById('genderMale');
             const genderFemaleRadio = document.getElementById('genderFemale');
-            const maleExams = document.getElementById('male-imaging-exams');
-            const femaleExams = document.getElementById('female-imaging-exams');
 
-            // 🔹 Função para alternar a visibilidade dos exames
-            function toggleExams(gender) {
-                if (gender === 'feminino' || gender === 'Feminino') {
-                    maleExams.classList.add('d-none');
-                    femaleExams.classList.remove('d-none');
-                    genderFemaleRadio.checked = true;
+            const exameFile = document.getElementById('exame-file');
+            const btnUploadExame = document.getElementById('btn-upload-exame');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const exameResultadoContainer = document.getElementById('exame-resultado-container');
+            const exameErrorMessage = document.getElementById('exame-error-message');
+
+            const examePacienteNome = document.getElementById('exame-paciente-nome');
+            const exameTipo = document.getElementById('exame-tipo');
+            const exameDiagnostico = document.getElementById('exame-diagnostico');
+            const exameValores = document.getElementById('exame-valores');
+            const exameParametros = document.getElementById('exame-parametros');
+
+            const anexosContainer = document.getElementById('anexos-container');
+
+            const resultadosView = document.getElementById('resultados-view');
+            const diagnosticoView = document.getElementById('diagnostico-view');
+            const toggleViewBtns = document.querySelectorAll('.toggle-view-btn');
+
+            // 🔹 Função para alternar entre as visualizações de Resultados e Diagnóstico
+            function toggleView(view) {
+                if (view === 'resultados') {
+                    resultadosView.classList.remove('d-none');
+                    diagnosticoView.classList.add('d-none');
                 } else {
-                    maleExams.classList.remove('d-none');
-                    femaleExams.classList.add('d-none');
-                    genderMaleRadio.checked = true;
+                    resultadosView.classList.add('d-none');
+                    diagnosticoView.classList.remove('d-none');
                 }
+
+                toggleViewBtns.forEach(btn => {
+                    if (btn.dataset.view === view) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
             }
+
+            // Ativa a lógica de alternância ao carregar a página
+            toggleViewBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const view = btn.dataset.view;
+                    toggleView(view);
+                });
+            });
 
             // 🔹 Função para calcular a idade
             function calcularIdade(dataNascimento) {
@@ -606,8 +463,6 @@
 
             // 🔹 **FUNÇÃO CORRIGIDA: Calcular e classificar o IMC**
             function calcularIMC(peso, altura) {
-                // A altura já deve estar em metros. Se estiver em cm, divida por 100 antes de passar para esta função.
-                // Exemplo: calcularIMC(85, 1.8)
                 const imc = peso / (altura * altura);
 
                 let classificacao = '';
@@ -628,15 +483,64 @@
                 return `<strong>${imc.toFixed(2)}</strong> (${classificacao})`;
             }
 
+            // 🔹 Função para renderizar os anexos
+            function renderizarAnexos(anexos) {
+                anexosContainer.innerHTML = '';
+
+                if (anexos && anexos.length > 0) {
+                    anexos.forEach(anexo => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+
+                        const anexoNome = document.createElement('span');
+                        anexoNome.textContent = anexo.nome_original;
+
+                        const anexoLink = document.createElement('a');
+                        anexoLink.href = anexo.caminho_servidor;
+                        anexoLink.target = '_blank';
+                        anexoLink.className = 'btn btn-outline-primary btn-sm';
+                        anexoLink.innerHTML = `<i class="fas fa-eye me-2"></i> Visualizar`;
+
+                        li.appendChild(anexoNome);
+                        li.appendChild(anexoLink);
+                        anexosContainer.appendChild(li);
+                    });
+                } else {
+                    anexosContainer.innerHTML = `<div class="alert alert-info" role="alert">Nenhum exame anexado a este atendimento.</div>`;
+                }
+            }
+
+            // ⚡️ SIMULAÇÃO DA CHAMADA AO BACKEND PARA ANEXOS
+            async function fetchAnexosDoAgendamento(agendamentoId) {
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                    const mockData = [
+                        { id: 1, agendamento_id: 1, nome_original: 'Exame de Sangue.pdf', caminho_servidor: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+                        { id: 2, agendamento_id: 1, nome_original: 'Radiografia do Tórax.jpg', caminho_servidor: 'https://placehold.co/800x600/FF5733/ffffff?text=Radiografia' },
+                        { id: 3, agendamento_id: 1, nome_original: 'Eletrocardiograma.pdf', caminho_servidor: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+                    ];
+
+                    const anexosEncontrados = mockData.filter(anexo => anexo.agendamento_id === agendamentoId);
+                    return anexosEncontrados;
+
+                } catch (error) {
+                    console.error('Erro ao buscar anexos:', error);
+                    return null;
+                }
+            }
+
             // 🔹 Carregar atendimento salvo no sessionStorage
             const atendimento = JSON.parse(sessionStorage.getItem("atendimento"));
 
             if (atendimento) {
+                atendimento.id = atendimento.id || 1;
+            }
+
+            if (atendimento) {
                 try {
-                    // Preencher os dados do paciente
                     document.getElementById('infoNome').textContent = atendimento.nome || 'N/A';
 
-                    // Formatar e preencher a data de nascimento e calcular a idade
                     const dataNascimento = atendimento.data_nascimento ? new Date(atendimento.data_nascimento) : null;
                     if (dataNascimento && !isNaN(dataNascimento)) {
                         const dataNascimentoFormatada = dataNascimento.toLocaleDateString('pt-BR');
@@ -648,18 +552,14 @@
                         document.getElementById('infoIdade').textContent = 'N/A';
                     }
 
-                    // Preencher peso e altura
                     document.getElementById('infoPeso').textContent = atendimento.peso || 'N/A';
                     document.getElementById('infoAltura').textContent = atendimento.altura || 'N/A';
 
-                    // 🔹 **Calcular e preencher o IMC**
                     const peso = parseFloat(atendimento.peso);
                     const altura = parseFloat(atendimento.altura);
                     if (!isNaN(peso) && !isNaN(altura)) {
-                        // Verifica se a altura é um valor em metros (e.g., 1.8) ou cm (e.g., 180)
-                        // A verificação abaixo é uma heurística para evitar o erro.
                         let alturaCorrigida = altura;
-                        if (altura > 3 && altura <= 300) { // Assume que valores acima de 3 e abaixo de 300 são em cm e converte
+                        if (altura > 3 && altura <= 300) {
                              alturaCorrigida = altura / 100;
                         }
 
@@ -668,16 +568,13 @@
                         document.getElementById('infoIMC').textContent = 'N/A';
                     }
 
-                    // Preencher a foto
                     const patientPhoto = document.getElementById('patient-photo-circle');
                     if (atendimento.foto_paciente) {
                         patientPhoto.src = atendimento.foto_paciente;
                     } else {
-                        // Se não houver foto, mantém a placeholder
                         patientPhoto.src = "https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO";
                     }
 
-                    // Formatar e preencher a data e hora do agendamento
                     const dataAgendamento = atendimento.data_agendamento ? new Date(atendimento.data_agendamento) : null;
                     if (dataAgendamento && !isNaN(dataAgendamento)) {
                         const dataHoraFormatada = dataAgendamento.toLocaleDateString('pt-BR') + ' às ' + dataAgendamento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -686,14 +583,13 @@
                         document.getElementById('infoDataHora').textContent = 'N/A';
                     }
 
-                    // Preencher campos de texto
                     document.getElementById('infoMotivoConsulta').textContent = atendimento.motivo_consulta || 'N/A';
                     document.getElementById('infoTipoTerapia').textContent = atendimento.tipo_terapia || 'N/A';
                     document.getElementById('infoObservacoes').textContent = atendimento.observacoes || 'N/A';
                     document.getElementById('infoCondicoes').textContent = atendimento.condicoes_saude || 'N/A';
 
-                    // Selecionar o gênero para exibir os exames corretos
-                    toggleExams(atendimento.genero_paciente);
+                    const anexos = await fetchAnexosDoAgendamento(atendimento.id);
+                    renderizarAnexos(anexos);
 
                 } catch (e) {
                     console.error("Erro ao carregar dados do agendamento:", e);
@@ -703,9 +599,93 @@
                 alert("Nenhum agendamento selecionado. Por favor, volte para o dashboard e selecione um atendimento.");
             }
 
-            // Event listeners para alternar os exames ao clicar nos botões de rádio
-            genderMaleRadio.addEventListener('change', () => toggleExams('masculino'));
-            genderFemaleRadio.addEventListener('change', () => toggleExams('feminino'));
+            // 🔹 Lógica para o Processamento de Exames com a IA
+            btnUploadExame.addEventListener('click', async function(event) {
+                event.preventDefault();
+
+                const file = exameFile.files[0];
+                if (!file) {
+                    exameErrorMessage.textContent = 'Por favor, selecione um arquivo PDF.';
+                    exameErrorMessage.classList.remove('d-none');
+                    return;
+                }
+
+                exameErrorMessage.classList.add('d-none');
+                loadingSpinner.classList.remove('d-none');
+
+                try {
+                    // ⚡️ SIMULAÇÃO DA CHAMADA AO BACKEND PARA ANÁLISE DE EXAMES
+                    // Substitua pela sua rota de backend
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    const data = {
+                        patientName: "João da Silva",
+                        examType: "Hemograma Completo",
+                        diagnosis: "Resultados do hemograma dentro dos limites de normalidade, indicando um estado de saúde geral estável. Pequenas variações em contagens específicas são consideradas normais e não representam risco imediato. Recomenda-se acompanhamento regular.",
+                        results: {
+                            'Hemoglobina': { value: '14.5 g/dL', trend: 'up' },
+                            'Leucócitos': { value: '7.8 x10³/µL', trend: 'neutral' },
+                            'Plaquetas': { value: '250 x10³/µL', trend: 'down' },
+                            'Glicose': { value: '95 mg/dL', trend: 'neutral' },
+                            'Colesterol Total': { value: '180 mg/dL', trend: 'down' },
+                            'Triglicerídeos': { value: '160 mg/dL', trend: 'up' },
+                        },
+                        parameters: {
+                            'Hemoglobina': 'Homens: 13.5-17.5 g/dL | Mulheres: 12.0-15.5 g/dL',
+                            'Leucócitos': '4.5-11.0 x10³/µL',
+                            'Plaquetas': '150-450 x10³/µL',
+                            'Glicose': '70-99 mg/dL',
+                            'Colesterol Total': 'Até 200 mg/dL',
+                            'Triglicerídeos': 'Até 150 mg/dL',
+                        }
+                    };
+
+                    examePacienteNome.textContent = data.patientName || 'N/A';
+                    exameTipo.textContent = data.examType || 'N/A';
+                    exameDiagnostico.textContent = data.diagnosis || 'N/A';
+
+                    exameValores.innerHTML = '';
+                    if (data.results && Object.keys(data.results).length > 0) {
+                        for (const key in data.results) {
+                            const result = data.results[key];
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item d-flex align-items-center';
+
+                            let iconHtml = '';
+                            if (result.trend === 'up') {
+                                iconHtml = '<i class="fas fa-arrow-up trend-icon trend-up"></i>';
+                            } else if (result.trend === 'down') {
+                                iconHtml = '<i class="fas fa-arrow-down trend-icon trend-down"></i>';
+                            }
+
+                            li.innerHTML = `<strong>${key}:</strong> ${result.value} ${iconHtml}`;
+                            exameValores.appendChild(li);
+                        }
+                    } else {
+                        exameValores.innerHTML = `<li class="list-group-item text-muted">Nenhum valor extraído.</li>`;
+                    }
+
+                    exameParametros.innerHTML = '';
+                    if (data.parameters && Object.keys(data.parameters).length > 0) {
+                        for (const key in data.parameters) {
+                            const li = document.createElement('li');
+                            li.className = 'list-group-item';
+                            li.innerHTML = `<strong>${key}:</strong> ${data.parameters[key]}`;
+                            exameParametros.appendChild(li);
+                        }
+                    } else {
+                        exameParametros.innerHTML = `<li class="list-group-item text-muted">Nenhum parâmetro de referência disponível.</li>`;
+                    }
+
+                    exameResultadoContainer.classList.remove('d-none');
+                    toggleView('resultados'); // Exibe a view de resultados por padrão
+                } catch (error) {
+                    console.error('Erro no upload do exame:', error);
+                    exameErrorMessage.textContent = `Erro: ${error.message}`;
+                    exameErrorMessage.classList.remove('d-none');
+                } finally {
+                    loadingSpinner.classList.add('d-none');
+                }
+            });
         });
     </script>
 </body>
