@@ -5,35 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Atendimento ao Paciente</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <link rel="stylesheet" href="css/animacaoBack.css">
-    <link rel="stylesheet" href="css/transicaoTela.css">
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* Variáveis de Cores e Fontes (adaptadas para Bootstrap) */
-        :root {
-            --primary-color: #0d6efd; /* Bootstrap primary blue */
-            --secondary-color: #6c757d; /* Bootstrap secondary gray */
-            --background-color: #f8f9fa; /* Bootstrap light background */
-            --card-background: #ffffff; /* White for cards */
-            --border-color: #dee2e6; /* Bootstrap border color */
-            --text-color: #212529; /* Bootstrap dark text */
-            --light-text-color: #6c757d; /* Bootstrap muted text */
-        }
-
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
+            background-color: #f3f4f6;
+            color: #1f2937;
             line-height: 1.6;
-            margin-top: 80px;
+            margin-top: 5rem;
         }
 
-        /* Custom styles for the navbar to match user's provided structure */
-        .navbar.bg-transparente {
-            background-color: var(--card-background) !important;
+        .navbar {
+            background-color: #ffffff !important;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: fixed;
             top: 0;
@@ -41,46 +32,47 @@
             z-index: 1000;
         }
 
-        .navbar-brand .logo-img {
-            color: var(--primary-color);
+        .logo-img {
+            color: #2563eb;
             font-weight: bold;
             font-size: 1.5rem;
             text-decoration: none;
             transition: color 0.2s ease-in-out;
         }
 
-        .navbar-brand .logo-img:hover {
-            color: #0a58ca;
+        .logo-img:hover {
+            color: #1d4ed8;
         }
 
-        /* Container principal para Sidebar e Main Content */
         .page-container {
             display: flex;
-            min-height: calc(100vh - 80px);
+            min-height: calc(100vh - 5rem);
         }
 
-        /* Menu Lateral (Sidebar) */
         .sidebar {
             width: 250px;
-            background-color: var(--card-background);
+            background-color: #ffffff;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
             padding: 20px;
             flex-shrink: 0;
         }
+
         .sidebar-title {
             font-size: 1.2rem;
-            color: var(--primary-color);
+            color: #2563eb;
             margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            border-bottom: 2px solid var(--primary-color);
+            border-bottom: 2px solid #2563eb;
             padding-bottom: 5px;
         }
+
         .sidebar-menu {
             list-style: none;
             padding: 0;
             margin: 0;
         }
+
         .sidebar-button {
             width: 100%;
             text-align: left;
@@ -88,121 +80,81 @@
             border: none;
             padding: 12px 10px;
             font-size: 1rem;
-            color: var(--text-color);
+            color: #1f2937;
             cursor: pointer;
             transition: background-color 0.3s ease, color 0.3s ease;
             border-radius: 5px;
             display: flex;
             align-items: center;
         }
+
         .sidebar-button i {
             margin-right: 10px;
         }
+
         .sidebar-button:hover {
-            background-color: var(--primary-color);
+            background-color: #2563eb;
             color: #fff;
         }
 
-        /* Conteúdo Principal (Main Content) */
         .main-content {
             flex-grow: 1;
             padding: 30px;
         }
+
         section {
-            background-color: var(--card-background);
+            background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             margin-bottom: 20px;
         }
+
         h2, h3, h4 {
-            color: var(--primary-color);
+            color: #2563eb;
             margin-bottom: 15px;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid #e5e7eb;
             padding-bottom: 5px;
         }
-        #anotacoes {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            resize: vertical;
-        }
-        .exames-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-        }
-        .exame-input-group {
-            display: flex;
-            flex-direction: column;
-        }
-        .exame-input-group label {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        .exame-input-group input, .exame-input-group textarea {
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 5px;
-        }
-        .exame-input-group textarea {
-            resize: vertical;
-        }
 
-        /* Estilos para a imagem do paciente */
         .patient-photo {
             width: 100px;
             height: 100px;
             object-fit: cover;
-            border: 2px solid var(--primary-color);
+            border: 2px solid #2563eb;
         }
 
-        /* Estilos para os resultados do exame */
-        #exame-resultado-container {
-            border: 1px solid var(--border-color);
+        .exame-resultado-container {
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
         }
+
         .resultado-item {
             margin-bottom: 10px;
         }
-        .resultado-item span {
-            font-weight: 600;
-        }
-        .resultado-item .valor {
-            font-weight: 400;
-        }
 
-        /* Estilos para a lista de anexos */
-        .anexos-list .list-group-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        /* Estilos para os ícones de aumento/declínio */
         .trend-icon {
             margin-left: 10px;
             font-size: 1rem;
         }
+
         .trend-up {
-            color: #28a745; /* green */
+            color: #10b981;
         }
+
         .trend-down {
-            color: #dc3545; /* red */
+            color: #ef4444;
         }
 
-        /* Estilos para a alternância de views */
         .toggle-view-btn.active {
-            background-color: var(--primary-color);
+            background-color: #2563eb;
             color: #fff;
-            border-color: var(--primary-color);
+            border-color: #2563eb;
         }
 
-        /* Responsividade para a Navbar e Layout geral */
+        /* Responsive styles */
         @media (max-width: 768px) {
             .navbar .container-fluid {
                 flex-direction: column;
@@ -218,13 +170,8 @@
                 justify-content: center;
                 margin-top: 10px;
             }
-            .navbar-buttons .btn {
-                margin-bottom: 5px;
-                margin-right: 5px !important;
-                margin-left: 5px !important;
-            }
             body {
-                margin-top: 150px;
+                margin-top: 9rem;
             }
             .page-container {
                 flex-direction: column;
@@ -255,25 +202,23 @@
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">
-                <img src="https://placehold.co/40x40/0d6efd/ffffff?text=LOGO" alt="Logo do Sistema" class="h-10 w-10 me-2 rounded-circle">
-                <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
-            </a>
-            <div class="navbar-buttons d-flex align-items-center">
-                <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
-                <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
-                <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
-                <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
-                <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
+    <nav class="navbar flex flex-col sm:flex-row items-start sm:items-center p-4">
+        <a class="navbar-brand flex items-center mb-2 sm:mb-0" href="#">
+            <img src="https://placehold.co/40x40/2563eb/ffffff?text=LOGO" alt="Logo do Sistema" class="h-10 w-10 mr-2 rounded-full">
+            <span class="logo-img">Sistema Terapeuta</span>
+        </a>
+        <div class="navbar-buttons flex items-center flex-wrap justify-center sm:justify-end w-full sm:w-auto">
+            <a href="#" class="btn btn-outline-primary px-3 py-2 rounded-md transition-colors duration-200 hover:bg-blue-600 hover:text-white border-blue-600 text-blue-600 mr-2">Home</a>
+            <a href="#" class="btn btn-outline-primary px-3 py-2 rounded-md transition-colors duration-200 hover:bg-blue-600 hover:text-white border-blue-600 text-blue-600 mr-2">Pacientes</a>
+            <a href="#" class="btn btn-outline-success px-3 py-2 rounded-md transition-colors duration-200 hover:bg-green-600 hover:text-white border-green-600 text-green-600 mr-2">Agendar</a>
+            <a href="#" class="btn btn-outline-secondary px-3 py-2 rounded-md transition-colors duration-200 hover:bg-gray-600 hover:text-white border-gray-600 text-gray-600">Histórico</a>
+            <button id="theme-toggle-btn" class="btn btn-outline-dark ml-2 px-3 py-2 rounded-md transition-colors duration-200 hover:bg-gray-800 hover:text-white border-gray-800 text-gray-800">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
     </nav>
 
-    <div class="page-container">
+    <div class="page-container flex flex-col sm:flex-row">
         <aside class="sidebar">
             <h3 class="sidebar-title">Ações do Atendimento</h3>
             <ul class="sidebar-menu">
@@ -284,26 +229,26 @@
             </ul>
         </aside>
 
-        <main class="main-content">
+        <main class="main-content flex-grow p-5">
             <section class="mb-4">
                 <h2>Detalhes do Atendimento</h2>
-                <div class="d-flex align-items-center mb-3">
-                    <div class="flex-shrink-0 me-3">
-                        <img id="patient-photo-circle" src="https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO" alt="Foto do Paciente" class="rounded-circle patient-photo">
+                <div class="flex items-center mb-3">
+                    <div class="flex-shrink-0 mr-3">
+                        <img id="patient-photo-circle" src="https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO" alt="Foto do Paciente" class="rounded-full patient-photo">
                     </div>
-                   <div id="patient-data" class="flex-grow-1">
+                   <div id="patient-data" class="flex-grow">
                         <h4>Paciente: <span id="infoNome"></span></h4>
-                        <ul class="list-group list-group-flush">
-                            <li class="list-group-item"><strong>Data e Hora:</strong> <span id="infoDataHora"></span></li>
-                            <li class="list-group-item"><strong>Data de Nascimento:</strong> <span id="infoDataNascimento"></span></li>
-                            <li class="list-group-item"><strong>Idade:</strong> <span id="infoIdade"></span></li>
-                            <li class="list-group-item"><strong>Peso:</strong> <span id="infoPeso"></span></li>
-                            <li class="list-group-item"><strong>Altura:</strong> <span id="infoAltura"></span></li>
-                            <li class="list-group-item"><strong>IMC:</strong> <span id="infoIMC"></span></li>
-                            <li class="list-group-item"><strong>Motivo da Consulta:</strong> <span id="infoMotivoConsulta"></span></li>
-                            <li class="list-group-item"><strong>Tipo de Terapia:</strong> <span id="infoTipoTerapia"></span></li>
-                            <li class="list-group-item"><strong>Observações:</strong> <span id="infoObservacoes"></span></li>
-                            <li class="list-group-item"><strong>Condições de Saúde:</strong> <span id="infoCondicoes"></span></li>
+                        <ul class="list-none p-0">
+                            <li class="p-2 border-b border-gray-200"><strong>Data e Hora:</strong> <span id="infoDataHora"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Data de Nascimento:</strong> <span id="infoDataNascimento"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Idade:</strong> <span id="infoIdade"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Peso:</strong> <span id="infoPeso"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Altura:</strong> <span id="infoAltura"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>IMC:</strong> <span id="infoIMC"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Motivo da Consulta:</strong> <span id="infoMotivoConsulta"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Tipo de Terapia:</strong> <span id="infoTipoTerapia"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Observações:</strong> <span id="infoObservacoes"></span></li>
+                            <li class="p-2 border-b border-gray-200"><strong>Condições de Saúde:</strong> <span id="infoCondicoes"></span></li>
                         </ul>
                     </div>
                 </div>
@@ -311,7 +256,7 @@
 
             <section class="mb-4">
                 <h3>Anotações do Atendimento</h3>
-                <textarea id="anotacoes" class="form-control" rows="10" placeholder="Anote aqui as informações do atendimento, observações, evolução, etc."></textarea>
+                <textarea id="anotacoes" class="w-full p-4 border border-gray-300 rounded-lg text-sm resize-y" rows="10" placeholder="Anote aqui as informações do atendimento, observações, evolução, etc."></textarea>
             </section>
 
             <section>
@@ -324,125 +269,138 @@
             <section>
                 <h3>Análise de Exames</h3>
 
-                <div class="btn-group mb-3" role="group">
-                    <button type="button" class="btn btn-outline-primary toggle-view-btn active" data-view="resultados">Resultados</button>
-                    <button type="button" class="btn btn-outline-primary toggle-view-btn" data-view="diagnostico">Diagnóstico</button>
+                <div class="flex flex-wrap gap-2 mb-3" role="group">
+                    <button type="button" class="btn px-4 py-2 rounded-lg transition-colors duration-200 toggle-view-btn active bg-blue-600 text-white" data-view="resultados">Resultados</button>
+                    <button type="button" class="btn px-4 py-2 rounded-lg transition-colors duration-200 toggle-view-btn bg-gray-200 text-gray-800 hover:bg-gray-300" data-view="diagnostico">Diagnóstico</button>
+                </div>
+
+                <!-- Modal de Mensagem de Erro/Sucesso -->
+                <div id="message-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
+                    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                        <h4 id="modal-title" class="text-xl font-bold mb-4"></h4>
+                        <p id="modal-message" class="text-gray-700 mb-4"></p>
+                        <button id="modal-close-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg float-right">Fechar</button>
+                    </div>
                 </div>
 
                 <!-- Começo da aplicação de IA -->
-                <div class="card p-4">
+                <div class="card p-4 rounded-lg shadow-sm bg-gray-50">
                     <form id="exame-upload-form" class="mb-3">
-                        <div class="input-group">
-                            <input type="file" class="form-control" id="exame-file" accept=".pdf">
-                            <button class="btn btn-primary" type="submit" id="btn-upload-exame">Processar Exame</button>
+                        <div class="flex gap-2">
+                            <input type="file" class="form-control flex-grow rounded-lg p-2 border border-gray-300" id="exame-file" accept=".pdf">
+                            <button class="btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" type="submit" id="btn-upload-exame">Processar Exame</button>
                         </div>
                     </form>
 
                     <!-- Indicador de Carregamento -->
-                    <div id="loading-spinner" class="d-none text-center p-4">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Processando...</span>
+                    <div id="loading-spinner" class="hidden text-center p-4">
+                        <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" role="status">
+                            <span class="sr-only">Processando...</span>
                         </div>
-                        <p class="mt-2 text-muted">Aguarde, processando o exame...</p>
+                        <p class="mt-2 text-gray-500">Aguarde, processando o exame...</p>
                     </div>
 
                     <!-- Área para Exibir os Resultados e o Diagnóstico -->
-                    <div id="exame-resultado-container">
+                    <div id="exame-resultado-container" class="hidden">
 
                         <!-- VIEW DE RESULTADOS -->
-                        <div id="resultados-view" class="d-none">
-                            <h4>Resultados Extraídos</h4>
+                        <div id="resultados-view" class="hidden">
+                            <h4 class="text-lg font-bold">Resultados Extraídos</h4>
                             <div class="resultado-item">
                                 <span>Nome do Paciente:</span>
-                                <p id="exame-paciente-nome" class="valor"></p>
+                                <p id="exame-paciente-nome" class="font-normal"></p>
                             </div>
                             <div class="resultado-item">
                                 <span>Tipo do Exame:</span>
-                                <p id="exame-tipo" class="valor"></p>
+                                <p id="exame-tipo" class="font-normal"></p>
                             </div>
                             <div class="resultado-item">
-                                <h5>Valores Extraídos:</h5>
-                                <ul id="exame-valores" class="list-group list-group-flush">
+                                <h5 class="text-base font-semibold mt-4">Valores Extraídos:</h5>
+                                <ul id="exame-valores" class="list-none p-0">
                                     <!-- Valores com ícones serão inseridos aqui via JS -->
                                 </ul>
                             </div>
-
-                            <hr class="my-4">
-
+                            <hr class="my-4 border-gray-200">
                             <!-- Seção de Parâmetros -->
                             <div id="exame-parametros-view">
-                                <h5>Parâmetros de Referência</h5>
-                                <ul id="exame-parametros" class="list-group list-group-flush">
+                                <h5 class="text-base font-semibold">Parâmetros de Referência</h5>
+                                <ul id="exame-parametros" class="list-none p-0">
                                     <!-- Parâmetros de referência serão inseridos aqui via JS -->
                                 </ul>
                             </div>
                         </div>
 
                         <!-- VIEW DE DIAGNÓSTICO -->
-                        <div id="diagnostico-view" class="d-none">
-                            <h4>Diagnóstico da IA</h4>
+                        <div id="diagnostico-view" class="hidden">
+                            <h4 class="text-lg font-bold">Diagnóstico da IA</h4>
                             <div class="resultado-item">
                                 <span>Análise de IA:</span>
-                                <p id="exame-diagnostico" class="valor"></p>
+                                <p id="exame-diagnostico" class="font-normal"></p>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Mensagem de Erro -->
-                    <div id="exame-error-message" class="alert alert-danger d-none" role="alert">
-                        <!-- Mensagens de erro serão exibidas aqui -->
-                    </div>
                 </div>
-                <!-- Fim da aplicação  -->
             </section>
         </main>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
-            const genderMaleRadio = document.getElementById('genderMale');
-            const genderFemaleRadio = document.getElementById('genderFemale');
-
             const exameFile = document.getElementById('exame-file');
             const btnUploadExame = document.getElementById('btn-upload-exame');
             const loadingSpinner = document.getElementById('loading-spinner');
             const exameResultadoContainer = document.getElementById('exame-resultado-container');
-            const exameErrorMessage = document.getElementById('exame-error-message');
 
             const examePacienteNome = document.getElementById('exame-paciente-nome');
             const exameTipo = document.getElementById('exame-tipo');
             const exameDiagnostico = document.getElementById('exame-diagnostico');
             const exameValores = document.getElementById('exame-valores');
             const exameParametros = document.getElementById('exame-parametros');
-
             const anexosContainer = document.getElementById('anexos-container');
-
             const resultadosView = document.getElementById('resultados-view');
             const diagnosticoView = document.getElementById('diagnostico-view');
             const toggleViewBtns = document.querySelectorAll('.toggle-view-btn');
 
+            const modal = document.getElementById('message-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalMessage = document.getElementById('modal-message');
+            const modalCloseBtn = document.getElementById('modal-close-btn');
+
+            // Função para exibir o modal personalizado
+            function showModal(title, message) {
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modal.classList.remove('hidden');
+            }
+
+            // Função para fechar o modal
+            modalCloseBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
             // 🔹 Função para alternar entre as visualizações de Resultados e Diagnóstico
             function toggleView(view) {
                 if (view === 'resultados') {
-                    resultadosView.classList.remove('d-none');
-                    diagnosticoView.classList.add('d-none');
+                    resultadosView.classList.remove('hidden');
+                    diagnosticoView.classList.add('hidden');
                 } else {
-                    resultadosView.classList.add('d-none');
-                    diagnosticoView.classList.remove('d-none');
+                    resultadosView.classList.add('hidden');
+                    diagnosticoView.classList.remove('hidden');
                 }
 
                 toggleViewBtns.forEach(btn => {
                     if (btn.dataset.view === view) {
                         btn.classList.add('active');
+                        btn.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
+                        btn.classList.add('bg-blue-600', 'text-white');
                     } else {
                         btn.classList.remove('active');
+                        btn.classList.remove('bg-blue-600', 'text-white');
+                        btn.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
                     }
                 });
             }
 
-            // Ativa a lógica de alternância ao carregar a página
             toggleViewBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     const view = btn.dataset.view;
@@ -461,10 +419,9 @@
                 return idade;
             }
 
-            // 🔹 **FUNÇÃO CORRIGIDA: Calcular e classificar o IMC**
+            // 🔹 Função para calcular e classificar o IMC
             function calcularIMC(peso, altura) {
                 const imc = peso / (altura * altura);
-
                 let classificacao = '';
                 if (imc < 18.5) {
                     classificacao = 'Abaixo do peso';
@@ -479,60 +436,49 @@
                 } else {
                     classificacao = 'Obesidade Grau III (mórbida)';
                 }
-
                 return `<strong>${imc.toFixed(2)}</strong> (${classificacao})`;
             }
 
             // 🔹 Função para renderizar os anexos
             function renderizarAnexos(anexos) {
                 anexosContainer.innerHTML = '';
-
                 if (anexos && anexos.length > 0) {
                     anexos.forEach(anexo => {
                         const li = document.createElement('li');
-                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-
+                        li.className = 'flex justify-between items-center p-3 border-b border-gray-200';
                         const anexoNome = document.createElement('span');
                         anexoNome.textContent = anexo.nome_original;
-
                         const anexoLink = document.createElement('a');
                         anexoLink.href = anexo.caminho_servidor;
                         anexoLink.target = '_blank';
-                        anexoLink.className = 'btn btn-outline-primary btn-sm';
-                        anexoLink.innerHTML = `<i class="fas fa-eye me-2"></i> Visualizar`;
-
+                        anexoLink.className = 'bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors text-sm';
+                        anexoLink.innerHTML = `<i class="fas fa-eye mr-2"></i> Visualizar`;
                         li.appendChild(anexoNome);
                         li.appendChild(anexoLink);
                         anexosContainer.appendChild(li);
                     });
                 } else {
-                    anexosContainer.innerHTML = `<div class="alert alert-info" role="alert">Nenhum exame anexado a este atendimento.</div>`;
+                    anexosContainer.innerHTML = `<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg" role="alert">Nenhum exame anexado a este atendimento.</div>`;
                 }
             }
 
-            // ⚡️ SIMULAÇÃO DA CHAMADA AO BACKEND PARA ANEXOS
+            // ⚡️ SIMULAÇÃO DA CHAMADA PARA ANEXOS COM DADOS MOCK
             async function fetchAnexosDoAgendamento(agendamentoId) {
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 500));
-
-                    const mockData = [
-                        { id: 1, agendamento_id: 1, nome_original: 'Exame de Sangue.pdf', caminho_servidor: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-                        { id: 2, agendamento_id: 1, nome_original: 'Radiografia do Tórax.jpg', caminho_servidor: 'https://placehold.co/800x600/FF5733/ffffff?text=Radiografia' },
-                        { id: 3, agendamento_id: 1, nome_original: 'Eletrocardiograma.pdf', caminho_servidor: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
-                    ];
-
-                    const anexosEncontrados = mockData.filter(anexo => anexo.agendamento_id === agendamentoId);
-                    return anexosEncontrados;
-
-                } catch (error) {
-                    console.error('Erro ao buscar anexos:', error);
-                    return null;
-                }
+                return new Promise(resolve => {
+                    setTimeout(() => {
+                        const mockData = [
+                            { id: 1, agendamento_id: 1, nome_original: 'Exame de Sangue.pdf', caminho_servidor: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+                            { id: 2, agendamento_id: 1, nome_original: 'Radiografia do Tórax.jpg', caminho_servidor: 'https://placehold.co/800x600/FF5733/ffffff?text=Radiografia' },
+                            { id: 3, agendamento_id: 1, nome_original: 'Eletrocardiograma.pdf', caminho_servidor: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+                        ];
+                        const anexosEncontrados = mockData.filter(anexo => anexo.agendamento_id === agendamentoId);
+                        resolve(anexosEncontrados);
+                    }, 500);
+                });
             }
 
             // 🔹 Carregar atendimento salvo no sessionStorage
             const atendimento = JSON.parse(sessionStorage.getItem("atendimento"));
-
             if (atendimento) {
                 atendimento.id = atendimento.id || 1;
             }
@@ -540,7 +486,6 @@
             if (atendimento) {
                 try {
                     document.getElementById('infoNome').textContent = atendimento.nome || 'N/A';
-
                     const dataNascimento = atendimento.data_nascimento ? new Date(atendimento.data_nascimento) : null;
                     if (dataNascimento && !isNaN(dataNascimento)) {
                         const dataNascimentoFormatada = dataNascimento.toLocaleDateString('pt-BR');
@@ -551,10 +496,8 @@
                         document.getElementById('infoDataNascimento').textContent = 'N/A';
                         document.getElementById('infoIdade').textContent = 'N/A';
                     }
-
                     document.getElementById('infoPeso').textContent = atendimento.peso || 'N/A';
                     document.getElementById('infoAltura').textContent = atendimento.altura || 'N/A';
-
                     const peso = parseFloat(atendimento.peso);
                     const altura = parseFloat(atendimento.altura);
                     if (!isNaN(peso) && !isNaN(altura)) {
@@ -562,19 +505,16 @@
                         if (altura > 3 && altura <= 300) {
                              alturaCorrigida = altura / 100;
                         }
-
                         document.getElementById('infoIMC').innerHTML = calcularIMC(peso, alturaCorrigida);
                     } else {
                         document.getElementById('infoIMC').textContent = 'N/A';
                     }
-
                     const patientPhoto = document.getElementById('patient-photo-circle');
                     if (atendimento.foto_paciente) {
                         patientPhoto.src = atendimento.foto_paciente;
                     } else {
                         patientPhoto.src = "https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO";
                     }
-
                     const dataAgendamento = atendimento.data_agendamento ? new Date(atendimento.data_agendamento) : null;
                     if (dataAgendamento && !isNaN(dataAgendamento)) {
                         const dataHoraFormatada = dataAgendamento.toLocaleDateString('pt-BR') + ' às ' + dataAgendamento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -582,129 +522,99 @@
                     } else {
                         document.getElementById('infoDataHora').textContent = 'N/A';
                     }
-
                     document.getElementById('infoMotivoConsulta').textContent = atendimento.motivo_consulta || 'N/A';
                     document.getElementById('infoTipoTerapia').textContent = atendimento.tipo_terapia || 'N/A';
                     document.getElementById('infoObservacoes').textContent = atendimento.observacoes || 'N/A';
                     document.getElementById('infoCondicoes').textContent = atendimento.condicoes_saude || 'N/A';
-
                     const anexos = await fetchAnexosDoAgendamento(atendimento.id);
                     renderizarAnexos(anexos);
-
                 } catch (e) {
                     console.error("Erro ao carregar dados do agendamento:", e);
-                    alert("Erro ao carregar os dados do atendimento. Verifique o console.");
+                    showModal("Erro", "Erro ao carregar os dados do atendimento. Verifique o console.");
                 }
             } else {
-                alert("Nenhum agendamento selecionado. Por favor, volte para o dashboard e selecione um atendimento.");
+                showModal("Aviso", "Nenhum agendamento selecionado. Por favor, volte para o dashboard e selecione um atendimento.");
             }
 
-            // 🔹 Lógica para o Processamento de Exames com a IA
+            // 🔹 Lógica para o Processamento de Exames com a IA (Simulado)
             btnUploadExame.addEventListener('click', async function(event) {
                 event.preventDefault();
-
-                // Localize o botão de upload do exame e outros elementos
-const btnUploadExame = document.getElementById('btn-upload-exame');
-const exameFile = document.getElementById('exame-file');
-const loadingSpinner = document.getElementById('loading-spinner');
-const exameResultadoContainer = document.getElementById('exame-resultado-container');
-const exameErrorMessage = document.getElementById('exame-error-message');
-
-const examePacienteNome = document.getElementById('exame-paciente-nome');
-const exameTipo = document.getElementById('exame-tipo');
-const exameDiagnostico = document.getElementById('exame-diagnostico');
-const exameValores = document.getElementById('exame-valores');
-const exameParametros = document.getElementById('exame-parametros');
-
-// Lógica para o Processamento de Exames com a IA
-btnUploadExame.addEventListener('click', async function(event) {
-    event.preventDefault();
-
-    const file = exameFile.files[0];
-    if (!file) {
-        exameErrorMessage.textContent = 'Por favor, selecione um arquivo PDF.';
-        exameErrorMessage.classList.remove('d-none');
-        return;
-    }
-
-    exameErrorMessage.classList.add('d-none');
-    loadingSpinner.classList.remove('d-none');
-
-    // Cria um objeto FormData para enviar o arquivo
-    const formData = new FormData();
-    formData.append('exame_file', file);
-
-    try {
-        // Faz a requisição para o seu servidor Express
-        const response = await fetch('http://localhost:5000/api/analisar-exame', {
-            method: 'POST',
-            body: formData,
-        });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Erro desconhecido na análise.');
-        }
-
-        const data = await response.json();
-        const analise = data.analise;
-
-        // **Preenche a página com os dados reais da análise**
-        examePacienteNome.textContent = analise.paciente_nome || 'N/A';
-        exameTipo.textContent = analise.tipo_exame || 'N/A';
-        exameDiagnostico.textContent = analise.diagnostico || 'N/A';
-
-        // Preenche a lista de valores
-        exameValores.innerHTML = '';
-        if (analise.resultados && analise.resultados.length > 0) {
-            analise.resultados.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item d-flex align-items-center';
-
-                let iconHtml = '';
-                if (item.status === 'Alto') {
-                    iconHtml = '<i class="fas fa-arrow-up trend-icon trend-up"></i>';
-                } else if (item.status === 'Baixo') {
-                    iconHtml = '<i class="fas fa-arrow-down trend-icon trend-down"></i>';
+                const file = exameFile.files[0];
+                if (!file) {
+                    showModal("Erro", "Por favor, selecione um arquivo PDF.");
+                    return;
                 }
+                loadingSpinner.classList.remove('hidden');
+                exameResultadoContainer.classList.add('hidden');
 
-                li.innerHTML = `<strong>${item.nome}:</strong> ${item.valor} (${item.status}) ${iconHtml}`;
-                exameValores.appendChild(li);
-            });
-        } else {
-            exameValores.innerHTML = `<li class="list-group-item text-muted">Nenhum valor extraído.</li>`;
-        }
+                try {
+                    // Simula uma resposta do backend com dados mock
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    const mockAnalise = {
+                        paciente_nome: 'João da Silva',
+                        tipo_exame: 'Exame de Sangue',
+                        diagnostico: 'A análise de IA sugere que os níveis de glicose e colesterol estão ligeiramente elevados, indicando a necessidade de ajustes na dieta e acompanhamento contínuo. Os demais indicadores estão dentro da normalidade para a faixa etária do paciente.',
+                        resultados: [
+                            { nome: 'Glicose', valor: '110 mg/dL', status: 'Alto', referencia: '70-99 mg/dL' },
+                            { nome: 'Colesterol Total', valor: '215 mg/dL', status: 'Alto', referencia: '< 200 mg/dL' },
+                            { nome: 'Hemoglobina', valor: '14.5 g/dL', status: 'Normal', referencia: '13-17 g/dL' },
+                            { nome: 'Vitamina D', valor: '28 ng/mL', status: 'Baixo', referencia: '30-100 ng/mL' },
+                        ]
+                    };
 
-        // Preenche a lista de parâmetros de referência
-        exameParametros.innerHTML = '';
-        if (analise.resultados && analise.resultados.length > 0) {
-            analise.resultados.forEach(item => {
-                const li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.innerHTML = `<strong>${item.nome}:</strong> ${item.referencia || 'N/A'}`;
-                exameParametros.appendChild(li);
-            });
-        } else {
-            exameParametros.innerHTML = `<li class="list-group-item text-muted">Nenhum parâmetro de referência disponível.</li>`;
-        }
+                    // Preenche a página com os dados simulados
+                    examePacienteNome.textContent = mockAnalise.paciente_nome || 'N/A';
+                    exameTipo.textContent = mockAnalise.tipo_exame || 'N/A';
+                    exameDiagnostico.textContent = mockAnalise.diagnostico || 'N/A';
 
-        // Exibe o contêiner de resultados
-        exameResultadoContainer.classList.remove('d-none');
-        // Ativa a view de resultados por padrão após o processamento
-        toggleView('resultados');
+                    // Preenche a lista de valores
+                    exameValores.innerHTML = '';
+                    if (mockAnalise.resultados && mockAnalise.resultados.length > 0) {
+                        mockAnalise.resultados.forEach(item => {
+                            const li = document.createElement('li');
+                            li.className = 'p-2 border-b border-gray-200 flex items-center';
+                            let iconHtml = '';
+                            let colorClass = '';
+                            if (item.status === 'Alto') {
+                                iconHtml = '<i class="fas fa-arrow-up trend-icon text-red-500"></i>';
+                                colorClass = 'text-red-600 font-bold';
+                            } else if (item.status === 'Baixo') {
+                                iconHtml = '<i class="fas fa-arrow-down trend-icon text-green-500"></i>';
+                                colorClass = 'text-green-600 font-bold';
+                            } else {
+                                colorClass = 'text-gray-600 font-bold';
+                            }
+                            li.innerHTML = `<span class="flex-grow"><strong>${item.nome}:</strong> ${item.valor}</span><span class="${colorClass}">${item.status}</span>${iconHtml}`;
+                            exameValores.appendChild(li);
+                        });
+                    } else {
+                        exameValores.innerHTML = `<li class="p-2 text-gray-500">Nenhum valor extraído.</li>`;
+                    }
 
-    } catch (error) {
-        console.error('Erro no upload do exame:', error);
-        exameErrorMessage.textContent = `Erro: ${error.message}`;
-        exameErrorMessage.classList.remove('d-none');
-    } finally {
-        // Oculta o spinner ao finalizar
-        loadingSpinner.classList.add('d-none');
-    }
-});
+                    // Preenche a lista de parâmetros de referência
+                    exameParametros.innerHTML = '';
+                    if (mockAnalise.resultados && mockAnalise.resultados.length > 0) {
+                        mockAnalise.resultados.forEach(item => {
+                            const li = document.createElement('li');
+                            li.className = 'p-2 border-b border-gray-200';
+                            li.innerHTML = `<strong>${item.nome}:</strong> ${item.referencia || 'N/A'}`;
+                            exameParametros.appendChild(li);
+                        });
+                    } else {
+                        exameParametros.innerHTML = `<li class="p-2 text-gray-500">Nenhum parâmetro de referência disponível.</li>`;
+                    }
 
-// Outras funções (toggleView, calcularIMC, etc.) permanecem inalteradas
-// ...
+                    // Exibe o contêiner de resultados
+                    exameResultadoContainer.classList.remove('hidden');
+                    // Ativa a view de resultados por padrão após o processamento
+                    toggleView('resultados');
+
+                } catch (error) {
+                    console.error('Erro no upload do exame:', error);
+                    showModal("Erro", `Erro: ${error.message}`);
+                } finally {
+                    loadingSpinner.classList.add('hidden');
+                }
             });
         });
     </script>
