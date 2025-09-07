@@ -7,6 +7,7 @@ const cors = require('cors');
 const pacienteRoutes = require('./routes/pacienteRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
+const openAiRoutes = require('./routes/openAiRoutes'); // <-- Nova linha
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api/pacientes', pacienteRoutes); // <<-- Rota corrigida
 app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/openai', openAiRoutes); // <-- Nova linha
 
 // Servir arquivos estáticos
 app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));

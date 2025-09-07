@@ -603,88 +603,108 @@
             btnUploadExame.addEventListener('click', async function(event) {
                 event.preventDefault();
 
-                const file = exameFile.files[0];
-                if (!file) {
-                    exameErrorMessage.textContent = 'Por favor, selecione um arquivo PDF.';
-                    exameErrorMessage.classList.remove('d-none');
-                    return;
+                // Localize o botão de upload do exame e outros elementos
+const btnUploadExame = document.getElementById('btn-upload-exame');
+const exameFile = document.getElementById('exame-file');
+const loadingSpinner = document.getElementById('loading-spinner');
+const exameResultadoContainer = document.getElementById('exame-resultado-container');
+const exameErrorMessage = document.getElementById('exame-error-message');
+
+const examePacienteNome = document.getElementById('exame-paciente-nome');
+const exameTipo = document.getElementById('exame-tipo');
+const exameDiagnostico = document.getElementById('exame-diagnostico');
+const exameValores = document.getElementById('exame-valores');
+const exameParametros = document.getElementById('exame-parametros');
+
+// Lógica para o Processamento de Exames com a IA
+btnUploadExame.addEventListener('click', async function(event) {
+    event.preventDefault();
+
+    const file = exameFile.files[0];
+    if (!file) {
+        exameErrorMessage.textContent = 'Por favor, selecione um arquivo PDF.';
+        exameErrorMessage.classList.remove('d-none');
+        return;
+    }
+
+    exameErrorMessage.classList.add('d-none');
+    loadingSpinner.classList.remove('d-none');
+
+    // Cria um objeto FormData para enviar o arquivo
+    const formData = new FormData();
+    formData.append('exame_file', file);
+
+    try {
+        // Faz a requisição para o seu servidor Express
+        const response = await fetch('http://localhost:5000/api/analisar-exame', {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Erro desconhecido na análise.');
+        }
+
+        const data = await response.json();
+        const analise = data.analise;
+
+        // **Preenche a página com os dados reais da análise**
+        examePacienteNome.textContent = analise.paciente_nome || 'N/A';
+        exameTipo.textContent = analise.tipo_exame || 'N/A';
+        exameDiagnostico.textContent = analise.diagnostico || 'N/A';
+
+        // Preenche a lista de valores
+        exameValores.innerHTML = '';
+        if (analise.resultados && analise.resultados.length > 0) {
+            analise.resultados.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex align-items-center';
+
+                let iconHtml = '';
+                if (item.status === 'Alto') {
+                    iconHtml = '<i class="fas fa-arrow-up trend-icon trend-up"></i>';
+                } else if (item.status === 'Baixo') {
+                    iconHtml = '<i class="fas fa-arrow-down trend-icon trend-down"></i>';
                 }
 
-                exameErrorMessage.classList.add('d-none');
-                loadingSpinner.classList.remove('d-none');
+                li.innerHTML = `<strong>${item.nome}:</strong> ${item.valor} (${item.status}) ${iconHtml}`;
+                exameValores.appendChild(li);
+            });
+        } else {
+            exameValores.innerHTML = `<li class="list-group-item text-muted">Nenhum valor extraído.</li>`;
+        }
 
-                try {
-                    // ⚡️ SIMULAÇÃO DA CHAMADA AO BACKEND PARA ANÁLISE DE EXAMES
-                    // Substitua pela sua rota de backend
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    const data = {
-                        patientName: "João da Silva",
-                        examType: "Hemograma Completo",
-                        diagnosis: "Resultados do hemograma dentro dos limites de normalidade, indicando um estado de saúde geral estável. Pequenas variações em contagens específicas são consideradas normais e não representam risco imediato. Recomenda-se acompanhamento regular.",
-                        results: {
-                            'Hemoglobina': { value: '14.5 g/dL', trend: 'up' },
-                            'Leucócitos': { value: '7.8 x10³/µL', trend: 'neutral' },
-                            'Plaquetas': { value: '250 x10³/µL', trend: 'down' },
-                            'Glicose': { value: '95 mg/dL', trend: 'neutral' },
-                            'Colesterol Total': { value: '180 mg/dL', trend: 'down' },
-                            'Triglicerídeos': { value: '160 mg/dL', trend: 'up' },
-                        },
-                        parameters: {
-                            'Hemoglobina': 'Homens: 13.5-17.5 g/dL | Mulheres: 12.0-15.5 g/dL',
-                            'Leucócitos': '4.5-11.0 x10³/µL',
-                            'Plaquetas': '150-450 x10³/µL',
-                            'Glicose': '70-99 mg/dL',
-                            'Colesterol Total': 'Até 200 mg/dL',
-                            'Triglicerídeos': 'Até 150 mg/dL',
-                        }
-                    };
+        // Preenche a lista de parâmetros de referência
+        exameParametros.innerHTML = '';
+        if (analise.resultados && analise.resultados.length > 0) {
+            analise.resultados.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.innerHTML = `<strong>${item.nome}:</strong> ${item.referencia || 'N/A'}`;
+                exameParametros.appendChild(li);
+            });
+        } else {
+            exameParametros.innerHTML = `<li class="list-group-item text-muted">Nenhum parâmetro de referência disponível.</li>`;
+        }
 
-                    examePacienteNome.textContent = data.patientName || 'N/A';
-                    exameTipo.textContent = data.examType || 'N/A';
-                    exameDiagnostico.textContent = data.diagnosis || 'N/A';
+        // Exibe o contêiner de resultados
+        exameResultadoContainer.classList.remove('d-none');
+        // Ativa a view de resultados por padrão após o processamento
+        toggleView('resultados');
 
-                    exameValores.innerHTML = '';
-                    if (data.results && Object.keys(data.results).length > 0) {
-                        for (const key in data.results) {
-                            const result = data.results[key];
-                            const li = document.createElement('li');
-                            li.className = 'list-group-item d-flex align-items-center';
+    } catch (error) {
+        console.error('Erro no upload do exame:', error);
+        exameErrorMessage.textContent = `Erro: ${error.message}`;
+        exameErrorMessage.classList.remove('d-none');
+    } finally {
+        // Oculta o spinner ao finalizar
+        loadingSpinner.classList.add('d-none');
+    }
+});
 
-                            let iconHtml = '';
-                            if (result.trend === 'up') {
-                                iconHtml = '<i class="fas fa-arrow-up trend-icon trend-up"></i>';
-                            } else if (result.trend === 'down') {
-                                iconHtml = '<i class="fas fa-arrow-down trend-icon trend-down"></i>';
-                            }
-
-                            li.innerHTML = `<strong>${key}:</strong> ${result.value} ${iconHtml}`;
-                            exameValores.appendChild(li);
-                        }
-                    } else {
-                        exameValores.innerHTML = `<li class="list-group-item text-muted">Nenhum valor extraído.</li>`;
-                    }
-
-                    exameParametros.innerHTML = '';
-                    if (data.parameters && Object.keys(data.parameters).length > 0) {
-                        for (const key in data.parameters) {
-                            const li = document.createElement('li');
-                            li.className = 'list-group-item';
-                            li.innerHTML = `<strong>${key}:</strong> ${data.parameters[key]}`;
-                            exameParametros.appendChild(li);
-                        }
-                    } else {
-                        exameParametros.innerHTML = `<li class="list-group-item text-muted">Nenhum parâmetro de referência disponível.</li>`;
-                    }
-
-                    exameResultadoContainer.classList.remove('d-none');
-                    toggleView('resultados'); // Exibe a view de resultados por padrão
-                } catch (error) {
-                    console.error('Erro no upload do exame:', error);
-                    exameErrorMessage.textContent = `Erro: ${error.message}`;
-                    exameErrorMessage.classList.remove('d-none');
-                } finally {
-                    loadingSpinner.classList.add('d-none');
-                }
+// Outras funções (toggleView, calcularIMC, etc.) permanecem inalteradas
+// ...
             });
         });
     </script>
