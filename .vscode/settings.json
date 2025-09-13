@@ -1,0 +1,24 @@
+{
+    "search.exclude":  {
+                           "**/node_modules":  true
+                       },
+    "editor.quickSuggestions":  {
+                                    "strings":  true
+                                },
+    "typescript.autoImportSuggestions.enabled":  true,
+    "git.enableSmartCommit":  true,
+    "editor.tabSize":  2,
+    "terminal.integrated.scrollback":  10000,
+    "breadcrumbs.enabled":  true,
+    "terminal.integrated.fontSize":  14,
+    "files.trimTrailingWhitespace":  true,
+    "files.exclude":  {
+                          "**/node_modules":  true,
+                          "**/.git":  true
+                      },
+    "workbench.iconTheme":  "material-icon-theme-simon",
+    "workbench.colorTheme":  "Default Dark Modern",
+    "git.autofetch":  true,
+    "editor.renderWhitespace":  "all",
+    "editor.formatOnSave":  true
+}

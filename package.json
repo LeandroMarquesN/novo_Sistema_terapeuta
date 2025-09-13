@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "nodemailer": "^7.0.5",
+<<<<<<< HEAD
+=======
+    "openai": "^5.19.1",
+    "pdf-parse": "^1.1.1",
+>>>>>>> 3959620b0900f06c3eea4d8f921ebede1266b5c5
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.23.0"
+  }
+}

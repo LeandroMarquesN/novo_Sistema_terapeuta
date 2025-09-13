@@ -1,0 +1,9 @@
+# .gitignore
+node_modules/
+.env
+docker/mysql-init/init.sql.save
+*.log
+*.env.*
+dist/
+.env
+.env

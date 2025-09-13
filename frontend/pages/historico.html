@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Histórico</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animacaoBack.css">
+
+  <style>
+     /* Estilo para a nav Bar e a Logo */
+     span.logo-img {
+      height: 280px; /* Aumentado para deixar o logo maior */
+      width: 650px; /* Aumentado para manter a proporção, ajuste conforme necessário */
+      background-image: url('../logo/logoFinal.png'); /* Caminho da imagem */
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block; /* Para que o span respeite as dimensões de height e width */
+      text-indent: -9999px; /* Esconde o texto, se houver, para acessibilidade */
+      overflow: hidden; /* Oculta qualquer conteúdo extra */
+    }
+    .bg-transparente {
+      background-color: transparent !important;
+    }
+
+    /* ============================== */
+  </style>
+
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <span class="logo-img">Sistema Terapeuta</span>
+      </a>
+      <div>
+        <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
+        <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+        <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+        <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
+      </div>
+    </div>
+  </nav>
+  <div class="container mt-5">
+    <h2>Histórico de Atendimentos</h2>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Paciente</th>
+          <th>Descrição</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>25/06/2025</td>
+          <td>Maria Silva</td>
+          <td>Consulta de avaliação e microscopia</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agendar Consulta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animacaoBack.css">
+  <link rel="stylesheet" href="/css/transicaoTela.css">
+
+  <style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f0f2f5;
+        color: #333;
+    }
+    body.dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+    .agendamento-container {
+        max-width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 20px;
+        background-color: rgba(255, 255, 255, 0.7);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    body.dark-mode .agendamento-container {
+        background-color: rgba(30, 30, 30, 0.7);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+    .form-control, .form-select, .form-control[type="tel"] {
+        border: 1px solid #ced4da;
+        background-color: #f8f9fa;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+    }
+    body.dark-mode .form-control,
+    body.dark-mode .form-select,
+    body.dark-mode .form-control[type="tel"] {
+        background-color: #2c2c2c;
+        border-color: #444;
+        color: #e0e0e0;
+    }
+    body.dark-mode .form-control::placeholder {
+        color: #b0b0b0;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    span.logo-img {
+      height: 280px;
+      width: 650px;
+      background-image: url('../logo/logoFinal.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+    .bg-transparente {
+      background-color: transparent !important;
+    }
+    .btn-flutuante {
+        position: fixed;
+        right: 20px;
+        z-index: 1000;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        text-decoration: none;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .btn-flutuante.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+    .btn-flutuante:hover {
+        background-color: #0056b3;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        transform: translateY(-2px);
+    }
+    .btn-voltar-flutuante {
+        bottom: 80px;
+    }
+    .btn-top-flutuante {
+        bottom: 20px;
+    }
+    .form-check-input[type="checkbox"] {
+      width: 1.5em;
+      height: 1.5em;
+      border: 2px solid #000080;
+      vertical-align: middle;
+      margin-top: 0.15em;
+    }
+    .form-check-input[type="checkbox"]:checked {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    .form-check-label {
+      line-height: 1.5em;
+      margin-left: 0.5em;
+    }
+    .clinical-modal .modal-content {
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    .clinical-modal .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        padding: 1rem 1.5rem;
+    }
+    .clinical-modal .modal-title {
+        font-weight: 600;
+        color: #343a40;
+    }
+    .clinical-modal .modal-body {
+        padding: 1.5rem;
+        color: #495057;
+        line-height: 1.6;
+    }
+    .clinical-modal .modal-footer {
+        border-top: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+        background-color: #f8f9fa;
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+    .clinical-modal .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        font-weight: 500;
+    }
+    .clinical-modal .btn-secondary {
+        background-color: #6c757d;
+        border-color: #6c757d;
+        font-weight: 500;
+    }
+    .clinical-modal .modal-body .modal-icon {
+        font-size: 2rem;
+        margin-right: 15px;
+        vertical-align: middle;
+    }
+    .clinical-modal .modal-body .modal-icon.error { color: #dc3545; }
+    .clinical-modal .modal-body .modal-icon.warning { color: #ffc107; }
+    .clinical-modal .modal-body .modal-icon.info { color: #17a2b8; }
+    .clinical-modal .modal-body .modal-icon.success { color: #28a745; }
+    #camera-container {
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      text-align: center;
+    }
+    video#camera-stream {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 8px;
+      background-color: #000;
+    }
+    img#captured-photo {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      border: 2px solid #007bff;
+    }
+  </style>
+</head>
+<body class="menosClaro">
+  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
+      </a>
+      <div>
+        <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
+        <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+        <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+        <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
+        <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
+            <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="agendamento-container mt-5">
+
+    <h2 class="mb-4 fade-in-element">Agendamento de Consulta</h2>
+
+    <form class="row g-3 fade-in-element" id="formAgendamento" enctype="multipart/form-data">
+
+      <div class="col-md-6">
+        <label for="nomePaciente" class="form-label">Nome do Paciente</label>
+        <input type="text" id="nomePaciente" name="nome" class="form-control" placeholder="Digite o nome completo" required>
+      </div>
+
+      <div class="col-md-6">
+        <label for="emailPaciente" class="form-label">Email do Paciente</label>
+        <input type="email" id="emailPaciente" name="email" class="form-control" placeholder="Digite o email do paciente">
+      </div>
+
+      <div class="col-md-6">
+        <label for="telefonePaciente" class="form-label">Telefone do Paciente</label>
+        <input type="tel" id="telefonePaciente" name="telefone" class="form-control" placeholder="Digite o telefone com DDD">
+      </div>
+
+      <div class="col-md-3">
+        <label for="dataNascimentoPaciente" class="form-label">Data de Nascimento do Paciente</label>
+        <input type="date" id="dataNascimentoPaciente" name="data_nascimento" class="form-control">
+      </div>
+
+      <div class="col-md-3">
+        <label for="idadePaciente" class="form-label">Idade do Paciente</label>
+        <input type="number" id="idadePaciente" name="idade" class="form-control" readonly>
+      </div>
+
+      <div class="col-md-4">
+        <label for="pesoPaciente" class="form-label">Peso (kg)</label>
+        <input type="number" id="pesoPaciente" name="peso" step="0.1" class="form-control">
+      </div>
+
+      <div class="col-md-4">
+        <label for="alturaPaciente" class="form-label">Altura (cm)</label>
+        <input type="number" id="alturaPaciente" name="altura" step="0.1" class="form-control">
+      </div>
+
+      <div class="col-md-4">
+        <label for="tipoSanguineoPaciente" class="form-label">Tipo Sanguíneo</label>
+        <select class="form-select" id="tipoSanguineoPaciente" name="tipo_sanguineo">
+          <option value="">Selecione</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option>
+          <option>O+</option><option>O-</option>
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label for="tipoTerapia" class="form-label">Consulta Integrativa</label>
+        <select class="form-select" id="tipoTerapia" name="tipo_terapia" required>
+          <option value="">Escolha uma opção</option>
+          <option>Biofísico</option>
+
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label for="dataHoraAgendamento" class="form-label">Data e Hora do Agendamento</label>
+        <input type="datetime-local" id="dataHoraAgendamento" name="data_agendamento" class="form-control" required>
+      </div>
+
+      <div class="col-12">
+        <label for="motivoConsulta" class="form-label">Motivo da Consulta</label>
+        <textarea class="form-control" id="motivoConsulta" name="motivo_consulta" rows="2"></textarea>
+      </div>
+
+      <div class="col-12">
+        <label for="origemIndicacao" class="form-label">Como conheceu o consultório?</label>
+        <select class="form-select" id="origemIndicacao" name="origem_indicacao">
+          <option value="">Selecione</option>
+          <option>Indicação</option>
+          <option>Instagram</option>
+          <option>Google</option>
+          <option>Facebook</option>
+          <option>Outro</option>
+        </select>
+      </div>
+
+      <div class="col-12">
+        <label for="observacoes" class="form-label">Observações</label>
+        <textarea class="form-control" id="observacoes" name="observacoes" rows="2"></textarea>
+      </div>
+
+      <div class="col-12 mt-4">
+        <h5 class="mb-3">Foto do Paciente (opcional)</h5>
+        <div id="camera-container" class="mb-3">
+          <video id="camera-stream" autoplay playsinline style="display:none;"></video>
+          <canvas id="photo-canvas" style="display:none;"></canvas>
+          <img id="captured-photo" src="" alt="Foto do Paciente" style="display:none;">
+          <button type="button" class="btn btn-info" id="btn-open-camera">
+            <i class="fas fa-camera me-2"></i> Abrir Câmera
+          </button>
+          <button type="button" class="btn btn-success" id="btn-take-photo" style="display:none;">
+            <i class="fas fa-camera me-2"></i> Tirar Foto
+          </button>
+          <button type="button" class="btn btn-warning" id="btn-retake-photo" style="display:none;">
+            <i class="fas fa-redo me-2"></i> Refazer
+          </button>
+        </div>
+      </div>
+
+      <div class="col-12">
+        <h5 class="mt-4">Condições de Saúde</h5>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Hipertensão" id="condicaoHipertensao"><label class="form-check-label" for="condicaoHipertensao">Hipertensão</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Diabetes" id="condicaoDiabetes"><label class="form-check-label" for="condicaoDiabetes">Diabetes</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Resistência Insulínica" id="condicaoResistencia"><label class="form-check-label" for="condicaoResistencia">Resistência Insulínica</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Hipotireoidismo" id="condicaoHipotireoidismo"><label class="form-check-label" for="condicaoHipotireoidismo">Hipotireoidismo</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Problemas Cardíacos" id="condicaoCardiacos"><label class="form-check-label" for="condicaoCardiacos">Problemas Cardíacos</label></div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Neurológico" id="condicaoNeurologico"><label class="form-check-label" for="condicaoNeurologico">Neurológico</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Disfunção Hepática" id="condicaoHepatica"><label class="form-check-label" for="condicaoHepatica">Disfunção Hepática</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Renal" id="condicaoRenal"><label class="form-check-label" for="condicaoRenal">Problemas Renais</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="TDAH" id="condicaoTDAH"><label class="form-check-label" for="condicaoTDAH">TDAH</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="TEA" id="condicaoTEA"><label class="form-check-label" for="condicaoTEA">TEA (Espectro Autista)</label></div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Fibromialgia" id="condicaoFibromialgia"><label class="form-check-label" for="condicaoFibromialgia">Fibromialgia</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Ansiedade" id="condicaoAnsiedade"><label class="form-check-label" for="condicaoAnsiedade">Ansiedade</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Depressão" id="condicaoDepressao"><label class="form-check-label" for="condicaoDepressao">Depressão</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Autoimune" id="condicaoAutoimune"><label class="form-check-label" for="condicaoAutoimune">Doença Autoimune</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Alergias" id="condicaoAlergias"><label class="form-check-label" for="condicaoAlergias">Alergias</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Remedios" id="condicaoRemedios"><label class="form-check-label" for="condicaoRemedios">Remedios</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Suplementos" id="condicaoSuplementos"><label class="form-check-label" for="condicaoSuplementos">Suplementos</label></div>
+            <div class="form-check"><input type="checkbox" class="form-check-input" name="condicoes[]" value="Vitaminas" id="condicaoVitaminas"><label class="form-check-label" for="condicaoVitaminas">Vitaminas</label></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 mt-4">
+        <label for="anexoInput" class="form-label">Anexar Exames ou Imagens (opcional)</label>
+        <input type="file" id="anexoInput" name="anexos" class="form-control" multiple>
+      </div>
+
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary mt-3">Salvar Agendamento</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="agendamento-container mt-5 fade-in-element">
+      <div class="mt-5">
+        <h4 class="mb-3">Agendamentos Registrados</h4>
+        <div class="table-responsive">
+          <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+              <tr>
+                <th>Paciente</th>
+                <th>Data</th>
+                <th>Terapia</th>
+                <th>Ação</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaAgendamentos">
+              <tr>
+                <td colspan="4" class="text-center">Carregando agendamentos...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+  </div>
+
+  <a href="/dashboard.html" class="btn-voltar-flutuante btn-flutuante" title="Voltar à Página Inicial" style="left: 20px;">
+    <i class="fas fa-arrow-left"></i>
+  </a>
+  <button id="back-to-top-btn" class="btn-top-flutuante btn-flutuante" title="Voltar ao Topo">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <div class="modal fade clinical-modal" id="customAlertModal" tabindex="-1" aria-labelledby="customAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="customAlertModalLabel"></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p id="customAlertModalMessage"></p>
+        </div>
+        <div class="modal-footer" id="customAlertModalFooter">
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    console.log('Script agendamentos.html carregado.');
+
+    let currentAppointments = [];
+    const APPOINTMENT_DURATION_MS = 10 * 60 * 60 * 1000;
+
+    // --- Lógica do Dark Mode ---
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const body = document.body;
+    const currentTheme = localStorage.getItem('theme');
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            body.classList.add('dark-mode');
+            themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+            themeToggleBtn.classList.remove('btn-outline-dark');
+            themeToggleBtn.classList.add('btn-outline-light');
+        } else {
+            body.classList.remove('dark-mode');
+            themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+            themeToggleBtn.classList.remove('btn-outline-light');
+            themeToggleBtn.classList.add('btn-outline-dark');
+        }
+    }
+
+    if (currentTheme) {
+        applyTheme(currentTheme);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+        const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+
+    // --- Lógica do Botão "Voltar ao Topo" ---
+    const backToTopBtn = document.getElementById('back-to-top-btn');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            backToTopBtn.classList.add('show');
+        } else {
+            backToTopBtn.classList.remove('show');
+        }
+    });
+
+    backToTopBtn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+
+    // Função auxiliar para capitalizar a primeira letra de cada palavra
+    function capitalizeWords(str) {
+      if (!str) return '';
+      return str.toLowerCase().split(' ').map(word => {
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }).join(' ');
+    }
+
+    // --- Funções para o Modal Customizado ---
+    const customAlertModal = new bootstrap.Modal(document.getElementById('customAlertModal'));
+    const customAlertModalLabel = document.getElementById('customAlertModalLabel');
+    const customAlertModalMessage = document.getElementById('customAlertModalMessage');
+    const customAlertModalFooter = document.getElementById('customAlertModalFooter');
+
+    function showClinicalAlert(title, message, iconType = 'info', confirmButtonText = 'Ok') {
+        customAlertModalLabel.innerHTML = `<i class="modal-icon fas fa-fw fa-${iconType}"></i> ${title}`;
+        customAlertModalMessage.innerHTML = message;
+        customAlertModalFooter.innerHTML = `<button type="button" class="btn btn-primary" data-bs-dismiss="modal">${confirmButtonText}</button>`;
+        customAlertModalLabel.querySelector('.modal-icon').className = `modal-icon fas fa-fw fa-${iconType} ${iconType}`;
+        customAlertModal.show();
+    }
+
+    function showClinicalConfirm(title, message) {
+        return new Promise((resolve) => {
+            customAlertModalLabel.innerHTML = `<i class="modal-icon fas fa-fw fa-question-circle"></i> ${title}`;
+            customAlertModalMessage.innerHTML = message;
+            customAlertModalLabel.querySelector('.modal-icon').className = `modal-icon fas fa-fw fa-question-circle warning`;
+            customAlertModalFooter.innerHTML = `
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmClinicalModalBtn">Confirmar</button>
+            `;
+            const confirmBtn = document.getElementById('confirmClinicalModalBtn');
+            confirmBtn.onclick = () => {
+                customAlertModal.hide();
+                resolve(true);
+            };
+            document.getElementById('customAlertModal').addEventListener('hidden.bs.modal', () => {
+                resolve(false);
+            }, { once: true });
+            customAlertModal.show();
+        });
+    }
+
+    // Função para carregar agendamentos na tabela
+    async function carregarAgendamentos() {
+      const tabelaBody = document.getElementById('tabelaAgendamentos');
+      tabelaBody.innerHTML = '<tr><td colspan="4" class="text-center">Carregando agendamentos...</td></tr>';
+      try {
+        const resposta = await fetch('/api/agendamentos');
+        if (!resposta.ok) {
+            throw new Error(`Erro HTTP: ${resposta.status}`);
+        }
+        const eventos = await resposta.json();
+        currentAppointments = eventos;
+        tabelaBody.innerHTML = '';
+        if (eventos.length === 0) {
+          tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento encontrado.</td></tr>`;
+          return;
+        }
+        eventos.forEach(evento => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${evento.nome || 'N/A'}</td>
+            <td>${new Date(evento.data_agendamento).toLocaleString('pt-BR')}</td>
+            <td>${evento.tipo_terapia || 'N/A'}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="excluirAgendamento('${evento.id}')">
+                Excluir
+              </button>
+            </td>
+          `;
+          tabelaBody.appendChild(tr);
+        });
+      } catch (erro) {
+        console.error('Erro ao carregar agendamentos:', erro);
+        tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Erro ao carregar agendamentos.</td></tr>`;
+      }
+    }
+
+    // Função para excluir agendamento
+    async function excluirAgendamento(id) {
+      const result = await showClinicalConfirm('Tem certeza?', "Você não poderá reverter isso!");
+      if (result) {
+        try {
+          const resposta = await fetch(`/api/agendamentos/${id}`, {
+            method: 'DELETE'
+          });
+          if (!resposta.ok) {
+            const errorText = await resposta.text();
+            console.error('Erro de resposta do servidor:', resposta.status, errorText);
+            if (resposta.status === 404) {
+                throw new Error('Erro 404: A rota de exclusão no servidor não foi encontrada. Verifique o backend.');
+            } else {
+                throw new Error(`Erro ao excluir agendamento: ${errorText || resposta.statusText}`);
+            }
+          }
+          carregarAgendamentos();
+          showClinicalAlert('Excluído!', 'O agendamento foi excluído com sucesso!', 'success');
+        } catch (erro) {
+          console.error('Erro ao excluir:', erro);
+          showClinicalAlert('Erro!', erro.message || 'Ocorreu um erro ao excluir o agendamento.', 'error');
+        }
+      }
+    }
+
+    // Função para calcular a idade
+    function calcularIdade() {
+      const dataNascimentoInput = document.getElementById('dataNascimentoPaciente');
+      const idadeInput = document.getElementById('idadePaciente');
+      if (!dataNascimentoInput || !idadeInput) return;
+      const dataNascimentoStr = dataNascimentoInput.value;
+      if (dataNascimentoStr) {
+        const dataNascimento = new Date(dataNascimentoStr + 'T00:00:00');
+        const hoje = new Date();
+        if (dataNascimento > hoje) {
+          idadeInput.value = '';
+          showClinicalAlert('Data de Nascimento Inválida', 'A data de nascimento não pode ser no futuro.', 'warning');
+          return;
+        }
+        let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+        const mes = hoje.getMonth() - dataNascimento.getMonth();
+        if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) {
+          idade--;
+        }
+        idadeInput.value = idade;
+      } else {
+        idadeInput.value = '';
+      }
+    }
+
+    // Função para verificar conflito de agendamento
+    async function checkAppointmentConflict(newAppointmentDateTimeStr, currentAppointmentId = null) {
+      const newStart = new Date(newAppointmentDateTimeStr);
+      const newEnd = new Date(newStart.getTime() + APPOINTMENT_DURATION_MS);
+      await carregarAgendamentos();
+      if (currentAppointments.length === 0) {
+        return { hasConflict: false };
+      }
+      for (const existingAppt of currentAppointments) {
+        if (currentAppointmentId && existingAppt.id === currentAppointmentId) {
+          continue;
+        }
+        const existingStart = new Date(existingAppt.data_agendamento);
+        const existingEnd = new Date(existingStart.getTime() + APPOINTMENT_DURATION_MS);
+        if (newStart < existingEnd && newEnd > existingStart) {
+          return {
+            hasConflict: true,
+            message: `O horário de ${new Date(existingAppt.data_agendamento).toLocaleString('pt-BR')} (com duração de 10 horas) já está ocupado por ${existingAppt.nome || 'outro paciente'}. Por favor, escolha outro horário.`
+          };
+        }
+      }
+      return { hasConflict: false };
+    }
+
+    // --- Lógica da Câmera ---
+    const video = document.getElementById('camera-stream');
+    const canvas = document.getElementById('photo-canvas');
+    const photo = document.getElementById('captured-photo');
+    const btnOpenCamera = document.getElementById('btn-open-camera');
+    const btnTakePhoto = document.getElementById('btn-take-photo');
+    const btnRetakePhoto = document.getElementById('btn-retake-photo');
+
+    let currentStream;
+    let patientPhotoBlob = null; // Variável para armazenar o blob da foto
+
+    btnOpenCamera.addEventListener('click', async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            currentStream = stream;
+            video.srcObject = stream;
+            video.style.display = 'block';
+            btnOpenCamera.style.display = 'none';
+            btnTakePhoto.style.display = 'block';
+            photo.style.display = 'none';
+            patientPhotoBlob = null; // Reseta o blob ao abrir a câmera
+        } catch (err) {
+            console.error('Erro ao acessar a câmera:', err);
+            showClinicalAlert('Erro', 'Não foi possível acessar a câmera. Verifique as permissões do navegador.', 'error');
+        }
+    });
+
+    btnTakePhoto.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob((blob) => {
+            patientPhotoBlob = blob;
+            const imageDataUrl = URL.createObjectURL(blob);
+            photo.src = imageDataUrl;
+            photo.style.display = 'block';
+            video.style.display = 'none';
+            btnTakePhoto.style.display = 'none';
+            btnRetakePhoto.style.display = 'block';
+        }, 'image/jpeg');
+
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+    });
+
+    btnRetakePhoto.addEventListener('click', () => {
+        patientPhotoBlob = null;
+        photo.style.display = 'none';
+        photo.src = '';
+        btnRetakePhoto.style.display = 'none';
+        btnOpenCamera.style.display = 'block';
+    });
+
+    // Listener para o formulário de agendamento
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded disparado.');
+
+      // Adiciona o event listener para o cálculo da idade
+      document.getElementById('dataNascimentoPaciente').addEventListener('change', calcularIdade);
+
+      const formAgendamento = document.getElementById('formAgendamento');
+      if (formAgendamento) {
+        console.log('Elemento formAgendamento encontrado. Anexando listener de submit.');
+        formAgendamento.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const form = e.target;
+          const formData = new FormData(form);
+
+          // Remover o campo de anexos do FormData original, pois será adicionado novamente
+          // Se o campo for 'anexos[]', o FormData.delete pode não funcionar corretamente
+          // O melhor é criar um FormData do zero.
+          const finalFormData = new FormData();
+
+          // Adicionar os campos de texto
+          for (const pair of formData.entries()) {
+            // Ignorar os campos de arquivo para tratá-los separadamente
+            if (pair[0] !== 'anexos[]') {
+              finalFormData.append(pair[0], pair[1]);
+            }
+          }
+
+          const errors = [];
+
+          let nomePaciente = form.querySelector('input[name="nome"]').value.trim();
+          if (!nomePaciente) {
+            errors.push('O campo "Nome do Paciente" é obrigatório.');
+          } else {
+            nomePaciente = capitalizeWords(nomePaciente);
+            finalFormData.set('nome', nomePaciente);
+          }
+
+          const tipoTerapia = form.querySelector('select[name="tipo_terapia"]').value;
+          if (!tipoTerapia) {
+            errors.push('Selecione um "Tipo de Terapia".');
+          }
+
+          const dataAgendamento = form.querySelector('input[name="data_agendamento"]').value;
+          if (!dataAgendamento) {
+            errors.push('O campo "Data e Hora do Agendamento" é obrigatório.');
+          } else {
+            const dataHora = new Date(dataAgendamento);
+            if (isNaN(dataHora.getTime()) || dataHora < new Date()) {
+              errors.push('A "Data e Hora do Agendamento" é inválida ou está no passado.');
+            }
+          }
+
+          const pesoInput = form.querySelector('input[name="peso"]');
+          let pesoValue = pesoInput ? pesoInput.value.replace(',', '.') : '';
+          if (pesoValue && (isNaN(parseFloat(pesoValue)) || parseFloat(pesoValue) <= 0)) {
+            errors.push('O "Peso" deve ser um número válido e maior que zero.');
+          }
+          if (pesoInput) finalFormData.set('peso', pesoValue);
+
+          const alturaInput = form.querySelector('input[name="altura"]');
+          let alturaValue = alturaInput ? alturaInput.value.replace(',', '.') : '';
+          if (alturaValue && (isNaN(parseFloat(alturaValue)) || parseFloat(alturaValue) <= 0)) {
+            errors.push('A "Altura" deve ser um número válido e maior que zero.');
+          }
+          if (alturaInput) finalFormData.set('altura', alturaValue);
+
+          // Coletar as condições de saúde
+          const condicoesSaude = Array.from(form.querySelectorAll('input[name="condicoes[]"]:checked'))
+            .map(checkbox => checkbox.value);
+          finalFormData.set('condicoes', JSON.stringify(condicoesSaude));
+
+          // Adicionar os anexos do input de arquivo
+          const anexoInput = document.getElementById('anexoInput');
+          if (anexoInput.files.length > 0) {
+              for (const file of anexoInput.files) {
+                  finalFormData.append('anexos', file);
+              }
+          }
+
+          // Adicionar o blob da foto do paciente (se existir)
+          if (patientPhotoBlob) {
+              finalFormData.append('patient_photo', patientPhotoBlob, 'patient_photo.jpeg');
+          }
+
+          if (errors.length > 0) {
+            showClinicalAlert('Erro de Validação', errors.join('<br>'), 'warning');
+            return;
+          }
+
+          try {
+            const resposta = await fetch('/api/agendamentos', {
+              method: 'POST',
+              body: finalFormData
+            });
+
+            if (resposta.status === 409) {
+                const errorData = await resposta.json();
+                showClinicalAlert('Conflito de Agendamento', errorData.message, 'warning');
+                return;
+            }
+
+            if (!resposta.ok) {
+              const errorText = await resposta.text();
+              console.error('Erro de resposta do servidor:', resposta.status, errorText);
+              throw new Error(`Erro ao salvar agendamento: ${errorText || resposta.statusText}`);
+            }
+
+            const resultado = await resposta.json();
+            showClinicalAlert('Sucesso!', 'Agendamento salvo com sucesso.', 'success');
+            form.reset();
+            carregarAgendamentos();
+
+            // Opcional: esconder a câmera e a foto após o sucesso
+            video.style.display = 'none';
+            photo.style.display = 'none';
+            btnTakePhoto.style.display = 'none';
+            btnRetakePhoto.style.display = 'none';
+            btnOpenCamera.style.display = 'block';
+            patientPhotoBlob = null;
+          } catch (erro) {
+            console.error('Erro ao salvar agendamento:', erro);
+            showClinicalAlert('Erro!', erro.message || 'Ocorreu um erro ao salvar o agendamento.', 'error');
+          }
+        });
+
+      } else {
+        console.error('Elemento formAgendamento não encontrado. O listener de submit não foi anexado.');
+      }
+
+      carregarAgendamentos();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+
+input:invalid, textarea:invalid {
+  border: 2px solid rgb(188, 137, 137);
+}
+input:valid, textarea:valid {
+  border: 2px solid rgb(70, 118, 70);
+}
+.erro {
+  color: red;
+  font-size: 0.8rem;
+}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Login</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animacaoBack.css">
+
+  <style>
+    /* Aplica a fonte Poppins a todo o corpo do documento */
+    body {
+        font-family: 'Poppins', sans-serif;
+        /* Adiciona flexbox para centralizar o conteúdo vertical e horizontalmente */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    /* Estilo do container com transparência */
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.2); /* Fundo branco com 20% de opacidade */
+      border-radius: 15px; /* Bordas arredondadas */
+      padding: 3rem; /* Espaçamento interno */
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
+      backdrop-filter: blur(10px); /* Efeito de vidro fosco */
+      border: 1px solid rgba(255, 255, 255, 0.3); /* Borda sutil */
+      width: 100%;
+      max-width: 500px; /* Aumenta a largura máxima */
+
+    }
+
+    .form-label {
+      color: #000; /* Cor do texto para contraste */
+      font-weight: 500;
+    }
+
+    h2 {
+        color: #000;
+    }
+
+    /* Adaptação para o fundo animado, se estiver em outro arquivo */
+    div.container-fluid {
+        background: linear-gradient(45deg,
+              #c1d6ec,  /* Azul profundo */
+              #a2c9f2,  /* Azul claro */
+              #2252b9,  /* Verde-água médio */
+              #50aad7,  /* Azul muito claro */
+              #dadfe4,  /* Azul médio mais saturado */
+              #99c2d8   /* Azul suave claro */
+            );
+            background-size: 500% 500%;
+            animation: gradientFlow 18s ease-in-out infinite;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+    }
+       @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      /*========== Estilização logo ============ */
+     .conteinerpai{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+     <style>
+    /* Aplica a fonte Poppins a todo o corpo do documento */
+    body {
+        font-family: 'Poppins', sans-serif;
+        /* Adiciona flexbox para centralizar o conteúdo vertical e horizontalmente */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+    }
+
+    /* Estilo do container com transparência */
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.2); /* Fundo branco com 20% de opacidade */
+      border-radius: 15px; /* Bordas arredondadas */
+      padding: 3rem; /* Espaçamento interno */
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
+      backdrop-filter: blur(10px); /* Efeito de vidro fosco */
+      border: 1px solid rgba(255, 255, 255, 0.3); /* Borda sutil */
+      width: 100%;
+      max-width: 500px; /* Aumenta a largura máxima */
+
+    }
+
+    .form-label {
+      color: #000; /* Cor do texto para contraste */
+      font-weight: 500;
+    }
+
+    h2 {
+        color: #000;
+    }
+
+    /* Adaptação para o fundo animado, se estiver em outro arquivo */
+    div.container-fluid {
+        background: linear-gradient(45deg,
+              #c1d6ec,  /* Azul profundo */
+              #a2c9f2,  /* Azul claro */
+              #2252b9,  /* Verde-água médio */
+              #50aad7,  /* Azul muito claro */
+              #dadfe4,  /* Azul médio mais saturado */
+              #99c2d8   /* Azul suave claro */
+            );
+            background-size: 500% 500%;
+            animation: gradientFlow 18s ease-in-out infinite;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+    }
+       @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      /*========== Estilização logo ============ */
+     .conteinerpai{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+    span.logo-img {
+    height: 200px;
+    width: 450px;
+
+    background-image: url('../logo/logoFinal.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+
+
+    display: inline-block;
+
+    overflow: hidden;
+    cursor: pointer;
+    /* Adiciona uma transição suave para a animação */
+    transition: transform 0.3s ease-in-out;
+    margin-left: 3%;
+}
+
+/* Adiciona um efeito de animação ao passar o mouse */
+span.logo-img:hover {
+    transform: scale(1.05); /* Aumenta o tamanho em 5% */
+}
+  </style>
+  </style>
+</head>
+<body class="d-flex justify-content-center align-items-center vh-100">
+  <div class="conteinerpai">
+    <div class='login-container'>
+        <span class="logo-img"></span>
+    </a>
+    <h2 class='text-center'>Login do Sistema</h2>
+    <form id="loginForm">
+      <div class='mb-3'>
+        <label for='nome' class='form-label'>Nome</label>
+        <input type='text' class='form-control' id='nome' required>
+      </div>
+      <div class='mb-3'>
+        <label for='senha' class='form-label'>Senha</label>
+        <input type='password' class='form-control' id='senha' required>
+      </div>
+      <button type='submit' class='btn btn-primary w-100'>Entrar</button>
+    </form>
+  </div>
+  </div>
+
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const nome = document.getElementById('nome').value;
+      const senha = document.getElementById('senha').value;
+
+      try {
+        const response = await fetch('http://localhost:3000/api/usuarios/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, senha })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Salva o nome do usuário no localStorage
+          localStorage.setItem('usuarioLogado', nome);
+          // Redireciona para a dashboard
+          window.location.href = 'dashboard.html';
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error('Erro no login:', error);
+        alert('Erro de conexão com o servidor.');
+      }
+    });
+  </script>
+
+  <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+</body>
+</html>

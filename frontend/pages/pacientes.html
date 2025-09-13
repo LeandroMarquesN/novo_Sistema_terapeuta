@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gerenciar Pacientes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/validacaoPaciente.css">
+  <link rel="stylesheet" href="/css/animacaoBack.css">
+  <link rel="stylesheet" href="/css/transicaoTela.css">
+
+   <style>
+     body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #f0f2f5;
+        color: #333;
+    }
+    body.dark-mode {
+        background-color: #121212;
+        color: #e0e0e0;
+    }
+    div.container {
+        margin-top: 3%;
+    }
+    span.logo-img {
+      height: 280px;
+      width: 650px;
+      background-image: url('../logo/logoFinal.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+    .bg-transparente {
+      background-color: transparent !important;
+    }
+    /* Estilos para o popup de sucesso */
+    .success-popup {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: white;
+      border: 1px solid #ccc;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 20px 40px;
+      text-align: center;
+      z-index: 1000;
+      border-radius: 10px;
+      animation: fadeIn 0.5s;
+    }
+    .success-popup .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: #aaa;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+   </style>
+
+</head>
+<body class="bg-light">
+  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
+      </a>
+      <div>
+        <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
+        <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
+        <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
+        <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
+        <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
+            <i class="fas fa-moon"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <div class="container py-5">
+    <h1 class="mb-4">Pacientes</h1>
+
+    <ul id="lista-pacientes" class="list-group mb-5"></ul>
+
+    <h2 id="form-title" class="mb-3">Editar informações do Paciente</h2>
+    <form id="formPaciente" novalidate>
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          <input class="form-control" name="nome" placeholder="Nome" required />
+          <span class="erro" id="erro-nome"></span>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" name="email" type="email" placeholder="Email" required />
+          <span class="erro" id="erro-email"></span>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" name="telefone" placeholder="Telefone" required />
+          <span class="erro" id="erro-telefone"></span>
+        </div>
+        <div class="col-md-6">
+          <input class="form-control" name="data_nascimento" type="date" placeholder="Data de Nascimento" required />
+          <small class="form-text text-muted">Data de Nascimento</small>
+          <span class="erro" id="erro-data"></span>
+        </div>
+      </div>
+      <div class="mb-3">
+        <textarea class="form-control" name="historico" placeholder="Histórico" rows="4"></textarea>
+      </div>
+
+      <div>
+        <button class="btn btn-primary me-2" type="submit">Salvar</button>
+        <button class="btn btn-secondary" type="button" id="cancelarEdicao" style="display:none;">Cancelar</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="successPopup" class="success-popup">
+    <span class="close-btn" onclick="fecharPopup()">&times;</span>
+    <h4 class="text-success">Sucesso!</h4>
+    <p>Os dados foram salvos.</p>
+  </div>
+
+  <script>
+    // --- Lógica do Dark Mode ---
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const body = document.body;
+    const currentTheme = localStorage.getItem('theme');
+
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            body.classList.add('dark-mode');
+            themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
+            themeToggleBtn.classList.remove('btn-outline-dark');
+            themeToggleBtn.classList.add('btn-outline-light');
+        } else {
+            body.classList.remove('dark-mode');
+            themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
+            themeToggleBtn.classList.remove('btn-outline-light');
+            themeToggleBtn.classList.add('btn-outline-dark');
+        }
+    }
+
+    if (currentTheme) {
+        applyTheme(currentTheme);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+        const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
+        applyTheme(newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+
+    // =============================================
+    let editandoId = null;
+
+    function mostrarErro(campo, mensagem) {
+      document.getElementById(`erro-${campo}`).innerText = mensagem || '';
+    }
+
+    // Função para mostrar o popup de sucesso
+    function mostrarPopup() {
+      const popup = document.getElementById('successPopup');
+      popup.style.display = 'block';
+      setTimeout(fecharPopup, 3000); // Fecha automaticamente após 3 segundos
+    }
+
+    // Função para fechar o popup de sucesso
+    function fecharPopup() {
+      const popup = document.getElementById('successPopup');
+      popup.style.display = 'none';
+    }
+
+    async function carregarPacientes() {
+      const res = await fetch('/api');
+      const pacientes = await res.json();
+      const lista = document.getElementById('lista-pacientes');
+      lista.innerHTML = pacientes.map(p => `
+        <li class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+          <div class="flex-grow-1">
+            <strong>${p.nome}</strong> - ${p.email} - ${p.telefone} - ${p.data_nascimento}
+          </div>
+          <div class="mt-2 mt-md-0">
+            <button class="btn btn-sm btn-warning me-2" onclick="editarPaciente(${p.id})">Editar</button>
+            <button class="btn btn-sm btn-danger" onclick="deletarPaciente(${p.id})">Excluir</button>
+          </div>
+        </li>
+      `).join('');
+    }
+
+    document.getElementById('formPaciente').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      let valido = true;
+
+      mostrarErro('nome');
+      mostrarErro('email');
+      mostrarErro('telefone');
+      mostrarErro('data_nascimento');
+
+      if (!form.nome.value.trim()) {
+        mostrarErro('nome', 'Nome é obrigatório');
+        valido = false;
+      }
+      if (!form.email.value.trim()) {
+        mostrarErro('email', 'Email é obrigatório');
+        valido = false;
+      }
+      if (!form.telefone.value.trim()) {
+        mostrarErro('telefone', 'Telefone é obrigatório');
+        valido = false;
+      }
+      if (!form.data_nascimento.value.trim()) {
+        mostrarErro('data', 'Data de nascimento é obrigatória');
+        valido = false;
+      }
+
+      if (!valido) return;
+
+      const paciente = {
+        nome: form.nome.value,
+        email: form.email.value,
+        telefone: form.telefone.value,
+        data_nascimento: form.data_nascimento.value,
+        historico: form.historico.value
+      };
+
+      if (editandoId) {
+        await fetch(`/api/${editandoId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paciente)
+        });
+        editandoId = null;
+        document.getElementById('form-title').innerText = 'Adicionar Paciente';
+        document.getElementById('cancelarEdicao').style.display = 'none';
+      } else {
+        await fetch('/api', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(paciente)
+        });
+      }
+
+      form.reset();
+      carregarPacientes();
+      mostrarPopup(); // Chama a função para mostrar o popup
+    });
+
+    async function editarPaciente(id) {
+      const res = await fetch(`/api/${id}`);
+      const paciente = await res.json();
+
+      const form = document.getElementById('formPaciente');
+      form.nome.value = paciente.nome;
+      form.email.value = paciente.email;
+      form.telefone.value = paciente.telefone;
+      form.data_nascimento.value = paciente.data_nascimento;
+      form.historico.value = paciente.historico;
+
+      editandoId = id;
+      document.getElementById('form-title').innerText = 'Editar Paciente';
+      document.getElementById('cancelarEdicao').style.display = 'inline-block';
+    }
+
+   async function carregarAgendamentos() {
+      try {
+        const response = await fetch('/api/agendamentos');
+        const agendamentos = await response.json();
+
+        const tabela = document.getElementById('tabela-agendamentos');
+        if (tabela) {
+          tabela.innerHTML = '';
+          agendamentos.forEach(ag => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${ag.id}</td>
+              <td>${ag.nome}</td>
+              <td>${new Date(ag.data).toLocaleString('pt-BR')}</td>
+              <td>${ag.tipo_terapia}</td>
+              <td>${ag.status_pagamento}</td>
+            `;
+            tabela.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error('Erro ao carregar agendamentos:', error);
+      }
+    }
+
+    async function deletarPaciente(id) {
+      if (confirm('Deseja realmente excluir este paciente?')) {
+        await fetch(`/api/${id}`, { method: 'DELETE' });
+
+        carregarPacientes();
+
+        if (typeof carregarAgendamentos === "function") {
+          carregarAgendamentos();
+        }
+      }
+    }
+
+    document.getElementById('cancelarEdicao').addEventListener('click', () => {
+      document.getElementById('formPaciente').reset();
+      document.getElementById('form-title').innerText = 'Adicionar Paciente';
+      document.getElementById('cancelarEdicao').style.display = 'none';
+      editandoId = null;
+    });
+
+    carregarPacientes();
+  </script>
+</body>
+</html>

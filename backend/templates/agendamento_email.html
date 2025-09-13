@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Confirmação de Agendamento</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative; /* Adicionado para posicionamento absoluto da .footer */
+    }
+    .header {
+      background: linear-gradient(135deg, #5f9ea0, #4682b4);
+      padding: 20px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .header .logo {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .content {
+      padding: 20px;
+      color: #333333;
+    }
+    .content h3 {
+      color: #4682b4;
+    }
+    .footer {
+      background-color: #f4f6f8;
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #777777;
+    }
+    /* Estilo da Logo */
+    span.logo-img {
+      height: 280px;
+      width: 650px;
+      background-image: url('https://i.imgur.com/53FW2BV.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+    span.footer {
+      height: 30px; /* Aproximadamente o tamanho da linha de texto "Sua Terapeuta" */
+      width: 30px; /* Ajustado proporcionalmente à imagem */
+      background-image: url('https://i.imgur.com/X6cHZyN.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      position: absolute;
+      bottom: 10px; /* Distância do fundo */
+      right: 10px;  /* Posicionado no canto direito */
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Cabeçalho -->
+    <div class="header">
+      <span class="logo-img"></span>
+    </div>
+    <!-- <div class="header">
+      <img src="https://i.imgur.com/53FW2BV.png" alt="Karla Marques Logo" style="max-width: 300px; height: auto; display: block; margin: 0 auto;">
+    </div> -->
+
+    <!-- Conteúdo -->
+    <div class="content">
+      <h3>Olá, {{nome_paciente}}!</h3>
+      <p>Seu agendamento para sua consulta foi agendada com sucesso</p>
+      <p>Foi registrado um atendimento <strong>{{tipo_terapia}}</strong>.</p>
+      <h3><strong>Detalhes do agendamento:</strong></h3>
+      <ul>
+        <li><strong>Data:</strong> {{data_agendamento}}</li>
+        <li><strong>Horário:</strong> {{hora_agendamento}}</li>
+        <li><strong>Motivo:</strong> {{motivo_consulta}}</li>
+      </ul>
+      <p>Chegar com 10 minutos de antecedência! </p>
+      <p>Se tiver alguma dúvida, por favor, entre em contato.11 97544-4577</p>
+      <p>Atenciosamente,</p>
+<<<<<<< HEAD
+      <p><strong>Karla Marques Terapeuta Integrativa</strong></p>
+=======
+      <p><strong>Karla Marques </strong></p>
+>>>>>>> 3959620b0900f06c3eea4d8f921ebede1266b5c5
+
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+      © {{ano_atual}} Sistema Terapeuta - Todos os direitos reservados.
+    </div>
+  </div>
+</body>
+</html>

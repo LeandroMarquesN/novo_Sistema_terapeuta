@@ -1,0 +1,11 @@
+Olá, {{nome_paciente}}!
+
+Seu agendamento para uma sessão de {{tipo_terapia}} foi confirmado!
+
+*Data:* {{data_agendamento}}
+*Horário:* {{hora_agendamento}}
+
+Estamos ansiosos para o nosso encontro!
+
+Atenciosamente,
+Sua Terapeuta

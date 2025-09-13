@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Confirmação de Reagendamento</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 0;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .header {
+      background: linear-gradient(135deg, #5f9ea0, #4682b4);
+      padding: 20px;
+      text-align: center;
+      color: #ffffff;
+    }
+    .header .logo {
+      font-size: 22px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .content {
+      padding: 20px;
+      color: #333333;
+    }
+    .content h3 {
+      color: #4682b4;
+    }
+    .footer {
+      background-color: #f4f6f8;
+      text-align: center;
+      padding: 15px;
+      font-size: 12px;
+      color: #777777;
+    }
+    /* Estilo da Logo */
+    span.logo-img {
+      height: 280px;
+      width: 650px;
+      background-image: url('https://i.imgur.com/53FW2BV.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: left;
+      display: inline-block;
+      text-indent: -9999px;
+      overflow: hidden;
+    }
+    span.footer {
+      height: 30px;
+      width: 30px;
+      background-image: url('https://i.imgur.com/X6cHZyN.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="header">
+      <span class="logo-img"></span>
+    </div>
+
+    <div class="content">
+      <h3>Olá, {{nome_paciente}}!</h3>
+      <p>Seu agendamento para sua consulta foi **reagendado** com sucesso!</p>
+      <p>Foi registrado um atendimento **{{tipo_terapia}}**.</p>
+      <h3>**Detalhes do novo agendamento:**</h3>
+      <ul>
+        <li>**Data:** {{data_agendamento}}</li>
+        <li>**Horário:** {{hora_agendamento}}</li>
+      </ul>
+      <p>Chegar com 10 minutos de antecedência! </p>
+      <p>Se tiver alguma dúvida, por favor, entre em contato. 11 97544-4577</p>
+      <p>Atenciosamente,</p>
+<<<<<<< HEAD
+      <p>Karla Marques Terapeuta Integrativa</p>
+=======
+      <p>Karla Marques </p>
+>>>>>>> 3959620b0900f06c3eea4d8f921ebede1266b5c5
+    </div>
+
+    <div class="footer">
+      © {{ano_atual}} Sistema Terapeuta - Todos os direitos reservados.
+    </div>
+  </div>
+</body>
+</html>
