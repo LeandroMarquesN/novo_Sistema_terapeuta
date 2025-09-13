@@ -1,9 +1,12 @@
-# .gitignore
+# Diretórios e arquivos gerados
 node_modules/
-.env
-docker/mysql-init/init.sql.save
-*.log
-*.env.*
 dist/
+uploads/
+*.log
+
+# Arquivos de ambiente e sensíveis
 .env
-.env
+.env.*
+
+# Arquivos temporários e de backup
+docker/mysql-init/init.sql.save
