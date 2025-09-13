@@ -6,7 +6,7 @@ uploads/
 
 # Arquivos de ambiente e sensíveis
 .env
-
+.env.*
 
 # Arquivos temporários e de backup
 docker/mysql-init/init.sql.save
