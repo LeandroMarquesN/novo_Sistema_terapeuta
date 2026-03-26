@@ -655,165 +655,126 @@
 
         // 2. Inicialização do Calendário
         async function inicializarCalendario() {
-    const calendarEl = document.getElementById('calendar');
-    if (!calendarEl) return; // Garante que o elemento existe
+            const calendarEl = document.getElementById('calendar');
+            const anoAtual = new Date().getFullYear();
+            const eventosLuas = [];
 
-    const anoAtual = new Date().getFullYear();
-    const eventosLuas = [];
-
-    // 1. Geração das Fases da Lua
-    for (let m = 0; m < 12; m++) {
-        for (let d = 1; d <= 31; d++) {
-            const data = new Date(anoAtual, m, d);
-            if (data.getMonth() !== m) break;
-
-            // Certifique-se que obterFaseLunar está definida globalmente
-            const infoLua = typeof obterFaseLunar === 'function' ? obterFaseLunar(data) : null;
-
-            if (infoLua) {
-                eventosLuas.push({
-                    title: infoLua.emoji,
-                    start: data.toISOString().split('T')[0],
-                    allDay: true,
-                    display: 'block',
-                    backgroundColor: 'transparent',
-                    borderColor: 'transparent',
-                    extendedProps: { tipo: 'LUA', info: `Lua ${infoLua.nome}` }
-                });
-            }
-        }
-    }
-
-    // 2. Configuração do FullCalendar
-    const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'pt-br',
-        themeSystem: 'bootstrap5',
-        events: eventosLuas,
-
-        eventClick: function(info) {
-            // Se for clique na Lua, ignora
-            if (info.event.extendedProps.tipo === 'LUA') return;
-
-            const evento = info.event;
-            const dados = evento.extendedProps;
-            const originalData = dados.originalData || {};
-
-            // Preenche os dados no modal de ações
-            document.getElementById('tituloModalAcoes').innerText = `Paciente: ${evento.title}`;
-            document.getElementById('infoResumoAgendamento').innerHTML = `Agendamento para: <strong>${new Date(evento.start).toLocaleString('pt-BR')}</strong>`;
-
-            // Ação: Ver Informações
-            document.getElementById('btnVerInfo').onclick = function() {
-                const modalAcoesEl = document.getElementById('modalAcoesPaciente');
-                const modalAcoesBS = bootstrap.Modal.getInstance(modalAcoesEl);
-                if (modalAcoesBS) modalAcoesBS.hide();
-
-                // Abre o modal de detalhes do paciente
-                if (typeof abrirModalPaciente === 'function') {
-                    abrirModalPaciente(encodeURIComponent(JSON.stringify(originalData)));
+            for (let m = 0; m < 12; m++) {
+                for (let d = 1; d <= 31; d++) {
+                    const data = new Date(anoAtual, m, d);
+                    if (data.getMonth() !== m) break;
+                    const infoLua = obterFaseLunar(data);
+                    if (infoLua) {
+                        eventosLuas.push({
+                            title: infoLua.emoji,
+                            start: data.toISOString().split('T')[0],
+                            allDay: true,
+                            display: 'block',
+                            backgroundColor: 'transparent',
+                            borderColor: 'transparent',
+                            extendedProps: { tipo: 'LUA', info: `Lua ${infoLua.nome}` }
+                        });
+                    }
                 }
-            };
+            }
 
-            // Ação: WhatsApp
-            document.getElementById('btnWhatsApp').onclick = function() {
-                const tel = originalData.telefone || "";
-                const msg = encodeURIComponent(`Olá ${evento.title}, confirmo seu atendimento em ${new Date(evento.start).toLocaleDateString('pt-BR')}.`);
-                window.open(`https://web.whatsapp.com/send?phone=55${tel}&text=${msg}`, '_blank');
-            };
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'pt-br',
+                themeSystem: 'bootstrap5',
+                events: eventosLuas,
 
-            // Ação: Reagendar
-            document.getElementById('btnReagendarModal').onclick = function() {
-                const modalAcoesEl = document.getElementById('modalAcoesPaciente');
-                const modalAcoesBS = bootstrap.Modal.getInstance(modalAcoesEl);
-                if (modalAcoesBS) modalAcoesBS.hide();
+                // --- ADICIONE ESTE BLOCO ABAIXO ---
+                eventClick: function(info) {
+                    // Se for clique na Lua, ignora
+                    if (info.event.extendedProps.tipo === 'LUA') return;
 
-                // Captura o ID de forma robusta
-                const idParaReagendar = evento.id || (originalData ? originalData.id : null);
+                    const evento = info.event;
+                    const dados = evento.extendedProps;
 
-                if (!idParaReagendar || idParaReagendar === "undefined") {
-                    alert("Erro: O ID do agendamento não foi encontrado.");
-                    return;
+                    // 1. Preenche os dados no modal de ações
+                    document.getElementById('tituloModalAcoes').innerText = `Paciente: ${evento.title}`;
+                    document.getElementById('infoResumoAgendamento').innerHTML = `Agendamento para: <strong>${new Date(evento.start).toLocaleString('pt-BR')}</strong>`;
+
+                    // 2. Ação: Ver Informações (reutiliza sua função original)
+                    document.getElementById('btnVerInfo').onclick = function() {
+                        bootstrap.Modal.getInstance(document.getElementById('modalAcoesPaciente')).hide();
+                        // Passa os dados salvos no originalData
+                        abrirModalPaciente(encodeURIComponent(JSON.stringify(dados.originalData)));
+                    };
+
+                    // 3. Ação: WhatsApp
+                    document.getElementById('btnWhatsApp').onclick = function() {
+                        const tel = dados.originalData.telefone || "";
+                        const msg = encodeURIComponent(`Olá ${evento.title}, confirmo seu atendimento em ${new Date(evento.start).toLocaleDateString('pt-BR')}.`);
+                        window.open(`https://web.whatsapp.com/send?phone=55${tel}&text=${msg}`, '_blank');
+                    };
+
+                    // 4. Ação: Reagendar
+                    // 4. Ação: Reagendar (Versão Super Blindada)
+                        document.getElementById('btnReagendarModal').onclick = function() {
+                            const modalAcoes = bootstrap.Modal.getInstance(document.getElementById('modalAcoesPaciente'));
+                            if (modalAcoes) modalAcoes.hide();
+
+                            // Tenta capturar o ID de 4 lugares diferentes no objeto do FullCalendar
+                            const idParaReagendar = evento.id ||
+                                                (evento._def ? evento._def.publicId : null) ||
+                                                (dados && dados.id) ||
+                                                (dados.originalData ? dados.originalData.id : null);
+
+                            console.log("ID Capturado:", idParaReagendar);
+
+                            if (!idParaReagendar || idParaReagendar === "undefined") {
+                                alert("Erro: O ID do agendamento não foi encontrado. Verifique se o evento possui um ID no banco de dados.");
+                                return;
+                            }
+
+                            document.getElementById('reagendarId').value = idParaReagendar;
+                            document.getElementById('reagendarPaciente').value = evento.title;
+                            document.getElementById('reagendarDataHora').value = "";
+
+                            const modalReagendar = new bootstrap.Modal(document.getElementById('modalReagendamento'));
+                            modalReagendar.show();
+                        };
+
+
+                    // 5. Mostra o modal de escolha
+                    const modalAcoes = new bootstrap.Modal(document.getElementById('modalAcoesPaciente'));
+                    modalAcoes.show();
+                },
+                // --- FIM DO BLOCO DE CLIQUE ---
+
+                eventDidMount: function(info) {
+                    let conteudo = info.event.extendedProps.tipo === 'LUA'
+                        ? `<strong>${info.event.extendedProps.info}</strong>`
+                        : `<strong>Paciente:</strong> ${info.event.title}`;
+
+                    if (typeof tippy === 'function') {
+                        tippy(info.el, {
+                            content: conteudo,
+                            allowHTML: true,
+                            theme: 'light-border',
+                            placement: 'top'
+                        });
+                    }
                 }
+            });
 
-                document.getElementById('reagendarId').value = idParaReagendar;
-                document.getElementById('reagendarPaciente').value = evento.title;
-                document.getElementById('reagendarDataHora').value = "";
+            calendar.render();
 
-                const modalReagendar = new bootstrap.Modal(document.getElementById('modalReagendamento'));
-                modalReagendar.show();
-            };
-
-            // Mostra o modal de escolha
-            const modalAcoes = new bootstrap.Modal(document.getElementById('modalAcoesPaciente'));
-            modalAcoes.show();
-        },
-
-        eventDidMount: function(info) {
-            let conteudo = info.event.extendedProps.tipo === 'LUA'
-                ? `<strong>${info.event.extendedProps.info}</strong>`
-                : `<strong>Paciente:</strong> ${info.event.title}`;
-
-            if (typeof tippy === 'function') {
-                tippy(info.el, {
-                    content: conteudo,
-                    allowHTML: true,
-                    theme: 'light-border',
-                    placement: 'top'
-                });
-            }
+            // Buscar paciente Agendado da API
+            try {
+                const res = await fetch('http://localhost:3000/api/agendamentos');
+                const agendamentos = await res.json();
+                const eventosApi = agendamentos.map(item => ({
+                    title: item.nome,
+                    start: item.data_agendamento,
+                    color: '#28a745',
+                    extendedProps: { tipo: 'PACIENTE' }
+                }));
+                calendar.addEventSource(eventosApi);
+            } catch (e) { console.error("Erro ao carregar paciente:", e); }
         }
-    });
-
-    calendar.render();
-
-    // 3. Busca de Agendamentos da API
-    try {
-        const res = await fetch('http://localhost:3000/api/agendamentos');
-        if (!res.ok) throw new Error('Erro ao buscar dados da API');
-
-        const agendamentos = await res.json();
-
-        const eventosApi = agendamentos.map(item => ({
-            id: String(item.id),
-            title: item.nome,
-            start: item.data_agendamento,
-            color: '#28a745',
-            extendedProps: {
-                tipo: 'PACIENTE',
-                originalData: item
-            }
-        }));
-
-        // Adiciona os eventos ao calendário após a renderização inicial
-        eventosApi.forEach(evento => calendar.addEvent(evento));
-
-    } catch (error) {
-        console.error("Erro ao carregar agendamentos no calendário:", error);
-    }
-}
-
-        // Função para abrir os detalhes do paciente (Ver Informações)
-        function abrirModalPaciente(dadosEncoded) {
-            const dados = JSON.parse(decodeURIComponent(dadosEncoded));
-
-            // Preenche os campos do modal de detalhes
-            document.getElementById('infoNome').innerText = dados.nome || 'N/A';
-            document.getElementById('infoDataNascimento').innerText = dados.data_nascimento || 'N/A';
-            document.getElementById('infoIdade').innerText = dados.idade || 'N/A';
-            document.getElementById('infoPeso').innerText = dados.peso || 'N/A';
-            document.getElementById('infoAltura').innerText = dados.altura || 'N/A';
-            document.getElementById('infoTipoSanguineo').innerText = dados.tipo_sanguineo || 'N/A';
-            document.getElementById('infoTipoTerapia').innerText = dados.tipo_terapia || 'N/A';
-            document.getElementById('infoDataAgendamento').innerText = new Date(dados.data_agendamento).toLocaleString('pt-BR');
-            document.getElementById('infoMotivoConsulta').innerText = dados.motivo_consulta || 'N/A';
-            document.getElementById('infoObservacoes').innerText = dados.observacoes || 'N/A';
-
-            const modal = new bootstrap.Modal(document.getElementById('modalPaciente'));
-            modal.show();
-        }
-
-
 
             // ==========================================================
             // FUNÇÃO PARA SALVAR O REAGENDAMENTO (COLE AQUI)

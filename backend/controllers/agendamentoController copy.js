@@ -375,32 +375,21 @@ exports.atualizarAgendamentoCompleto = async (req, res) => {
 };
 
 // ==================================================================================================
-// FUNÇÃO EXCLUSIVA PARA REAGENDAMENTO (SOMENTE DATA) - VERSÃO CORRIGIDA
+// FUNÇÃO EXCLUSIVA PARA REAGENDAMENTO (SOMENTE DATA)
+// Esta função lida apenas com a atualização da data e hora.
 // ==================================================================================================
 exports.reagendarAgendamento = async (req, res) => {
   const agendamentoId = req.params.id;
-  let { data_agendamento } = req.body; // Usamos 'let' para podermos limpar a data
+  const { data_agendamento } = req.body;
 
-  console.log(`--- Iniciando reagendamento para ID: ${agendamentoId} ---`);
-
-  // 1. LIMPEZA DA DATA (O segredo para não dar erro no MySQL)
   if (!data_agendamento) {
     return res.status(400).json({ mensagem: 'Nova data de agendamento é obrigatória.' });
   }
-
-  // Remove o 'T' que o navegador envia e garante o formato YYYY-MM-DD HH:mm:ss
-  if (data_agendamento.includes('T')) {
-    data_agendamento = data_agendamento.replace('T', ' ').substring(0, 19);
-    if (data_agendamento.length === 16) data_agendamento += ':00';
-  }
-
-  console.log(`Data formatada para o banco: ${data_agendamento}`);
 
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
 
-    // 2. ATUALIZAÇÃO NO BANCO
     const [updateResult] = await connection.query(
       `UPDATE agendamentos SET data_agendamento = ? WHERE id = ?`,
       [data_agendamento, agendamentoId]
@@ -411,23 +400,20 @@ exports.reagendarAgendamento = async (req, res) => {
       return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser reagendado.' });
     }
 
-    // 3. BUSCA DADOS PARA NOTIFICAÇÃO
-    const [dados] = await connection.query(
+    // ==============================================================================================
+    // TRECHO A SER DESCOMENTADO E AJUSTADO:
+    // ==============================================================================================
+    const [agendamento] = await connection.query(
       'SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ?',
       [agendamentoId]
     );
 
-    if (dados.length > 0) {
-      const { nome, email, telefone, tipo_terapia } = dados[0];
+    if (agendamento.length > 0) {
+      const { nome, email, telefone, tipo_terapia } = agendamento[0];
 
-      // 4. FINALIZA A TRANSAÇÃO (COMMIT) ANTES DE ENVIAR NOTIFICAÇÕES
-      // Isso evita deixar o banco "preso" esperando o e-mail/whatsapp sair
       await connection.commit();
-
-      // Responde ao front-end imediatamente
       res.status(200).json({ mensagem: 'Agendamento reagendado com sucesso!' });
 
-      // 5. ENVIAR NOTIFICAÇÕES (Fora da transação para performance)
       if (email) {
         notificationService.sendEmailNotification({
           nome,
@@ -446,19 +432,16 @@ exports.reagendarAgendamento = async (req, res) => {
         }, true);
       }
     } else {
+      // Se não encontrar o agendamento para pegar os dados
       await connection.rollback();
-      res.status(404).json({ mensagem: 'Dados do agendamento não encontrados.' });
+      return res.status(404).json({ mensagem: 'Agendamento não encontrado para notificação.' });
     }
 
   } catch (err) {
-    if (connection) await connection.rollback();
-    console.error('Erro técnico no reagendamento:', err);
-    res.status(500).json({
-        erro: 'Erro ao reagendar',
-        detalhes: err.message,
-        sqlState: err.sqlState
-    });
+    await connection.rollback();
+    console.error('Erro ao reagendar agendamento (somente data):', err);
+    res.status(500).json({ erro: 'Erro ao reagendar agendamento', detalhes: err.message });
   } finally {
-    if (connection) connection.release();
+    connection.release();
   }
 };
