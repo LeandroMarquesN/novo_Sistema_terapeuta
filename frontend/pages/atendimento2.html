@@ -53,49 +53,25 @@
 
         <main class="flex-1 p-4 md:p-8 space-y-6">
 
-           <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-    <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
-        <h2 class="font-bold flex items-center"><i class="fas fa-id-card mr-2 text-xl"></i> Ficha de Atendimento</h2>
-        <span class="bg-blue-500 px-3 py-1 rounded-full text-xs font-mono">ID Agendamento: #<span id="id_agendamento">--</span></span>
-    </div>
-
-    <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div class="flex flex-col items-center md:border-r border-gray-100 pr-6">
-                <img id="foto_paciente" src="https://placehold.co/120x120/A0A0A0/ffffff?text=FOTO" class="rounded-full border-4 border-blue-50 mb-3 shadow-sm">
-                <h3 id="nome" class="text-xl font-bold text-gray-800 text-center uppercase tracking-tight">Carregando...</h3>
-                <p class="text-blue-600 text-sm font-medium" id="tipo_terapia">--</p>
-            </div>
-
-            <div class="space-y-3 text-sm">
-                <div>
-                    <label class="text-gray-400 block text-xs uppercase font-bold">CPF (Obrigatório para MarketUP)</label>
-                    <input type="text" id="cpf_paciente" placeholder="000.000.000-00"
-                           class="w-full p-2 border border-blue-200 rounded bg-blue-50 focus:ring-2 focus:ring-blue-500 outline-none font-semibold">
+            <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+                    <h2 class="font-bold flex items-center"><i class="fas fa-user-circle mr-2 text-xl"></i> Dados do Paciente</h2>
+                    <span class="bg-blue-500 px-3 py-1 rounded-full text-xs">Agendamento ID: #<span id="display-id">1234</span></span>
                 </div>
-                <p><strong>Email:</strong> <span id="email" class="text-gray-600">--</span></p>
-                <p><strong>WhatsApp:</strong> <span id="telefone" class="text-gray-600">--</span></p>
-                <p><strong>Origem:</strong> <span id="origem_indicacao" class="text-gray-600">--</span></p>
-            </div>
-
-            <div class="space-y-3 text-sm border-l border-gray-50 pl-6">
-                <p><strong>Nascimento:</strong> <span id="data_nascimento">--</span> (<span id="idade">--</span> anos)</p>
-                <p><strong>Peso:</strong> <span id="peso">--</span> kg</p>
-                <p><strong>Altura:</strong> <span id="altura">--</span> m</p>
-                <p><strong>Sangue:</strong> <span id="tipo_sanguineo" class="text-red-600 font-bold">--</span></p>
-            </div>
-
-            <div class="space-y-3 text-sm border-l border-gray-50 pl-6">
-                <p><strong>Motivo da Consulta:</strong> <br><span id="motivo_consulta" class="text-gray-500 italic">--</span></p>
-                <div class="mt-2">
-                    <span class="text-xs font-bold text-red-500 uppercase">Condições de Saúde:</span>
-                    <div id="condicoes" class="flex flex-wrap gap-1 mt-1">
-                        </div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flex flex-col items-center border-r border-gray-100">
+                        <img src="https://placehold.co/120x120/A0A0A0/ffffff?text=FOTO" class="rounded-full border-4 border-blue-100 mb-2">
+                        <h3 id="patient-name" class="text-lg font-bold text-gray-800 text-center">Carregando Nome...</h3>
+                        <p class="text-sm text-gray-500" id="patient-email">email@paciente.com</p>
+                    </div>
+                    <div class="col-span-2 grid grid-cols-2 gap-4 text-sm">
+                        <div class="bg-gray-50 p-3 rounded"><strong>Idade:</strong> <span id="infoIdade">--</span> anos</div>
+                        <div class="bg-gray-50 p-3 rounded"><strong>Tipo Sanguíneo:</strong> <span id="infoSangue">--</span></div>
+                        <div class="bg-gray-50 p-3 rounded"><strong>IMC:</strong> <span id="infoIMC">--</span></div>
+                        <div class="bg-gray-50 p-3 rounded text-red-600"><strong>Condições:</strong> <span id="infoCondicoes">--</span></div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </div>
-</section>
+            </section>
 
             <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-bold text-blue-800 mb-4 border-b pb-2 italic"><i class="fas fa-pen-fancy mr-2"></i> Evolução Terapêutica</h3>
@@ -177,67 +153,6 @@
                 document.getElementById('vit-valor').value = '';
             }
         }
-
-        // ======= Logica  para puchar os dados ==============
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // 1. Pegar o ID do agendamento que vem na URL (ex: atendimento.html?id=10)
-        const urlParams = new URLSearchParams(window.location.search);
-        const agendamentoId = urlParams.get('id');
-
-        if (!agendamentoId) {
-            alert("Erro: Nenhum ID de agendamento encontrado na URL.");
-            return;
-        }
-
-        // 2. Chamar a sua API Node.js para buscar os dados
-        fetch(`/api/agendamentos/${agendamentoId}`)
-            .then(response => response.json())
-            .then(data => {
-                // Preencher os campos do HTML com os dados do banco
-                document.getElementById('id_agendamento').innerText = data.id;
-                document.getElementById('nome').innerText = data.nome || 'Não informado';
-                document.getElementById('email').innerText = data.email || '--';
-                document.getElementById('telefone').innerText = data.telefone || '--';
-                document.getElementById('tipo_terapia').innerText = data.tipo_terapia || '--';
-                document.getElementById('data_nascimento').innerText = new Date(data.data_nascimento).toLocaleDateString('pt-BR');
-                document.getElementById('idade').innerText = data.idade || '--';
-                document.getElementById('peso').innerText = data.peso || '--';
-                document.getElementById('altura').innerText = data.altura || '--';
-                document.getElementById('tipo_sanguineo').innerText = data.tipo_sanguineo || '--';
-                document.getElementById('motivo_consulta').innerText = data.motivo_consulta || '--';
-                document.getElementById('origem_indicacao').innerText = data.origem_indicacao || '--';
-
-                // Lógica para as badges de Condições de Saúde (transforma string em etiquetas)
-                const condicoesContainer = document.getElementById('condicoes');
-                if (data.condicoes) {
-                    const lista = data.condicoes.split(','); // Supondo que você salva como "Diabetes,Ansiedade"
-                    lista.forEach(cond => {
-                        const span = document.createElement('span');
-                        span.className = "bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase";
-                        span.innerText = cond.trim();
-                        condicoesContainer.appendChild(span);
-                    });
-                }
-            })
-            .catch(err => {
-                console.error("Erro ao buscar dados do agendamento:", err);
-                alert("Erro ao carregar dados do paciente.");
-            });
-    });
-
-    // Função para salvar o CPF e finalizar (Hacker do bem preparando a ponte para o MarketUP)
-
-    function finalizarAtendimento() {
-        const cpf = document.getElementById('cpf_paciente').value;
-        if (!cpf) {
-            alert("Por favor, preencha o CPF para gerar o Cupom Fiscal no MarketUP!");
-            return;
-        }
-        // Aqui você chamará sua rota de finalizar, enviando o CPF junto
-        console.log("Enviando para o financeiro com CPF:", cpf);
-    }
-
     </script>
 </body>
 </html>
