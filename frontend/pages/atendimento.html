@@ -3,798 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Atendimento ao Paciente</title>
+    <title>Sessão de Atendimento - Sistema Terapeuta</title>
 
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Inter Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        window.initializeApp = initializeApp;
-        window.getAuth = getAuth;
-        window.signInAnonymously = signInAnonymously;
-        window.signInWithCustomToken = signInWithCustomToken;
-        window.onAuthStateChanged = onAuthStateChanged;
-        window.getFirestore = getFirestore;
-        window.doc = doc;
-        window.getDoc = getDoc;
-        window.setDoc = setDoc;
-        window.onSnapshot = onSnapshot;
-        window.setLogLevel = setLogLevel;
-    </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-            color: #1f2937;
-            line-height: 1.6;
-            margin-top: 5rem;
-        }
-
-        .navbar {
-            background-color: #ffffff !important;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .logo-img {
-            color: #2563eb;
-            font-weight: bold;
-            font-size: 1.5rem;
-            text-decoration: none;
-            transition: color 0.2s ease-in-out;
-        }
-
-        .logo-img:hover {
-            color: #1d4ed8;
-        }
-
-        .page-container {
-            display: flex;
-            min-height: calc(100vh - 5rem);
-        }
-
-        .sidebar {
-            width: 250px;
-            background-color: #ffffff;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-title {
-            font-size: 1.2rem;
-            color: #2563eb;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid #2563eb;
-            padding-bottom: 5px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar-button {
-            width: 100%;
-            text-align: left;
-            background-color: transparent;
-            border: none;
-            padding: 12px 10px;
-            font-size: 1rem;
-            color: #1f2937;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-        }
-
-        .sidebar-button i {
-            margin-right: 10px;
-        }
-
-        .sidebar-button:hover {
-            background-color: #2563eb;
-            color: #fff;
-        }
-
-        .main-content {
-            flex-grow: 1;
-            padding: 30px;
-        }
-
-        section {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            margin-bottom: 20px;
-        }
-
-        h2, h3, h4 {
-            color: #2563eb;
-            margin-bottom: 15px;
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 5px;
-        }
-
-        .patient-photo {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border: 2px solid #2563eb;
-        }
-
-        .exame-resultado-container {
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .resultado-item {
-            margin-bottom: 10px;
-        }
-
-        .trend-icon {
-            margin-left: 10px;
-            font-size: 1rem;
-        }
-
-        .trend-up {
-            color: #10b981;
-        }
-
-        .trend-down {
-            color: #ef4444;
-        }
-
-        .toggle-view-btn.active {
-            background-color: #2563eb;
-            color: #fff;
-            border-color: #2563eb;
-        }
-
-        /* Responsive styles */
-        @media (max-width: 768px) {
-            .navbar .container-fluid {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            .navbar-brand {
-                margin-bottom: 10px;
-            }
-            .navbar-buttons {
-                width: 100%;
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                margin-top: 10px;
-            }
-            body {
-                margin-top: 9rem;
-            }
-            .page-container {
-                flex-direction: column;
-                min-height: auto;
-            }
-            .sidebar {
-                width: 100%;
-                padding: 15px;
-                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            }
-            .sidebar-menu {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 10px;
-            }
-            .sidebar-button {
-                flex: 1 1 auto;
-                width: auto;
-                text-align: center;
-                justify-content: center;
-            }
-            .main-content {
-                padding: 20px;
-            }
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .sidebar { height: calc(100vh - 4rem); position: sticky; top: 4rem; }
+        .glass-card { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body>
+<body class="bg-gray-100">
 
-    <nav class="navbar flex flex-col sm:flex-row items-start sm:items-center p-4">
-        <a class="navbar-brand flex items-center mb-2 sm:mb-0" href="#">
-            <img src="https://placehold.co/40x40/2563eb/ffffff?text=LOGO" alt="Logo do Sistema" class="h-10 w-10 mr-2 rounded-full">
-            <span class="logo-img">Sistema Terapeuta</span>
-        </a>
-        <div class="navbar-buttons flex items-center flex-wrap justify-center sm:justify-end w-full sm:w-auto">
-            <a href="#" class="btn btn-outline-primary px-3 py-2 rounded-md transition-colors duration-200 hover:bg-blue-600 hover:text-white border-blue-600 text-blue-600 mr-2">Home</a>
-            <a href="#" class="btn btn-outline-primary px-3 py-2 rounded-md transition-colors duration-200 hover:bg-blue-600 hover:text-white border-blue-600 text-blue-600 mr-2">Pacientes</a>
-            <a href="#" class="btn btn-outline-success px-3 py-2 rounded-md transition-colors duration-200 hover:bg-green-600 hover:text-white border-green-600 text-green-600 mr-2">Agendar</a>
-            <a href="#" class="btn btn-outline-secondary px-3 py-2 rounded-md transition-colors duration-200 hover:bg-gray-600 hover:text-white border-gray-600 text-gray-600">Histórico</a>
-            <button id="theme-toggle-btn" class="btn btn-outline-dark ml-2 px-3 py-2 rounded-md transition-colors duration-200 hover:bg-gray-800 hover:text-white border-gray-800 text-gray-800">
-                <i class="fas fa-moon"></i>
-            </button>
+    <nav class="bg-white shadow-md h-16 fixed w-full z-50 flex items-center px-6 justify-between">
+        <div class="flex items-center">
+            <div class="h-10 w-10 bg-blue-600 rounded-full flex items-center justify-center text-white mr-3">
+                <i class="fas fa-hands-helping"></i>
+            </div>
+            <span class="text-xl font-bold text-blue-800">Sistema Terapeuta</span>
+        </div>
+        <div class="space-x-4">
+            <a href="dashboard.html" class="text-gray-600 hover:text-blue-600"><i class="fas fa-home"></i> Home</a>
+            <span class="text-gray-300">|</span>
+            <span class="font-semibold text-blue-600">Atendimento em Curso</span>
         </div>
     </nav>
 
-    <div class="page-container flex flex-col sm:flex-row">
-        <aside class="sidebar">
-            <h3 class="sidebar-title">Ações do Atendimento</h3>
-            <ul class="sidebar-menu">
-                <li><button id="btn-salvar" class="sidebar-button"><i class="fas fa-save"></i> Salvar Atendimento</button></li>
-                <li><button id="btn-anexar" class="sidebar-button"><i class="fas fa-paperclip"></i> Anexar Exames</button></li>
-                <li><button id="btn-historico" class="sidebar-button"><i class="fas fa-history"></i> Ver Histórico</button></li>
-                <li><button id="btn-imprimir" class="sidebar-button"><i class="fas fa-print"></i> Imprimir</button></li>
-            </ul>
+    <div class="flex pt-16">
+        <aside class="sidebar w-64 bg-white border-r p-6 hidden md:block">
+            <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">Ações Rápidas</h3>
+            <nav class="space-y-2">
+                <button class="w-full text-left p-3 rounded-lg bg-blue-50 text-blue-700 font-medium hover:bg-blue-100 transition">
+                    <i class="fas fa-save mr-2"></i> Salvar Prontuário
+                </button>
+                <button class="w-full text-left p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fas fa-history mr-2"></i> Ver Última Sessão
+                </button>
+                <button class="w-full text-left p-3 rounded-lg text-gray-600 hover:bg-gray-100 transition">
+                    <i class="fas fa-file-medical mr-2"></i> Prescrição Base
+                </button>
+                <hr class="my-4">
+                <button class="w-full text-left p-3 rounded-lg bg-green-600 text-white font-medium hover:bg-green-700 shadow-md transition">
+                    <i class="fas fa-check-double mr-2"></i> Finalizar e Cobrar
+                </button>
+            </nav>
         </aside>
 
-        <main class="main-content flex-grow p-5">
-            <section class="mb-4">
-                <h2>Detalhes do Atendimento</h2>
-                <div class="flex items-center mb-3">
-                    <div class="flex-shrink-0 mr-3">
-                        <img id="patient-photo-circle" src="https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO" alt="Foto do Paciente" class="rounded-full patient-photo">
+        <main class="flex-1 p-4 md:p-8 space-y-6">
+
+            <section class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+                    <h2 class="font-bold flex items-center"><i class="fas fa-user-circle mr-2 text-xl"></i> Dados do Paciente</h2>
+                    <span class="bg-blue-500 px-3 py-1 rounded-full text-xs">Agendamento ID: #<span id="display-id">1234</span></span>
+                </div>
+                <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="flex flex-col items-center border-r border-gray-100">
+                        <img src="https://placehold.co/120x120/A0A0A0/ffffff?text=FOTO" class="rounded-full border-4 border-blue-100 mb-2">
+                        <h3 id="patient-name" class="text-lg font-bold text-gray-800 text-center">Carregando Nome...</h3>
+                        <p class="text-sm text-gray-500" id="patient-email">email@paciente.com</p>
                     </div>
-                   <div id="patient-data" class="flex-grow">
-                        <h4>Paciente: <span id="infoNome"></span></h4>
-                        <ul class="list-none p-0">
-                            <li class="p-2 border-b border-gray-200"><strong>ID do Paciente:</strong> <span id="infoPatientId"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Data e Hora:</strong> <span id="infoDataHora"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Data de Nascimento:</strong> <span id="infoDataNascimento"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Idade:</strong> <span id="infoIdade"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Peso:</strong> <span id="infoPeso"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Altura:</strong> <span id="infoAltura"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>IMC:</strong> <span id="infoIMC"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Motivo da Consulta:</strong> <span id="infoMotivoConsulta"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Tipo de Terapia:</strong> <span id="infoTipoTerapia"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Observações:</strong> <span id="infoObservacoes"></span></li>
-                            <li class="p-2 border-b border-gray-200"><strong>Condições de Saúde:</strong> <span id="infoCondicoes"></span></li>
-                        </ul>
+                    <div class="col-span-2 grid grid-cols-2 gap-4 text-sm">
+                        <div class="bg-gray-50 p-3 rounded"><strong>Idade:</strong> <span id="infoIdade">--</span> anos</div>
+                        <div class="bg-gray-50 p-3 rounded"><strong>Tipo Sanguíneo:</strong> <span id="infoSangue">--</span></div>
+                        <div class="bg-gray-50 p-3 rounded"><strong>IMC:</strong> <span id="infoIMC">--</span></div>
+                        <div class="bg-gray-50 p-3 rounded text-red-600"><strong>Condições:</strong> <span id="infoCondicoes">--</span></div>
                     </div>
                 </div>
             </section>
 
-            <section class="mb-4">
-                <h3>Anotações do Atendimento</h3>
-                <textarea id="anotacoes" class="w-full p-4 border border-gray-300 rounded-lg text-sm resize-y" rows="10" placeholder="Anote aqui as informações do atendimento, observações, evolução, etc."></textarea>
+            <section class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 class="text-lg font-bold text-blue-800 mb-4 border-b pb-2 italic"><i class="fas fa-pen-fancy mr-2"></i> Evolução Terapêutica</h3>
+                <textarea class="w-full p-4 h-64 bg-yellow-50 border border-yellow-100 rounded-lg shadow-inner focus:ring-2 focus:ring-blue-500 outline-none text-gray-700"
+                          placeholder="Digite aqui as observações do atendimento de hoje..."></textarea>
             </section>
 
-            <section>
-                <h3>Anexos do Paciente</h3>
-                <div id="anexos-container" class="anexos-list list-group">
-                    <!-- A lista de anexos será gerada aqui via JavaScript -->
-                </div>
-            </section>
+            <section class="bg-white rounded-xl shadow-sm border border-blue-200 p-6">
+                <h3 class="text-lg font-bold text-green-700 mb-4 flex items-center">
+                    <i class="fas fa-shopping-cart mr-2"></i> Produtos e Vitaminas Receitadas
+                </h3>
 
-            <section>
-                <h3>Análise de Exames</h3>
-
-                <div class="flex flex-wrap gap-2 mb-3" role="group">
-                    <button type="button" class="btn px-4 py-2 rounded-lg transition-colors duration-200 toggle-view-btn active bg-blue-600 text-white" data-view="resultados">Resultados</button>
-                    <button type="button" class="btn px-4 py-2 rounded-lg transition-colors duration-200 toggle-view-btn bg-gray-200 text-gray-800 hover:bg-gray-300" data-view="diagnostico">Diagnóstico</button>
-                </div>
-
-                <!-- Modal de Mensagem de Erro/Sucesso -->
-                <div id="message-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-                    <div class="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
-                        <h4 id="modal-title" class="text-xl font-bold mb-4"></h4>
-                        <p id="modal-message" class="text-gray-700 mb-4"></p>
-                        <button id="modal-close-btn" class="bg-blue-600 text-white px-4 py-2 rounded-lg float-right">Fechar</button>
-                    </div>
-                </div>
-
-                <!-- Começo da aplicação de IA -->
-                <div class="card p-4 rounded-lg shadow-sm bg-gray-50">
-                    <form id="exame-upload-form" class="mb-3">
-                        <div class="flex gap-2">
-                            <input type="file" class="form-control flex-grow rounded-lg p-2 border border-gray-300" id="exame-file" accept=".pdf" disabled>
-                            <button class="btn bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors" type="submit" id="btn-upload-exame">Processar Exame (Simulado)</button>
-                        </div>
-                    </form>
-
-                    <!-- Indicador de Carregamento -->
-                    <div id="loading-spinner" class="hidden text-center p-4">
-                        <div class="animate-spin inline-block w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" role="status">
-                            <span class="sr-only">Processando...</span>
-                        </div>
-                        <p class="mt-2 text-gray-500">Aguarde, a IA está processando o exame...</p>
+                <div class="space-y-4">
+                    <div class="flex gap-2">
+                        <input type="text" id="vit-nome" placeholder="Nome da Vitamina" class="flex-1 p-2 border rounded">
+                        <input type="number" id="vit-valor" placeholder="Valor R$" class="w-24 p-2 border rounded">
+                        <button onclick="adicionarVitamina()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                            <i class="fas fa-plus"></i>
+                        </button>
                     </div>
 
-                    <!-- Área para Exibir os Resultados e o Diagnóstico -->
-                    <div id="exame-resultado-container" class="hidden">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="p-2 border">Descrição</th>
+                                <th class="p-2 border">Preço</th>
+                                <th class="p-2 border">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-vitaminas">
+                            <tr>
+                                <td class="p-2 border">Consulta Integrativa (Restante)</td>
+                                <td class="p-2 border">R$ 350,00</td>
+                                <td class="p-2 border text-gray-400">Padrão</td>
+                            </tr>
+                        </tbody>
+                    </table>
 
-                        <!-- VIEW DE RESULTADOS -->
-                        <div id="resultados-view" class="hidden">
-                            <h4 class="text-lg font-bold">Resultados Extraídos</h4>
-                            <div class="resultado-item">
-                                <span>Nome do Paciente:</span>
-                                <p id="exame-paciente-nome" class="font-normal"></p>
-                            </div>
-                            <div class="resultado-item">
-                                <span>Tipo do Exame:</span>
-                                <p id="exame-tipo" class="font-normal"></p>
-                            </div>
-                            <div class="resultado-item">
-                                <h5 class="text-base font-semibold mt-4">Valores Extraídos:</h5>
-                                <ul id="exame-valores" class="list-none p-0">
-                                    <!-- Valores com ícones serão inseridos aqui via JS -->
-                                </ul>
-                            </div>
-                            <hr class="my-4 border-gray-200">
-                            <!-- Seção de Parâmetros -->
-                            <div id="exame-parametros-view">
-                                <h5 class="text-base font-semibold">Parâmetros de Referência</h5>
-                                <ul id="exame-parametros" class="list-none p-0">
-                                    <!-- Parâmetros de referência serão inseridos aqui via JS -->
-                                </ul>
-                            </div>
+                    <div class="bg-green-50 p-4 rounded-lg flex justify-between items-center border border-green-200">
+                        <div>
+                            <p class="text-xs text-green-600 uppercase font-bold">Total a cobrar (Descontado o Sinal)</p>
+                            <h2 class="text-2xl font-black text-green-800">R$ <span id="total-final">150,00</span></h2>
                         </div>
-
-                        <!-- VIEW DE DIAGNÓSTICO -->
-                        <div id="diagnostico-view" class="hidden">
-                            <h4 class="text-lg font-bold">Diagnóstico da IA</h4>
-                            <div class="resultado-item">
-                                <span>Análise de IA:</span>
-                                <p id="exame-diagnostico" class="font-normal"></p>
-                                <div id="diagnostico-sources" class="text-xs text-gray-500 mt-2"></div>
-                            </div>
+                        <div class="space-y-2">
+                            <button class="block w-full bg-blue-600 text-white text-xs px-4 py-2 rounded font-bold hover:bg-blue-700">
+                                <i class="fab fa-whatsapp mr-1"></i> ENVIAR LINK SUMUP
+                            </button>
+                            <button class="block w-full border border-blue-600 text-blue-600 text-xs px-4 py-2 rounded font-bold hover:bg-blue-50">
+                                <i class="fas fa-file-invoice-dollar mr-1"></i> GERAR CUPOM MARKETUP
+                            </button>
                         </div>
                     </div>
                 </div>
             </section>
+
         </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', async function() {
-            setLogLevel('Debug');
+        // Lógica simples para adicionar vitaminas à lista
+        function adicionarVitamina() {
+            const nome = document.getElementById('vit-nome').value;
+            const valor = document.getElementById('vit-valor').value;
 
-            const btnSalvar = document.getElementById('btn-salvar');
-            const anotacoesTextarea = document.getElementById('anotacoes');
-            const exameFile = document.getElementById('exame-file');
-            const btnUploadExame = document.getElementById('btn-upload-exame');
-            const loadingSpinner = document.getElementById('loading-spinner');
-            const exameResultadoContainer = document.getElementById('exame-resultado-container');
+            if(nome && valor) {
+                const lista = document.getElementById('lista-vitaminas');
+                const row = `<tr>
+                    <td class="p-2 border">${nome}</td>
+                    <td class="p-2 border">R$ ${parseFloat(valor).toFixed(2)}</td>
+                    <td class="p-2 border"><button class="text-red-500"><i class="fas fa-trash"></i></button></td>
+                </tr>`;
+                lista.innerHTML += row;
 
-            const infoPatientId = document.getElementById('infoPatientId');
-            const infoNome = document.getElementById('infoNome');
-            const infoDataNascimento = document.getElementById('infoDataNascimento');
-            const infoIdade = document.getElementById('infoIdade');
-            const infoPeso = document.getElementById('infoPeso');
-            const infoAltura = document.getElementById('infoAltura');
-            const infoIMC = document.getElementById('infoIMC');
-            const infoDataHora = document.getElementById('infoDataHora');
-            const infoMotivoConsulta = document.getElementById('infoMotivoConsulta');
-            const infoTipoTerapia = document.getElementById('infoTipoTerapia');
-            const infoObservacoes = document.getElementById('infoObservacoes');
-            const infoCondicoes = document.getElementById('infoCondicoes');
-            const patientPhoto = document.getElementById('patient-photo-circle');
+                // Atualiza o total (lógica simplificada para demonstração)
+                let totalAtual = parseFloat(document.getElementById('total-final').innerText);
+                document.getElementById('total-final').innerText = (totalAtual + parseFloat(valor)).toFixed(2);
 
-            const examePacienteNome = document.getElementById('exame-paciente-nome');
-            const exameTipo = document.getElementById('exame-tipo');
-            const exameDiagnostico = document.getElementById('exame-diagnostico');
-            const exameValores = document.getElementById('exame-valores');
-            const exameParametros = document.getElementById('exame-parametros');
-            const anexosContainer = document.getElementById('anexos-container');
-            const resultadosView = document.getElementById('resultados-view');
-            const diagnosticoView = document.getElementById('diagnostico-view');
-            const toggleViewBtns = document.querySelectorAll('.toggle-view-btn');
-            const diagnosticoSources = document.getElementById('diagnostico-sources');
-
-            const modal = document.getElementById('message-modal');
-            const modalTitle = document.getElementById('modal-title');
-            const modalMessage = document.getElementById('modal-message');
-            const modalCloseBtn = document.getElementById('modal-close-btn');
-
-            let db, auth, userId, patientId = 'paciente-exemplo-001';
-
-            // Function to show custom modal
-            function showModal(title, message) {
-                modalTitle.textContent = title;
-                modalMessage.textContent = message;
-                modal.classList.remove('hidden');
+                document.getElementById('vit-nome').value = '';
+                document.getElementById('vit-valor').value = '';
             }
-
-            modalCloseBtn.addEventListener('click', () => {
-                modal.classList.add('hidden');
-            });
-
-            // Function to toggle between views
-            function toggleView(view) {
-                if (view === 'resultados') {
-                    resultadosView.classList.remove('hidden');
-                    diagnosticoView.classList.add('hidden');
-                } else {
-                    resultadosView.classList.add('hidden');
-                    diagnosticoView.classList.remove('hidden');
-                }
-
-                toggleViewBtns.forEach(btn => {
-                    if (btn.dataset.view === view) {
-                        btn.classList.add('active', 'bg-blue-600', 'text-white');
-                        btn.classList.remove('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
-                    } else {
-                        btn.classList.remove('active', 'bg-blue-600', 'text-white');
-                        btn.classList.add('bg-gray-200', 'text-gray-800', 'hover:bg-gray-300');
-                    }
-                });
-            }
-
-            toggleViewBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const view = btn.dataset.view;
-                    toggleView(view);
-                });
-            });
-
-            // Function to calculate age
-            function calcularIdade(dataNascimento) {
-                const hoje = new Date();
-                let idade = hoje.getFullYear() - dataNascimento.getFullYear();
-                const mes = hoje.getMonth() - dataNascimento.getMonth();
-                if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) {
-                    idade--;
-                }
-                return idade;
-            }
-
-            // Function to calculate and classify BMI
-            function calcularIMC(peso, altura) {
-                const imc = peso / (altura * altura);
-                let classificacao = '';
-                if (imc < 18.5) {
-                    classificacao = 'Abaixo do peso';
-                } else if (imc >= 18.5 && imc < 24.9) {
-                    classificacao = 'Peso normal';
-                } else if (imc >= 25 && imc < 29.9) {
-                    classificacao = 'Sobrepeso';
-                } else if (imc >= 30 && imc < 34.9) {
-                    classificacao = 'Obesidade Grau I';
-                } else if (imc >= 35 && imc < 39.9) {
-                    classificacao = 'Obesidade Grau II';
-                } else {
-                    classificacao = 'Obesidade Grau III (mórbida)';
-                }
-                return `<strong>${imc.toFixed(2)}</strong> (${classificacao})`;
-            }
-
-            // Mock function to simulate attachment rendering
-            function renderizarAnexos(anexos) {
-                anexosContainer.innerHTML = '';
-                if (anexos && anexos.length > 0) {
-                    anexos.forEach(anexo => {
-                        const li = document.createElement('li');
-                        li.className = 'flex justify-between items-center p-3 border-b border-gray-200';
-                        const anexoNome = document.createElement('span');
-                        anexoNome.textContent = anexo.nome;
-                        const anexoLink = document.createElement('a');
-                        anexoLink.href = anexo.url;
-                        anexoLink.target = '_blank';
-                        anexoLink.className = 'bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition-colors text-sm';
-                        anexoLink.innerHTML = `<i class="fas fa-eye mr-2"></i> Visualizar`;
-                        li.appendChild(anexoNome);
-                        li.appendChild(anexoLink);
-                        anexosContainer.appendChild(li);
-                    });
-                } else {
-                    anexosContainer.innerHTML = `<div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 rounded-lg" role="alert">Nenhum exame anexado a este atendimento.</div>`;
-                }
-            }
-
-            async function initFirebaseAndLoadData() {
-                try {
-                    const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-                    const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-                    if (!firebaseConfig || !firebaseConfig.projectId) {
-                        console.error("Firebase config is missing or invalid. Please check the __firebase_config variable.");
-                        showModal("Erro de Configuração", "A configuração do Firebase está faltando ou é inválida. O aplicativo pode não funcionar corretamente.");
-                        return;
-                    }
-
-                    const app = initializeApp(firebaseConfig);
-                    auth = getAuth(app);
-                    db = getFirestore(app);
-
-                    await new Promise(resolve => {
-                        onAuthStateChanged(auth, async (user) => {
-                            if (user) {
-                                userId = user.uid;
-                            } else {
-                                const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-                                try {
-                                    if (initialAuthToken) {
-                                        await signInWithCustomToken(auth, initialAuthToken);
-                                        userId = auth.currentUser.uid;
-                                    } else {
-                                        const anonymousUser = await signInAnonymously(auth);
-                                        userId = anonymousUser.user.uid;
-                                    }
-                                } catch (error) {
-                                    console.error("Erro ao autenticar com Firebase:", error);
-                                    showModal("Erro de Autenticação", "Não foi possível autenticar o usuário. O salvamento de dados não funcionará.");
-                                    userId = `anon-${crypto.randomUUID()}`;
-                                }
-                            }
-                            console.log("UserID:", userId);
-                            resolve();
-                        });
-                    });
-
-                    // Load patient data from Firestore using onSnapshot for real-time updates
-                    const patientRef = doc(db, `artifacts/${appId}/public/data/patients`, patientId);
-                    onSnapshot(patientRef, (docSnap) => {
-                        if (docSnap.exists()) {
-                            const data = docSnap.data();
-                            loadPatientData(data);
-                        } else {
-                            showModal("Aviso", "Nenhum dado encontrado para este paciente. Use o botão Salvar para criar um novo registro.");
-                        }
-                    }, (error) => {
-                        console.error("Erro ao carregar dados do paciente:", error);
-                        showModal("Erro de Conexão", "Não foi possível carregar os dados do paciente em tempo real. Verifique sua conexão ou as permissões.");
-                    });
-
-                } catch (e) {
-                    console.error("Erro na inicialização do Firebase:", e);
-                    showModal("Erro Fatal", "Ocorreu um erro ao inicializar o Firebase. O aplicativo pode não funcionar.");
-                }
-            }
-
-            async function loadPatientData(data) {
-                try {
-                    infoPatientId.textContent = patientId;
-                    infoNome.textContent = data.nome || 'N/A';
-                    const dataNascimento = data.data_nascimento ? new Date(data.data_nascimento.seconds * 1000) : null;
-                    if (dataNascimento && !isNaN(dataNascimento)) {
-                        const dataNascimentoFormatada = dataNascimento.toLocaleDateString('pt-BR');
-                        const idade = calcularIdade(dataNascimento);
-                        infoDataNascimento.textContent = dataNascimentoFormatada;
-                        infoIdade.textContent = idade;
-                    } else {
-                        infoDataNascimento.textContent = 'N/A';
-                        infoIdade.textContent = 'N/A';
-                    }
-                    infoPeso.textContent = data.peso || 'N/A';
-                    infoAltura.textContent = data.altura || 'N/A';
-                    const peso = parseFloat(data.peso);
-                    const altura = parseFloat(data.altura);
-                    if (!isNaN(peso) && !isNaN(altura) && altura > 0) {
-                        let alturaCorrigida = altura;
-                        if (altura > 3 && altura <= 300) {
-                            alturaCorrigida = altura / 100;
-                        }
-                        infoIMC.innerHTML = calcularIMC(peso, alturaCorrigida);
-                    } else {
-                        infoIMC.textContent = 'N/A';
-                    }
-                    if (data.foto_paciente) {
-                        patientPhoto.src = data.foto_paciente;
-                    } else {
-                        patientPhoto.src = "https://placehold.co/100x100/A0A0A0/ffffff?text=FOTO";
-                    }
-                    const dataAgendamento = data.data_agendamento ? new Date(data.data_agendamento.seconds * 1000) : null;
-                    if (dataAgendamento && !isNaN(dataAgendamento)) {
-                        const dataHoraFormatada = dataAgendamento.toLocaleDateString('pt-BR') + ' às ' + dataAgendamento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                        infoDataHora.textContent = dataHoraFormatada;
-                    } else {
-                        infoDataHora.textContent = 'N/A';
-                    }
-                    infoMotivoConsulta.textContent = data.motivo_consulta || 'N/A';
-                    infoTipoTerapia.textContent = data.tipo_terapia || 'N/A';
-                    infoObservacoes.textContent = data.observacoes || 'N/A';
-                    infoCondicoes.textContent = data.condicoes_saude || 'N/A';
-                    anotacoesTextarea.value = data.anotacoes || '';
-
-                    // Mock data for attachments, as Firestore doesn't handle files
-                    const anexos = data.anexos || [{ id: 1, nome: 'Exame de Sangue.pdf', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }];
-                    renderizarAnexos(anexos);
-
-                } catch (e) {
-                    console.error("Erro ao carregar dados do agendamento:", e);
-                    showModal("Erro", "Erro ao carregar os dados do atendimento. Verifique o console.");
-                }
-            }
-
-            // Save notes to Firestore
-            btnSalvar.addEventListener('click', async function() {
-                if (!db || !patientId) {
-                    showModal("Erro", "O Firebase não foi inicializado corretamente.");
-                    return;
-                }
-
-                try {
-                    const patientRef = doc(db, `artifacts/${__app_id}/public/data/patients`, patientId);
-                    await setDoc(patientRef, {
-                        anotacoes: anotacoesTextarea.value,
-                        // Mock data for demonstration purposes. In a real app, this would come from a form.
-                        nome: "Ana Oliveira",
-                        data_nascimento: new Date("1990-05-15"),
-                        peso: "65 kg",
-                        altura: "168 cm",
-                        data_agendamento: new Date(),
-                        motivo_consulta: "Dores de cabeça recorrentes",
-                        tipo_terapia: "Terapia Cognitivo-Comportamental",
-                        observacoes: "Paciente apresenta ansiedade leve.",
-                        condicoes_saude: "Nenhuma condição crônica conhecida.",
-                    }, { merge: true });
-
-                    showModal("Sucesso!", "Anotações salvas com sucesso no Firestore.");
-
-                } catch (e) {
-                    console.error("Erro ao salvar anotações:", e);
-                    showModal("Erro", "Erro ao salvar anotações. Verifique o console.");
-                }
-            });
-
-            // ⚡️ Logic for AI analysis using Gemini API (simulated PDF content)
-            btnUploadExame.addEventListener('click', async function(event) {
-                event.preventDefault();
-                loadingSpinner.classList.remove('hidden');
-                exameResultadoContainer.classList.add('hidden');
-                exameDiagnostico.textContent = '';
-                diagnosticoSources.innerHTML = '';
-
-                // Simulated lab results data. This would normally be extracted from the PDF.
-                const mockAnalise = {
-                    paciente_nome: 'Ana Oliveira',// preciso que essa linha contenha o nomedo paciente que esta sendo atendido
-                    tipo_exame: 'Exame de Sangue',
-                    resultados: [
-                        { nome: 'Glicose', valor: '110 mg/dL', status: 'Alto', referencia: '70-99 mg/dL' },
-                        { nome: 'Colesterol Total', valor: '215 mg/dL', status: 'Alto', referencia: '< 200 mg/dL' },
-                        { nome: 'Hemoglobina', valor: '14.5 g/dL', status: 'Normal', referencia: '13-17 g/dL' },
-                        { nome: 'Vitamina D', valor: '28 ng/mL', status: 'Baixo', referencia: '30-100 ng/mL' },
-                    ]
-                };
-
-                // Fill in the UI with the mock data
-                examePacienteNome.textContent = mockAnalise.paciente_nome || 'N/A';
-                exameTipo.textContent = mockAnalise.tipo_exame || 'N/A';
-
-                exameValores.innerHTML = '';
-                exameParametros.innerHTML = '';
-
-                if (mockAnalise.resultados && mockAnalise.resultados.length > 0) {
-                    mockAnalise.resultados.forEach(item => {
-                        const liValores = document.createElement('li');
-                        liValores.className = 'p-2 border-b border-gray-200 flex items-center';
-                        let iconHtml = '';
-                        let colorClass = 'text-gray-600';
-                        if (item.status === 'Alto') {
-                            iconHtml = '<i class="fas fa-arrow-up trend-icon text-red-500"></i>';
-                            colorClass = 'text-red-600 font-bold';
-                        } else if (item.status === 'Baixo') {
-                            iconHtml = '<i class="fas fa-arrow-down trend-icon text-green-500"></i>';
-                            colorClass = 'text-green-600 font-bold';
-                        }
-                        liValores.innerHTML = `<span class="flex-grow"><strong>${item.nome}:</strong> ${item.valor}</span><span class="${colorClass}">${item.status}</span>${iconHtml}`;
-                        exameValores.appendChild(liValores);
-
-                        const liParametros = document.createElement('li');
-                        liParametros.className = 'p-2 border-b border-gray-200';
-                        liParametros.innerHTML = `<strong>${item.nome}:</strong> ${item.referencia || 'N/A'}`;
-                        exameParametros.appendChild(liParametros);
-                    });
-                } else {
-                    exameValores.innerHTML = `<li class="p-2 text-gray-500">Nenhum valor extraído.</li>`;
-                    exameParametros.innerHTML = `<li class="p-2 text-gray-500">Nenhum parâmetro de referência disponível.</li>`;
-                }
-
-                // Construct the prompt for Gemini API
-                const prompt = `Atue como um analista de saúde. Analise os seguintes resultados de exames de sangue para o paciente ${mockAnalise.paciente_nome} e forneça um diagnóstico resumido. Identifique os valores anormais e suas possíveis implicações. Seja profissional e conciso.
-
-Resultados do Exame:
-- Tipo de Exame: ${mockAnalise.tipo_exame}
-- Glicose: ${mockAnalise.resultados.find(r => r.nome === 'Glicose').valor} (Referência: ${mockAnalise.resultados.find(r => r.nome === 'Glicose').referencia})
-- Colesterol Total: ${mockAnalise.resultados.find(r => r.nome === 'Colesterol Total').valor} (Referência: ${mockAnalise.resultados.find(r => r.nome === 'Colesterol Total').referencia})
-- Hemoglobina: ${mockAnalise.resultados.find(r => r.nome === 'Hemoglobina').valor} (Referência: ${mockAnalise.resultados.find(r => r.nome === 'Hemoglobina').referencia})
-- Vitamina D: ${mockAnalise.resultados.find(r => r.nome === 'Vitamina D').valor} (Referência: ${mockAnalise.resultados.find(r => r.nome === 'Vitamina D').referencia})
-`;
-                try {
-                    const apiKey = "";
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-                    const payload = {
-                        contents: [{ parts: [{ text: prompt }] }],
-                        tools: [{ "google_search": {} }],
-                        systemInstruction: {
-                            parts: [{ text: "Atue como um analista de saúde experiente. Forneça uma análise sucinta e profissional dos resultados de exames médicos, indicando possíveis riscos ou necessidades de acompanhamento. Responda em português. Crie uma resposta que possa ser dada a um paciente." }]
-                        },
-                    };
-
-                    let response = await fetch(apiUrl, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-
-                    const result = await response.json();
-                    const candidate = result.candidates?.[0];
-                    if (candidate && candidate.content?.parts?.[0]?.text) {
-                        const text = candidate.content.parts[0].text;
-                        let sources = [];
-                        const groundingMetadata = candidate.groundingMetadata;
-                        if (groundingMetadata && groundingMetadata.groundingAttributions) {
-                            sources = groundingMetadata.groundingAttributions
-                                .map(attribution => ({
-                                    uri: attribution.web?.uri,
-                                    title: attribution.web?.title,
-                                }))
-                                .filter(source => source.uri && source.title);
-                        }
-
-                        exameDiagnostico.innerHTML = text.replace(/\n/g, '<br>');
-
-                        if (sources.length > 0) {
-                            diagnosticoSources.innerHTML = '<strong>Fontes:</strong><br>';
-                            sources.forEach(source => {
-                                const sourceLink = document.createElement('a');
-                                sourceLink.href = source.uri;
-                                sourceLink.target = '_blank';
-                                sourceLink.textContent = source.title;
-                                sourceLink.className = 'block hover:underline text-blue-500';
-                                diagnosticoSources.appendChild(sourceLink);
-                            });
-                        }
-                    } else {
-                        throw new Error("Resposta da IA vazia ou inválida.");
-                    }
-                } catch (error) {
-                    console.error('Erro na análise de IA:', error);
-                    exameDiagnostico.textContent = 'Não foi possível gerar um diagnóstico. Por favor, tente novamente.';
-                } finally {
-                    loadingSpinner.classList.add('hidden');
-                    exameResultadoContainer.classList.remove('hidden');
-                    toggleView('diagnostico');
-                }
-            });
-
-            // Theme toggle logic
-            const themeToggleBtn = document.getElementById('theme-toggle-btn');
-            themeToggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('bg-gray-900');
-                document.body.classList.toggle('text-gray-100');
-                document.body.classList.toggle('bg-gray-50');
-                document.body.classList.toggle('text-gray-900');
-                document.querySelectorAll('section, .sidebar, .navbar').forEach(el => {
-                    el.classList.toggle('bg-white');
-                    el.classList.toggle('bg-gray-800');
-                });
-                document.querySelectorAll('h2, h3, h4').forEach(el => {
-                     el.classList.toggle('text-blue-600');
-                     el.classList.toggle('text-blue-400');
-                });
-                const icon = themeToggleBtn.querySelector('i');
-                if (icon.classList.contains('fa-moon')) {
-                    icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun');
-                } else {
-                    icon.classList.remove('fa-sun');
-                    icon.classList.add('fa-moon');
-                }
-            });
-
-            initFirebaseAndLoadData();
-        });
+        }
     </script>
 </body>
 </html>
