@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-50 flex items-center justify-center min-h-screen">
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
 
     <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
         <div class="text-center mb-8">
@@ -39,37 +39,65 @@
 
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">Senha de Acesso</label>
-                <input type="password" name="senha_master" required placeholder="••••••••"
+                <input type="password" name="senha_master" required minlength="6" placeholder="No mínimo 6 caracteres"
                     class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
             </div>
 
             <div class="flex items-start space-x-2 py-2">
-                <input type="checkbox" required class="mt-1 h-4 w-4 text-blue-600 border-slate-300 rounded">
-                <p class="text-xs text-slate-500">Ao se cadastrar, você concorda com os termos de uso e política de privacidade.</p>
+                <input type="checkbox" id="termos" required class="mt-1 h-4 w-4 text-blue-600 border-slate-300 rounded">
+                <label for="termos" class="text-xs text-slate-500 cursor-pointer">Ao se cadastrar, você concorda com os termos de uso e política de privacidade.</label>
             </div>
 
-            <button type="submit" 
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.02] active:scale-95">
+            <button type="submit" id="btnSubmit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
                 Criar Minha Clínica
             </button>
         </form>
 
         <p class="text-center mt-6 text-sm text-slate-600">
-            Já tem uma conta? <a href="/login" class="text-blue-600 font-bold hover:underline">Fazer Login</a>
+            Já tem uma conta? <a href="login.html" class="text-blue-600 font-bold hover:underline">Fazer Login</a>
         </p>
     </div>
 
     <script>
         document.getElementById('formCadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const btnSubmit = document.getElementById('btnSubmit');
+            const originalText = btnSubmit.innerText;
+            
+            // 1. Feedback visual: desativa o botão
+            btnSubmit.disabled = true;
+            btnSubmit.innerText = "Processando...";
+
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
 
-            // Aqui você enviará os dados para a sua rota do Node.js
-            console.log("Enviando dados para o servidor:", data);
-            
-            // Exemplo de chamada:
-            // const response = await fetch('/api/auth/register-clinica', { ... });
+            try {
+                // 2. Chamada para a API (Caminho relativo para não quebrar na nuvem)
+                const response = await fetch('/api/auth/register-clinica', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // SUCESSO: Redireciona com um parâmetro de sucesso
+                    window.location.href = '/index.html?status=sucesso';
+                } else {
+                    // ERRO DO SERVIDOR (ex: e-mail já existe)
+                    alert(result.error || "Erro ao criar clínica. Verifique os dados.");
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerText = originalText;
+                }
+            } catch (error) {
+                console.error("Erro na conexão:", error);
+                alert("Falha na conexão com o servidor.");
+                btnSubmit.disabled = false;
+                btnSubmit.innerText = originalText;
+            }
         });
     </script>
 </body>
