@@ -1,4 +1,3 @@
-
 // agendamentoController.js
 console.log('--- agendamentoController.js carregado ---');
 
@@ -16,26 +15,18 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// --- Função para criar um novo agendamento ---
+// =============================================================================
+// 1. CRIAR AGENDAMENTO
+// =============================================================================
 exports.criarAgendamento = async (req, res) => {
-  console.log('Dados do formulário (req.body):', req.body);
-  console.log('Anexos (req.files):', req.files);
-
   const {
-    nome,
-    email,
-    telefone,
-    data_nascimento,
-    idade,
-    peso,
-    altura,
-    tipo_sanguineo,
-    tipo_terapia,
-    data_agendamento,
-    motivo_consulta,
-    origem_indicacao,
-    observacoes
+    nome, cpf, email, telefone, data_nascimento, idade,
+    peso, altura, tipo_sanguineo, tipo_terapia,
+    data_agendamento, motivo_consulta, origem_indicacao, observacoes
   } = req.body;
+
+  const clinicaId = 1;
+  const membroId = 1;
 
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = req.files['anexos'] || [];
@@ -44,18 +35,13 @@ exports.criarAgendamento = async (req, res) => {
   let condicoesString = '';
   if (req.body.condicoes) {
     try {
-      const condicoesArray = JSON.parse(req.body.condicoes);
-      if (Array.isArray(condicoesArray)) {
-        condicoesString = condicoesArray.join(', ');
-      }
-    } catch (e) {
-      console.error('Erro ao fazer parse das condições de saúde:', e);
-      condicoesString = String(req.body.condicoes);
-    }
+      const condicoesArray = typeof req.body.condicoes === 'string' ? JSON.parse(req.body.condicoes) : req.body.condicoes;
+      condicoesString = Array.isArray(condicoesArray) ? condicoesArray.join(', ') : String(req.body.condicoes);
+    } catch (e) { condicoesString = String(req.body.condicoes); }
   }
 
-  if (!nome || !data_agendamento) {
-    return res.status(400).json({ mensagem: 'Nome e data de agendamento são obrigatórios.' });
+  if (!nome || !cpf || !data_agendamento) {
+    return res.status(400).json({ mensagem: 'Nome, CPF e data são obrigatórios.' });
   }
 
   const connection = await db.getConnection();
@@ -63,402 +49,208 @@ exports.criarAgendamento = async (req, res) => {
     await connection.beginTransaction();
 
     let paciente_id;
-
-    // 1. Verifica se o paciente já existe
     const [pacientesExistentes] = await connection.query(
-      'SELECT id FROM pacientes WHERE nome = ? AND data_nascimento = ?',
-      [nome, data_nascimento]
+      'SELECT id FROM pacientes WHERE cpf = ? AND clinica_id = ?',
+      [cpf, clinicaId]
     );
 
     if (pacientesExistentes.length > 0) {
       paciente_id = pacientesExistentes[0].id;
-      console.log('Paciente existente encontrado, ID:', paciente_id);
-    } else {
-      // 2. Se não existir, cria um novo paciente
-      const [novoPacienteResult] = await connection.query(
-        `INSERT INTO pacientes (
-          nome, email, telefone, data_nascimento, foto_perfil
-        ) VALUES (?, ?, ?, ?, ?)`,
-        [nome, email || null, telefone || null, data_nascimento || null, fotoPerfilFilename || null]
+      await connection.query(
+        `UPDATE pacientes SET 
+          telefone = ?, email = ?, peso = ?, altura = ?, 
+          idade = ?, tipo_sanguineo = ?, condicoes_preexistentes = ?
+         WHERE id = ?`,
+        [telefone, email, peso, altura, idade, tipo_sanguineo, condicoesString, paciente_id]
       );
-      paciente_id = novoPacienteResult.insertId;
-      console.log('Novo paciente criado, ID:', paciente_id);
+    } else {
+      const [novoPacResult] = await connection.query(
+        `INSERT INTO pacientes (
+          clinica_id, nome, cpf, email, telefone, data_nascimento, 
+          idade, tipo_sanguineo, peso, altura, condicoes_preexistentes, foto_perfil
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [clinicaId, nome, cpf, email, telefone, data_nascimento, idade, tipo_sanguineo, peso, altura, condicoesString, fotoPerfilFilename]
+      );
+      paciente_id = novoPacResult.insertId;
     }
 
-    // 3. Insere o agendamento
     const sqlAgendamento = `
       INSERT INTO agendamentos (
-        paciente_id, nome, data_agendamento, tipo_terapia, observacoes,
-        status_pagamento, peso, altura, data_nascimento, idade, tipo_sanguineo,
-        motivo_consulta, origem_indicacao, condicoes, email, telefone
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        clinica_id, paciente_id, membro_id, nome, data_agendamento, 
+        tipo_terapia, motivo_consulta, origem_indicacao, status_agendamento,
+        peso, altura, data_nascimento, idade, tipo_sanguineo, email, telefone, cpf, condicoes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const valoresAgendamento = [
-      paciente_id, nome, data_agendamento, tipo_terapia, observacoes || null, 'pendente',
-      peso || null, altura || null, tipo_sanguineo || null, motivo_consulta || null, origem_indicacao || null,
-      condicoesString || null, email || null, telefone || null
+      clinicaId, paciente_id, membroId, nome, data_agendamento,
+      tipo_terapia, motivo_consulta, origem_indicacao, 'aguardando_sinal',
+      peso || null, altura || null, data_nascimento || null, idade || null,
+      tipo_sanguineo || null, email || null, telefone || null, cpf, condicoesString
     ];
 
-    // Ajusta valoresAgendamento
-    const valoresAgendamentoFinal = [
-      paciente_id, nome, data_agendamento, tipo_terapia, observacoes || null,
-      'pendente', peso || null, altura || null, data_nascimento || null, idade || null, tipo_sanguineo || null,
-      motivo_consulta || null, origem_indicacao || null, condicoesString || null, email || null, telefone || null
-    ];
-
-    const [agendamentoResult] = await connection.query(sqlAgendamento, valoresAgendamentoFinal);
+    const [agendamentoResult] = await connection.query(sqlAgendamento, valoresAgendamento);
     const agendamentoId = agendamentoResult.insertId;
-    console.log('Agendamento inserido, ID:', agendamentoId);
 
-    // 4. Insere anexos
     if (anexos.length > 0) {
       for (const file of anexos) {
         await connection.query(
           `INSERT INTO anexos (
-            agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes
-          ) VALUES (?, ?, ?, ?, ?)`,
-          [agendamentoId, file.originalname, file.filename, file.mimetype, file.size]
+            clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes
+          ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [clinicaId, paciente_id, agendamentoId, file.originalname, file.filename, file.mimetype, file.size]
         );
       }
-      console.log(`${anexos.length} anexos inseridos na tabela 'anexos'.`);
     }
 
     await connection.commit();
-    res.status(201).json({ mensagem: 'Agendamento, paciente e anexos salvos com sucesso!' });
+    res.status(201).json({ mensagem: 'Agendamento e Paciente processados com sucesso!', agendamentoId });
 
-    // --- Envia notificações depois de salvar e responder ---
-    if (email) {
-      notificationService.sendEmailNotification({
-        nome,
-        email,
-        tipo_terapia,
-        data_agendamento,
-        motivo_consulta
-      });
-    }
-
-    if (telefone) {
-      notificationService.sendWhatsAppNotification({
-        nome,
-        telefone,
-        tipo_terapia,
-        data_agendamento
-      });
-    }
+    // Notificações
+    if (email) notificationService.sendEmailNotification({ nome, email, tipo_terapia, data_agendamento, motivo_consulta });
+    if (telefone) notificationService.sendWhatsAppNotification({ nome, telefone, tipo_terapia, data_agendamento });
 
   } catch (err) {
-    await connection.rollback();
-    console.error('Erro ao salvar agendamento no backend:', err);
-
-    if (patientPhoto && fs.existsSync(patientPhoto.path)) {
-      fs.unlinkSync(patientPhoto.path);
-      console.log(`Arquivo da foto do paciente ${patientPhoto.filename} removido devido a erro.`);
-    }
-
-    res.status(500).json({ erro: 'Erro ao salvar agendamento', detalhes: err.message, sql: err.sql, sqlMessage: err.sqlMessage });
+    if (connection) await connection.rollback();
+    res.status(500).json({ erro: 'Erro ao criar agendamento', detalhes: err.message });
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 };
 
-// --- Função para listar todos os agendamentos ---
+// =============================================================================
+// 2. LISTAR AGENDAMENTOS
+// =============================================================================
 exports.listarAgendamentos = async (req, res) => {
+  const clinicaId = 1;
   try {
     const sqlAgendamentos = `
-      SELECT id, paciente_id, nome, data_agendamento, tipo_terapia, observacoes,
-             status_pagamento, peso, altura, data_nascimento, idade, tipo_sanguineo,
-             motivo_consulta, origem_indicacao, condicoes, email, telefone
-      FROM agendamentos
-      ORDER BY data_agendamento ASC
+      SELECT id, paciente_id, nome, cpf, data_agendamento, tipo_terapia, 
+             motivo_consulta, origem_indicacao, status_agendamento,
+             peso, altura, data_nascimento, idade, tipo_sanguineo, email, telefone, condicoes
+      FROM agendamentos WHERE clinica_id = ? ORDER BY data_agendamento ASC
     `;
+    const [agendamentos] = await db.query(sqlAgendamentos, [clinicaId]);
 
-    const [agendamentos] = await db.query(sqlAgendamentos);
+    if (agendamentos.length === 0) return res.json([]);
 
-    const sqlAnexos = `
-      SELECT agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes
-      FROM anexos
-    `;
-    const [anexos] = await db.query(sqlAnexos);
+    const agendamentoIds = agendamentos.map(a => a.id);
+    const [anexos] = await db.query(
+      'SELECT agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes FROM anexos WHERE agendamento_id IN (?)',
+      [agendamentoIds]
+    );
 
-    const agendamentosComAnexos = agendamentos.map(agendamento => {
-      const anexosDoAgendamento = anexos.filter(anexo => anexo.agendamento_id === agendamento.id);
-      const anexosUnicos = anexosDoAgendamento.filter((anexo, index, self) =>
-        index === self.findIndex(t => t.nome_original === anexo.nome_original)
-      );
-      return { ...agendamento, anexos: anexosUnicos };
+    const agendamentosComAnexos = agendamentos.map(ag => {
+      return { ...ag, anexos: anexos.filter(an => an.agendamento_id === ag.id) };
     });
 
     res.json(agendamentosComAnexos);
   } catch (err) {
-    console.error('Erro ao listar agendamentos no backend:', err);
     res.status(500).json({ erro: 'Erro ao listar agendamentos', detalhes: err.message });
   }
 };
 
-// --- Função para deletar um agendamento ---
-
+// =============================================================================
+// 3. DELETAR AGENDAMENTO
+// =============================================================================
 exports.deletarAgendamento = async (req, res) => {
   const connection = await db.getConnection();
+  const clinicaId = 1;
   try {
     const { id } = req.params;
+    const [agendamento] = await connection.query(
+      'SELECT nome, email, tipo_terapia, data_agendamento FROM agendamentos WHERE id = ? AND clinica_id = ?',
+      [id, clinicaId]
+    );
 
-    // Passo 1: Busca o agendamento antes de deletá-lo para obter os dados de notificação
-    const [agendamento] = await connection.query('SELECT nome, email, tipo_terapia, data_agendamento FROM agendamentos WHERE id = ?', [id]);
+    if (agendamento.length === 0) return res.status(404).json({ mensagem: 'Não encontrado.' });
 
-    if (agendamento.length === 0) {
-      return res.status(404).json({ mensagem: 'Agendamento não encontrado.' });
+    const [result] = await connection.query('DELETE FROM agendamentos WHERE id = ? AND clinica_id = ?', [id, clinicaId]);
+
+    res.status(200).json({ mensagem: 'Excluído com sucesso.' });
+
+    if (agendamento[0].email) {
+      notificationService.sendEmailNotification(agendamento[0], false, true);
     }
-
-    const agendamentoParaNotificar = agendamento[0];
-
-    // Passo 2: Deleta o agendamento do banco de dados
-    const [result] = await connection.query('DELETE FROM agendamentos WHERE id = ?', [id]);
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ mensagem: 'Agendamento não encontrado.' });
-    }
-
-    res.status(200).json({ mensagem: 'Agendamento excluído com sucesso.' });
-
-    // Passo 3: Envia as notificações de cancelamento
-    if (agendamentoParaNotificar.email) {
-      notificationService.sendEmailNotification({
-        nome: agendamentoParaNotificar.nome,
-        email: agendamentoParaNotificar.email,
-        tipo_terapia: agendamentoParaNotificar.tipo_terapia,
-        data_agendamento: agendamentoParaNotificar.data_agendamento
-      }, false, true); // O terceiro parâmetro indica que é uma notificação de cancelamento
-    }
-
   } catch (err) {
-    console.error('Erro ao deletar agendamento:', err);
-    res.status(500).json({ erro: 'Erro ao deletar agendamento', detalhes: err.message });
+    res.status(500).json({ erro: 'Erro ao deletar', detalhes: err.message });
   } finally {
     connection.release();
   }
 };
 
-// ==================================================================================================
-// FUNÇÃO ORIGINAL (agora com um novo nome, se necessário)
-// Esta função lida com a atualização completa, incluindo uploads de arquivos.
-// ==================================================================================================
+// =============================================================================
+// 4. ATUALIZAR COMPLETO
+// =============================================================================
 exports.atualizarAgendamentoCompleto = async (req, res) => {
   const agendamentoId = req.params.id;
-  console.log(`Atualizando agendamento completo com ID: ${agendamentoId}`);
-
-  const {
-    nome,
-    email,
-    telefone,
-    data_nascimento,
-    idade,
-    peso,
-    altura,
-    tipo_sanguineo,
-    tipo_terapia,
-    data_agendamento,
-    motivo_consulta,
-    origem_indicacao,
-    observacoes
-  } = req.body;
-
+  const clinicaId = 1;
+  const { nome, cpf, email, telefone, data_nascimento, idade, peso, altura, tipo_sanguineo, tipo_terapia, data_agendamento, motivo_consulta, origem_indicacao, observacoes } = req.body;
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = req.files['anexos'] || [];
-  let fotoPerfilFilename = patientPhoto ? patientPhoto.filename : null;
-
-  let condicoesString = '';
-  if (req.body.condicoes) {
-    try {
-      const condicoesArray = JSON.parse(req.body.condicoes);
-      if (Array.isArray(condicoesArray)) {
-        condicoesString = condicoesArray.join(', ');
-      }
-    } catch (e) {
-      console.error('Erro ao fazer parse das condições de saúde:', e);
-      condicoesString = String(req.body.condicoes);
-    }
-  }
 
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
+    const [agendamentoAtual] = await connection.query('SELECT paciente_id FROM agendamentos WHERE id = ? AND clinica_id = ?', [agendamentoId, clinicaId]);
+    if (agendamentoAtual.length === 0) throw new Error('Acesso negado');
 
-    // 1. Atualizar o registro do agendamento
-    const sqlUpdate = `
-      UPDATE agendamentos SET
-        nome = ?, email = ?, telefone = ?, data_nascimento = ?, idade = ?,
-        peso = ?, altura = ?, tipo_sanguineo = ?, tipo_terapia = ?,
-        data_agendamento = ?, motivo_consulta = ?, origem_indicacao = ?,
-        observacoes = ?, condicoes = ?
-      WHERE id = ?
-    `;
+    const pacienteId = agendamentoAtual[0].paciente_id;
+    await connection.query(
+      `UPDATE agendamentos SET nome=?, email=?, telefone=?, data_agendamento=?, cpf=? WHERE id=? AND clinica_id=?`,
+      [nome, email, telefone, data_agendamento, cpf, agendamentoId, clinicaId]
+    );
 
-    const valoresUpdate = [
-      nome, email || null, telefone || null, data_nascimento || null, idade || null,
-      peso || null, altura || null, tipo_sanguineo || null, tipo_terapia || null,
-      data_agendamento, motivo_consulta || null, origem_indicacao || null,
-      observacoes || null, condicoesString || null, agendamentoId
-    ];
-
-    const [updateResult] = await connection.query(sqlUpdate, valoresUpdate);
-
-    if (updateResult.affectedRows === 0) {
-      await connection.rollback();
-      return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser atualizado.' });
-    }
-
-    // 2. Atualiza a foto de perfil do paciente (se uma nova for enviada)
-    if (fotoPerfilFilename) {
-      // Primeiro, encontre o ID do paciente associado ao agendamento
-      const [agendamento] = await connection.query('SELECT paciente_id FROM agendamentos WHERE id = ?', [agendamentoId]);
-      if (agendamento.length > 0) {
-        const pacienteId = agendamento[0].paciente_id;
-        // Agora, atualize o campo foto_perfil do paciente
-        await connection.query('UPDATE pacientes SET foto_perfil = ? WHERE id = ?', [fotoPerfilFilename, pacienteId]);
-      }
-    }
-
-    // 3. Gerencia anexos existentes e novos
     if (anexos.length > 0) {
-      // Insere os novos anexos
       for (const file of anexos) {
-        await connection.query(
-          `INSERT INTO anexos (
-                    agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes
-                ) VALUES (?, ?, ?, ?, ?)`,
-          [agendamentoId, file.originalname, file.filename, file.mimetype, file.size]
-        );
+        await connection.query('INSERT INTO anexos (clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes) VALUES (?,?,?,?,?,?,?)', [clinicaId, pacienteId, agendamentoId, file.originalname, file.filename, file.mimetype, file.size]);
       }
     }
 
     await connection.commit();
-    res.status(200).json({ mensagem: 'Agendamento atualizado com sucesso!' });
-
-    // --- Envia notificações de atualização ---
-    if (email) {
-      notificationService.sendEmailNotification({
-        nome,
-        email,
-        tipo_terapia,
-        data_agendamento,
-        motivo_consulta
-      }, true);
-    }
-
-    if (telefone) {
-      notificationService.sendWhatsAppNotification({
-        nome,
-        telefone,
-        tipo_terapia,
-        data_agendamento
-      }, true);
-    }
-
+    res.status(200).json({ mensagem: 'Atualizado com sucesso!' });
   } catch (err) {
-    await connection.rollback();
-    console.error('Erro ao atualizar agendamento:', err);
-    // Limpa os arquivos enviados em caso de erro
-    if (patientPhoto && fs.existsSync(patientPhoto.path)) {
-      fs.unlinkSync(patientPhoto.path);
-    }
-    anexos.forEach(anexo => {
-      if (fs.existsSync(anexo.path)) {
-        fs.unlinkSync(anexo.path);
-      }
-    });
-
-    res.status(500).json({ erro: 'Erro ao atualizar agendamento', detalhes: err.message, sql: err.sql, sqlMessage: err.sqlMessage });
+    if (connection) await connection.rollback();
+    res.status(500).json({ erro: err.message });
   } finally {
     connection.release();
   }
 };
 
-// ==================================================================================================
-// FUNÇÃO EXCLUSIVA PARA REAGENDAMENTO (SOMENTE DATA) - VERSÃO CORRIGIDA
-// ==================================================================================================
+// =============================================================================
+// 5. REAGENDAR (SÓ DATA)
+// =============================================================================
 exports.reagendarAgendamento = async (req, res) => {
   const agendamentoId = req.params.id;
-  let { data_agendamento } = req.body; // Usamos 'let' para podermos limpar a data
+  const clinicaId = 1;
+  let { data_agendamento } = req.body;
 
-  console.log(`--- Iniciando reagendamento para ID: ${agendamentoId} ---`);
-
-  // 1. LIMPEZA DA DATA (O segredo para não dar erro no MySQL)
-  if (!data_agendamento) {
-    return res.status(400).json({ mensagem: 'Nova data de agendamento é obrigatória.' });
-  }
-
-  // Remove o 'T' que o navegador envia e garante o formato YYYY-MM-DD HH:mm:ss
   if (data_agendamento.includes('T')) {
     data_agendamento = data_agendamento.replace('T', ' ').substring(0, 19);
     if (data_agendamento.length === 16) data_agendamento += ':00';
   }
 
-  console.log(`Data formatada para o banco: ${data_agendamento}`);
-
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
-
-    // 2. ATUALIZAÇÃO NO BANCO
     const [updateResult] = await connection.query(
-      `UPDATE agendamentos SET data_agendamento = ? WHERE id = ?`,
-      [data_agendamento, agendamentoId]
+      'UPDATE agendamentos SET data_agendamento = ? WHERE id = ? AND clinica_id = ?',
+      [data_agendamento, agendamentoId, clinicaId]
     );
 
-    if (updateResult.affectedRows === 0) {
-      await connection.rollback();
-      return res.status(404).json({ mensagem: 'Agendamento não encontrado para ser reagendado.' });
+    if (updateResult.affectedRows === 0) throw new Error('Agendamento não encontrado');
+
+    const [dados] = await connection.query('SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ? AND clinica_id = ?', [agendamentoId, clinicaId]);
+    await connection.commit();
+
+    res.status(200).json({ mensagem: 'Reagendado com sucesso!' });
+    if (dados.length > 0 && dados[0].email) {
+      notificationService.sendEmailNotification({ ...dados[0], data_agendamento }, true);
     }
-
-    // 3. BUSCA DADOS PARA NOTIFICAÇÃO
-    const [dados] = await connection.query(
-      'SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ?',
-      [agendamentoId]
-    );
-
-    if (dados.length > 0) {
-      const { nome, email, telefone, tipo_terapia } = dados[0];
-
-      // 4. FINALIZA A TRANSAÇÃO (COMMIT) ANTES DE ENVIAR NOTIFICAÇÕES
-      // Isso evita deixar o banco "preso" esperando o e-mail/whatsapp sair
-      await connection.commit();
-
-      // Responde ao front-end imediatamente
-      res.status(200).json({ mensagem: 'Agendamento reagendado com sucesso!' });
-
-      // 5. ENVIAR NOTIFICAÇÕES (Fora da transação para performance)
-      if (email) {
-        notificationService.sendEmailNotification({
-          nome,
-          email,
-          tipo_terapia,
-          data_agendamento
-        }, true);
-      }
-
-      if (telefone) {
-        notificationService.sendWhatsAppNotification({
-          nome,
-          telefone,
-          tipo_terapia,
-          data_agendamento
-        }, true);
-      }
-    } else {
-      await connection.rollback();
-      res.status(404).json({ mensagem: 'Dados do agendamento não encontrados.' });
-    }
-
   } catch (err) {
     if (connection) await connection.rollback();
-    console.error('Erro técnico no reagendamento:', err);
-    res.status(500).json({
-        erro: 'Erro ao reagendar',
-        detalhes: err.message,
-        sqlState: err.sqlState
-    });
+    res.status(500).json({ erro: err.message });
   } finally {
-    if (connection) connection.release();
+    connection.release();
   }
 };

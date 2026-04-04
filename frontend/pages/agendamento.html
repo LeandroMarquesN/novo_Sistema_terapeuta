@@ -215,9 +215,17 @@
 
     <form class="row g-3 fade-in-element" id="formAgendamento" enctype="multipart/form-data">
 
-      <div class="col-md-6">
-        <label for="nomePaciente" class="form-label">Nome do Paciente</label>
+      <div class="col-md-8">
+        <label for="nomePaciente" class="form-label font-bold">Nome do Paciente</label>
         <input type="text" id="nomePaciente" name="nome" class="form-control" placeholder="Digite o nome completo" required>
+      </div>
+
+      <div class="col-md-4">
+        <label for="cpfPaciente" class="form-label font-bold text-primary">CPF (Obrigatório)</label>
+        <input type="text" id="cpfPaciente" name="cpf" class="form-control border-primary" 
+               placeholder="000.000.000-00" maxlength="14" required 
+               oninput="this.value = this.value.replace(/[^0-9.-]/g, '')">
+        <small class="text-muted" style="font-size: 0.75rem;">Necessário para o prontuário único.</small>
       </div>
 
       <div class="col-md-6">
@@ -790,10 +798,17 @@
             showClinicalAlert('Erro!', erro.message || 'Ocorreu um erro ao salvar o agendamento.', 'error');
           }
         });
+        // Adicione isso dentro da validação do formulário no seu script
+          const cpfPaciente = form.querySelector('input[name="cpf"]').value.trim();
+          if (!cpfPaciente || cpfPaciente.length < 11) {
+              errors.push('O CPF do paciente é obrigatório para o cadastro no sistema.');
+          } else {
+              finalFormData.set('cpf', cpfPaciente);
+          }
 
-      } else {
-        console.error('Elemento formAgendamento não encontrado. O listener de submit não foi anexado.');
-      }
+          } else {
+            console.error('Elemento formAgendamento não encontrado. O listener de submit não foi anexado.');
+          }
 
       carregarAgendamentos();
     });

@@ -5,7 +5,8 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// --- Configuração do Multer para Upload de Anexos e Foto de Perfil ---
+// --- Configuração do Multer (Upload de Arquivos) ---
+// O path.join aqui sobe um nível (..) para criar a pasta na raiz do projeto
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
 if (!fs.existsSync(uploadDir)) {
@@ -23,32 +24,31 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage }).fields([
+const upload = multer({ storage: storage });
+
+// Define quais campos de arquivo aceitamos
+const uploadFields = upload.fields([
   { name: 'anexos', maxCount: 50 },
   { name: 'patient_photo', maxCount: 1 }
 ]);
 
-// --- Definição das Rotas da API ---
+// --- DEFINIÇÃO DAS ROTAS ---
 
-// Rota POST para criar um novo agendamento.
-router.post('/', upload, agendamentoController.criarAgendamento);
+// 1. Criar novo agendamento (POST) - Aceita arquivos
+router.post('/', uploadFields, agendamentoController.criarAgendamento);
 
-// Rota GET para listar todos os agendamentos.
+// 2. Listar todos os agendamentos (GET)
 router.get('/', agendamentoController.listarAgendamentos);
 
-// Rota DELETE para excluir um agendamento.
+// 3. Deletar um agendamento (DELETE)
 router.delete('/:id', agendamentoController.deletarAgendamento);
 
-// ==================================================================================================
-// ROTAS DE ATUALIZAÇÃO (CORRIGIDAS)
-// ==================================================================================================
-
-// Rota PUT para reagendar uma consulta (somente a data).
-// Agora usa o método PUT, que é o que o seu frontend espera.
+// 4. Reagendar consulta (PUT) - Apenas a data (rápido)
+// Ex: Usado no "Drag and Drop" do calendário ou modal simples
 router.put('/:id', agendamentoController.reagendarAgendamento);
 
-// Se você ainda precisar da rota de atualização completa, pode mantê-la com outro nome
-// Exemplo: router.put('/completo/:id', upload, agendamentoController.atualizarAgendamentoCompleto);
+// 5. Atualização COMPLETA (PUT) - Nome, CPF, Fotos, Anexos
+// Usada no botão "Editar" que abre o formulário cheio
+router.put('/completo/:id', uploadFields, agendamentoController.atualizarAgendamentoCompleto);
 
-// Exporta o roteador.
 module.exports = router;

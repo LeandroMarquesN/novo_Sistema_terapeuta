@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Equipe | Painel Administrativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <div class="container mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800">Gerenciar Equipe</h1>
+            <button onclick="toggleModal()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition">
+                + Adicionar Membro
+            </button>
+        </div>
+
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+            <table class="min-w-full leading-normal">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-600 uppercase text-sm">
+                        <th class="py-3 px-6 text-left">Nome</th>
+                        <th class="py-3 px-6 text-left">Cargo</th>
+                        <th class="py-3 px-6 text-left">E-mail</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-equipe">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="modalMembro" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+            <h2 class="text-xl font-bold mb-4">Adicionar Novo Membro</h2>
+            
+            <form id="formMembro" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Nome Completo</label>
+                    <input type="text" name="nome" required class="w-full mt-1 p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">E-mail (Login)</label>
+                    <input type="email" name="email" required class="w-full mt-1 p-2 border rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Senha Provisória</label>
+                    <input type="password" name="senha" required class="w-full mt-1 p-2 border rounded-md">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Cargo</label>
+                    <select name="cargo" class="w-full mt-1 p-2 border rounded-md">
+                        <option value="Terapeuta">Terapeuta</option>
+                        <option value="Recepcionista">Recepcionista</option>
+                        <option value="Administrativo">Administrativo</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="toggleModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Salvar Membro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal() {
+            const modal = document.getElementById('modalMembro');
+            modal.classList.toggle('hidden');
+        }
+
+        document.getElementById('formMembro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+    
+    // Desabilitar o botão para evitar cliques duplos
+    const btnSalvar = e.target.querySelector('button[type="submit"]');
+    btnSalvar.disabled = true;
+    btnSalvar.innerText = "Salvando...";
+
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData);
+
+    try {
+        const response = await fetch('/api/equipe/adicionar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Sucesso! (Status 200-299)
+            alert('✅ ' + result.message);
+            location.reload(); 
+        } else {
+            // Erro controlado (Status 400, 403, etc.)
+            // Aqui ele vai mostrar "Limite atingido" ou "E-mail em uso"
+            alert('⚠️ Atenção: ' + (result.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        // Erro de rede ou servidor fora do ar
+        alert('❌ Erro crítico: Não foi possível conectar ao servidor.');
+    } finally {
+        // Reabilitar o botão caso o usuário precise corrigir algo
+        btnSalvar.disabled = false;
+        btnSalvar.innerText = "Salvar Membro";
+    }
+});
+    </script>
+</body>
+</html>

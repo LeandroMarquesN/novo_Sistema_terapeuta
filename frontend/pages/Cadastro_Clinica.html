@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro MedLM - Sistema Terapêutico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen">
+
+    <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+        <div class="text-center mb-8">
+            <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
+                <i class="fas fa-clinic-medical text-white text-2xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800">Crie sua Clínica</h1>
+            <p class="text-slate-500">Inicie seu teste grátis no MedLM hoje.</p>
+        </div>
+
+        <form id="formCadastro" class="space-y-5">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Nome da Clínica</label>
+                <input type="text" name="nome_clinica" required placeholder="Ex: Clínica Equilíbrio"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Seu Nome Completo</label>
+                <input type="text" name="dono_nome" required placeholder="Seu nome"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail Profissional</label>
+                <input type="email" name="email_master" required placeholder="seu@email.com"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-1">Senha de Acesso</label>
+                <input type="password" name="senha_master" required placeholder="••••••••"
+                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            </div>
+
+            <div class="flex items-start space-x-2 py-2">
+                <input type="checkbox" required class="mt-1 h-4 w-4 text-blue-600 border-slate-300 rounded">
+                <p class="text-xs text-slate-500">Ao se cadastrar, você concorda com os termos de uso e política de privacidade.</p>
+            </div>
+
+            <button type="submit" 
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.02] active:scale-95">
+                Criar Minha Clínica
+            </button>
+        </form>
+
+        <p class="text-center mt-6 text-sm text-slate-600">
+            Já tem uma conta? <a href="/login" class="text-blue-600 font-bold hover:underline">Fazer Login</a>
+        </p>
+    </div>
+
+    <script>
+        document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            // Aqui você enviará os dados para a sua rota do Node.js
+            console.log("Enviando dados para o servidor:", data);
+            
+            // Exemplo de chamada:
+            // const response = await fetch('/api/auth/register-clinica', { ... });
+        });
+    </script>
+</body>
+</html>
