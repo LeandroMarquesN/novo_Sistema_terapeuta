@@ -92,29 +92,53 @@
     }
 
     /*========== Estilização logo MedLM ============ */
+    /* Mantendo e aprimorando seu efeito de Gradient Flow */
+    .gradient-bg {
+    background: linear-gradient(45deg,
+        #5a92d6, #60c6cb, #a2c9f2, #5a92d6, #60c6cb
+    );
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease-in-out infinite;
+
+    /* --- AS LINHAS QUE FAZEM A MÁGICA --- */
+    -webkit-background-clip: text; /* Recorta o fundo no formato das letras */
+    background-clip: text;         /* Versão padrão */
+    -webkit-text-fill-color: transparent; /* Torna a letra transparente para o fundo aparecer */
+    color: transparent;            /* Fallback */
+    /* ------------------------------------ */
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+    /* ================================== */
     .logo-wrapper {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 0.5rem;
     }
 
     span.logo-img {
-        height: 100px; /* Ajustado para um tamanho mais comercial */
+        height: 120px; /* Ajustado para um tamanho mais comercial */
         width: 100%;
-        max-width: 300px;
+        max-width: 320px;
         /* Aponta para o novo logo que vamos criar */
-        background-image: url('/logo/logoMedLM.png'); 
-        background-size: contain;
+        background-image: url('../logo/LogoTop.png');
+        background-size: 100%;
         background-repeat: no-repeat;
         background-position: center;
         display: inline-block;
         cursor: pointer;
+        margin: 0 auto 10px auto;
+
         transition: transform 0.3s ease-in-out;
     }
 
     span.logo-img:hover {
         transform: scale(1.05);
     }
-    
+
     /* Mensagem de erro estilizada */
     #error-message {
         color: #ffd7d7;
@@ -129,15 +153,19 @@
   </style>
 </head>
 <body>
-  
+
   <div class="conteinerpai">
     <div class='login-container'>
         <div class="logo-wrapper">
             <span class="logo-img"></span>
         </div>
-        
-        <h2 class='text-center'>Login do Sistema</h2>
-        
+
+        <!-- <h2 class='text-center'>Login</h2> -->
+        <h2 class="text-xl font-bold gradient-bg">
+          Login do Sistema
+      </h2>
+
+
         <div id="error-message"></div>
 
         <form id="loginForm">
@@ -179,18 +207,18 @@
 
         if (response.ok) {
           // --- A MÁGICA DO SAAS ACONTECE AQUI ---
-          
+
           // 1. Salva o Token JWT (O seu passaporte para todas as rotas)
           localStorage.setItem('token', data.token);
-          
+
           // 2. Salva os dados do usuário e da clínica (Para personalizar a dashboard)
           localStorage.setItem('usuarioNome', data.usuario.nome);
           localStorage.setItem('usuarioCargo', data.usuario.cargo);
           localStorage.setItem('clinicaNome', data.usuario.clinica);
-          
+
           // Redireciona para a dashboard
           window.location.href = '/dashboard';
-          
+
         } else {
           // Mostra a mensagem de erro que vem do backend (ex: "E-mail ou senha inválidos")
           errorMessage.textContent = data.error || 'Erro ao realizar login.';

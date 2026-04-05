@@ -28,10 +28,10 @@
         }
 
         span.logo-img {
-            height: 280px;
-            width: 650px;
-            background-image: url('../logo/logoFinal.png');
-            background-size: contain;
+            height: 120px;
+            width: 300px;
+            background-image: url('/logo/LogoTop.png');
+            background-size: 100%;
             background-repeat: no-repeat;
             background-position: left;
             display: inline-block;
@@ -353,7 +353,7 @@
     color: #ffffff;
 }
 
-[data-bs-theme="dark"] .login-container, 
+[data-bs-theme="dark"] .login-container,
 [data-bs-theme="dark"] .card,
 [data-bs-theme="dark"] .navbar {
     background-color: rgba(0, 0, 0, 0.4) !important;
@@ -361,8 +361,8 @@
     backdrop-filter: blur(15px);
 }
 
-[data-bs-theme="dark"] .form-label, 
-[data-bs-theme="dark"] h2, 
+[data-bs-theme="dark"] .form-label,
+[data-bs-theme="dark"] h2,
 [data-bs-theme="dark"] h1 {
     color: #ffffff !important;
 }
@@ -382,7 +382,7 @@
     <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">
-                <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
+                <span class="logo-img">Sistema Terapeuta</span>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -398,7 +398,7 @@
 
                     <a href="/pacientes" class="btn btn-outline-primary me-2">Pacientes</a>
                     <a href="/agendamento" class="btn btn-outline-success me-2">Agendar</a>
-                    
+
                      <a href="/equipe" class="btn btn-outline-success me-2">Minha Equipe</a>
                     <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
                         <i class="fas fa-moon"></i>
@@ -665,10 +665,10 @@ const textoCompleto = `${saudacaoBase}${usuarioLogado}`;
 // 3. Executa a animação
 escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
     // Adiciona o ícone suavemente após o texto terminar
-    const iconeHTML = terminaComA 
-        ? ' <i class="fa-solid fa-user-nurse" style="color: #2252b9;"></i>' 
+    const iconeHTML = terminaComA
+        ? ' <i class="fa-solid fa-user-nurse" style="color: #2252b9;"></i>'
         : ' <i class="fa-solid fa-user-doctor" style="color: #2252b9;"></i>';
-    
+
     document.getElementById('boasVindas').innerHTML += iconeHTML;
 });
 // =========  Carrega e atualiza agendamento ================

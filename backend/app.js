@@ -35,6 +35,8 @@ app.use('/pages', express.static(path.join(__dirname, 'frontend', 'pages')));
 app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));
 app.use('/css', express.static(path.join(__dirname, 'frontend', 'css')));
 app.use('/logo', express.static(path.join(__dirname, 'frontend', 'logo')));
+// Rota Completa (Fallback/Apelido)
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/', (req, res) => {
