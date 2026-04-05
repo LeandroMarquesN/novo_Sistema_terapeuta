@@ -30,7 +30,7 @@
                 background-repeat: no-repeat !important;
                 background-position: left center !important;
                 display: inline-block !important;
-                height: 280px !important;
+                height: 100px !important;
                 width: 250px!important;
                 text-indent: -9999px!important;
                 overflow: hidden !important;
@@ -77,6 +77,10 @@
     span.logo-img:hover::after {
         left: 150%;
         transition: all 0.9s ease-in-out;
+    }
+    span.logo-img:active {
+        transform: scale(0.95); /* Dá um leve "clique" para dentro quando pressionado */
+        filter: brightness(0.9);
     }
        /* Estilização para a data e hora */
        #data-hora-container {
@@ -257,7 +261,7 @@
 <body class="menosClaro">
   <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
     <div class="container-fluid">
-          <a class="navbar-brand" href="#">
+          <a class="navbar-brand" href="/dashboard">
             <span class="logo-img">Sistema Terapeuta</span>
           </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -291,31 +295,67 @@
     <form class="row g-3 fade-in-element" id="formAgendamento" enctype="multipart/form-data">
 
       <div class="col-md-8">
-        <label for="nomePaciente" class="form-label font-bold">Nome do Paciente</label>
-        <input type="text" id="nomePaciente" name="nome" class="form-control" placeholder="Digite o nome completo" required>
-      </div>
+        <label for="nomePaciente" class="form-label font-bold text-primary">Nome do Paciente</label>
+        <input type="text"
+               id="nomePaciente"
+               name="nome"
+               class="form-control border-primary"
+               placeholder="Digite o nome completo"
+               required
+               oninput="limparNome(this)"
+               onblur="validarNomeCompletoEOffensive(this)">
+        <small id="nomeError" class="text-danger" style="display: none;"></small>
+    </div>
 
-      <div class="col-md-4">
+       <div class="col-md-4">
         <label for="cpfPaciente" class="form-label font-bold text-primary">CPF (Obrigatório)</label>
-        <input type="text" id="cpfPaciente" name="cpf" class="form-control border-primary"
-               placeholder="000.000.000-00" maxlength="14" required
-               oninput="this.value = this.value.replace(/[^0-9.-]/g, '')">
-        <small class="text-muted" style="font-size: 0.75rem;">Necessário para o prontuário único.</small>
+        <input type="text"
+           id="cpfPaciente"
+           name="cpf"
+           class="form-control border-primary"
+           placeholder="000.000.000-00"
+           maxlength="14"
+           required
+           inputmode="numeric"
+           oninput="validarEMascararCPF(this)">
+           <small id="cpfError" class="text-danger" style="display: none;">Apenas números são permitidos!</small>
+           <small class="text-muted" style="font-size: 0.75rem;">Necessário para o prontuário único.</small>
+        </div>
+
+
+        <div class="col-md-6">
+          <label for="emailPaciente" class="form-label font-bold text-primary">Email do Paciente</label>
+          <input type="email"
+                 id="emailPaciente"
+                 name="email"
+                 class="form-control border-primary"
+                 placeholder="exemplo@email.com"
+                 required
+                 onblur="validarEmail(this)"
+                 oninput="this.classList.remove('is-invalid')"> <div id="emailError" class="invalid-feedback" style="display: none;">
+              E-mail inválido ou mal formatado.
+          </div>
       </div>
 
       <div class="col-md-6">
-        <label for="emailPaciente" class="form-label">Email do Paciente</label>
-        <input type="email" id="emailPaciente" name="email" class="form-control" placeholder="Digite o email do paciente">
-      </div>
-
-      <div class="col-md-6">
-        <label for="telefonePaciente" class="form-label">Telefone do Paciente</label>
-        <input type="tel" id="telefonePaciente" name="telefone" class="form-control" placeholder="Digite o telefone com DDD">
-      </div>
+        <label for="telefonePaciente" class="form-label font-bold text-primary">Telefone do Paciente</label>
+        <input type="tel"
+               id="telefonePaciente"
+               name="telefone"
+               class="form-control border-primary"
+               placeholder="(11) 99999-9999"
+               maxlength="15"
+               required
+               inputmode="numeric"
+               oninput="validarEMascararTelefone(this)">
+        <small id="telError" class="text-danger" style="display: none;">Apenas números são permitidos no telefone!</small>
+    </div>
 
       <div class="col-md-3">
-        <label for="dataNascimentoPaciente" class="form-label">Data de Nascimento do Paciente</label>
-        <input type="date" id="dataNascimentoPaciente" name="data_nascimento" class="form-control">
+          <label for="dataNascimentoPaciente" class="form-label font-bold text-primary">Data de Nascimento</label>
+          <input type="date" id="dataNascimentoPaciente" name="data_nascimento"
+                 class="form-control border-primary" required onchange="validarDataNascimento(this)">
+          <small id="dataError" class="text-danger" style="display: none;">Data inválida ou no futuro!</small>
       </div>
 
       <div class="col-md-3">
@@ -488,6 +528,117 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+
+    //  ====== Função validar CPF com mascara para o usario ver a separação dos numero ===========================
+    //  ====== E tambem nao deixar o usario digitar nada que nao seja numero ======
+    function validarEMascararCPF(input) {
+    const errorMsg = document.getElementById('cpfError');
+    let v = input.value;
+
+    // Verifica se o usuário tentou digitar letras
+    if (/[a-zA-Z]/.test(v)) {
+        errorMsg.style.display = 'block'; // Mostra o aviso em vermelho
+    } else {
+        errorMsg.style.display = 'none';
+    }
+
+    // REGRA DE OURO: Remove TUDO o que não for número
+    v = v.replace(/\D/g, "");
+
+    // Aplica a máscara visual
+    if (v.length > 9) {
+        v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    } else if (v.length > 6) {
+        v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+    } else if (v.length > 3) {
+        v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+    }
+
+    input.value = v;
+}
+// --- VALIDAÇÃO DO NOME ---
+// 1. Limpeza em tempo real (Não deixa digitar números ou símbolos)
+function limparNome(input) {
+    // Permite apenas letras (incluindo acentos) e espaços
+    input.value = input.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, "");
+}
+
+// 2. Validação Vigorosa (Nome completo + Blacklist)
+function validarNomeCompletoEOffensive(input) {
+    const nomeError = document.getElementById('nomeError');
+    const valor = input.value.trim();
+
+    // Lista de palavras proibidas (Blacklist)
+    const blacklist = [
+        'cusao', 'cuzao', 'viado','Viado', 'bixa', 'bicha', 'otario', 'filho da puta',
+        'fdp', 'fulano','Fulano', 'beltrano','Beltrano','Ciclano', 'ciclano', 'teste',  'Teste','TESTE', 'testando', 'asdf',
+        'caralho', 'porra', 'desgraça', 'vtnm', 'vtnc','vacilao','Otario','Cusao','Cuzao',
+    ];
+
+    // Transforma em minúsculo para comparar
+    const valorBaixo = valor.toLowerCase();
+
+    // -----  Validação de Nome Completo (pelo menos duas palavras) ---
+    const partesNome = valor.split(/\s+/);
+
+    let mensagem = "";
+
+    // TESTE 1: Nome vazio ou apenas uma palavra
+    if (valor === "" || partesNome.length < 2) {
+        mensagem = "Por favor, digite o nome completo (Nome e Sobrenome).";
+    }
+    // TESTE 2: Verificar Blacklist (Palavras Maliciosas ou Genéricas)
+    else if (blacklist.some(palavra => valorBaixo.includes(palavra))) {
+        mensagem = "Nome inválido. Por favor, utilize termos profissionais.";
+        input.value = ""; // Limpa o campo ofensivo imediatamente
+    }
+    // TESTE 3: Nomes repetitivos (ex: "José José José")
+    else if (partesNome[0] === partesNome[1]) {
+        mensagem = "O sobrenome não pode ser igual ao nome.";
+    }
+
+    // --- NOVA VALIDAÇÃO CONTRA LETRAS ALEATÓRIAS ---
+
+    // 1. Bloqueia repetições exageradas (ex: "aaaaa" ou "jjjjj")
+    const rptChar = /(.)\1{2,}/; // Identifica a mesma letra 3x seguidas
+
+    // 2. Lista de sequências comuns de teclado (Gibberish)
+    const sequenciasTeclado = ['asdf', 'qwerty', 'zxcv', 'jkl', '123', 'abcde'];
+
+    // 3. Verificação de proporção de vogais (Nomes reais precisam de vogais!)
+    const vogais = valorBaixo.match(/[aeiouà-ÿ]/g);
+    const temPoucaVogal = !vogais || (vogais.length / valor.length) < 0.2;
+
+    if (rptChar.test(valorBaixo)) {
+        mensagem = "Por favor, não repita caracteres excessivamente.";
+    }
+    else if (sequenciasTeclado.some(seq => valorBaixo.includes(seq))) {
+        mensagem = "Por favor, digite um nome real e não sequências de teclado.";
+    }
+    else if (temPoucaVogal && valor.length > 4) {
+        mensagem = "Nome inválido. Verifique se digitou corretamente.";
+    }
+    // --- FIM DA NOVA VALIDAÇÃO ---
+
+    // Aplicação do Feedback
+    if (mensagem !== "") {
+        nomeError.innerText = mensagem;
+        nomeError.style.display = 'block';
+        input.classList.add('is-invalid');
+        input.classList.remove('is-valid');
+    } else {
+        nomeError.style.display = 'none';
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+    }
+}
+
+// Limpeza final antes de enviar para o Banco de Dados (MySQL)
+document.querySelector('form').addEventListener('submit', function(e) {
+    const cpfInput = document.getElementById('cpfPaciente');
+    // Remove os pontos e o traço para enviar apenas 11 dígitos ao Node.js
+    cpfInput.value = cpfInput.value.replace(/\D/g, '');
+});
      // ======  Função data e hora ===============================================================================
      function atualizarDataHora() {
             const now = new Date();
@@ -500,6 +651,117 @@
         atualizarDataHora();
         setInterval(atualizarDataHora, 1000);
     // ========================================================================
+    // ======= mascara e validação de dados email data da idade e mascara para o telefone
+    // --- MÁSCARA DE TELEFONE (Formato: (11) 99999-9999) ---
+function mascaraTelefone(i) {
+    let v = i.value.replace(/\D/g, ""); // Remove o que não é número
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2"); // Coloca parênteses no DDD
+    v = v.replace(/(\d{5})(\d)/, "$1-$2"); // Coloca hífen no número
+    i.value = v;
+}
+// --- VALIDAÇÇAO TELEFONE ---
+function validarEMascararTelefone(input) {
+    const errorMsg = document.getElementById('telError');
+    let v = input.value;
+
+    // 1. Alerta se houver letras (opcional, para educar o usuário)
+    if (/[a-zA-Z]/.test(v)) {
+        if (errorMsg) errorMsg.style.display = 'block';
+    } else {
+        if (errorMsg) errorMsg.style.display = 'none';
+    }
+
+    // 2. REGRA DE OURO: Remove TUDO o que não for número
+    v = v.replace(/\D/g, "");
+
+    // 3. Aplica a máscara dinâmica (ajusta entre 10 e 11 dígitos)
+    if (v.length > 10) {
+        // Formato Celular: (11) 99999-9999
+        v = v.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+    } else if (v.length > 5) {
+        // Formato Fixo: (11) 4444-4444
+        v = v.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+    } else if (v.length > 2) {
+        // Apenas o DDD: (11)
+        v = v.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+    } else if (v.length > 0) {
+        // Começando o DDD: (1
+        v = v.replace(/^(\d*)/, "($1");
+    }
+
+    input.value = v;
+}
+
+// --- VALIDAÇÃO DE EMAIL PODEROSA ---
+function validarEmail(input) {
+    const emailError = document.getElementById('emailError');
+    const valor = input.value.trim(); // Remove espaços extras no início/fim
+
+    // 1. Regex Profissional:
+    // Garante letras/números + @ + letras/números + ponto + pelo menos 2 letras no final
+    const regexEstrutura = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    // 2. Verificação de "Apenas Números" antes do @:
+    // Pega tudo que vem antes do @
+    const parteUsuario = valor.split('@')[0];
+    const apenasNumeros = /^\d+$/.test(parteUsuario);
+
+    // Lógica de Barragem
+    if (valor !== "") {
+        // Se não passar na estrutura básica OU for apenas números antes do @
+        if (!regexEstrutura.test(valor) || apenasNumeros) {
+            emailError.style.display = 'block';
+            emailError.innerText = apenasNumeros ?
+                "O e-mail não pode conter apenas números antes do '@'!" :
+                "Por favor, insira um e-mail válido (ex: nome@dominio.com)";
+
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+        } else {
+            // E-mail passou em todos os testes
+            emailError.style.display = 'none';
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid'); // Feedback visual de sucesso (verde)
+        }
+    } else {
+        // Se o campo estiver vazio e for obrigatório
+        emailError.style.display = 'none';
+        input.classList.remove('is-invalid', 'is-valid');
+    }
+}
+
+// --- VALIDAÇÃO DE DATA (Não permite nascer no futuro) ---
+function validarDataNascimento(input) {
+    const dataError = document.getElementById('dataError');
+    const dataSelecionada = new Date(input.value);
+    const hoje = new Date();
+
+    if (dataSelecionada > hoje) {
+        dataError.style.display = 'block';
+        input.value = ""; // Limpa o campo
+    } else {
+        dataError.style.display = 'none';
+    }
+}
+
+// --- LIMPEZA ANTES DE ENVIAR PARA O MYSQL ---
+document.querySelector('form').addEventListener('submit', function(e) {
+    // Limpa o Telefone: tira ( ) - e espaços
+    const telInput = document.getElementById('telefonePaciente');
+    telInput.value = telInput.value.replace(/\D/g, '');
+
+    // O CPF já deve estar na sua lógica de limpeza anterior
+});
+// --- LIMPEZA ANTES DE ENVIAR O NUMERO DE TELEFONE PAR O BANCO ---
+document.querySelector('form').addEventListener('submit', function(e) {
+    const telInput = document.getElementById('telefonePaciente');
+    const cpfInput = document.getElementById('cpfPaciente');
+
+    if (telInput) telInput.value = telInput.value.replace(/\D/g, '');
+    if (cpfInput) cpfInput.value = cpfInput.value.replace(/\D/g, '');
+
+    // Agora o formulário segue para o backend só com números!
+});
     console.log('Script agendamentos.html carregado.');
 
     let currentAppointments = [];
