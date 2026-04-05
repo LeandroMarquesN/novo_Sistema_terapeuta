@@ -1,40 +1,52 @@
 const db = require('../config/db');
 
-// Exportamos a função para o Routes conseguir ler
+// --- FUNÇÃO PARA ADICIONAR MEMBRO ---
 exports.adicionarMembro = async (req, res) => {
     const { nome, email, senha, cargo } = req.body;
-    const clinicaId = 1; // Temporário até o JWT entrar
+
+    // USANDO 'req.usuario' PARA BATER COM O SEU MIDDLEWARE!
+    const clinicaId = req.usuario.clinica_id;
 
     try {
-        // 1. VERIFICAÇÃO DE E-MAIL DUPLICADO
-        const [existeEmail] = await db.execute(
-            "SELECT id FROM membros_equipe WHERE email = ?",
-            [email]
-        );
-
+        const [existeEmail] = await db.execute("SELECT id FROM usuarios WHERE email = ?", [email]);
         if (existeEmail.length > 0) {
-            return res.status(400).json({ error: "Este e-mail já está sendo usado." });
+            return res.status(400).json({ error: "Este e-mail já está em uso." });
         }
 
-        // 2. CHECAGEM DE LIMITE
-        const [clinica] = await db.execute("SELECT limite_membros FROM clinicas WHERE id = ?", [clinicaId]);
-        const [membrosAtuais] = await db.execute("SELECT COUNT(*) as total FROM membros_equipe WHERE clinica_id = ?", [clinicaId]);
+        const [clinicaRows] = await db.execute("SELECT limite_membros FROM clinicas WHERE id = ?", [clinicaId]);
+        const [countRows] = await db.execute("SELECT COUNT(*) as total FROM usuarios WHERE clinica_id = ?", [clinicaId]);
 
-        if (clinica.length === 0) {
-            return res.status(404).json({ error: "Clínica não encontrada." });
+        if (countRows[0].total >= clinicaRows[0].limite_membros) {
+            return res.status(403).json({ error: "Limite de membros atingido para o seu plano!" });
         }
 
-        if (membrosAtuais[0].total >= clinica[0].limite_membros) {
-            return res.status(403).json({ error: "Limite de membros atingido. Faça upgrade!" });
-        }
-
-        // 3. SALVAR
-        const sql = "INSERT INTO membros_equipe (clinica_id, nome, email, senha, cargo) VALUES (?, ?, ?, ?, ?)";
-        await db.execute(sql, [clinicaId, nome, email, senha, cargo]);
+        const cargoFormatado = cargo.toLowerCase();
+        await db.execute(
+            "INSERT INTO usuarios (clinica_id, nome, email, senha, cargo) VALUES (?, ?, ?, ?, ?)",
+            [clinicaId, nome, email, senha, cargoFormatado]
+        );
 
         res.json({ message: "Membro adicionado com sucesso!" });
     } catch (err) {
-        console.error(err);
+        console.error("Erro ao adicionar membro:", err);
         res.status(500).json({ error: "Erro interno no servidor." });
+    }
+};
+
+// --- FUNÇÃO PARA LISTAR MEMBROS ---
+exports.listarMembros = async (req, res) => {
+    try {
+        // AQUI TAMBÉM: Mudamos para 'req.usuario'
+        const clinicaId = req.usuario.clinica_id;
+
+        const [membros] = await db.execute(
+            "SELECT id, nome, email, cargo FROM usuarios WHERE clinica_id = ?",
+            [clinicaId]
+        );
+
+        res.json(membros);
+    } catch (error) {
+        console.error("Erro ao listar equipe:", error);
+        res.status(500).json({ error: "Erro ao buscar dados da equipe." });
     }
 };
