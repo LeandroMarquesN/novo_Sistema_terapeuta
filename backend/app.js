@@ -21,7 +21,9 @@ const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
 
 // --- 2. MAPEAMENTO DAS APIS ---
 app.use('/api/auth', authRoutes);
+
 app.use('/api/clinicas', cadastroClinicaRoutes);
+
 app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api/equipe', equipeRoutes);
@@ -50,10 +52,13 @@ app.get('/dashboard', (req, res) => {
 });
 
 app.get('/agendamento', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'agendamento.html'));
 });
 app.get('/pacientes', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'pacientes.html'));
+});
+app.get('/equipe', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'equipe.html'));
 });
 
 module.exports = app;

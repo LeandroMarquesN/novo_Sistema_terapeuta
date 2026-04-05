@@ -64,77 +64,106 @@
             </form>
         </div>
     </div>
-
+    <!-- ==== modal de sucesso para novo integrante cadastrado === -->
+    <div id="toast-sucesso" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-50">
+        <div class="bg-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3">
+            <div class="bg-white/20 p-2 rounded-full">
+                <i class="fas fa-check text-lg"></i>
+            </div>
+            <div>
+                <p class="font-bold">Sucesso!</p>
+                <p class="text-sm opacity-90">Membro adicionado à equipe.</p>
+            </div>
+        </div>
+    </div>
     <script>
-        function toggleModal() {
-            const modal = document.getElementById('modalMembro');
-            modal.classList.toggle('hidden');
+        const token = localStorage.getItem('token');
+    
+        // Função para mostrar o Toast bonitão
+        function showToast() {
+            const toast = document.getElementById('toast-sucesso');
+            // Mostra o toast subindo e aparecendo
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+    
+            // Esconde depois de 3 segundos
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
         }
-
+    
+        function toggleModal() {
+            document.getElementById('modalMembro').classList.toggle('hidden');
+        }
+    
         document.getElementById('formMembro').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            const btnSalvar = e.target.querySelector('button[type="submit"]');
+            btnSalvar.disabled = true;
+            btnSalvar.innerText = "Processando...";
     
-    // Desabilitar o botão para evitar cliques duplos
-    const btnSalvar = e.target.querySelector('button[type="submit"]');
-    btnSalvar.disabled = true;
-    btnSalvar.innerText = "Salvando...";
-
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-
-    try {
-        const response = await fetch('/api/equipe/adicionar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+    
+            try {
+                const response = await fetch('/api/equipe/adicionar', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
+                    },
+                    body: JSON.stringify(data)
+                });
+    
+                if (response.ok) {
+                    toggleModal(); // Fecha o modal
+                    showToast();   // MOSTRA O POPUP DO TAILWIND!
+                    e.target.reset(); // Limpa o formulário
+                    carregarEquipe(); // Atualiza a lista sem dar refresh na página inteira
+                } else {
+                    const result = await response.json();
+                    alert('⚠️ ' + (result.error || 'Erro ao salvar.'));
+                }
+            } catch (error) {
+                alert('❌ Erro de conexão.');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerText = "Salvar Membro";
+            }
         });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            // Sucesso! (Status 200-299)
-            alert('✅ ' + result.message);
-            location.reload(); 
-        } else {
-            // Erro controlado (Status 400, 403, etc.)
-            // Aqui ele vai mostrar "Limite atingido" ou "E-mail em uso"
-            alert('⚠️ Atenção: ' + (result.error || 'Erro desconhecido'));
+    
+        async function carregarEquipe() {
+            try {
+                const response = await fetch('/api/equipe/listar', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const membros = await response.json();
+                const tabela = document.getElementById('lista-equipe');
+                tabela.innerHTML = ''; 
+    
+                membros.forEach(membro => {
+                    tabela.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50 transition">
+                            <td class="py-3 px-6 text-slate-700 font-medium">${membro.nome}</td>
+                            <td class="py-3 px-6">
+                                <span class="bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1 rounded-full uppercase">
+                                    ${membro.cargo}
+                                </span>
+                            </td>
+                            <td class="py-3 px-6 text-slate-500">${membro.email}</td>
+                        </tr>
+                    `;
+                });
+            } catch (error) {
+                console.error("Erro ao carregar equipe:", error);
+            }
         }
-    } catch (error) {
-        // Erro de rede ou servidor fora do ar
-        alert('❌ Erro crítico: Não foi possível conectar ao servidor.');
-    } finally {
-        // Reabilitar o botão caso o usuário precise corrigir algo
-        btnSalvar.disabled = false;
-        btnSalvar.innerText = "Salvar Membro";
-    }
-});
-
-// Função para carregar a equipe do banco de dados
-async function carregarEquipe() {
-    try {
-        const response = await fetch('/api/equipe/listar');
-        const membros = await response.json();
-
-        const tabela = document.getElementById('lista-equipe');
-        tabela.innerHTML = ''; // Limpa a tabela antes de preencher
-
-        membros.forEach(membro => {
-            tabela.innerHTML += `
-                <tr class="border-b">
-                    <td class="py-3 px-6">${membro.nome}</td>
-                    <td class="py-3 px-6"><span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">${membro.cargo}</span></td>
-                    <td class="py-3 px-6">${membro.email}</td>
-                </tr>
-            `;
-        });
-    } catch (error) {
-        console.error("Erro ao carregar tabela:", error);
-    }
-}
-
-// Chamar a função assim que a página carregar
-window.onload = carregarEquipe;
+    
+        window.onload = carregarEquipe;
     </script>
 </body>
 </html>

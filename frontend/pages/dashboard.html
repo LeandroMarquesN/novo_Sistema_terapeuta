@@ -346,6 +346,30 @@
                 display: none; /* Esconde a data/hora em telas pequenas para economizar espaço */
             }
         }
+    /* ======= Estilo para a função do dark mode */
+    /* Cores para o Modo Escuro */
+[data-bs-theme="dark"] body {
+    background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460) !important;
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .login-container, 
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .navbar {
+    background-color: rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+}
+
+[data-bs-theme="dark"] .form-label, 
+[data-bs-theme="dark"] h2, 
+[data-bs-theme="dark"] h1 {
+    color: #ffffff !important;
+}
+[data-bs-theme="dark"] #boasVindas {
+    color: #a2c9f2 !important; /* Um azul clarinho para destacar no escuro */
+    text-shadow: 0 0 10px rgba(162, 201, 242, 0.3); /* Um brilho leve */
+}
     </style>
 
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
@@ -374,7 +398,7 @@
 
                     <a href="/pacientes" class="btn btn-outline-primary me-2">Pacientes</a>
                     <a href="/agendamento" class="btn btn-outline-success me-2">Agendar</a>
-                    <a href="/historico.html" class="btn btn-outline-secondary me-2">Histórico</a>
+                    
                      <a href="/equipe" class="btn btn-outline-success me-2">Minha Equipe</a>
                     <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
                         <i class="fas fa-moon"></i>
@@ -607,30 +631,46 @@
         setInterval(atualizarDataHora, 1000);
 
 // ====== funcao maquina de escrever ===========
-        function escreverTextoComMaquinaEscrever(texto, elementoId) {
-            const elemento = document.getElementById(elementoId);
-            elemento.textContent = "";
-            let i = 0;
-            const intervalo = setInterval(() => {
-                if (i < texto.length) {
-                    elemento.textContent += texto.charAt(i);
-                    i++;
-                } else {
-                    clearInterval(intervalo);
-                }
-            }, 30);
-        }
+        // 1. Pega os dados que o login salvou no navegador
+const usuarioLogado = localStorage.getItem('usuarioNome'); // Nome vindo do Token
+const token = localStorage.getItem('token');
 
-        if (usuario) {
-            const nomeParts = usuario.trim().split(' ');
-            const primeiroNome = nomeParts[0].toLowerCase();
-            const terminaComA = primeiroNome.endsWith('a');
-            const icone = terminaComA ? `<i class="fa-solid fa-user-doctor-female"></i>` : `<i class="fa-solid fa-user-doctor"></i>`;
-            const saudacao = terminaComA ? `Bem-vinda, ${usuario} ${icone}` : `Bem-vindo, ${usuario} ${icone}`;
-            document.getElementById('boasVindas').innerHTML = saudacao;
+// Segurança: Se não tem token, manda de volta pro login
+if (!token || !usuarioLogado) {
+    window.location.href = '/login';
+}
+
+function escreverTextoComMaquinaEscrever(texto, elementoId, callback) {
+    const elemento = document.getElementById(elementoId);
+    elemento.textContent = "";
+    let i = 0;
+    const intervalo = setInterval(() => {
+        if (i < texto.length) {
+            elemento.textContent += texto.charAt(i);
+            i++;
         } else {
-            window.location.href = 'login.html';
+            clearInterval(intervalo);
+            if (callback) callback(); // Executa o ícone após o texto
         }
+    }, 50); // Velocidade da digitação
+}
+
+// 2. Lógica de Saudação (Masculino/Feminino)
+const primeiroNome = usuarioLogado.trim().split(' ')[0].toLowerCase();
+const terminaComA = primeiroNome.endsWith('a');
+
+const saudacaoBase = terminaComA ? "Bem-vinda, " : "Bem-vindo, ";
+const textoCompleto = `${saudacaoBase}${usuarioLogado}`;
+
+// 3. Executa a animação
+escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
+    // Adiciona o ícone suavemente após o texto terminar
+    const iconeHTML = terminaComA 
+        ? ' <i class="fa-solid fa-user-nurse" style="color: #2252b9;"></i>' 
+        : ' <i class="fa-solid fa-user-doctor" style="color: #2252b9;"></i>';
+    
+    document.getElementById('boasVindas').innerHTML += iconeHTML;
+});
 // =========  Carrega e atualiza agendamento ================
 
         document.addEventListener('DOMContentLoaded', async function () {
@@ -1155,6 +1195,35 @@ async function carregarEAtualizarAgendamentos() {
                 alert('Erro ao cancelar agendamento. Verifique a conexão com o servidor.');
             }
         }
+    // ==================  Função dark mode ===============
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeIcon = themeToggleBtn.querySelector('i');
+
+// 1. Função para aplicar o tema
+function aplicarTema(tema) {
+    document.documentElement.setAttribute('data-bs-theme', tema);
+    localStorage.setItem('theme', tema); // Salva a preferência
+
+    // Troca o ícone (Lua para Sol e vice-versa)
+    if (tema === 'dark') {
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+        themeToggleBtn.classList.replace('btn-outline-dark', 'btn-outline-light');
+    } else {
+        themeIcon.classList.replace('fa-sun', 'fa-moon');
+        themeToggleBtn.classList.replace('btn-outline-light', 'btn-outline-dark');
+    }
+}
+
+// 2. Verifica se o usuário já tinha uma preferência salva
+const temaSalvo = localStorage.getItem('theme') || 'light';
+aplicarTema(temaSalvo);
+
+// 3. Ouvinte de clique no botão
+themeToggleBtn.addEventListener('click', () => {
+    const temaAtual = document.documentElement.getAttribute('data-bs-theme');
+    const novoTema = temaAtual === 'dark' ? 'light' : 'dark';
+    aplicarTema(novoTema);
+});
     </script>
 </body>
 </html>

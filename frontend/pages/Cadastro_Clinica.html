@@ -75,7 +75,7 @@
 
             try {
                 // 2. Chamada para a API (Caminho relativo para não quebrar na nuvem)
-                const response = await fetch('/api/auth/register-clinica', {
+                const response = await fetch('/api/clinicas/register-clinica', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
@@ -85,7 +85,7 @@
 
                 if (response.ok) {
                     // SUCESSO: Redireciona com um parâmetro de sucesso
-                    window.location.href = '/index.html?status=sucesso';
+                    window.location.href = '/?status=sucesso';
                 } else {
                     // ERRO DO SERVIDOR (ex: e-mail já existe)
                     alert(result.error || "Erro ao criar clínica. Verifique os dados.");
