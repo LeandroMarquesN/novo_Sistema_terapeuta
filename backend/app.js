@@ -39,4 +39,21 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'pages', 'index.html'));
 });
 
+// ADICIONE ESTA LINHA AQUI:
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'login.html'));
+});
+
+// ADICIONE ESTA ROTA AQUI:
+app.get('/dashboard', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
+});
+
+app.get('/agendamento', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
+});
+app.get('/pacientes', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
+});
+
 module.exports = app;
