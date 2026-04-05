@@ -23,6 +23,79 @@
         background-color: #121212;
         color: #e0e0e0;
     }
+    /* ======  logo do sistema ========= */
+    span.logo-img {
+                background-image: url('/logo/LogoTop.png') !important;
+                background-size:100% !important;
+                background-repeat: no-repeat !important;
+                background-position: left center !important;
+                display: inline-block !important;
+                height: 280px !important;
+                width: 250px!important;
+                text-indent: -9999px!important;
+                overflow: hidden !important;
+                cursor: pointer !important;
+                position: relative!important; /* Necessário para o efeito de brilho */
+                /* 1. ARREDONDAMENTO: 15% ou use pixels para mais precisão (ex: 15px) */
+                border-radius: 15px!important;
+
+                /* --- AJUSTE DE POSICIONAMENTO --- */
+                margin-top: 15px;      /* Afasta do topo do navegador */
+                margin-left: 40px;     /* Afasta da borda esquerda da tela */
+
+                /* Define que o aumento (scale) comece da esquerda para não "tremer" */
+                transform-origin: left center;
+
+
+                /* Transição suave para escala e sombra */
+                transition: all 0.5s ease-in-out;
+            }
+      /* Efeito de Brilho (O "Pulo do Gato") */
+    span.logo-img::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%; /* Começa fora da logo */
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.4) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        transform: skewX(-25deg); /* Inclina o brilho */
+        transition: none;
+    }
+
+    span.logo-img:hover {
+        transform: scale(1.1); /* Um aumento mais sutil (10%) para não perder o foco */
+        filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.1)); /* Sombra suave de profundidade */
+    }
+
+    /* Quando o mouse passa, o brilho atravessa a logo */
+    span.logo-img:hover::after {
+        left: 150%;
+        transition: all 0.9s ease-in-out;
+    }
+       /* Estilização para a data e hora */
+       #data-hora-container {
+            font-size: 0.9rem;
+            color: #fff;
+            background-color: rgba(10, 73, 140, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+            margin-right: 15px; /* Espaço entre a data/hora e os botões */
+        }
+
+        #data-hora-container i {
+            font-size: 1rem;
+        }
+
     .agendamento-container {
         max-width: 1000px;
         margin-left: auto;
@@ -55,17 +128,7 @@
         border-color: #86b7fe;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
-    span.logo-img {
-      height: 280px;
-      width: 650px;
-      background-image: url('../logo/logoFinal.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: left;
-      display: inline-block;
-      text-indent: -9999px;
-      overflow: hidden;
-    }
+
     .bg-transparente {
       background-color: transparent !important;
     }
@@ -194,19 +257,31 @@
 <body class="menosClaro">
   <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">
-        <span class="logo-img" href="dashboard.html">Sistema Terapeuta</span>
-      </a>
-      <div>
-        <a href="dashboard.html" class="btn btn-outline-primary me-2">Home</a>
-        <a href="pacientes.html" class="btn btn-outline-primary me-2">Pacientes</a>
-        <a href="agendamento.html" class="btn btn-outline-success me-2">Agendar</a>
-        <a href="historico.html" class="btn btn-outline-secondary">Histórico</a>
-        <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
-            <i class="fas fa-moon"></i>
+          <a class="navbar-brand" href="#">
+            <span class="logo-img">Sistema Terapeuta</span>
+          </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
         </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="ms-auto d-flex align-items-center">
+                <div id="data-hora-container">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span id="data-hora"></span>
+
+                </div>
+
+                <a href="/pacientes" class="btn btn-outline-primary me-2">Pacientes</a>
+                <a href="/agendamento" class="btn btn-outline-success me-2">Agendar</a>
+
+                 <a href="/equipe" class="btn btn-outline-success me-2">Minha Equipe</a>
+                <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
       </div>
-    </div>
   </nav>
 
   <div class="agendamento-container mt-5">
@@ -222,8 +297,8 @@
 
       <div class="col-md-4">
         <label for="cpfPaciente" class="form-label font-bold text-primary">CPF (Obrigatório)</label>
-        <input type="text" id="cpfPaciente" name="cpf" class="form-control border-primary" 
-               placeholder="000.000.000-00" maxlength="14" required 
+        <input type="text" id="cpfPaciente" name="cpf" class="form-control border-primary"
+               placeholder="000.000.000-00" maxlength="14" required
                oninput="this.value = this.value.replace(/[^0-9.-]/g, '')">
         <small class="text-muted" style="font-size: 0.75rem;">Necessário para o prontuário único.</small>
       </div>
@@ -413,6 +488,18 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+     // ======  Função data e hora ===============================================================================
+     function atualizarDataHora() {
+            const now = new Date();
+            const dataHora = now.toLocaleString('pt-BR', {
+                weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit'
+            });
+            document.getElementById('data-hora').textContent = dataHora;
+        }
+        atualizarDataHora();
+        setInterval(atualizarDataHora, 1000);
+    // ========================================================================
     console.log('Script agendamentos.html carregado.');
 
     let currentAppointments = [];
