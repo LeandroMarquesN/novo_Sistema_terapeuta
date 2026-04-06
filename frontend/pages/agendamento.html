@@ -593,8 +593,24 @@ function validarNomeCompletoEOffensive(input) {
         input.value = ""; // Limpa o campo ofensivo imediatamente
     }
     // TESTE 3: Nomes repetitivos (ex: "José José José")
-    else if (partesNome[0] === partesNome[1]) {
-        mensagem = "O sobrenome não pode ser igual ao nome.";
+    // Função auxiliar para remover acentos (coloque fora ou dentro da função principal)
+    const removerAcentos = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    // --- TESTE 3 ATUALIZADO: Nomes repetitivos ---
+    const nomeLimpo = removerAcentos(partesNome[0]);
+    const sobrenomeLimpo = removerAcentos(partesNome[1] || "");
+
+    // Verifica se existem palavras repetidas em qualquer lugar do nome
+    const temPalavraRepetida = partesNome.some((palavra, index) => {
+        return partesNome.slice(index + 1).some(outra => removerAcentos(outra) === removerAcentos(palavra));
+    });
+
+    if (temPalavraRepetida) {
+        mensagem = "O nome contém palavras repetidas. Por favor, verifique.";
+    }
+
+    if (nomeLimpo === sobrenomeLimpo && nomeLimpo !== "") {
+        mensagem = "O sobrenome não pode ser igual ao nome (mesmo com acentos diferentes).";
     }
 
     // --- NOVA VALIDAÇÃO CONTRA LETRAS ALEATÓRIAS ---
