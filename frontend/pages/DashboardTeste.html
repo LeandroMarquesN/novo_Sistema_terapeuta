@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
-
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -297,129 +297,440 @@
             <div class="grid grid-cols-12 gap-10">
 
                 <div class="col-span-12 lg:col-span-8">
-                    <div class="bg-white dark:bg-gray-900 rounded-[3rem] p-10 shadow-sm border border-gray-100 dark:border-gray-800">
+                  <!-- ------ Agenda calendario    -->
+                  <div class="col-span-12 lg:col-span-8 space-y-10">
+                    <div class="bg-white dark:bg-gray-900 rounded-[3rem] p-10 shadow-sm border border-gray-100 dark:border-gray-800 transition-all">
                         <div class="flex justify-between items-center mb-8">
-                            <h2 class="text-2xl font-bold dark:text-white tracking-tight">Sua Agenda Hoje</h2>
-                            <button class="text-blue-600 text-sm font-bold hover:text-emerald-500 transition">Ver calendário completo</button>
+                            <div>
+                                <h2 class="text-2xl font-bold dark:text-white tracking-tight">Agenda do Dia</h2>
+                                <p class="text-gray-500 text-sm">Controle de pacientes e prontuários</p>
+                            </div>
+                            <button class="text-blue-600 text-sm font-bold hover:text-emerald-500 transition flex items-center gap-2">
+                                <i class="fas fa-print"></i> Imprimir Lista
+                            </button>
                         </div>
-                        <div class="overflow-hidden">
+
+                        <div class="overflow-x-auto">
                             <table class="w-full text-left">
                                 <thead>
-                                    <tr class="text-gray-400 text-xs uppercase tracking-widest border-b dark:border-gray-800">
-                                        <th class="pb-5">Paciente</th>
-                                        <th class="pb-5">Horário</th>
-                                        <th class="pb-5">Serviço</th>
-                                        <th class="pb-5">Status</th>
-                                        <th class="pb-5 text-right">Ação</th>
+                                    <tr class="text-gray-400 text-[10px] uppercase tracking-[0.2em] border-b dark:border-gray-800">
+                                        <th class="pb-5 font-bold">Paciente (Nome / CPF / Email)</th>
+                                        <th class="pb-5 font-bold">Agendamento</th>
+                                        <th class="pb-5 font-bold">Motivo da Consulta</th>
+                                        <th class="pb-5 font-bold">Pagamento</th>
+                                        <th class="pb-5 font-bold text-right">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabelaAgendamentos" class="divide-y divide-gray-50 dark:divide-gray-800">
-                                    </tbody>
+                                    <tr class="group hover:bg-blue-50/30 dark:hover:bg-gray-800/50 transition-all">
+                                        <td class="py-6">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-100 dark:shadow-none">
+                                                    LM
+                                                </div>
+                                                <div>
+                                                    <p class="font-bold text-gray-900 dark:text-white text-base">Leandro Marques</p>
+                                                    <p class="text-[11px] text-gray-500 dark:text-gray-400 font-medium tracking-wide">
+                                                        <i class="far fa-id-card me-1 text-blue-400"></i> 123.456.789-00 • <i class="far fa-envelope me-1 text-emerald-400"></i> leandro@email.com
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-6">
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-bold text-gray-700 dark:text-gray-200">11/04/2026</span>
+                                                <span class="text-xs text-emerald-500 font-black">14:00h - 15:00h</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-6">
+                                            <span class="text-xs font-medium text-gray-500 bg-gray-100 dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                                                Ansiedade e Stress
+                                            </span>
+                                        </td>
+                                        <td class="py-6">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                                <span class="text-[10px] font-black uppercase text-emerald-600 dark:text-emerald-400">Pago</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-6 text-right">
+                                            <div class="flex justify-end gap-2">
+                                                <button title="Atender" class="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 hover:scale-110 transition shadow-md shadow-blue-100 dark:shadow-none">
+                                                    <i class="fas fa-play text-[10px]"></i>
+                                                </button>
+
+                                                <button title="Reagendar" class="w-9 h-9 bg-amber-400 text-white rounded-xl flex items-center justify-center hover:bg-amber-500 hover:scale-110 transition shadow-md shadow-amber-100 dark:shadow-none">
+                                                    <i class="fas fa-calendar-alt text-[10px]"></i>
+                                                </button>
+
+                                                <button title="Cancelar" class="w-9 h-9 bg-red-100 text-red-500 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white hover:scale-110 transition">
+                                                    <i class="fas fa-times text-[10px]"></i>
+                                                </button>
+
+                                                <a href="https://wa.me/5511999999999?text=Olá Leandro, aqui é da clínica da Dra. Karla."
+                                                   target="_blank"
+                                                   class="w-9 h-9 bg-emerald-500 text-white rounded-xl flex items-center justify-center hover:bg-emerald-600 hover:scale-110 transition shadow-md shadow-emerald-100 dark:shadow-none">
+                                                    <i class="fab fa-whatsapp text-lg"></i>
+                                                </a>
+
+                                                <button onclick="abrirModal({nome: 'Leandro Marques', horario: '14:00 - 15:00', telefone: '11999999999', statusPagamento: 'Pago'})"
+                                                        class="w-9 h-9 bg-white dark:bg-gray-800 text-blue-500 border border-gray-100 dark:border-gray-700 rounded-xl flex items-center justify-center hover:bg-blue-50 dark:hover:bg-gray-700 transition shadow-sm">
+                                                    <i class="fas fa-eye text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
                             </table>
                         </div>
                     </div>
+                    <!--    --------- CALENDARIO ---- AGENDA ------ -->
 
-                    <div class="mt-10 bg-white dark:bg-gray-900 rounded-[3rem] p-10 shadow-sm border border-gray-100 dark:border-gray-800 transition hover:border-blue-50">
-                        <h2 class="text-2xl font-bold dark:text-white mb-8 tracking-tight">Pico de Atendimentos (Semanal)</h2>
-                        <div id="chart-pareto" class="h-72 flex items-end gap-5 px-6 border-b dark:border-gray-800">
-                            <div class="flex-1 bg-gradient-to-t from-blue-100 to-blue-50 dark:from-gray-800 dark:to-gray-800 rounded-t-2xl h-[40%] hover:from-blue-500 hover:to-emerald-400 transition-all duration-500 relative group cursor-pointer">
-                                <span class="absolute -top-9 left-1/2 -translate-x-1/2 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity text-blue-700 dark:text-blue-300">Seg</span>
-                            </div>
-                            <div class="flex-1 bg-gradient-to-t from-blue-500 to-emerald-400 rounded-t-2xl h-[85%] relative group shadow-lg shadow-blue-100 dark:shadow-none">
-                                <span class="absolute -top-9 left-1/2 -translate-x-1/2 text-sm font-bold text-emerald-600 dark:text-emerald-400">Ter</span>
-                            </div>
-                            <div class="flex-1 bg-gradient-to-t from-blue-100 to-blue-50 dark:from-gray-800 dark:to-gray-800 rounded-t-2xl h-[65%] hover:from-blue-500 hover:to-emerald-400 transition-all duration-500 relative group cursor-pointer">
-                                <span class="absolute -top-9 left-1/2 -translate-x-1/2 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity text-blue-700 dark:text-blue-300">Qua</span>
-                            </div>
-                            <div class="flex-1 bg-gradient-to-t from-blue-500 to-emerald-400 rounded-t-2xl h-[95%] relative group shadow-lg shadow-blue-100 dark:shadow-none">
-                                <span class="absolute -top-9 left-1/2 -translate-x-1/2 text-sm font-bold text-emerald-600 dark:text-emerald-400">Qui</span>
-                            </div>
-                            <div class="flex-1 bg-gradient-to-t from-blue-100 to-blue-50 dark:from-gray-800 dark:to-gray-800 rounded-t-2xl h-[35%] hover:from-blue-500 hover:to-emerald-400 transition-all duration-500 relative group cursor-pointer">
-                                <span class="absolute -top-9 left-1/2 -translate-x-1/2 text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity text-blue-700 dark:text-blue-300">Sex</span>
-                            </div>
-                        </div>
-                        <div class="flex justify-between text-xs text-gray-400 pt-3 px-6">
-                            <span>Baixo</span>
-                            <span>Alto Volume</span>
-                        </div>
-                    </div>
+                <div class="bg-white dark:bg-gray-900 rounded-[3rem] p-10 shadow-sm border border-gray-100 dark:border-gray-800 transition-all">
+                  <div class="flex flex-col sm:flex-row items-center justify-between mb-8 gap-4">
+                      <div>
+                          <h3 class="text-xl font-bold dark:text-white tracking-tight">Disponibilidade</h3>
+                          <p class="text-xs text-gray-400 font-medium">Abril 2026</p>
+                      </div>
+
+                      <div class="flex bg-gray-50 dark:bg-gray-800 p-1 rounded-2xl border border-gray-100 dark:border-gray-700">
+                          <button onclick="alternarCalendario('semana')" id="btn-semana" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white">
+                              Semana
+                          </button>
+                          <button onclick="alternarCalendario('mes')" id="btn-mes" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                              Mês Inteiro
+                          </button>
+                      </div>
+                  </div>
+
+                  <div id="view-calendario">
+                      <div class="grid grid-cols-7 gap-2 mb-4">
+                          <div class="text-center text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase">Dom</div>
+                          <div class="text-center text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase">Seg</div>
+                          <div class="text-center text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase">Ter</div>
+                          <div class="text-center text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase">Qua</div>
+                          <div class="text-center text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase">Qui</div>
+                          <div class="text-center text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase">Sex</div>
+                          <div class="text-center text-[10px] font-black text-gray-300 dark:text-gray-600 uppercase">Sáb</div>
+                      </div>
+
+                      <div id="grid-dias" class="grid grid-cols-7 gap-2">
+                          </div>
+                  </div>
+              </div>
+
+                    <!-- ---- Grafico para ilustrar -->
+                    <div class="mt-10 bg-white dark:bg-gray-900 rounded-[3rem] p-8 shadow-sm border border-gray-100 dark:border-gray-800 transition hover:shadow-xl hover:shadow-blue-50/50 duration-500">
+                      <div class="flex justify-between items-center mb-6">
+                          <div>
+                              <h2 class="text-2xl font-bold dark:text-white tracking-tight">Fluxo de Atendimentos</h2>
+                              <p class="text-gray-500 text-sm">Volume semanal de sessões</p>
+                          </div>
+                          <div class="flex gap-2">
+                              <span class="flex items-center gap-1.5 text-xs font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-full">
+                                  <i class="fas fa-circle text-[6px]"></i> Produtivo
+                              </span>
+                          </div>
+                      </div>
+
+                      <div id="chart-fluxo" class="min-h-[300px]"></div>
+                  </div>
                 </div>
-
-                <div class="col-span-12 lg:col-span-4">
-                    <div class="sticky top-10 space-y-8">
-                        <div id="asidePaciente" class="bg-gradient-to-br from-blue-600 via-blue-500 to-emerald-400 rounded-[3rem] p-10 text-white shadow-2xl shadow-blue-200 dark:shadow-none transition-all duration-500">
-                            <div class="flex items-center gap-5 mb-10 border-b border-white/20 pb-6">
-                                <div class="w-20 h-20 bg-white/20 rounded-3xl backdrop-blur-lg flex items-center justify-center text-3xl font-extrabold shadow-inner">LM</div>
+                  <!-- -- fim  -->
+                  <div class="col-span-12 xl:col-span-4">
+                    <div class="sticky top-10 space-y-6"> <div id="asidePaciente" class="bg-gradient-to-br from-blue-600 via-blue-500 to-emerald-400 rounded-[2.5rem] p-8 text-white shadow-2xl transition-all duration-500">
+                            <div class="flex items-center gap-4 mb-8 border-b border-white/20 pb-6">
+                                <div class="w-16 h-16 bg-white/20 rounded-2xl backdrop-blur-lg flex items-center justify-center text-2xl font-extrabold shadow-inner">LM</div>
                                 <div>
-                                    <h3 id="infoNomeAside" class="text-2xl font-bold leading-tight">Leandro Marques</h3>
-                                    <p class="text-blue-100 text-base font-medium">Sessão: <span class="font-bold text-white">14:00 - 15:00</span></p>
+                                    <h3 id="infoNomeAside" class="text-xl font-bold leading-tight">Leandro Marques</h3>
+                                    <p class="text-blue-100 text-sm font-medium">Sessão: <span class="font-bold text-white">14:00 - 15:00</span></p>
                                 </div>
                             </div>
 
-                            <div class="space-y-6">
-                                <div class="bg-white/10 rounded-2xl p-5 backdrop-blur-sm border border-white/10">
-                                    <p class="text-xs uppercase font-bold text-blue-100 tracking-widest">Status Financeiro</p>
-                                    <div class="flex justify-between items-end mt-1.5">
-                                        <span class="text-3xl font-extrabold text-white">Sinal Pago</span>
-                                        <i class="fas fa-check-circle text-emerald-300 text-2xl"></i>
+                            <div class="space-y-4"> <div class="bg-white/10 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 tracking-widest">Status Financeiro</p>
+                                    <div class="flex justify-between items-end mt-1">
+                                        <span class="text-2xl font-extrabold text-white">Sinal Pago</span>
+                                        <i class="fas fa-check-circle text-emerald-300 text-xl"></i>
                                     </div>
                                 </div>
 
-                                <div class="bg-white/10 rounded-2xl p-5 backdrop-blur-sm border border-white/10 relative overflow-hidden group">
-                                    <p class="text-xs uppercase font-bold text-blue-100 tracking-widest">Anotação Clínica Rápida</p>
-                                    <p class="text-sm mt-3 italic text-blue-50 leading-relaxed">"Paciente relata melhora significativa na qualidade do sono após introdução da técnica de respiração diafragmática..."</p>
-                                    <i class="fas fa-quote-right absolute -bottom-2 -right-2 text-white/10 text-6xl transition group-hover:scale-110"></i>
+                                <div class="bg-white/10 rounded-2xl p-4 backdrop-blur-sm border border-white/10 relative overflow-hidden group">
+                                    <p class="text-[10px] uppercase font-bold text-blue-100 tracking-widest">Anotação Clínica</p>
+                                    <p class="text-xs mt-2 italic text-blue-50 leading-relaxed">"Paciente relata melhora significativa na qualidade do sono..."</p>
+                                    <i class="fas fa-quote-right absolute -bottom-1 -right-1 text-white/5 text-4xl transition group-hover:scale-110"></i>
                                 </div>
                             </div>
 
-                            <button class="w-full mt-10 bg-gradient-to-r from-amber-400 to-orange-400 text-gray-950 font-extrabold py-5 rounded-3xl hover:from-amber-300 hover:to-orange-300 transition shadow-lg text-lg hover:scale-[1.02]">
+                            <button class="w-full mt-8 bg-gradient-to-r from-amber-400 to-orange-400 text-gray-950 font-black py-4 rounded-2xl hover:from-amber-300 hover:to-orange-300 transition shadow-lg text-base hover:scale-[1.02]">
                                 Ver Prontuário Completo
                             </button>
                         </div>
 
-                        <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-800 shadow-sm transition hover:shadow-md">
-                            <h4 class="font-bold dark:text-white text-lg mb-4 flex items-center gap-2">
-                                <i class="fas fa-bell text-orange-400"></i> Lembrete Importante
+                        <div class="bg-white dark:bg-gray-900 rounded-[2rem] p-6 border border-gray-100 dark:border-gray-800 shadow-sm transition hover:shadow-md">
+                            <h4 class="font-bold dark:text-white text-base mb-3 flex items-center gap-2">
+                                <i class="fas fa-bell text-orange-400"></i> Lembrete
                             </h4>
-                            <p class="text-sm text-gray-500 leading-relaxed">Existem <span class="font-bold text-blue-600">3 solicitações</span> de reagendamento para esta semana aguardando sua revisão no painel de pacientes.</p>
+                            <p class="text-xs text-gray-500 leading-relaxed">Existem <span class="font-bold text-blue-600">3 solicitações</span> aguardando revisão.</p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
+
+
+    <!--  =========== MODAIS QUE FICAM  ESCONDIDO E SO APARECEM QUANDO CLICAMOS ===== -->
+
+            <!-- 0.1 MoDAL DA AGENDA -->
+            <div id="modalPaciente" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-gray-900/20 backdrop-blur-sm transition-all">
+
+              <div class="bg-white dark:bg-gray-900 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-white/20 overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+
+                  <div class="bg-gradient-to-r from-blue-600 to-emerald-500 p-8 text-white relative">
+                      <button onclick="fecharModal()" class="absolute top-6 right-6 hover:rotate-90 transition-transform">
+                          <i class="fas fa-times text-xl"></i>
+                      </button>
+                      <div class="flex items-center gap-4">
+                          <div id="modalAvatar" class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center text-2xl font-black backdrop-blur-md border border-white/30">
+                              LM
+                          </div>
+                          <div>
+                              <h3 id="modalNome" class="text-2xl font-bold tracking-tight">Leandro Marques</h3>
+                              <p id="modalStatus" class="text-blue-100 text-sm font-medium">Paciente Confirmado</p>
+                          </div>
+                      </div>
+                  </div>
+
+                  <div class="p-8 space-y-6">
+                      <div class="grid grid-cols-2 gap-4">
+                          <div class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl">
+                              <p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Horário</p>
+                              <p id="modalHorario" class="font-bold dark:text-white">14:00 - 15:00</p>
+                          </div>
+                          <div class="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-2xl">
+                              <p class="text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Procedimento</p>
+                              <p id="modalServico" class="font-bold dark:text-white">Terapia Online</p>
+                          </div>
+                      </div>
+
+                      <div class="bg-blue-50 dark:bg-blue-900/20 p-5 rounded-2xl border border-blue-100 dark:border-blue-800">
+                          <p class="text-xs text-blue-600 dark:text-blue-400 font-bold mb-2 flex items-center gap-2">
+                              <i class="fas fa-info-circle"></i> Nota da Assistente
+                          </p>
+                          <p class="text-sm text-gray-600 dark:text-gray-300 italic leading-relaxed">
+                              "Paciente prefere atendimento via Google Meet. Link já enviado via WhatsApp."
+                          </p>
+                      </div>
+
+                      <div class="flex gap-3">
+                          <button class="flex-1 bg-gray-900 dark:bg-white dark:text-gray-900 text-white font-bold py-4 rounded-2xl hover:opacity-90 transition">
+                              Iniciar Sessão
+                          </button>
+                          <button class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center hover:bg-emerald-200 transition">
+                              <i class="fab fa-whatsapp text-xl"></i>
+                          </button>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <!-- ======= fim do modal da agenda ========== -->
     <script>
+      // ========= 0.1 Agenda ========
+      function abrirModal(paciente) {
+        const modal = document.getElementById('modalPaciente');
+        const content = document.getElementById('modalContent');
 
-        // ========= Botao dark mode ==========
-        const themeBtn = document.getElementById('theme-toggle-btn');
-        const themeText = themeBtn.querySelector('span'); // Pega o texto
-        const themeIcon = themeBtn.querySelector('i');    // Pega o ícone
-        const html = document.documentElement;
+        // Preenchendo os dados básicos e novos
+        document.getElementById('modalNome').textContent = paciente.nome;
+        document.getElementById('modalHorario').textContent = paciente.horario;
+        document.getElementById('modalStatus').textContent = 'Status: ' + paciente.statusPagamento;
 
-        themeBtn.addEventListener('click', () => {
-            html.classList.toggle('dark');
+        // Se você quiser mostrar o CPF e Email no Modal também, adicione IDs neles no HTML do modal
+        // Exemplo: document.getElementById('modalCPF').textContent = paciente.cpf;
 
-            if (html.classList.contains('dark')) {
-                // Se mudou para Dark: mostra sol e texto "Claro"
-                themeIcon.classList.replace('fa-moon', 'fa-sun');
-                themeText.textContent = 'Claro';
-                localStorage.setItem('theme', 'dark');
-            } else {
-                // Se mudou para Light: mostra lua e texto "Escuro"
-                themeIcon.classList.replace('fa-sun', 'fa-moon');
-                themeText.textContent = 'Escuro';
-                localStorage.setItem('theme', 'light');
+        // Ajustando o link do WhatsApp dentro do Modal também
+        const zapLink = `https://wa.me/55${paciente.telefone.replace(/\D/g, '')}`;
+        const btnZap = modal.querySelector('.fa-whatsapp').parentElement;
+        btnZap.href = zapLink;
+
+        // Mostrar modal
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+      // ======== fUNCAO D CALENDARIO -- AGENDA =====
+      const gridDias = document.getElementById('grid-dias');
+    const btnSemana = document.getElementById('btn-semana');
+    const btnMes = document.getElementById('btn-mes');
+
+    // DADOS MOCKADOS (Exemplos de agendamentos para o Tooltip)
+    const dadosAgendamentos = {
+        5: { total: 3, horarios: "09:00, 11:00, 15:00" },
+        7: { total: 1, horarios: "10:00" },
+        8: { total: 5, horarios: "Manhã Cheia" },
+        11: { total: 8, horarios: "Dia Inteiro Lotado" }, // Hoje
+        12: { total: 2, horarios: "14:00, 16:00" },
+        13: { total: 0, horarios: "Livre" }
+    };
+
+    function alternarCalendario(tipo) {
+        gridDias.innerHTML = ''; // Limpa a grid
+
+        if (tipo === 'semana') {
+            // Estilização dos botões
+            btnSemana.className = "px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white";
+            btnMes.className = "px-4 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200";
+
+            // Gera 7 dias (Exemplo: Semana do dia 11)
+            const diasSemana = [5, 6, 7, 8, 9, 10, 11]; // Exemplo
+            diasSemana.forEach(dia => {
+                const isHoje = dia === 11;
+                const info = dadosAgendamentos[dia];
+
+                // --- O Poupup (Tooltip) ---
+                let popupHtml = '';
+                if (info && info.total > 0) {
+                    popupHtml = `
+                        <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-40 p-4 bg-gray-900 dark:bg-white text-white dark:text-gray-950 rounded-2xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 pointer-events-none z-50 text-center">
+                            <p class="text-[10px] font-black uppercase tracking-wider">${info.total} Agendamentos</p>
+                            <p class="text-xs mt-1 font-medium opacity-80">${info.horarios}</p>
+                            <div class="absolute top-full left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-900 dark:bg-white rotate-45 -translate-y-1.5"></div>
+                        </div>
+                    `;
+                }
+
+                gridDias.innerHTML += `
+                    <div class="group relative h-16 ${isHoje ? 'bg-gradient-to-br from-blue-500 to-emerald-400 text-white shadow-lg' : 'bg-gray-50 dark:bg-gray-800/50 dark:text-gray-400'} rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:scale-105 transition-all">
+                        ${popupHtml}
+                        <span class="text-xs font-black">${dia}</span>
+                        ${isHoje ? '<span class="text-[8px] uppercase font-bold">Hoje</span>' : ''}
+                    </div>
+                `;
+            });
+        } else {
+            // Estilização dos botões
+            btnMes.className = "px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white";
+            btnSemana.className = "px-4 py-2 rounded-xl text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200";
+
+            // Gera todos os dias (Abril 2026 começa na Quarta)
+            for(let i=1; i<=33; i++) {
+                const diaReal = i - 3;
+                if (i <= 3) {
+                    gridDias.innerHTML += `<div class="h-10 opacity-20 text-xs flex items-center justify-center"></div>`;
+                } else if (diaReal <= 30) {
+                    const isHoje = diaReal === 11;
+                    const info = dadosAgendamentos[diaReal];
+
+                    // --- O Poupup (Tooltip) ---
+                    let popupHtml = '';
+                    if (info && info.total > 0) {
+                        popupHtml = `
+                            <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 w-32 p-3 bg-gray-900 dark:bg-white text-white dark:text-gray-950 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0 pointer-events-none z-50 text-center">
+                                <p class="text-[9px] font-black uppercase">${info.total} Pacientes</p>
+                                <div class="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45 -translate-y-1"></div>
+                            </div>
+                        `;
+                    }
+
+                    gridDias.innerHTML += `
+                        <div class="group relative h-10 ${isHoje ? 'bg-blue-600 text-white' : 'hover:bg-blue-50 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'} rounded-xl flex items-center justify-center text-[11px] font-bold cursor-pointer transition-all">
+                            ${popupHtml}
+                            ${diaReal}
+                        </div>
+                    `;
+                }
             }
-        });
-
-        // Ao carregar a página: manter o que o usuário escolheu antes
-        if (localStorage.getItem('theme') === 'dark') {
-            html.classList.add('dark');
-            themeIcon.classList.replace('fa-moon', 'fa-sun');
-            themeText.textContent = 'Claro';
         }
-        // ============fim dark mode==================
-    </script>
+    }
+
+    // Inicializa como semana
+    alternarCalendario('semana');
+
+
+      // ========= 1. FUNCAO Relógio em Tempo Real =========
+      function atualizarDataHora() {
+          const spanData = document.getElementById('data-hora');
+          if (!spanData) return;
+          const agora = new Date();
+          const formatador = new Intl.DateTimeFormat('pt-BR', {
+              day: '2-digit', month: '2-digit', year: 'numeric',
+              hour: '2-digit', minute: '2-digit', second: '2-digit'
+          });
+          spanData.textContent = formatador.format(agora);
+      }
+      atualizarDataHora();
+      setInterval(atualizarDataHora, 1000);
+
+      // ========= 2. Lógica Principal (Dark Mode e Gráfico) =========
+      document.addEventListener('DOMContentLoaded', () => {
+          const themeBtn = document.getElementById('theme-toggle-btn');
+          const html = document.documentElement;
+          if (!themeBtn) return;
+
+          const themeText = themeBtn.querySelector('span');
+          const themeIcon = themeBtn.querySelector('i');
+
+          // Função de Interface do Botão
+          const updateBtnUI = (isDark) => {
+              if (isDark) {
+                  themeIcon.classList.replace('fa-moon', 'fa-sun');
+                  themeText.textContent = 'Claro';
+              } else {
+                  themeIcon.classList.replace('fa-sun', 'fa-moon');
+                  themeText.textContent = 'Escuro';
+              }
+          };
+
+          // Carregar tema salvo
+          const currentTheme = localStorage.getItem('theme');
+          if (currentTheme === 'dark') {
+              html.classList.add('dark');
+              updateBtnUI(true);
+          }
+
+          // --- Configuração do Gráfico ---
+          const chartOptions = {
+              series: [{ name: 'Atendimentos', data: [12, 19, 15, 25, 10, 8, 5] }],
+              chart: {
+                  type: 'area', height: 300, toolbar: { show: false },
+                  zoom: { enabled: false }, fontFamily: 'Poppins, sans-serif'
+              },
+              colors: ['#3b82f6'],
+              dataLabels: { enabled: false },
+              stroke: { curve: 'smooth', width: 4, colors: ['#10b981'] },
+              fill: { type: 'gradient', gradient: { opacityFrom: 0.45, opacityTo: 0.05 } },
+              grid: { borderColor: html.classList.contains('dark') ? '#1f2937' : '#f1f1f1', strokeDashArray: 4 },
+              xaxis: {
+                  categories: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+                  labels: { style: { colors: '#94a3b8', fontWeight: 600 } }
+              },
+              yaxis: { show: false },
+              tooltip: { theme: html.classList.contains('dark') ? 'dark' : 'light' }
+          };
+
+          const chart = new ApexCharts(document.querySelector("#chart-fluxo"), chartOptions);
+          chart.render();
+
+          // --- Evento de Clique do Botão de Tema ---
+          themeBtn.addEventListener('click', () => {
+              html.classList.toggle('dark');
+              const isDark = html.classList.contains('dark');
+              localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+              // Atualiza o Botão
+              updateBtnUI(isDark);
+
+              // Atualiza o Gráfico para o modo Dark/Light
+              chart.updateOptions({
+                  tooltip: { theme: isDark ? 'dark' : 'light' },
+                  grid: { borderColor: isDark ? '#1f2937' : '#f1f1f1' }
+              });
+          });
+      });
+  </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
   </body>
 </html>
