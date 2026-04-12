@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const pacientesController = require('../controllers/pacientesController');
+// 1. Importe o middleware de autenticação (verifique o caminho correto no seu projeto)
+const auth = require('../middleware/authMiddleware')
 
-// Rotas para a tela de prontuário
-router.get('/', pacientesController.listarPacientes);
-router.get('/:id/prontuario', pacientesController.verProntuario);
-// router.put('/:id', pacientesController.atualizarPaciente); // Para o botão Editar
+// 2. Adicione o 'auth' antes de chamar o controller
+router.get('/', auth, pacientesController.listarPacientes);
+router.get('/:id/prontuario', auth, pacientesController.verProntuario);
 
 module.exports = router;

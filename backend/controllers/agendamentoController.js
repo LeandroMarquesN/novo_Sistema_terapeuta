@@ -25,8 +25,10 @@ exports.criarAgendamento = async (req, res) => {
     data_agendamento, motivo_consulta, origem_indicacao, observacoes
   } = req.body;
 
-  const clinicaId = 1;
-  const membroId = 1;
+  // --- O AJUSTE ESTÁ AQUI ---
+  const clinicaId = req.usuario.clinica_id; // PEGA DO TOKEN
+  const usuarioId = req.usuario.id;         // PEGA DO TOKEN TAMBÉM!
+  // --------------------------
 
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = req.files['anexos'] || [];
@@ -57,8 +59,8 @@ exports.criarAgendamento = async (req, res) => {
     if (pacientesExistentes.length > 0) {
       paciente_id = pacientesExistentes[0].id;
       await connection.query(
-        `UPDATE pacientes SET 
-          telefone = ?, email = ?, peso = ?, altura = ?, 
+        `UPDATE pacientes SET
+          telefone = ?, email = ?, peso = ?, altura = ?,
           idade = ?, tipo_sanguineo = ?, condicoes_preexistentes = ?
          WHERE id = ?`,
         [telefone, email, peso, altura, idade, tipo_sanguineo, condicoesString, paciente_id]
@@ -66,7 +68,7 @@ exports.criarAgendamento = async (req, res) => {
     } else {
       const [novoPacResult] = await connection.query(
         `INSERT INTO pacientes (
-          clinica_id, nome, cpf, email, telefone, data_nascimento, 
+          clinica_id, nome, cpf, email, telefone, data_nascimento,
           idade, tipo_sanguineo, peso, altura, condicoes_preexistentes, foto_perfil
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [clinicaId, nome, cpf, email, telefone, data_nascimento, idade, tipo_sanguineo, peso, altura, condicoesString, fotoPerfilFilename]
@@ -76,14 +78,14 @@ exports.criarAgendamento = async (req, res) => {
 
     const sqlAgendamento = `
       INSERT INTO agendamentos (
-        clinica_id, paciente_id, membro_id, nome, data_agendamento, 
+        clinica_id, paciente_id, usuario_id, nome, data_agendamento,
         tipo_terapia, motivo_consulta, origem_indicacao, status_agendamento,
         peso, altura, data_nascimento, idade, tipo_sanguineo, email, telefone, cpf, condicoes
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const valoresAgendamento = [
-      clinicaId, paciente_id, membroId, nome, data_agendamento,
+      clinicaId, paciente_id, usuarioId, nome, data_agendamento,
       tipo_terapia, motivo_consulta, origem_indicacao, 'aguardando_sinal',
       peso || null, altura || null, data_nascimento || null, idade || null,
       tipo_sanguineo || null, email || null, telefone || null, cpf, condicoesString
@@ -125,7 +127,7 @@ exports.listarAgendamentos = async (req, res) => {
   const clinicaId = 1;
   try {
     const sqlAgendamentos = `
-      SELECT id, paciente_id, nome, cpf, data_agendamento, tipo_terapia, 
+      SELECT id, paciente_id, nome, cpf, data_agendamento, tipo_terapia,
              motivo_consulta, origem_indicacao, status_agendamento,
              peso, altura, data_nascimento, idade, tipo_sanguineo, email, telefone, condicoes
       FROM agendamentos WHERE clinica_id = ? ORDER BY data_agendamento ASC

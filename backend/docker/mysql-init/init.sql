@@ -31,7 +31,15 @@ CREATE TABLE IF NOT EXISTS pacientes (
   clinica_id INT NOT NULL,
   nome VARCHAR(100) NOT NULL,
   cpf VARCHAR(14),
+  email VARCHAR(100), -- Faltava
   telefone VARCHAR(20),
+  data_nascimento DATE, -- Faltava
+  idade INT, -- Faltava
+  tipo_sanguineo VARCHAR(5), -- Faltava
+  peso DECIMAL(5,2), -- Faltava
+  altura DECIMAL(3,2), -- Faltava
+  condicoes_preexistentes TEXT, -- Faltava
+  foto_perfil VARCHAR(255), -- Faltava para a foto do paciente
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_paciente_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -67,22 +75,41 @@ CREATE TABLE IF NOT EXISTS financeiro (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
   paciente_id INT NOT NULL,
-  agendamento_id INT NULL,
+  agendamento_id INT NULL, -- Liga o dinheiro à sessão específica
   tipo ENUM('receita', 'despesa') NOT NULL,
+  descricao VARCHAR(255),
   valor DECIMAL(10,2) NOT NULL,
   data_vencimento DATE NOT NULL,
-  status ENUM('aberto', 'pago', 'atrasado') DEFAULT 'aberto',
-  metodo_pagamento ENUM('pix', 'cartao', 'dinheiro'),
+  data_pagamento DATE NULL,
+  -- STATUS FINANCEIRO (Aberto, Pago, etc)
+  status_pagamento ENUM('aberto', 'pago', 'atrasado', 'estornado', 'cancelado') DEFAULT 'aberto',
+  metodo_pagamento ENUM('pix', 'cartao', 'dinheiro', 'boleto'),
   CONSTRAINT fk_fin_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
+-- 6. Anexos
+CREATE TABLE IF NOT EXISTS anexos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  paciente_id INT NOT NULL,
+  agendamento_id INT NOT NULL,
+  nome_original VARCHAR(255),
+  caminho_servidor VARCHAR(255),
+  mime_type VARCHAR(50),
+  tamanho_bytes INT,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_anexo_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_anexo_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_anexo_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- INSERTS DE TESTE (Corrigidos para a nova estrutura)
 -- Primeiro criamos a clinica
-INSERT IGNORE INTO clinicas (id, nome_clinica, dono_nome, email_master, senha_master) 
+INSERT IGNORE INTO clinicas (id, nome_clinica, dono_nome, email_master, senha_master)
 VALUES (1, 'Clínica Experimental', 'Leandro Marques', 'admin@sistema.com', '123456');
 
 -- Depois o usuário dono vinculado à clinica 1
-INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo) 
+INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo)
 VALUES (1, 'Leandro Marques', 'leandro@teste.com', '123456', 'dono');
