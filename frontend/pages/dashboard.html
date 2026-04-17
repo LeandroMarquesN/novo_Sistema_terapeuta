@@ -908,7 +908,14 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
 
     // 3. Busca de Agendamentos da API
     try {
-        const res = await fetch('http://localhost:3000/api/agendamentos');
+        // AJUSTE AQUI: Adicionando o Header com o Token
+        const res = await fetch('http://localhost:3000/api/agendamentos', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
         if (!res.ok) throw new Error('Erro ao buscar dados da API');
 
         const agendamentos = await res.json();
@@ -924,7 +931,7 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
             }
         }));
 
-        // Adiciona os eventos ao calendário após a renderização inicial
+        // Adiciona os eventos ao calendário
         eventosApi.forEach(evento => calendar.addEvent(evento));
 
     } catch (error) {
