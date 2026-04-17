@@ -1,0 +1,4 @@
+3. Pasta database (ou migrations)
+Você mencionou que tem um arquivo init.sql. Conforme o sistema cresce, você vai adicionar tabelas (ex: financeiro, prontuário).
+
+O que colocar nela: Além do seu init.sql, você pode criar uma subpasta seeds/ para dados iniciais (como uma lista de especialidades médicas) que o sistema precisa ter assim que é instalado.

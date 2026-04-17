@@ -1,0 +1,8 @@
+2. Pasta utils (ou helpers)
+Sabe aquelas funções que você usa em vários lugares? Tipo formatar uma data, validar um CPF ou calcular a idade do paciente com base no nascimento?
+
+O que colocar nela: Pequenos scripts reutilizáveis.
+
+Exemplo: dateFormatter.js, cpfValidator.js.
+
+Vantagem: Evita que você escreva a mesma lógica de validação de CPF em três controllers diferentes.

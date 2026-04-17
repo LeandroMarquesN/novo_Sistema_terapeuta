@@ -15,19 +15,20 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-// =============================================================================
-// 1. CRIAR AGENDAMENTO
-// =============================================================================
 exports.criarAgendamento = async (req, res) => {
+  // --- TRAVA DE SEGURANÇA ---
+  if (!req.usuario) {
+    return res.status(401).json({ error: "Sessão inválida. Por favor, faça login novamente." });
+  }
+
   const {
     nome, cpf, email, telefone, data_nascimento, idade,
     peso, altura, tipo_sanguineo, tipo_terapia,
     data_agendamento, motivo_consulta, origem_indicacao, observacoes
   } = req.body;
 
-  // --- O AJUSTE ESTÁ AQUI ---
-  const clinicaId = req.usuario.clinica_id; // PEGA DO TOKEN
-  const usuarioId = req.usuario.id;         // PEGA DO TOKEN TAMBÉM!
+  const clinicaId = req.usuario.clinica_id;
+  const usuarioId = req.usuario.id;
   // --------------------------
 
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;

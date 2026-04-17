@@ -1,0 +1,6 @@
+4. Pasta validators (Opcional, mas recomendada)
+Antes mesmo do dado chegar no Controller, é bom saber se ele está correto.
+
+O que colocar nela: Esquemas de validação (usando bibliotecas como Joi ou Zod).
+
+Vantagem: Se o usuário esquecer de preencher o nome do paciente, a requisição morre aqui mesmo, antes de gastar processamento no seu banco de dados.

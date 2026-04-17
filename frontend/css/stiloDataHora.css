@@ -1,0 +1,17 @@
+ /* Estilização para a data e hora */
+ #data-hora-container {
+  font-size: 0.9rem;
+  color: #fff;
+  background-color: rgba(10, 73, 140, 0.7);
+  padding: 8px 12px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  margin-right: 15px; /* Espaço entre a data/hora e os botões */
+}
+
+#data-hora-container i {
+  font-size: 1rem;
+}

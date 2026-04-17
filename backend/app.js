@@ -19,6 +19,12 @@ const equipeRoutes = require('./routes/equipeRoutes'); // DECLARADO SÓ UMA VEZ!
 const authRoutes = require('./routes/authRoutes');
 const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
 
+// ADICIONE AQUI: Middleware para desativar o cache e proteger os dados da clínica
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  next();
+});
+
 // --- 2. MAPEAMENTO DAS APIS ---
 app.use('/api/auth', authRoutes);
 
@@ -35,7 +41,17 @@ app.use('/pages', express.static(path.join(__dirname, 'frontend', 'pages')));
 app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));
 app.use('/css', express.static(path.join(__dirname, 'frontend', 'css')));
 app.use('/logo', express.static(path.join(__dirname, 'frontend', 'logo')));
+
+
+
+// Se a pasta ScriptGlobal está dentro de frontend
+app.use('/ScriptGlobal', express.static(path.join(__dirname, 'frontend/ScriptGlobal')));
+
+// 1. Servir os arquivos estáticos da pasta frontend
+app.use(express.static(path.join(__dirname, 'frontend')));
+
 // Rota Completa (Fallback/Apelido)
+
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -62,5 +78,9 @@ app.get('/pacientes', (req, res) => {
 app.get('/equipe', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'pages', 'equipe.html'));
 });
+
+
+
+
 
 module.exports = app;
