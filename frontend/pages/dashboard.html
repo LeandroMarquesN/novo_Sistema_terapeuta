@@ -7,12 +7,15 @@
     <script src="../ScriptGlobal/verifiLog.js"></script>
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/dashBordStyle.css">
     <link rel="stylesheet" href="/css/animacaoBack.css">
     <link rel="stylesheet" href="/css/maquinaEscrever.css">
     <link rel="stylesheet" href="/css/transicaoTela.css">
     <link rel="stylesheet" href="/css/modalPrimeiro Atendi.css">
+    <link rel="stylesheet" href="/css/regendamentoModal.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -739,6 +742,41 @@
         }
         atualizarDataHora();
         setInterval(atualizarDataHora, 1000);
+// ====== Funcao auxiliar do reagendemnto showClinicalAlert =======
+    // /Funcao Auxiliar do reagendamento que faz o modal do reagendamento
+                    function showClinicalAlert(message, type = 'Reagendado Com Sucesso!') {
+                        // 1. Garantir que o container existe
+                        let container = document.querySelector('.clinical-alert-container');
+                        if (!container) {
+                            container = document.createElement('div');
+                            container.className = 'clinical-alert-container';
+                            document.body.appendChild(container);
+                        }
+
+                        // 2. Criar o elemento do alerta
+                        const alert = document.createElement('div');
+                        alert.className = `clinical-alert ${type}`;
+
+                        // Define o ícone baseado no tipo
+                        const icon = type === 'success' ? 'fa-check-circle' :
+                                    type === 'error' ? 'fa-exclamation-triangle' : 'fa-info-circle';
+
+                        alert.innerHTML = `
+                            <i class="fas ${icon} clinical-alert-icon"></i>
+                            <span class="clinical-alert-message">${message}</span>
+                        `;
+
+                        container.appendChild(alert);
+
+                        // 3. Animação de entrada (pequeno delay para o CSS aplicar a transição)
+                        setTimeout(() => alert.classList.add('show'), 10);
+
+                        // 4. Auto-remover após 4 segundos
+                        setTimeout(() => {
+                            alert.classList.remove('show');
+                            setTimeout(() => alert.remove(), 500); // Remove do DOM após a animação de saída
+                        }, 4000);
+                    }
 
 // ====== funcao maquina de escrever ===========
         // 1. Pega os dados que o login salvou no navegador
@@ -973,6 +1011,7 @@ async function inicializarCalendario() {
 
 
 
+
                         // ==========================================================
                         // FUNÇÃO PARA SALVAR O REAGENDAMENTO (COLE AQUI)
                         // ==========================================================
@@ -1030,34 +1069,52 @@ async function inicializarCalendario() {
                     });
 
 
+
+
                             // ============= Modal Primeiro Atendimento===================
-function mostrarModalPrimeiroAtendimento(agendamentos) {
+                            function mostrarModalPrimeiroAtendimento(agendamentos) {
     const modalEl = document.getElementById('modalAtendimento');
     const mensagemEl = document.getElementById('mensagemAtendimento');
     if (!modalEl || !mensagemEl) return;
 
+    // 1. Pegar a data de hoje no formato YYYY-MM-DD (Horário de Brasília)
     const agora = new Date();
-    const hojeData = agora.toISOString().split('T')[0];
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    const hojeData = `${ano}-${mes}-${dia}`;
 
-    // 1. Filtro Inteligente: Mesmo dia E horário futuro (ou agora)
+    // 2. Filtro Inteligente com blindagem de fuso
     const agendamentosValidos = agendamentos.filter(a => {
-        const dataAtendimento = new Date(a.data_agendamento);
+        // Criamos a data do atendimento limpando qualquer resquício de fuso ISO
+        const dataAtendimento = new Date(a.data_agendamento.replace('T', ' ').replace('Z', ''));
+
         const eHoje = a.data_agendamento.startsWith(hojeData);
-        const eFuturo = dataAtendimento >= agora; // Se for 18:01 e o agendamento era 18:00, eFuturo será false
+
+        // Comparamos o horário real. Se agora são 21:54 e o Matheus é 22:00, eFuturo será TRUE.
+        const eFuturo = dataAtendimento >= agora;
 
         return eHoje && eFuturo;
     });
 
     if (agendamentosValidos.length > 0) {
-        // Ordena para garantir que o mais próximo seja o primeiro
-        agendamentosValidos.sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
+        // Ordenação garantida (do mais cedo para o mais tarde)
+        agendamentosValidos.sort((a, b) => {
+            const dA = new Date(a.data_agendamento.replace('T', ' ').replace('Z', ''));
+            const dB = new Date(b.data_agendamento.replace('T', ' ').replace('Z', ''));
+            return dA - dB;
+        });
 
         const primeiro = agendamentosValidos[0];
-        const dataAtend = new Date(primeiro.data_agendamento);
+
+        // Criar a data para exibição sem erro de fuso
+        const dataAtend = new Date(primeiro.data_agendamento.replace('T', ' ').replace('Z', ''));
         const horaAtendFormatada = dataAtend.toLocaleTimeString('pt-BR', {
             hour: '2-digit',
             minute: '2-digit'
         });
+
+        // ... resto da sua lógica de saudação e máquina de escrever
 
         // Lógica de Saudação
         const horaAtual = agora.getHours();
