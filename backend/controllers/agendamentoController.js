@@ -21,11 +21,20 @@ exports.criarAgendamento = async (req, res) => {
     return res.status(401).json({ error: "Sessão inválida. Por favor, faça login novamente." });
   }
 
-  const {
+  // 1. Mude de const para let para podermos alterar o valor
+  let {
     nome, cpf, email, telefone, data_nascimento, idade,
     peso, altura, tipo_sanguineo, tipo_terapia,
     data_agendamento, motivo_consulta, origem_indicacao, observacoes
   } = req.body;
+
+  // 2. A "blindagem" contra o fuso horário (UTC)
+  if (data_agendamento) {
+    // Se vier 2026-04-20T17:01, vira 2026-04-20 17:01:00
+    // O .split('.')[0] remove milissegundos se existirem
+    data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
+  }
+  // ----------------------------------------------------
 
   const clinicaId = req.usuario.clinica_id;
   const usuarioId = req.usuario.id;
@@ -49,8 +58,9 @@ exports.criarAgendamento = async (req, res) => {
 
   const connection = await db.getConnection();
   try {
+    // FORÇA A SESSÃO DO BANCO A USAR O HORÁRIO DE BRASÍLIA
+    await connection.query("SET time_zone = '-03:00'");
     await connection.beginTransaction();
-
     let paciente_id;
     const [pacientesExistentes] = await connection.query(
       'SELECT id FROM pacientes WHERE cpf = ? AND clinica_id = ?',
@@ -125,7 +135,9 @@ exports.criarAgendamento = async (req, res) => {
 // 2. LISTAR AGENDAMENTOS
 // =============================================================================
 exports.listarAgendamentos = async (req, res) => {
-  const clinicaId = 1;
+  const clinicaId = req.usuario.clinica_id;
+
+  console.log(`Buscando agendamentos para a clínica do usuário: ${clinicaId}`);
   try {
     const sqlAgendamentos = `
       SELECT id, paciente_id, nome, cpf, data_agendamento, tipo_terapia,
@@ -158,7 +170,7 @@ exports.listarAgendamentos = async (req, res) => {
 // =============================================================================
 exports.deletarAgendamento = async (req, res) => {
   const connection = await db.getConnection();
-  const clinicaId = 1;
+  const clinicaId = req.usuario.clinica_id;
   try {
     const { id } = req.params;
     const [agendamento] = await connection.query(
@@ -187,7 +199,7 @@ exports.deletarAgendamento = async (req, res) => {
 // =============================================================================
 exports.atualizarAgendamentoCompleto = async (req, res) => {
   const agendamentoId = req.params.id;
-  const clinicaId = 1;
+  const clinicaId = req.usuario.clinica_id;
   const { nome, cpf, email, telefone, data_nascimento, idade, peso, altura, tipo_sanguineo, tipo_terapia, data_agendamento, motivo_consulta, origem_indicacao, observacoes } = req.body;
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = req.files['anexos'] || [];
@@ -225,7 +237,7 @@ exports.atualizarAgendamentoCompleto = async (req, res) => {
 // =============================================================================
 exports.reagendarAgendamento = async (req, res) => {
   const agendamentoId = req.params.id;
-  const clinicaId = 1;
+  const clinicaId = req.usuario.clinica_id;
   let { data_agendamento } = req.body;
 
   if (data_agendamento.includes('T')) {

@@ -886,10 +886,18 @@ document.querySelector('form').addEventListener('submit', function(e) {
 
     // Função para carregar agendamentos na tabela
     async function carregarAgendamentos() {
+
       const tabelaBody = document.getElementById('tabelaAgendamentos');
       tabelaBody.innerHTML = '<tr><td colspan="4" class="text-center">Carregando agendamentos...</td></tr>';
       try {
-        const resposta = await fetch('/api/agendamentos');
+        // CORREÇÃO: O token deve ser passado dentro do objeto de configuração do fetch
+        const resposta = await fetch('/api/agendamentos', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+
         if (!resposta.ok) {
             throw new Error(`Erro HTTP: ${resposta.status}`);
         }
@@ -904,7 +912,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>${evento.nome || 'N/A'}</td>
-            <td>${new Date(evento.data_agendamento).toLocaleString('pt-BR')}</td>
+            <td>${new Date(evento.data_agendamento.replace('Z', '').replace('T', ' ')).toLocaleString('pt-BR')}</td>
             <td>${evento.tipo_terapia || 'N/A'}</td>
             <td>
               <button class="btn btn-danger btn-sm" onclick="excluirAgendamento('${evento.id}')">
@@ -926,7 +934,10 @@ document.querySelector('form').addEventListener('submit', function(e) {
       if (result) {
         try {
           const resposta = await fetch(`/api/agendamentos/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
           });
           if (!resposta.ok) {
             const errorText = await resposta.text();
@@ -1070,12 +1081,18 @@ document.querySelector('form').addEventListener('submit', function(e) {
           // O melhor é criar um FormData do zero.
           const finalFormData = new FormData();
 
-          // Adicionar os campos de texto
           for (const pair of formData.entries()) {
-            // Ignorar os campos de arquivo para tratá-los separadamente
-            if (pair[0] !== 'anexos[]') {
-              finalFormData.append(pair[0], pair[1]);
-            }
+              if (pair[0] !== 'anexos[]') {
+                  let valor = pair[1];
+
+                  // Se o campo for a data, garantimos que ela vá como texto puro
+                  if (pair[0] === 'data_agendamento' && valor) {
+                      // Isso remove qualquer tentativa do navegador de colocar fuso horário
+                      valor = valor.replace('Z', '').replace('T', ' ');
+                  }
+
+                  finalFormData.append(pair[0], valor);
+              }
           }
 
           const errors = [];

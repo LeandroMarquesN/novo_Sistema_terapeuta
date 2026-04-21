@@ -5,12 +5,14 @@
     <title>Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="../ScriptGlobal/verifiLog.js"></script>
+    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/dashBordStyle.css">
     <link rel="stylesheet" href="/css/animacaoBack.css">
     <link rel="stylesheet" href="/css/maquinaEscrever.css">
     <link rel="stylesheet" href="/css/transicaoTela.css">
+    <link rel="stylesheet" href="/css/modalPrimeiro Atendi.css">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -483,7 +485,7 @@
 
     <div class="container-fluid mt-5">
         <div class="text-center mb-4 fade-in-element">
-            <h1 id="boasVindas" class="fs-2 fw-bold">Bem-vinda!</h1>
+            <h1 id="boasVindas" class="fs-2 fw-bold" style="min-height: 1.2em;"></h1>
             <p class="fs-5">Você está no sistema Clinico</p>
         </div>
 
@@ -513,7 +515,7 @@
             <div id="calendar"></div>
         </div>
     </div>
-
+<!-- ----modal de reagendamento -->
     <div class="modal fade" id="modalReagendamento" tabindex="-1" aria-labelledby="modalReagendamentoLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -540,24 +542,34 @@
             </div>
         </div>
     </div>
-<!-- modalque fala do primeiro atendimento do dia -->
-    <div class="modal fade" id="modalAtendimento" tabindex="-1" aria-labelledby="modalAtendimentoLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalAtendimentoLabel">Seu Primeiro Atendimento do Dia</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- modal de fala do primeiro atendimento do dia -->
+<div class="modal fade" id="modalAtendimento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content shadow-lg">
+            <div style="height: 5px; background: #87ceeb;"></div>
+
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3">
+                    <div class="display-5 text-info animate__animated animate__fadeIn">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
                 </div>
-                <div class="modal-body">
-                    <p id="mensagemAtendimento" class="fs-5"></p>
+                <h5 class="fw-bold mb-3" style="color: #4682b4;">Agenda do Momento</h5>
+
+                <div class="p-3 bg-light-custom rounded-4">
+                    <p id="mensagemAtendimento" class="fs-5 mb-0 text-dark" style="min-height: 3.5em;"></p>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Entendido</button>
-                </div>
+            </div>
+
+            <div class="modal-footer border-0 pb-4 d-flex justify-content-center">
+                <button type="button" class="btn btn-info text-white px-5 shadow-sm" data-bs-dismiss="modal" style="border-radius: 50px; background-color: #5f9ea0; border: none;">
+                    Ok, prosseguir
+                </button>
             </div>
         </div>
     </div>
-
+</div>
+<!-- modal da lua -->
     <div class="modal fade" id="modalLuas" tabindex="-1" aria-labelledby="modalLuasLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -574,7 +586,7 @@
             </div>
         </div>
     </div>
-
+<!-- modal do paciente -->
     <div class="modal fade" id="modalPaciente" tabindex="-1" aria-labelledby="modalPacienteLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -634,7 +646,7 @@
             </div>
         </div>
     </div>
-
+<!-- ---moda visualizador de anexos ----- -->
     <div class="modal fade" id="modalVisualizarAnexo" tabindex="-1" aria-labelledby="modalVisualizarAnexoLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered" id="dialogVisualizarAnexo">
             <div class="modal-content">
@@ -738,42 +750,55 @@ if (!token || !usuarioLogado) {
     window.location.href = '/login';
 }
 
+// 1. A Função Máquina de Escrever (Protegida contra atropelos)
 function escreverTextoComMaquinaEscrever(texto, elementoId, callback) {
     const elemento = document.getElementById(elementoId);
+    if (!elemento) return;
+
     elemento.textContent = "";
     let i = 0;
-    const intervalo = setInterval(() => {
+
+    if (window.maquinaIntervalo) clearInterval(window.maquinaIntervalo);
+
+    window.maquinaIntervalo = setInterval(() => {
         if (i < texto.length) {
             elemento.textContent += texto.charAt(i);
             i++;
         } else {
-            clearInterval(intervalo);
-            if (callback) callback(); // Executa o ícone após o texto
+            clearInterval(window.maquinaIntervalo);
+            if (callback) callback();
         }
-    }, 50); // Velocidade da digitação
+    }, 50);
 }
 
-// 2. Lógica de Saudação (Masculino/Feminino)
-const primeiroNome = usuarioLogado.trim().split(' ')[0].toLowerCase();
-const terminaComA = primeiroNome.endsWith('a');
+// 2. Definindo a saudação neutra por horário
+const hora = new Date().getHours();
+let saudacao;
 
-const saudacaoBase = terminaComA ? "Bem-vinda, " : "Bem-vindo, ";
-const textoCompleto = `${saudacaoBase}${usuarioLogado}`;
+if (hora >= 5 && hora < 12) saudacao = "Bom dia";
+else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
+else saudacao = "Boa noite";
 
-// 3. Executa a animação
+// usuarioLogado deve vir do seu sistema de Auth (ex: localStorage ou Token)
+const textoCompleto = `${saudacao}, ${usuarioLogado}!`;
+
+// 3. Execução
 escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
-    // Adiciona o ícone suavemente após o texto terminar
-    const iconeHTML = terminaComA
-        ? ' <i class="fa-solid fa-user-nurse" style="color: #2252b9;"></i>'
-        : ' <i class="fa-solid fa-user-doctor" style="color: #2252b9;"></i>';
-
+    // Adiciona um ícone neutro de saúde no final
+    const iconeHTML = ' <i class="fa-solid fa-stethoscope" style="color: #2252b9;"></i>';
     document.getElementById('boasVindas').innerHTML += iconeHTML;
 });
 // =========  Carrega e atualiza agendamento ================
 
-        document.addEventListener('DOMContentLoaded', async function () {
-            await carregarEAtualizarAgendamentos();
-            inicializarCalendario();
+        document.addEventListener('DOMContentLoaded', () => {
+            // Dispara as duas funções ao mesmo tempo (em paralelo)
+            // Isso deixa o dashboard muito mais ágil
+            Promise.all([
+                carregarEAtualizarAgendamentos(),
+                inicializarCalendario()
+            ]).catch(err => {
+                console.error("Erro na inicialização do Dashboard:", err);
+            });
         });
 // ==========================================================
 // ============= Funcao Calendario ==========================
@@ -793,9 +818,9 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
         }
 
         // 2. Inicialização do Calendário
-        async function inicializarCalendario() {
+async function inicializarCalendario() {
     const calendarEl = document.getElementById('calendar');
-    if (!calendarEl) return; // Garante que o elemento existe
+    if (!calendarEl) return;
 
     const anoAtual = new Date().getFullYear();
     const eventosLuas = [];
@@ -806,9 +831,7 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
             const data = new Date(anoAtual, m, d);
             if (data.getMonth() !== m) break;
 
-            // Certifique-se que obterFaseLunar está definida globalmente
-            const infoLua = typeof obterFaseLunar === 'function' ? obterFaseLunar(data) : null;
-
+            const infoLua = typeof obtenerFaseLunar === 'function' ? obtenerFaseLunar(data) : null;
             if (infoLua) {
                 eventosLuas.push({
                     title: infoLua.emoji,
@@ -831,24 +854,19 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
         events: eventosLuas,
 
         eventClick: function(info) {
-            // Se for clique na Lua, ignora
             if (info.event.extendedProps.tipo === 'LUA') return;
 
             const evento = info.event;
             const dados = evento.extendedProps;
             const originalData = dados.originalData || {};
 
-            // Preenche os dados no modal de ações
             document.getElementById('tituloModalAcoes').innerText = `Paciente: ${evento.title}`;
             document.getElementById('infoResumoAgendamento').innerHTML = `Agendamento para: <strong>${new Date(evento.start).toLocaleString('pt-BR')}</strong>`;
 
             // Ação: Ver Informações
             document.getElementById('btnVerInfo').onclick = function() {
-                const modalAcoesEl = document.getElementById('modalAcoesPaciente');
-                const modalAcoesBS = bootstrap.Modal.getInstance(modalAcoesEl);
+                const modalAcoesBS = bootstrap.Modal.getInstance(document.getElementById('modalAcoesPaciente'));
                 if (modalAcoesBS) modalAcoesBS.hide();
-
-                // Abre o modal de detalhes do paciente
                 if (typeof abrirModalPaciente === 'function') {
                     abrirModalPaciente(encodeURIComponent(JSON.stringify(originalData)));
                 }
@@ -863,14 +881,11 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
 
             // Ação: Reagendar
             document.getElementById('btnReagendarModal').onclick = function() {
-                const modalAcoesEl = document.getElementById('modalAcoesPaciente');
-                const modalAcoesBS = bootstrap.Modal.getInstance(modalAcoesEl);
+                const modalAcoesBS = bootstrap.Modal.getInstance(document.getElementById('modalAcoesPaciente'));
                 if (modalAcoesBS) modalAcoesBS.hide();
 
-                // Captura o ID de forma robusta
                 const idParaReagendar = evento.id || (originalData ? originalData.id : null);
-
-                if (!idParaReagendar || idParaReagendar === "undefined") {
+                if (!idParaReagendar) {
                     alert("Erro: O ID do agendamento não foi encontrado.");
                     return;
                 }
@@ -878,14 +893,10 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
                 document.getElementById('reagendarId').value = idParaReagendar;
                 document.getElementById('reagendarPaciente').value = evento.title;
                 document.getElementById('reagendarDataHora').value = "";
-
-                const modalReagendar = new bootstrap.Modal(document.getElementById('modalReagendamento'));
-                modalReagendar.show();
+                new bootstrap.Modal(document.getElementById('modalReagendamento')).show();
             };
 
-            // Mostra o modal de escolha
-            const modalAcoes = new bootstrap.Modal(document.getElementById('modalAcoesPaciente'));
-            modalAcoes.show();
+            new bootstrap.Modal(document.getElementById('modalAcoesPaciente')).show();
         },
 
         eventDidMount: function(info) {
@@ -906,308 +917,380 @@ escreverTextoComMaquinaEscrever(textoCompleto, 'boasVindas', () => {
 
     calendar.render();
 
-    // 3. Busca de Agendamentos da API
+    // 3. Busca de Agendamentos da API (Agora corretamente dentro da função)
     try {
-        // AJUSTE AQUI: Adicionando o Header com o Token
-        const res = await fetch('http://localhost:3000/api/agendamentos', {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+
+        const res = await fetch('/api/agendamentos', {
             method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!res.ok) throw new Error('Erro ao buscar dados da API');
+        if (!res.ok) throw new Error(`Erro: ${res.status}`);
 
         const agendamentos = await res.json();
-
         const eventosApi = agendamentos.map(item => ({
             id: String(item.id),
             title: item.nome,
             start: item.data_agendamento,
             color: '#28a745',
-            extendedProps: {
-                tipo: 'PACIENTE',
-                originalData: item
-            }
+            extendedProps: { tipo: 'PACIENTE', originalData: item }
         }));
 
-        // Adiciona os eventos ao calendário
+        // Remove apenas os pacientes (mantém as luas) e adiciona os novos
+        calendar.getEvents().forEach(ev => {
+            if (ev.extendedProps.tipo === 'PACIENTE') ev.remove();
+        });
+
         eventosApi.forEach(evento => calendar.addEvent(evento));
 
     } catch (error) {
-        console.error("Erro ao carregar agendamentos no calendário:", error);
+        console.error("Erro ao carregar agendamentos:", error);
+    }
+} // <--- A função agora termina AQUI.
+
+
+                        // Função para abrir os detalhes do paciente (Ver Informações)
+                        function abrirModalPaciente(dadosEncoded) {
+                            const dados = JSON.parse(decodeURIComponent(dadosEncoded));
+
+                            // Preenche os campos do modal de detalhes
+                            document.getElementById('infoNome').innerText = dados.nome || 'N/A';
+                            document.getElementById('infoDataNascimento').innerText = dados.data_nascimento || 'N/A';
+                            document.getElementById('infoIdade').innerText = dados.idade || 'N/A';
+                            document.getElementById('infoPeso').innerText = dados.peso || 'N/A';
+                            document.getElementById('infoAltura').innerText = dados.altura || 'N/A';
+                            document.getElementById('infoTipoSanguineo').innerText = dados.tipo_sanguineo || 'N/A';
+                            document.getElementById('infoTipoTerapia').innerText = dados.tipo_terapia || 'N/A';
+                            document.getElementById('infoDataAgendamento').innerText = new Date(dados.data_agendamento).toLocaleString('pt-BR');
+                            document.getElementById('infoMotivoConsulta').innerText = dados.motivo_consulta || 'N/A';
+                            document.getElementById('infoObservacoes').innerText = dados.observacoes || 'N/A';
+
+                            const modal = new bootstrap.Modal(document.getElementById('modalPaciente'));
+                            modal.show();
+                        }
+
+
+
+                        // ==========================================================
+                        // FUNÇÃO PARA SALVAR O REAGENDAMENTO (COLE AQUI)
+                        // ==========================================================
+                        document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
+                        event.preventDefault();
+
+                        const id = document.getElementById('reagendarId').value;
+                        const novaDataHora = document.getElementById('reagendarDataHora').value;
+
+                        if (!id || id === "undefined" || !novaDataHora) {
+                            alert('Por favor, selecione uma data e hora válidas.');
+                            return;
+                        }
+
+                        // Desabilita o botão para evitar cliques duplos enquanto salva
+                        const btnSalvar = event.target.querySelector('button[type="submit"]');
+                        if (btnSalvar) btnSalvar.disabled = true;
+
+                        try {
+                            const response = await fetch(`/api/agendamentos/${id}`, { // URL Relativa
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                },
+                                body: JSON.stringify({ data_agendamento: novaDataHora })
+                            });
+                            if (response.ok) {
+                        showClinicalAlert('Sucesso!', 'Agendamento reagendado com sucesso!', 'success');
+
+                        // FECHAMENTO INTELIGENTE:
+                        const modalElement = document.getElementById('modalReagendamento');
+                        const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                        if (modalInstance) modalInstance.hide();
+
+                        // ATUALIZAÇÃO SEM PISCAR A TELA:
+                        if (typeof carregarEAtualizarAgendamentos === 'function') {
+                            await carregarEAtualizarAgendamentos();
+                        }
+                        if (typeof inicializarCalendario === 'function') {
+                            await inicializarCalendario();
+                        }
+
+                            } else {
+                                const error = await response.json();
+                                alert('Erro ao reagendar: ' + (error.message || 'Erro no servidor'));
+                            }
+                        } catch (error) {
+                            console.error('Erro ao reagendar:', error);
+                            alert('Erro de conexão com o servidor.');
+                        } finally {
+                            // Reabilita o botão independente de dar erro ou sucesso
+                            if (btnSalvar) btnSalvar.disabled = false;
+                        }
+                    });
+
+
+                            // ============= Modal Primeiro Atendimento===================
+function mostrarModalPrimeiroAtendimento(agendamentos) {
+    const modalEl = document.getElementById('modalAtendimento');
+    const mensagemEl = document.getElementById('mensagemAtendimento');
+    if (!modalEl || !mensagemEl) return;
+
+    const agora = new Date();
+    const hojeData = agora.toISOString().split('T')[0];
+
+    // 1. Filtro Inteligente: Mesmo dia E horário futuro (ou agora)
+    const agendamentosValidos = agendamentos.filter(a => {
+        const dataAtendimento = new Date(a.data_agendamento);
+        const eHoje = a.data_agendamento.startsWith(hojeData);
+        const eFuturo = dataAtendimento >= agora; // Se for 18:01 e o agendamento era 18:00, eFuturo será false
+
+        return eHoje && eFuturo;
+    });
+
+    if (agendamentosValidos.length > 0) {
+        // Ordena para garantir que o mais próximo seja o primeiro
+        agendamentosValidos.sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
+
+        const primeiro = agendamentosValidos[0];
+        const dataAtend = new Date(primeiro.data_agendamento);
+        const horaAtendFormatada = dataAtend.toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        // Lógica de Saudação
+        const horaAtual = agora.getHours();
+        let saudacao = (horaAtual >= 5 && horaAtual < 12) ? "Bom dia" :
+                       (horaAtual >= 12 && horaAtual < 18) ? "Boa tarde" : "Boa noite";
+
+        const usuarioLogado = localStorage.getItem('nomeUsuario') || 'Doutor(a)';
+        const mensagem = `${saudacao}, ${usuarioLogado}! Seu próximo atendimento é com ${primeiro.nome}, às ${horaAtendFormatada}.`;
+
+        const modalAtendimento = new bootstrap.Modal(modalEl);
+        modalAtendimento.show();
+
+        // 2. Aciona sua função de máquina de escrever
+        setTimeout(() => {
+            escreverTextoComMaquinaEscrever(mensagem, 'mensagemAtendimento', () => {
+                const iconeHTML = ' <i class="fa-solid fa-clock-rotate-left" style="color: #007bff;"></i>';
+                mensagemEl.innerHTML += iconeHTML;
+            });
+        }, 600);
     }
 }
 
-        // Função para abrir os detalhes do paciente (Ver Informações)
-        function abrirModalPaciente(dadosEncoded) {
-            const dados = JSON.parse(decodeURIComponent(dadosEncoded));
-
-            // Preenche os campos do modal de detalhes
-            document.getElementById('infoNome').innerText = dados.nome || 'N/A';
-            document.getElementById('infoDataNascimento').innerText = dados.data_nascimento || 'N/A';
-            document.getElementById('infoIdade').innerText = dados.idade || 'N/A';
-            document.getElementById('infoPeso').innerText = dados.peso || 'N/A';
-            document.getElementById('infoAltura').innerText = dados.altura || 'N/A';
-            document.getElementById('infoTipoSanguineo').innerText = dados.tipo_sanguineo || 'N/A';
-            document.getElementById('infoTipoTerapia').innerText = dados.tipo_terapia || 'N/A';
-            document.getElementById('infoDataAgendamento').innerText = new Date(dados.data_agendamento).toLocaleString('pt-BR');
-            document.getElementById('infoMotivoConsulta').innerText = dados.motivo_consulta || 'N/A';
-            document.getElementById('infoObservacoes').innerText = dados.observacoes || 'N/A';
-
-            const modal = new bootstrap.Modal(document.getElementById('modalPaciente'));
-            modal.show();
-        }
 
 
 
-            // ==========================================================
-            // FUNÇÃO PARA SALVAR O REAGENDAMENTO (COLE AQUI)
-            // ==========================================================
-            document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
-                event.preventDefault();
+                                // =========== mostral modal das luas ===============
 
-                const id = document.getElementById('reagendarId').value;
-                const novaDataHora = document.getElementById('reagendarDataHora').value;
+                                function mostrarModalLuas() {
+                                    const modalLuas = new bootstrap.Modal(document.getElementById('modalLuas'));
+                                    const mensagemLuasEl = document.getElementById('mensagemLuas');
 
-                if (!id || !novaDataHora) {
-                    alert('Por favor, selecione uma data e hora válidas.');
-                    return;
-                }
+                                    const dataAtual = new Date();
+                                    const mesAtual = dataAtual.getMonth();
+                                    const anoAtual = dataAtual.getFullYear();
 
-                try {
-                    const response = await fetch(`http://localhost:3000/api/agendamentos/${id}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ data_agendamento: novaDataHora })
-                    });
+                                    const luasDoMes = [
+                                        { fase: 'Nova', data: new Date(anoAtual, mesAtual, 6) },
+                                        { fase: 'Crescente', data: new Date(anoAtual, mesAtual, 13) },
+                                        { fase: 'Cheia', data: new Date(anoAtual, mesAtual, 21) },
+                                        { fase: 'Minguante', data: new Date(anoAtual, mesAtual, 28) }
+                                    ];
 
-                    if (response.ok) {
-                        alert('Agendamento reagendado com sucesso!');
-                        // Fecha o modal e recarrega a página para atualizar o calendário
-                        location.reload();
-                    } else {
-                        const error = await response.json();
-                        alert('Erro ao reagendar: ' + (error.message || response.statusText));
-                    }
-                } catch (error) {
-                    console.error('Erro ao reagendar:', error);
-                    alert('Erro de conexão com o servidor.');
-                }
-            });
+                                    let mensagem = "As fases da lua para este mês são:\n\n";
+                                    luasDoMes.forEach(lua => {
+                                        mensagem += `Lua ${lua.fase} - ${lua.data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n`;
+                                    });
+
+                                    escreverTextoComMaquinaEscrever(mensagem, 'mensagemLuas');
+                                }
+                                // ======= funçãode botaopara voltar ao  topo ======
+
+                                function scrollToTop() {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+
+                                // ======================FUNCAO ABRIRI ANEXOS============================
+                                function abrirModalAnexo(filename) {
+                                    const anexoContainer = document.getElementById('anexo-container');
+                                    anexoContainer.innerHTML = '';
+                                    const url = `/uploads/${filename}`;
+                                    const extensao = filename.split('.').pop().toLowerCase();
+
+                                    if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(extensao)) {
+                                        anexoContainer.innerHTML = `<img src="${url}" class="img-fluid" alt="Anexo do Paciente">`;
+                                    } else if (extensao === 'pdf') {
+                                        anexoContainer.innerHTML = `<embed src="${url}" type="application/pdf" width="100%" height="600px" />`;
+                                    } else {
+                                        anexoContainer.innerHTML = `<p>Tipo de arquivo não suportado para visualização embutida. <a href="${url}" target="_blank">Clique aqui para baixar.</a></p>`;
+                                    }
+
+                                    const modalVisualizarAnexo = new bootstrap.Modal(document.getElementById('modalVisualizarAnexo'));
+                                    modalVisualizarAnexo.show();
+                                }
+
+                                // ------ FUNCAO ABRIR MODAL PACIENTE -------
+                                function abrirModalPaciente(agendamentoJson) {
+                                    try {
+                                        const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
+
+                                        const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
+
+                                        document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
+                                        document.getElementById('infoDataNascimento').textContent = agendamento.data_nascimento ? new Date(agendamento.data_nascimento).toLocaleDateString('pt-BR') : 'N/A';
+                                        document.getElementById('infoIdade').textContent = agendamento.idade || 'N/A';
+                                        document.getElementById('infoPeso').textContent = agendamento.peso ? `${agendamento.peso} kg` : 'N/A';
+                                        document.getElementById('infoAltura').textContent = agendamento.altura ? `${agendamento.altura} cm` : 'N/A';
+                                        document.getElementById('infoTipoSanguineo').textContent = agendamento.tipo_sanguineo || 'N/A';
+                                        document.getElementById('infoTipoTerapia').textContent = agendamento.tipo_terapia || 'N/A';
+                                        document.getElementById('infoMotivoConsulta').textContent = agendamento.motivo_consulta || 'N/A';
+                                        document.getElementById('infoOrigemIndicacao').textContent = agendamento.origem_indicacao || 'N/A';
+                                        document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
+                                        document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
+
+                                        const infoAnexo = document.getElementById('infoAnexo');
+                                        let anexosHtml = '';
+
+                                        if (agendamento.anexos && agendamento.anexos.length > 0) {
+                                            agendamento.anexos.forEach(anexo => {
+                                                anexosHtml += `<div><a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a></div>`;
+                                            });
+                                            infoAnexo.innerHTML = anexosHtml;
+                                        } else {
+                                            infoAnexo.textContent = 'N/A';
+                                        }
+
+                                        const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        });
+                                        document.getElementById('infoDataAgendamento').textContent = dataFormatada;
+
+                                        modalPaciente.show();
+                                        } catch (e) {
+                                            console.error('Erro ao abrir modal do paciente:', e);
+                                        }
+                                }
+                                // ---- FIM ATENDER AGENDAMENTO -----
+                                async function atenderAgendamento(agendamentoJson) {
+                                    try {
+                                        const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
+                                        sessionStorage.setItem("atendimento", JSON.stringify(agendamento));
+                                        window.location.href = "atendimento.html";
+                                    } catch (error) {
+                                        console.error("Erro ao iniciar atendimento:", error);
+                                        alert("Não foi possível iniciar o atendimento.");
+                                    }
+                                }
+
+                                function abrirModalReagendamento(agendamentoJson) {
+                                    try {
+                                        const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
+                                        document.getElementById('reagendarId').value = agendamento.id;
+                                        document.getElementById('reagendarPaciente').value = agendamento.nome;
+                                        const modalReagendamento = new bootstrap.Modal(document.getElementById('modalReagendamento'));
+                                        modalReagendamento.show();
+                                    } catch (error) {
+                                        console.error('Erro ao abrir o modal de reagendamento:', error);
+                                    }
+                                }
+
+                            //    =========  Funcao reagendamento ============
+                            document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
+                            event.preventDefault();
+
+                            const id = document.getElementById('reagendarId').value;
+                            const novaDataHora = document.getElementById('reagendarDataHora').value;
+
+                            if (!id || !novaDataHora) {
+                                alert('Por favor, selecione uma data e hora válidas.');
+                                return;
+                            }
+
+                            try {
+                                // Mudança para URL relativa (essencial para Docker/Produção)
+                                const response = await fetch(`/api/agendamentos/${id}`, {
+                                    method: 'PUT',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                    },
+                                    body: JSON.stringify({ data_agendamento: novaDataHora })
+                                });
+
+                                if (response.ok) {
+                                    alert('✅ Reagendamento realizado com sucesso!');
+
+                                    // Fechamento seguro do modal
+                                    const modalElement = document.getElementById('modalReagendamento');
+                                    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+                                    if (modalInstance) {
+                                        modalInstance.hide();
+                                    }
+
+                                    // Recarrega a tabela e o calendário para atualizar a visão do médico
+                                    if (typeof carregarEAtualizarAgendamentos === 'function') {
+                                        carregarEAtualizarAgendamentos();
+                                    }
+                                    if (typeof inicializarCalendario === 'function') {
+                                        inicializarCalendario();
+                                    }
+
+                                } else {
+                                    // Tenta ler a mensagem de erro vinda do backend
+                                    const errorData = await response.json().catch(() => ({}));
+                                    alert('❌ Erro ao reagendar: ' + (errorData.erro || errorData.mensagem || 'Erro desconhecido no servidor.'));
+                                }
+                            } catch (error) {
+                                console.error('Erro ao reagendar agendamento:', error);
+                                alert('Erro de conexão. Verifique se o servidor está rodando.');
+                            }
+                        });
 
 
-// ============= Modal Primeiro Atendimento===================
+                                                    function atualizarContagemRegressiva(agendamentos) {
+                                                        const agora = new Date().getTime();
+                                                        const linhas = document.querySelectorAll('#tabelaAgendamentos tr');
+                                                        linhas.forEach((tr, index) => {
+                                                            const agendamento = agendamentos[index];
+                                                            if (!agendamento) return;
+                                                            const timestamp = new Date(agendamento.data_agendamento).getTime();
+                                                            const diferenca = timestamp - agora;
+                                                            const cell = tr.querySelector('.countdown-cell');
+                                                            if (diferenca > 0) {
+                                                                const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+                                                                const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                                                const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
+                                                                const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
+                                                                let texto = "";
+                                                                if (dias > 0) texto += `${dias}d `;
+                                                                if (horas > 0) texto += `${horas}h `;
+                                                                if (minutos > 0) texto += `${minutos}m `;
+                                                                texto += `${segundos}s`;
+                                                                cell.textContent = texto;
+                                                                cell.classList.remove('countdown-past');
+                                                            } else {
+                                                                cell.textContent = 'Agendamento finalizado';
+                                                                cell.classList.add('countdown-past');
+                                                                }
+                                                            });
+                                                        }
 
-        function mostrarModalPrimeiroAtendimento(agendamentosFuturos) {
-            const modalAtendimento = new bootstrap.Modal(document.getElementById('modalAtendimento'));
-            const mensagemEl = document.getElementById('mensagemAtendimento');
-
-            if (agendamentosFuturos.length > 0) {
-                const primeiro = agendamentosFuturos[0];
-                const data = new Date(primeiro.data_agendamento);
-                const dataFormatada = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-                const horaFormatada = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-                const mensagem = `Seu primeiro atendimento do dia é com o(a) ${primeiro.nome || 'Paciente'} e está confirmado para a data ${dataFormatada} às ${horaFormatada}.`;
-
-                escreverTextoComMaquinaEscrever(mensagem, 'mensagemAtendimento');
-                modalAtendimento.show();
-            }
-        }
-
-        // =========== mostral modal das luas ===============
-
-        function mostrarModalLuas() {
-            const modalLuas = new bootstrap.Modal(document.getElementById('modalLuas'));
-            const mensagemLuasEl = document.getElementById('mensagemLuas');
-
-            const dataAtual = new Date();
-            const mesAtual = dataAtual.getMonth();
-            const anoAtual = dataAtual.getFullYear();
-
-            const luasDoMes = [
-                { fase: 'Nova', data: new Date(anoAtual, mesAtual, 6) },
-                { fase: 'Crescente', data: new Date(anoAtual, mesAtual, 13) },
-                { fase: 'Cheia', data: new Date(anoAtual, mesAtual, 21) },
-                { fase: 'Minguante', data: new Date(anoAtual, mesAtual, 28) }
-            ];
-
-            let mensagem = "As fases da lua para este mês são:\n\n";
-            luasDoMes.forEach(lua => {
-                mensagem += `Lua ${lua.fase} - ${lua.data.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}\n`;
-            });
-
-            escreverTextoComMaquinaEscrever(mensagem, 'mensagemLuas');
-        }
-        // ======= funçãode botaopara voltar ao  topo ======
-
-        function scrollToTop() {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // ==================================================
-        function abrirModalAnexo(filename) {
-            const anexoContainer = document.getElementById('anexo-container');
-            anexoContainer.innerHTML = '';
-            const url = `/uploads/${filename}`;
-            const extensao = filename.split('.').pop().toLowerCase();
-
-            if (['jpg', 'jpeg', 'png', 'gif', 'svg'].includes(extensao)) {
-                anexoContainer.innerHTML = `<img src="${url}" class="img-fluid" alt="Anexo do Paciente">`;
-            } else if (extensao === 'pdf') {
-                anexoContainer.innerHTML = `<embed src="${url}" type="application/pdf" width="100%" height="600px" />`;
-            } else {
-                anexoContainer.innerHTML = `<p>Tipo de arquivo não suportado para visualização embutida. <a href="${url}" target="_blank">Clique aqui para baixar.</a></p>`;
-            }
-
-            const modalVisualizarAnexo = new bootstrap.Modal(document.getElementById('modalVisualizarAnexo'));
-            modalVisualizarAnexo.show();
-        }
-
-        function abrirModalPaciente(agendamentoJson) {
-            try {
-                const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
-
-                const modalPaciente = new bootstrap.Modal(document.getElementById('modalPaciente'));
-
-                document.getElementById('infoNome').textContent = agendamento.nome || 'N/A';
-                document.getElementById('infoDataNascimento').textContent = agendamento.data_nascimento ? new Date(agendamento.data_nascimento).toLocaleDateString('pt-BR') : 'N/A';
-                document.getElementById('infoIdade').textContent = agendamento.idade || 'N/A';
-                document.getElementById('infoPeso').textContent = agendamento.peso ? `${agendamento.peso} kg` : 'N/A';
-                document.getElementById('infoAltura').textContent = agendamento.altura ? `${agendamento.altura} cm` : 'N/A';
-                document.getElementById('infoTipoSanguineo').textContent = agendamento.tipo_sanguineo || 'N/A';
-                document.getElementById('infoTipoTerapia').textContent = agendamento.tipo_terapia || 'N/A';
-                document.getElementById('infoMotivoConsulta').textContent = agendamento.motivo_consulta || 'N/A';
-                document.getElementById('infoOrigemIndicacao').textContent = agendamento.origem_indicacao || 'N/A';
-                document.getElementById('infoObservacoes').textContent = agendamento.observacoes || 'N/A';
-                document.getElementById('infoCondicoes').textContent = agendamento.condicoes || 'N/A';
-
-                const infoAnexo = document.getElementById('infoAnexo');
-                let anexosHtml = '';
-
-                if (agendamento.anexos && agendamento.anexos.length > 0) {
-                    agendamento.anexos.forEach(anexo => {
-                        anexosHtml += `<div><a href="#" onclick="abrirModalAnexo('${anexo.caminho_servidor}'); return false;">${anexo.nome_original}</a></div>`;
-                    });
-                    infoAnexo.innerHTML = anexosHtml;
-                } else {
-                    infoAnexo.textContent = 'N/A';
-                }
-
-                const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-                document.getElementById('infoDataAgendamento').textContent = dataFormatada;
-
-                modalPaciente.show();
-            } catch (e) {
-                console.error('Erro ao abrir modal do paciente:', e);
-            }
-        }
-
-        async function atenderAgendamento(agendamentoJson) {
-            try {
-                const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
-                sessionStorage.setItem("atendimento", JSON.stringify(agendamento));
-                window.location.href = "atendimento.html";
-            } catch (error) {
-                console.error("Erro ao iniciar atendimento:", error);
-                alert("Não foi possível iniciar o atendimento.");
-            }
-        }
-
-        function abrirModalReagendamento(agendamentoJson) {
-            try {
-                const agendamento = JSON.parse(decodeURIComponent(agendamentoJson));
-                document.getElementById('reagendarId').value = agendamento.id;
-                document.getElementById('reagendarPaciente').value = agendamento.nome;
-                const modalReagendamento = new bootstrap.Modal(document.getElementById('modalReagendamento'));
-                modalReagendamento.show();
-            } catch (error) {
-                console.error('Erro ao abrir o modal de reagendamento:', error);
-            }
-        }
-
-        //    =======  Funcao reagendamento ============
-
-document.getElementById('formReagendamento').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const id = document.getElementById('reagendarId').value;
-    const novaDataHora = document.getElementById('reagendarDataHora').value;
-
-    if (!id || !novaDataHora) {
-        console.error('Dados de reagendamento inválidos.');
-        return;
-    }
-
-    try {
-        const response = await fetch(`http://localhost:3000/api/agendamentos/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ data_agendamento: novaDataHora })
-        });
-
-        if (response.ok) {
-            alert('Agendamento reagendado com sucesso!');
-            const modalReagendamento = bootstrap.Modal.getInstance(document.getElementById('modalReagendamento'));
-            modalReagendamento.hide();
-            // Assumindo que a função para recarregar a tabela se chama carregarEAtualizarAgendamentos
-            // Se o nome for diferente, ajuste-o aqui.
-            carregarEAtualizarAgendamentos();
-        } else {
-            const error = await response.json();
-            alert('Erro ao reagendar: ' + (error.message || response.statusText));
-        }
-    } catch (error) {
-        console.error('Erro ao reagendar agendamento:', error);
-        alert('Erro ao reagendar agendamento. Tente novamente mais tarde.');
-    }
-});
-
-        function atualizarContagemRegressiva(agendamentos) {
-            const agora = new Date().getTime();
-            const linhas = document.querySelectorAll('#tabelaAgendamentos tr');
-            linhas.forEach((tr, index) => {
-                const agendamento = agendamentos[index];
-                if (!agendamento) return;
-                const timestamp = new Date(agendamento.data_agendamento).getTime();
-                const diferenca = timestamp - agora;
-                const cell = tr.querySelector('.countdown-cell');
-                if (diferenca > 0) {
-                    const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
-                    const horas = Math.floor((diferenca % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                    const minutos = Math.floor((diferenca % (1000 * 60 * 60)) / (1000 * 60));
-                    const segundos = Math.floor((diferenca % (1000 * 60)) / 1000);
-                    let texto = "";
-                    if (dias > 0) texto += `${dias}d `;
-                    if (horas > 0) texto += `${horas}h `;
-                    if (minutos > 0) texto += `${minutos}m `;
-                    texto += `${segundos}s`;
-                    cell.textContent = texto;
-                    cell.classList.remove('countdown-past');
-                } else {
-                    cell.textContent = 'Agendamento finalizado';
-                    cell.classList.add('countdown-past');
-                }
-            });
-        }
-
-//==================carregareAtualizaragendamento ================================
-
-async function carregarEAtualizarAgendamentos() {
+                              //==================carregareAtualizaragendamento ================================
+                              async function carregarEAtualizarAgendamentos() {
     const tabelaAgendamentos = document.getElementById('tabelaAgendamentos');
+    if (!tabelaAgendamentos) return;
+
     tabelaAgendamentos.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Carregando agendamentos...</td></tr>';
 
     try {
-        // Alteração: Adicionado o objeto de configuração com os Headers e o Token
-        const resposta = await fetch('http://localhost:3000/api/agendamentos', {
+        const resposta = await fetch('/api/agendamentos', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1220,33 +1303,46 @@ async function carregarEAtualizarAgendamentos() {
         tabelaAgendamentos.innerHTML = '';
 
         if (agendamentos.length === 0) {
-            tabelaAgendamentos.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento futuro encontrado.</td></tr>';
+            tabelaAgendamentos.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento encontrado.</td></tr>';
             return;
         }
 
+        const hojeInicio = new Date();
+        hojeInicio.setHours(0, 0, 0, 0);
+
         const agendamentosFuturos = agendamentos.filter(agendamento => {
-            const dataAgendamento = new Date(agendamento.data_agendamento);
-            return dataAgendamento > new Date();
-        }).sort((a, b) => new Date(a.data_agendamento) - new Date(b.data_agendamento));
+            // ALTERAÇÃO 1: Blindagem no filtro
+            const dataAg = new Date(agendamento.data_agendamento.replace('T', ' ').replace('Z', ''));
+            return dataAg >= hojeInicio;
+        }).sort((a, b) => {
+            // ALTERAÇÃO 2: Blindagem na ordenação
+            const dA = new Date(a.data_agendamento.replace('T', ' ').replace('Z', ''));
+            const dB = new Date(b.data_agendamento.replace('T', ' ').replace('Z', ''));
+            return dA - dB;
+        });
 
         agendamentosFuturos.forEach(agendamento => {
-            const dataAgendamento = new Date(agendamento.data_agendamento);
-            const dataFormatada = dataAgendamento.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + '/' + dataAgendamento.getFullYear() + '<br>' + dataAgendamento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            // ALTERAÇÃO 3: Blindagem na criação da data para exibição e WhatsApp
+            const dataAgendamento = new Date(agendamento.data_agendamento.replace('T', ' ').replace('Z', ''));
 
-            // --- LÓGICA DO WHATSAPP ---
+            const dataFormatada = dataAgendamento.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            }).replace(', ', '<br>');
+
+            // Lógica WhatsApp (Mantida exatamente como a sua)
             let whatsappHtml = '';
             if (agendamento.telefone) {
-                const foneLimpo = agendamento.telefone.replace(/\D/g, ''); // Remove ( ) - e espaços
+                const foneLimpo = agendamento.telefone.replace(/\D/g, '');
                 const horaMsg = dataAgendamento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 const mensagem = encodeURIComponent(`Olá ${agendamento.nome}, confirmamos seu horário hoje às ${horaMsg}`);
-                const linkWA = `https://wa.me/55${foneLimpo}?text=${mensagem}`;
-
                 whatsappHtml = `
-                    <a href="${linkWA}" target="_blank" class="ms-2" title="Confirmar via WhatsApp" style="text-decoration: none;">
+                    <a href="https://wa.me/55${foneLimpo}?text=${mensagem}" target="_blank" class="ms-2" title="WhatsApp">
                         <i class="fab fa-whatsapp" style="color: #25D366; font-size: 1.1rem;"></i>
                     </a>`;
             }
-            // ---------------------------
 
             const agendamentoString = encodeURIComponent(JSON.stringify(agendamento));
 
@@ -1254,8 +1350,8 @@ async function carregarEAtualizarAgendamentos() {
             row.innerHTML = `
                 <td>
                     <div class="d-flex align-items-center justify-content-center">
-                        <span class="nome-paciente" onclick="abrirModalPaciente('${agendamentoString}')">
-                            ${agendamento.nome}
+                        <span class="nome-paciente" style="cursor:pointer; color: #0d6efd;" onclick="abrirModalPaciente('${agendamentoString}')">
+                            ${agendamento.nome || 'Paciente sem nome'}
                         </span>
                         ${whatsappHtml}
                     </div>
@@ -1263,16 +1359,15 @@ async function carregarEAtualizarAgendamentos() {
                 <td>${dataFormatada}</td>
                 <td class="countdown-cell" data-timestamp="${dataAgendamento.getTime()}"></td>
                 <td>
-                    <div class="d-flex justify-content-center">
-                        <button class="btn btn-sm btn-atender" title="Atender" onclick="atenderAgendamento('${agendamentoString}')">
-                            <i class="fas fa-play"></i> Atender
+                    <div class="d-flex justify-content-center gap-2">
+                        <button class="btn btn-sm btn-outline-primary" title="Atender" onclick="atenderAgendamento('${agendamentoString}')">
+                            <i class="fas fa-play"></i>
                         </button>
-                        <button class="btn btn-sm btn-reagendar" title="Reagendar"
-                            onclick="abrirModalReagendamento('${agendamentoString}')">
-                            <i class="fas fa-calendar-alt"></i> Reagendar
+                        <button class="btn btn-sm btn-outline-warning" title="Reagendar" onclick="abrirModalReagendamento('${agendamentoString}')">
+                            <i class="fas fa-calendar-alt"></i>
                         </button>
-                        <button class="btn btn-sm btn-cancelar" title="Cancelar" onclick="cancelarAgendamento(${agendamento.id})">
-                            <i class="fas fa-times"></i> Cancelar
+                        <button class="btn btn-sm btn-outline-danger" title="Cancelar" onclick="cancelarAgendamento('${agendamento.id}')">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
                 </td>
@@ -1280,65 +1375,159 @@ async function carregarEAtualizarAgendamentos() {
             tabelaAgendamentos.appendChild(row);
         });
 
-        // Inicia a contagem regressiva
-        setInterval(() => atualizarContagemRegressiva(agendamentosFuturos), 1000);
+        if (typeof atualizarContagemRegressiva === 'function') {
+            atualizarContagemRegressiva(agendamentosFuturos);
+        }
 
     } catch (error) {
         console.error('Erro ao carregar agendamentos:', error);
-        tabelaAgendamentos.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Erro ao carregar agendamentos. Verifique o console.</td></tr>';
-    }
-}
-// ================= cancelamento de agendamento ==================================
-
-        async function cancelarAgendamento(agendamentoId) {
-            if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return;
-            try {
-                const resposta = await fetch(`http://localhost:3000/api/agendamentos/${agendamentoId}`, { method: 'DELETE' });
-                if (resposta.ok) {
-                    alert('Agendamento cancelado com sucesso!');
-                    carregarEAtualizarAgendamentos();
-                } else {
-                    const erro = await resposta.json();
-                    alert('Erro ao cancelar agendamento: ' + (erro.message || 'Erro desconhecido.'));
-                    console.error('Erro de resposta do servidor:', erro);
-                }
-            } catch (erro) {
-                console.error('Erro ao cancelar agendamento:', erro);
-                alert('Erro ao cancelar agendamento. Verifique a conexão com o servidor.');
-            }
-        }
-    // ==================  Função dark mode ===============
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-const themeIcon = themeToggleBtn.querySelector('i');
-
-// 1. Função para aplicar o tema
-function aplicarTema(tema) {
-    document.documentElement.setAttribute('data-bs-theme', tema);
-    localStorage.setItem('theme', tema); // Salva a preferência
-
-    // Troca o ícone (Lua para Sol e vice-versa)
-    if (tema === 'dark') {
-        themeIcon.classList.replace('fa-moon', 'fa-sun');
-        themeToggleBtn.classList.replace('btn-outline-dark', 'btn-outline-light');
-    } else {
-        themeIcon.classList.replace('fa-sun', 'fa-moon');
-        themeToggleBtn.classList.replace('btn-outline-light', 'btn-outline-dark');
+        tabelaAgendamentos.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Erro ao carregar dados.</td></tr>';
     }
 }
 
-// 2. Verifica se o usuário já tinha uma preferência salva
-const temaSalvo = localStorage.getItem('theme') || 'light';
-aplicarTema(temaSalvo);
+                              // ================= cancelamento de agendamento ==================================
 
-// 3. Ouvinte de clique no botão
-themeToggleBtn.addEventListener('click', () => {
-    const temaAtual = document.documentElement.getAttribute('data-bs-theme');
-    const novoTema = temaAtual === 'dark' ? 'light' : 'dark';
-    aplicarTema(novoTema);
-});
+                             async function cancelarAgendamento(agendamentoId) {
+                                if (!confirm('Tem certeza que deseja cancelar este agendamento?')) return;
+
+                                try {
+                                    const resposta = await fetch(`/api/agendamentos/${agendamentoId}`, { // URL Relativa
+                                        method: 'DELETE',
+                                        headers: {
+                                            'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                        }
+                                    });
+
+                                    // Lemos o JSON apenas UMA VEZ
+                                    let dados;
+                                    const contentType = resposta.headers.get("content-type");
+                                    if (contentType && contentType.includes("application/json")) {
+                                        dados = await resposta.json();
+                                    }
+
+                                    if (resposta.ok) {
+                                        alert('Agendamento cancelado com sucesso!');
+                                        // Atualiza a tabela e o calendário sem dar refresh na página
+                                        if (typeof carregarEAtualizarAgendamentos === 'function') carregarEAtualizarAgendamentos();
+                                        if (typeof inicializarCalendario === 'function') inicializarCalendario();
+                                    } else {
+                                        const mensagemErro = dados?.message || dados?.erro || 'Erro desconhecido.';
+                                        alert('Erro ao cancelar: ' + mensagemErro);
+                                    }
+                                } catch (erro) {
+                                    console.error('Erro ao cancelar agendamento:', erro);
+                                    alert('Erro de conexão. O servidor está rodando?');
+                                }
+                            }
+                                // ==================  Função dark mode ===============
+                                const themeToggleBtn = document.getElementById('theme-toggle-btn');
+                                const themeIcon = themeToggleBtn.querySelector('i');
+
+                                // 1. Função para aplicar o tema
+                                function aplicarTema(tema) {
+                                    document.documentElement.setAttribute('data-bs-theme', tema);
+                                    localStorage.setItem('theme', tema); // Salva a preferência
+
+                                    // Troca o ícone (Lua para Sol e vice-versa)
+                                    if (tema === 'dark') {
+                                        themeIcon.classList.replace('fa-moon', 'fa-sun');
+                                        themeToggleBtn.classList.replace('btn-outline-dark', 'btn-outline-light');
+                                    } else {
+                                        themeIcon.classList.replace('fa-sun', 'fa-moon');
+                                        themeToggleBtn.classList.replace('btn-outline-light', 'btn-outline-dark');
+                                    }
+                                }
+
+                                // 2. Verifica se o usuário já tinha uma preferência salva
+                                const temaSalvo = localStorage.getItem('theme') || 'light';
+                                aplicarTema(temaSalvo);
+
+                                // 3. Ouvinte de clique no botão
+                                themeToggleBtn.addEventListener('click', () => {
+                                    const temaAtual = document.documentElement.getAttribute('data-bs-theme');
+                                    const novoTema = temaAtual === 'dark' ? 'light' : 'dark';
+                                    aplicarTema(novoTema);
+                                });
+
+
+                            // ========= Função para Carregar a Tabela de Agendamentos ==========
+                    async function carregarEAtualizarAgendamentos() {
+                        try {
+                            const resposta = await fetch('/api/agendamentos', {
+                                method: 'GET',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (!resposta.ok) {
+                                if (resposta.status === 401) {
+                                    window.location.href = '/login';
+                                    return;
+                                }
+                                throw new Error('Erro ao buscar agendamentos');
+                            }
+
+                            const agendamentos = await resposta.json();
+                            const tabela = document.getElementById('tabelaAgendamentos');
+                            if (!tabela) return;
+
+                            tabela.innerHTML = '';
+
+                            if (agendamentos.length === 0) {
+                                tabela.innerHTML = '<tr><td colspan="4" class="text-center">Nenhum agendamento encontrado para hoje.</td></tr>';
+                                return;
+                            }
+
+                            agendamentos.forEach(agendamento => {
+                                const data = new Date(agendamento.data_agendamento);
+                                const dataFormatada = data.toLocaleString('pt-BR');
+
+                                const tr = document.createElement('tr');
+                                tr.innerHTML = `
+                                    <td class="nome-paciente" onclick="abrirModalPaciente('${encodeURIComponent(JSON.stringify(agendamento))}')">
+                                        ${agendamento.nome}
+                                    </td>
+                                    <td>${dataFormatada}</td>
+                                    <td class="text-center"><span class="badge bg-primary">Confirmado</span></td>
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-danger" onclick="cancelarAgendamento('${agendamento.id}')">
+                                            <i class="fas fa-trash"></i> Cancelar
+                                        </button>
+                                    </td>
+                                `;
+                                tabela.appendChild(tr);
+                            });
+
+                            if (typeof mostrarModalPrimeiroAtendimento === 'function') {
+                                mostrarModalPrimeiroAtendimento(agendamentos);
+                            }
+
+                        } catch (erro) {
+                            console.error('Erro na tabela:', erro);
+                            const tabela = document.getElementById('tabelaAgendamentos');
+                            if (tabela) {
+                                tabela.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Erro ao carregar dados.</td></tr>';
+                            }
+                        }
+                    } // <--- AQUI FECHA A FUNÇÃO carregarEAtualizarAgendamentos
+
+                    // ========= Função de Logout ==========
+                    function handleLogout(event) {
+                        if (event) event.preventDefault();
+                        const modal = document.getElementById('logoutModal');
+                        if (modal) modal.style.display = 'flex';
+
+                        setTimeout(() => {
+                            localStorage.clear();
+                            window.location.href = '/login';
+                        }, 1500);
+                    } // <--- AQUI FECHA A FUNÇÃO handleLogout
+
     </script>
 
     <script src="../ScriptGlobal/logout.js"></script>
-    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+    <script src="../ScriptGlobal/verifiLog.js"></script>
+
 </body>
 </html>
