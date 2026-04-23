@@ -18,6 +18,7 @@ const openAiRoutes = require('./routes/openAiRoutes');
 const equipeRoutes = require('./routes/equipeRoutes'); // DECLARADO SÓ UMA VEZ!
 const authRoutes = require('./routes/authRoutes');
 const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
+const financeiroRoutes = require('./routes/financeiroRoutes');
 
 // ADICIONE AQUI: Middleware para desativar o cache e proteger os dados da clínica
 app.use((req, res, next) => {
@@ -35,6 +36,8 @@ app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api/equipe', equipeRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/openai', openAiRoutes);
+// Define o prefixo das rotas financeiras
+app.use('/api/financeiro', financeiroRoutes);
 
 // --- 3. SERVIDORES DE ARQUIVOS ESTÁTICOS ---
 app.use('/pages', express.static(path.join(__dirname, 'frontend', 'pages')));
@@ -77,6 +80,9 @@ app.get('/pacientes', (req, res) => {
 });
 app.get('/equipe', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'pages', 'equipe.html'));
+});
+app.get('/financeiro', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'financeiro.html'));
 });
 
 

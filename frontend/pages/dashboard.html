@@ -472,10 +472,13 @@
                     <a href="/pacientes" class="btn btn-outline-primary me-2">Pacientes</a>
                     <a href="/agendamento" class="btn btn-outline-success me-2">Agendar</a>
 
-                     <a href="/equipe" class="btn btn-outline-success me-2">Minha Equipe</a>
+                    <a href="/financeiro" class="btn btn-outline-info me-2" id="nav-financeiro">
+                        <i class="fas fa-dollar-sign"></i> Financeiro
+                    </a>
 
-                     <!-- Logout -->
-                     <a href="javascript:void(0)" onclick="handleLogout(event)" class="btn btn-outline-danger">
+                    <a href="/equipe" class="btn btn-outline-success me-2">Minha Equipe</a>
+
+                    <a href="javascript:void(0)" onclick="handleLogout(event)" class="btn btn-outline-danger">
                         <i class="fas fa-sign-out-alt"></i> Sair
                     </a>
                     <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
@@ -1585,6 +1588,7 @@ async function inicializarCalendario() {
 
     <script src="../ScriptGlobal/logout.js"></script>
     <script src="../ScriptGlobal/verifiLog.js"></script>
+    <script src="../ScriptGlobal/FinaceiroBotaoInvisivel.js"></script>
 
 </body>
 </html>

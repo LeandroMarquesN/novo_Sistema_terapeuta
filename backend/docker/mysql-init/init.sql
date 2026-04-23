@@ -37,6 +37,8 @@ CREATE TABLE IF NOT EXISTS pacientes (
   idade INT, -- Faltava
   tipo_sanguineo VARCHAR(5), -- Faltava
   peso DECIMAL(5,2), -- Faltava
+  genero VARCHAR(20), -- novo campo
+  status_pagamento VARCHAR(20) DEFAULT 'em_dia', -- novo campo
   altura DECIMAL(3,2), -- Faltava
   condicoes_preexistentes TEXT, -- Faltava
   foto_perfil VARCHAR(255), -- Faltava para a foto do paciente
@@ -56,6 +58,7 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   email VARCHAR(100),
   telefone VARCHAR(20),
   cpf VARCHAR(14),
+  genero VARCHAR(20),
   tipo_terapia VARCHAR(100),
   motivo_consulta TEXT,
   origem_indicacao VARCHAR(100),
@@ -105,6 +108,9 @@ CREATE TABLE IF NOT EXISTS anexos (
   CONSTRAINT fk_anexo_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+
+
+--
 -- INSERTS DE TESTE (Corrigidos para a nova estrutura)
 -- Primeiro criamos a clinica
 INSERT IGNORE INTO clinicas (id, nome_clinica, dono_nome, email_master, senha_master)

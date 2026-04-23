@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedLM - Gestão de Caixa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/darkModeFinanceiro.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+    <style>
+        .bg-clean { background-color: #F9FAFB; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(243, 244, 246, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-clean">
+    <div class="flex h-screen overflow-hidden font-sans">
+
+        <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen bg-white border-r border-gray-100 overflow-hidden group shadow-sm">
+            <div class="flex flex-col h-full">
+                <div class="h-24 flex items-center px-6 border-b border-gray-50 overflow-hidden">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold">M</div>
+                    <span class="ml-4 font-bold text-xl text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity">Med<span class="text-blue-500">LM</span></span>
+                </div>
+                <nav class="flex-1 px-3 pt-6 space-y-2">
+                    <a href="/dashboard" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition">
+                        <i class="fas fa-th-large w-6"></i><span class="ml-4 opacity-0 group-hover:opacity-100">Dashboard</span>
+                    </a>
+                    <a href="/financeiro" class="flex items-center p-3 rounded-xl bg-blue-50 text-blue-600">
+                        <i class="fas fa-wallet w-6"></i><span class="ml-4 font-bold opacity-0 group-hover:opacity-100">Financeiro</span>
+                    </a>
+                    <a href="/pacientes" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition">
+                        <i class="fas fa-user-friends w-6"></i><span class="ml-4 opacity-0 group-hover:opacity-100">Pacientes</span>
+                    </a>
+                    <button id="theme-toggle-btn" class="flex items-center w-full p-3 rounded-xl text-gray-400 hover:bg-gray-100 transition mt-auto">
+                        <i class="fas fa-moon w-6"></i>
+                        <span id="theme-text" class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity">Modo Escuro</span>
+                    </button>
+                    <a href="javascript:void(0)" onclick="handleLogout(event)" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-600 transition mt-auto mb-6">
+                        <i class="fas fa-sign-out-alt w-6"></i>
+                        <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity">Sair do Sistema</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="flex-1 ml-20 p-8 lg:p-12 overflow-y-auto">
+
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-gray-900 tracking-tight">Centro Financeiro</h1>
+                    <p class="text-gray-400 font-medium">Gestão de recebíveis e fluxo de caixa.</p>
+                </div>
+
+                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-gray-100 shadow-sm w-full md:w-96">
+                    <i class="fas fa-search text-gray-300"></i>
+                    <input type="text" id="buscaPaciente" placeholder="Nome, CPF ou Telefone..." class="bg-transparent border-none outline-none text-sm w-full">
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Saldo a Receber</p>
+                    <h3 id="saldoPendente" class="text-3xl font-black mt-2 text-gray-900">R$ 0,00</h3>
+                    <div class="mt-3 text-blue-500 text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-clock"></i> Pendências em aberto
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Faturamento Mês</p>
+                    <h3 id="faturamentoMes" class="text-3xl font-black mt-2 text-emerald-500">R$ 0,00</h3>
+                    <div class="mt-3 text-emerald-500 text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-arrow-up"></i> Fluxo confirmado
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm border-l-4 border-l-red-400">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Inadimplência</p>
+                    <h3 id="totalDevedores" class="text-3xl font-black mt-2 text-red-500">0</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Pacientes com atraso</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Ticket Médio</p>
+                    <h3 id="ticketMedio" class="text-3xl font-black mt-2 text-gray-900">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Média por consulta</p>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-4 mb-6">
+                <div class="flex bg-white p-1 rounded-xl border border-gray-100 shadow-sm">
+                    <button onclick="filtrarPeriodo('hoje')" class="px-4 py-2 text-xs font-bold rounded-lg hover:bg-gray-50 transition">Hoje</button>
+                    <button onclick="filtrarPeriodo('semana')" class="px-4 py-2 text-xs font-bold rounded-lg hover:bg-gray-50 transition">Esta Semana</button>
+                    <button onclick="filtrarPeriodo('mes')" class="px-4 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-md">Este Mês</button>
+                </div>
+                <select id="filtroStatus" class="bg-white px-4 py-2 rounded-xl border border-gray-100 text-xs font-bold outline-none shadow-sm text-gray-500">
+                    <option value="todos">Todos Status</option>
+                    <option value="aberto">Abertos</option>
+                    <option value="pago">Pagos</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                <div class="xl:col-span-3 bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-50/50 text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-50">
+                                    <th class="px-8 py-5">Vencimento</th>
+                                    <th class="px-8 py-5">Paciente</th>
+                                    <th class="px-8 py-5">Descrição</th>
+                                    <th class="px-8 py-5 text-right">Valor</th>
+                                    <th class="px-8 py-5 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaFinanceira" class="divide-y divide-gray-50">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase mb-6 tracking-widest text-center">Adesão de Sinais</h4>
+                        <div class="w-32 h-32 mb-6">
+                            <canvas id="miniGraficoPizza"></canvas>
+                        </div>
+                        <div class="w-full space-y-3">
+                            <div class="flex justify-between text-xs font-bold">
+                                <span class="text-gray-400">Status da Semana</span>
+                                <span id="textoSaude" class="text-blue-600">80%</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div id="barraProgressoSaude" class="h-full bg-blue-500 transition-all duration-500" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+<!-- --------  modal de pagamentos ---------- -->
+<div id="modalPagamento" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+      <div class="p-8">
+          <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-black text-gray-900 tracking-tight">Confirmar Recebimento</h3>
+              <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+          </div>
+
+          <div class="space-y-6">
+              <div class="bg-blue-50 p-4 rounded-2xl">
+                  <p class="text-[10px] font-bold text-blue-500 uppercase">Paciente</p>
+                  <p id="modalNomePaciente" class="font-bold text-gray-900">Lavinia Nascimento</p>
+                  <p id="modalValor" class="text-2xl font-black text-blue-600 mt-1">R$ 159,90</p>
+              </div>
+
+              <div>
+                  <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 block">Forma de Pagamento</label>
+                  <div class="grid grid-cols-3 gap-3">
+                      <button onclick="selecionarMetodo('pix', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-emerald-500 transition flex flex-col items-center gap-2">
+                          <i class="fab fa-pix text-emerald-500 text-xl"></i>
+                          <span class="text-[10px] font-bold">PIX</span>
+                      </button>
+                      <button onclick="selecionarMetodo('cartao', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-500 transition flex flex-col items-center gap-2">
+                          <i class="fas fa-credit-card text-blue-500 text-xl"></i>
+                          <span class="text-[10px] font-bold">CARTÃO</span>
+                      </button>
+                      <button onclick="selecionarMetodo('dinheiro', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-amber-500 transition flex flex-col items-center gap-2">
+                          <i class="fas fa-money-bill-wave text-amber-500 text-xl"></i>
+                          <span class="text-[10px] font-bold">DINHEIRO</span>
+                      </button>
+                  </div>
+              </div>
+          </div>
+
+          <button onclick="processarBaixa()" class="w-full mt-8 bg-gray-900 text-white font-bold py-4 rounded-2xl hover:bg-emerald-600 transition-colors shadow-lg shadow-gray-200">
+              Confirmar e Dar Baixa
+          </button>
+      </div>
+  </div>
+</div>
+<!-- -------------fim do modal -------------- -->
+<script src="../ScriptGlobal/financeiroScript.js"></script>
+<script>
+        // Agora o array começa vazio e será preenchido pelo banco de dados
+        let lancamentos = [];
+
+
+        // FUNÇÃO PARA BUSCAR DADOS REAIS DO BACKEND
+    async function carregarDadosEstrategicos() {
+        try {
+            // Busca a lista de lançamentos
+            const dados = await apiFetch('/api/financeiro/lista');
+            if (dados) {
+                lancamentos = dados; // Atualiza o array global com os dados do banco (Daniel aparecerá aqui)
+                renderizar();
+            }
+
+            // Busca os dados do resumo (Cards de Poder)
+            const resumo = await apiFetch('/api/financeiro/resumo');
+            if (resumo) {
+                atualizarCards(resumo);
+            }
+        } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+        }
+    }
+
+    function atualizarCards(resumo) {
+            if (!resumo) return;
+
+            // O Controller envia 'saldo_receber', o HTML tem que ler 'saldo_receber'
+            if (document.getElementById('saldoPendente')) {
+                document.getElementById('saldoPendente').innerText = `R$ ${parseFloat(resumo.saldo_receber || 0).toFixed(2)}`;
+            }
+            if (document.getElementById('faturamentoMes')) {
+                document.getElementById('faturamentoMes').innerText = `R$ ${parseFloat(resumo.faturamento_mes || 0).toFixed(2)}`;
+            }
+            // E assim por diante para os outros cards...
+        }
+
+
+
+    function renderizar() {
+        const tbody = document.getElementById('listaFinanceira');
+        if (!tbody) return;
+
+        tbody.innerHTML = lancamentos.map(item => `
+            <tr class="hover:bg-gray-50 transition">
+                <td class="px-8 py-6 text-sm font-medium text-gray-400">${new Date(item.data_vencimento).toLocaleDateString('pt-BR')}</td>
+                <td class="px-8 py-6">
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-gray-900">${item.paciente_nome}</span>
+                        <a href="https://wa.me/55${item.paciente_tel}" target="_blank" class="text-[10px] text-emerald-500 font-bold hover:underline">
+                            <i class="fab fa-whatsapp"></i> Contato Direto
+                        </a>
+                    </div>
+                </td>
+                <td class="px-8 py-6 text-xs text-gray-500 font-medium">Sinal de Consulta</td>
+                <td class="px-8 py-6 text-right">
+                    <span class="text-sm font-black ${item.status_pagamento === 'pago' ? 'text-emerald-500' : 'text-gray-900'}">
+                        R$ ${parseFloat(item.valor).toFixed(2)}
+                    </span>
+                </td>
+                <td class="px-8 py-6 text-center">
+                    <div class="flex justify-center gap-2">
+                        ${item.status_pagamento === 'aberto' ? `
+                            <button onclick="abrirModal(${item.id})" class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition shadow-sm">
+                                <i class="fas fa-check text-[10px]"></i>
+                            </button>
+                        ` : '<i class="fas fa-check-double text-emerald-500" title="Pagamento Realizado"></i>'}
+
+                        <button class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition shadow-sm">
+                            <i class="fas fa-file-pdf text-[10px]"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `).join('');
+
+
+         atualizarResumo();
+        }
+
+        function atualizarResumo() {
+            // Trocado .status por .status_pagamento
+            const abertos = lancamentos.filter(l => l.status_pagamento === 'aberto').reduce((a, b) => a + parseFloat(b.valor), 0);
+            const pagos = lancamentos.filter(l => l.status_pagamento === 'pago').reduce((a, b) => a + parseFloat(b.valor), 0);
+
+            const total = pagos + abertos;
+            const perc = total > 0 ? (pagos / total) * 100 : 0; // Evita divisão por zero
+
+            document.getElementById('textoSaude').innerText = `${Math.round(perc)}%`;
+            document.getElementById('barraProgressoSaude').style.width = `${perc}%`;
+
+            // Atualiza os outros campos também...
+            document.getElementById('saldoPendente').innerText = `R$ ${abertos.toFixed(2)}`;
+            document.getElementById('faturamentoMes').innerText = `R$ ${pagos.toFixed(2)}`;
+        }
+
+       // MINI CHART JS
+       const ctx = document.getElementById('miniGraficoPizza').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [159.90, 250],
+                    backgroundColor: ['#E5E7EB', '#10B981'],
+                    borderWidth: 0
+                }]
+            },
+            options: { cutout: '80%', plugins: { legend: { display: false } } }
+        });
+
+        // CHAMADA MESTRE: Busca os dados no banco assim que a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarDadosEstrategicos();
+        });
+        // ======= Script pra o modal de pagamentos =====
+
+
+    // --- 1. FUNÇÃO PARA ABRIR O MODAL ---
+    function abrirModal(id) {
+        // Busca o lançamento no nosso array
+        const item = lancamentos.find(l => l.id === id);
+        if (!item) return;
+
+        // Usamos window. para evitar conflito com o script externo
+        window.itemParaBaixar = item;
+
+        // Garante que o valor vire número para o toFixed(2) não quebrar
+        const valorNumerico = parseFloat(item.valor || 0);
+
+        // Preenche os dados no Modal usando os nomes exatos do banco
+        const nomePaciente = document.getElementById('modalNomePaciente');
+        const valorModal = document.getElementById('modalValor');
+
+        if (nomePaciente) nomePaciente.innerText = item.paciente_nome;
+        if (valorModal) valorModal.innerText = `R$ ${valorNumerico.toFixed(2)}`;
+
+        // Reseta seleções anteriores
+        window.metodoSelecionado = '';
+        document.querySelectorAll('.metodo-btn').forEach(btn => {
+            btn.classList.remove('border-emerald-500', 'bg-emerald-50', 'border-blue-500', 'bg-blue-50', 'border-amber-500', 'bg-amber-50');
+        });
+
+        // Mostra o Modal
+        const modal = document.getElementById('modalPagamento');
+        if (modal) modal.classList.remove('hidden');
+    }
+
+    // --- 2. FUNÇÃO PARA SELECIONAR O MÉTODO ---
+    function selecionarMetodo(metodo, elemento) {
+        metodoSelecionado = metodo;
+
+        // Remove destaques de todos os botões
+        document.querySelectorAll('.metodo-btn').forEach(btn => {
+            btn.classList.remove('border-emerald-500', 'bg-emerald-50', 'border-blue-500', 'bg-blue-50', 'border-amber-500', 'bg-amber-50');
+        });
+
+        // Adiciona cor baseada no método (Seguindo seu padrão de cores claras)
+        if (metodo === 'pix') elemento.classList.add('border-emerald-500', 'bg-emerald-50');
+        if (metodo === 'cartao') elemento.classList.add('border-blue-500', 'bg-blue-50');
+        if (metodo === 'dinheiro') elemento.classList.add('border-amber-500', 'bg-amber-50');
+    }
+
+    async function processarBaixa() {
+        // Usamos window para garantir que estamos acessando a variável do script externo
+        if (!window.metodoSelecionado) {
+            alert("Por favor, selecione a forma de pagamento.");
+            return;
+        }
+
+        if(window.itemParaBaixar) {
+            // Aqui fazemos a lógica de troca de status
+            window.itemParaBaixar.status = 'pago';
+
+            // O console.log deve usar o nome que vem do banco: paciente_nome
+            console.log(`Sucesso: Pagamento de ${window.itemParaBaixar.paciente_nome} via ${window.metodoSelecionado.toUpperCase()} registrado.`);
+
+        /* FLUXO BACKEND (Onde entra o seu conhecimento de Full-Stack):
+        Aqui você dispararia o comando para o Node.js:
+
+        const response = await fetch(`/api/financeiro/baixar/${itemParaBaixar.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                metodo: metodoSelecionado,
+                clinica_id: 2 // O ID da clínica logada
+            })
+        });
+        */
+
+            // 1. Fecha o Modal
+            fecharModal();
+
+            // 2. Renderiza a tabela novamente (Daniel ou Lavínia ficarão com check verde)
+            renderizar();
+
+            // 3. Atualiza os Cards (Saldo a Receber diminui, Faturamento aumenta)
+            atualizarResumo();
+        }
+    }
+
+   function fecharModal() {
+        const modal = document.getElementById('modalPagamento');
+        if(modal) modal.classList.add('hidden');
+
+        // Limpamos as globais no window
+        window.itemParaBaixar = null;
+        window.metodoSelecionado = '';
+    }
+
+
+  </script>
+
+  <script src="../ScriptGlobal/logout.js"></script>
+  <script src="../ScriptGlobal/verifiLog.js"></script>
+  <script src="../ScriptGlobal/darkMOdeFinanceiro.js"></script>
+
+</body>
+</html>

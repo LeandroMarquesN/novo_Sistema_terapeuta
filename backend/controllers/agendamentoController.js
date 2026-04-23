@@ -15,31 +15,33 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// =============================================================================
+// 1. CRIAR AGENDAMENTO
+// =============================================================================
+
 exports.criarAgendamento = async (req, res) => {
   // --- TRAVA DE SEGURANÇA ---
   if (!req.usuario) {
     return res.status(401).json({ error: "Sessão inválida. Por favor, faça login novamente." });
   }
 
-  // 1. Mude de const para let para podermos alterar o valor
+  // 1. Capturando dados (incluindo genero e valor_sinal)
   let {
     nome, cpf, email, telefone, data_nascimento, idade,
-    peso, altura, tipo_sanguineo, tipo_terapia,
-    data_agendamento, motivo_consulta, origem_indicacao, observacoes
+    peso, genero, altura, tipo_sanguineo, tipo_terapia,
+    data_agendamento, motivo_consulta, origem_indicacao, observacoes,
+    valor_sinal // Valor vindo do seu novo input com máscara
   } = req.body;
 
-  // 2. A "blindagem" contra o fuso horário (UTC)
+  // 2. Blindagem de fuso horário
   if (data_agendamento) {
-    // Se vier 2026-04-20T17:01, vira 2026-04-20 17:01:00
-    // O .split('.')[0] remove milissegundos se existirem
     data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
   }
-  // ----------------------------------------------------
 
   const clinicaId = req.usuario.clinica_id;
   const usuarioId = req.usuario.id;
-  // --------------------------
 
+  // Tratamento de arquivos
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = req.files['anexos'] || [];
   let fotoPerfilFilename = patientPhoto ? patientPhoto.filename : null;
@@ -58,70 +60,97 @@ exports.criarAgendamento = async (req, res) => {
 
   const connection = await db.getConnection();
   try {
-    // FORÇA A SESSÃO DO BANCO A USAR O HORÁRIO DE BRASÍLIA
     await connection.query("SET time_zone = '-03:00'");
     await connection.beginTransaction();
+
     let paciente_id;
     const [pacientesExistentes] = await connection.query(
       'SELECT id FROM pacientes WHERE cpf = ? AND clinica_id = ?',
       [cpf, clinicaId]
     );
 
+    // --- LOGICA DE PACIENTE (COM GÊNERO E STATUS PAGAMENTO) ---
     if (pacientesExistentes.length > 0) {
       paciente_id = pacientesExistentes[0].id;
+      // Ao criar novo agendamento, marcamos o paciente com pendência (status_pagamento)
       await connection.query(
         `UPDATE pacientes SET
           telefone = ?, email = ?, peso = ?, altura = ?,
-          idade = ?, tipo_sanguineo = ?, condicoes_preexistentes = ?
+          idade = ?, tipo_sanguineo = ?, genero = ?,
+          condicoes_preexistentes = ?, status_pagamento = 'pendente'
          WHERE id = ?`,
-        [telefone, email, peso, altura, idade, tipo_sanguineo, condicoesString, paciente_id]
+        [telefone, email, peso, altura, idade, tipo_sanguineo, genero, condicoesString, paciente_id]
       );
     } else {
       const [novoPacResult] = await connection.query(
         `INSERT INTO pacientes (
           clinica_id, nome, cpf, email, telefone, data_nascimento,
-          idade, tipo_sanguineo, peso, altura, condicoes_preexistentes, foto_perfil
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [clinicaId, nome, cpf, email, telefone, data_nascimento, idade, tipo_sanguineo, peso, altura, condicoesString, fotoPerfilFilename]
+          idade, tipo_sanguineo, peso, altura, genero,
+          condicoes_preexistentes, foto_perfil, status_pagamento
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')`,
+        [clinicaId, nome, cpf, email, telefone, data_nascimento, idade, tipo_sanguineo, peso, altura, genero, condicoesString, fotoPerfilFilename]
       );
       paciente_id = novoPacResult.insertId;
     }
 
+    // --- LOGICA DE AGENDAMENTO ---
     const sqlAgendamento = `
       INSERT INTO agendamentos (
         clinica_id, paciente_id, usuario_id, nome, data_agendamento,
         tipo_terapia, motivo_consulta, origem_indicacao, status_agendamento,
-        peso, altura, data_nascimento, idade, tipo_sanguineo, email, telefone, cpf, condicoes
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        peso, genero, altura, data_nascimento, idade, tipo_sanguineo, email, telefone, cpf, condicoes
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const valoresAgendamento = [
       clinicaId, paciente_id, usuarioId, nome, data_agendamento,
       tipo_terapia, motivo_consulta, origem_indicacao, 'aguardando_sinal',
-      peso || null, altura || null, data_nascimento || null, idade || null,
+      peso || null, genero || null, altura || null, data_nascimento || null, idade || null,
       tipo_sanguineo || null, email || null, telefone || null, cpf, condicoesString
     ];
 
     const [agendamentoResult] = await connection.query(sqlAgendamento, valoresAgendamento);
     const agendamentoId = agendamentoResult.insertId;
 
+    // --- 🚀 LOGICA FINANCEIRA DINÂMICA ---
+    // Limpando a máscara do valor vindo do front (ex: "159,90" -> 159.90)
+    let valorLimpo = 0.00;
+    if (valor_sinal) {
+      valorLimpo = parseFloat(valor_sinal.replace(/\./g, '').replace(',', '.'));
+    }
+
+    if (valorLimpo > 0) {
+      const sqlFinanceiro = `
+        INSERT INTO financeiro (
+          clinica_id, paciente_id, agendamento_id, tipo,
+          descricao, valor, data_vencimento, status_pagamento
+        ) VALUES (?, ?, ?, 'receita', ?, ?, CURDATE(), 'aberto')
+      `;
+
+      await connection.query(sqlFinanceiro, [
+        clinicaId,
+        paciente_id,
+        agendamentoId,
+        `Sinal de Consulta - ${nome}`,
+        valorLimpo
+      ]);
+    }
+
+    // --- ANEXOS ---
     if (anexos.length > 0) {
       for (const file of anexos) {
         await connection.query(
-          `INSERT INTO anexos (
-            clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes
-          ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO anexos (clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes) VALUES (?, ?, ?, ?, ?, ?, ?)`,
           [clinicaId, paciente_id, agendamentoId, file.originalname, file.filename, file.mimetype, file.size]
         );
       }
     }
 
     await connection.commit();
-    res.status(201).json({ mensagem: 'Agendamento e Paciente processados com sucesso!', agendamentoId });
+    res.status(201).json({ mensagem: 'Processado com sucesso!', agendamentoId });
 
     // Notificações
     if (email) notificationService.sendEmailNotification({ nome, email, tipo_terapia, data_agendamento, motivo_consulta });
-    if (telefone) notificationService.sendWhatsAppNotification({ nome, telefone, tipo_terapia, data_agendamento });
 
   } catch (err) {
     if (connection) await connection.rollback();
@@ -130,37 +159,71 @@ exports.criarAgendamento = async (req, res) => {
     if (connection) connection.release();
   }
 };
-
 // =============================================================================
 // 2. LISTAR AGENDAMENTOS
 // =============================================================================
 exports.listarAgendamentos = async (req, res) => {
   const clinicaId = req.usuario.clinica_id;
 
-  console.log(`Buscando agendamentos para a clínica do usuário: ${clinicaId}`);
   try {
+    // 1. Query turbinada com JOIN no Financeiro
+    // Pegamos o status de pagamento e o valor diretamente da tabela financeira
     const sqlAgendamentos = `
-      SELECT id, paciente_id, nome, cpf, data_agendamento, tipo_terapia,
-             motivo_consulta, origem_indicacao, status_agendamento,
-             peso, altura, data_nascimento, idade, tipo_sanguineo, email, telefone, condicoes
-      FROM agendamentos WHERE clinica_id = ? ORDER BY data_agendamento ASC
+      SELECT
+        a.*,
+        f.status_pagamento AS financeiro_status,
+        f.valor AS valor_sinal,
+        f.metodo_pagamento
+      FROM agendamentos a
+      LEFT JOIN financeiro f ON a.id = f.agendamento_id
+      WHERE a.clinica_id = ?
+      ORDER BY a.data_agendamento ASC
     `;
+
     const [agendamentos] = await db.query(sqlAgendamentos, [clinicaId]);
 
-    if (agendamentos.length === 0) return res.json([]);
+    if (agendamentos.length === 0) return res.json({ total: 0, dados: [] });
 
+    // 2. Busca de Anexos (Mantendo sua lógica eficiente de IN)
     const agendamentoIds = agendamentos.map(a => a.id);
     const [anexos] = await db.query(
-      'SELECT agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes FROM anexos WHERE agendamento_id IN (?)',
+      'SELECT agendamento_id, nome_original, caminho_servidor, mime_type FROM anexos WHERE agendamento_id IN (?)',
       [agendamentoIds]
     );
 
-    const agendamentosComAnexos = agendamentos.map(ag => {
-      return { ...ag, anexos: anexos.filter(an => an.agendamento_id === ag.id) };
+    // 3. Processamento e "Inteligência" (BI simples)
+    let totalMasculino = 0;
+    let totalFeminino = 0;
+
+    const dadosFormatados = agendamentos.map(ag => {
+      // Contagem para o mini-dashboard
+      if (ag.genero === 'Masculino') totalMasculino++;
+      if (ag.genero === 'Feminino') totalFeminino++;
+
+      return {
+        ...ag,
+        // Adicionamos uma "label" amigável para o frontend
+        status_formatado: ag.status_agendamento.replace('_', ' ').toUpperCase(),
+        data_ptbr: new Date(ag.data_agendamento).toLocaleString('pt-BR'),
+        anexos: anexos.filter(an => an.agendamento_id === ag.id)
+      };
     });
 
-    res.json(agendamentosComAnexos);
+    // 4. Retorno Explicativo
+    res.json({
+      meta: {
+        total_geral: agendamentos.length,
+        distribuicao_genero: {
+          masculino: totalMasculino,
+          feminino: totalFeminino,
+          outros: agendamentos.length - (totalMasculino + totalFeminino)
+        }
+      },
+      dados: dadosFormatados
+    });
+
   } catch (err) {
+    console.error("Erro ao listar:", err);
     res.status(500).json({ erro: 'Erro ao listar agendamentos', detalhes: err.message });
   }
 };
@@ -200,7 +263,7 @@ exports.deletarAgendamento = async (req, res) => {
 exports.atualizarAgendamentoCompleto = async (req, res) => {
   const agendamentoId = req.params.id;
   const clinicaId = req.usuario.clinica_id;
-  const { nome, cpf, email, telefone, data_nascimento, idade, peso, altura, tipo_sanguineo, tipo_terapia, data_agendamento, motivo_consulta, origem_indicacao, observacoes } = req.body;
+  const { nome, cpf, email, telefone, data_nascimento, idade, peso, genero, altura, tipo_sanguineo, tipo_terapia, data_agendamento, motivo_consulta, origem_indicacao, observacoes } = req.body;
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = req.files['anexos'] || [];
 
@@ -212,8 +275,8 @@ exports.atualizarAgendamentoCompleto = async (req, res) => {
 
     const pacienteId = agendamentoAtual[0].paciente_id;
     await connection.query(
-      `UPDATE agendamentos SET nome=?, email=?, telefone=?, data_agendamento=?, cpf=? WHERE id=? AND clinica_id=?`,
-      [nome, email, telefone, data_agendamento, cpf, agendamentoId, clinicaId]
+      `UPDATE agendamentos SET nome=?, email=?, telefone=?, genero=?, data_agendamento=?, cpf=? WHERE id=? AND clinica_id=?`,
+      [nome, email, telefone, genero, data_agendamento, cpf, agendamentoId, clinicaId]
     );
 
     if (anexos.length > 0) {

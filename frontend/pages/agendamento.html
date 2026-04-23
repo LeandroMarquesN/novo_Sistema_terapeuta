@@ -379,6 +379,18 @@
         <label for="pesoPaciente" class="form-label">Peso (kg)</label>
         <input type="number" id="pesoPaciente" name="peso" step="0.1" class="form-control">
       </div>
+      <!-- novo campo de genero -->
+      <div class="col-md-4">
+        <label for="generoPaciente" class="form-label">Gênero</label>
+        <select id="generoPaciente" name="genero" class="form-select" required>
+          <option value="" selected disabled>Selecione...</option>
+          <option value="Masculino">Masculino</option>
+          <option value="Feminino">Feminino</option>
+          <option value="Prefiro não dizer">Prefiro não dizer</option>
+          <option value="Outro">Outro</option>
+        </select>
+
+      </div>
 
       <div class="col-md-4">
         <label for="alturaPaciente" class="form-label">Altura (cm)</label>
@@ -397,7 +409,7 @@
       </div>
 
       <div class="col-md-6">
-        <label for="tipoTerapia" class="form-label">Consulta Integrativa</label>
+        <label for="tipoTerapia" class="form-label">Tipo de Atendimento</label>
         <select class="form-select" id="tipoTerapia" name="tipo_terapia" required>
           <option value="">Escolha uma opção</option>
           <option>Presencial</option>
@@ -480,6 +492,29 @@
           </div>
         </div>
       </div>
+      <!-- --- select para pegar o valor do sinal e realizar o agendamento -->
+       <div class="col-md-6">
+          <label class="form-label">Valor do Sinal (R$)</label>
+          <div class="input-group">
+            <select id="selectSinal" class="form-select" style="max-width: 150px;" onchange="ajustarValorSinal(this.value)">
+              <option value="">Rápido...</option>
+              <option value="50.00">R$ 50</option>
+              <option value="100.00">R$ 100</option>
+              <option value="150.00">R$ 150</option>
+              <option value="200.00">R$ 200</option>
+              <option value="custom">Outro</option>
+            </select>
+
+            <span class="input-group-text">R$</span>
+            <input type="text"
+                  id="valorSinal"
+                  name="valor_sinal"
+                  class="form-control"
+                  placeholder="0,00"
+                  oninput="mascaraMoeda(this)">
+          </div>
+        </div>
+
 
       <div class="col-12 mt-4">
         <label for="anexoInput" class="form-label">Anexar Exames ou Imagens (opcional)</label>
@@ -540,7 +575,28 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // ====== Função para validar o valor do sinal ======
+    // Faz o select preencher o input automaticamente
+function ajustarValorSinal(valor) {
+    const input = document.getElementById('valorSinal');
+    if (valor && valor !== 'custom') {
+        // Formata o valor do select para o padrão da máscara (ex: 100.00 -> 100,00)
+        input.value = parseFloat(valor).toLocaleString('pt-br', { minimumFractionDigits: 2 });
+    } else if (valor === 'custom') {
+        input.value = '';
+        input.focus();
+    }
+}
 
+// Máscara de Moeda com Regex
+function mascaraMoeda(i) {
+    let v = i.value.replace(/\D/g, ''); // Remove tudo que não é dígito
+    v = (v / 100).toFixed(2) + '';
+    v = v.replace(".", ",");
+    v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+    v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
+    i.value = v;
+}
     //  ====== Função validar CPF com mascara para o usario ver a separação dos numero ===========================
     //  ====== E tambem nao deixar o usario digitar nada que nao seja numero ======
     function validarEMascararCPF(input) {
