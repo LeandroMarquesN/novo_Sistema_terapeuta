@@ -31,17 +31,18 @@ CREATE TABLE IF NOT EXISTS pacientes (
   clinica_id INT NOT NULL,
   nome VARCHAR(100) NOT NULL,
   cpf VARCHAR(14),
-  email VARCHAR(100), -- Faltava
+  email VARCHAR(100),
   telefone VARCHAR(20),
-  data_nascimento DATE, -- Faltava
-  idade INT, -- Faltava
-  tipo_sanguineo VARCHAR(5), -- Faltava
-  peso DECIMAL(5,2), -- Faltava
-  genero VARCHAR(20), -- novo campo
-  status_pagamento VARCHAR(20) DEFAULT 'em_dia', -- novo campo
-  altura DECIMAL(3,2), -- Faltava
-  condicoes_preexistentes TEXT, -- Faltava
-  foto_perfil VARCHAR(255), -- Faltava para a foto do paciente
+  data_nascimento DATE,
+  idade INT,
+  tipo_sanguineo VARCHAR(5),
+  peso DECIMAL(5,2),
+  genero VARCHAR(20),
+  -- Aqui aceita a frase "Consulta Paga OK" perfeitamente
+  status_pagamento VARCHAR(20) DEFAULT 'pendente',
+  altura DECIMAL(3,2),
+  condicoes_preexistentes TEXT,
+  foto_perfil VARCHAR(255),
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_paciente_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -73,20 +74,21 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   CONSTRAINT fk_agend_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. FINANCEIRO
+-- 5. FINANCEIRO (Atualizada com link e gateway)
 CREATE TABLE IF NOT EXISTS financeiro (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
+  gateway_id VARCHAR(255) NULL, -- NOVO: Para integrar com Mercado Pago/Asaas
   paciente_id INT NOT NULL,
-  agendamento_id INT NULL, -- Liga o dinheiro à sessão específica
+  agendamento_id INT NULL,
   tipo ENUM('receita', 'despesa') NOT NULL,
   descricao VARCHAR(255),
   valor DECIMAL(10,2) NOT NULL,
   data_vencimento DATE NOT NULL,
   data_pagamento DATE NULL,
-  -- STATUS FINANCEIRO (Aberto, Pago, etc)
   status_pagamento ENUM('aberto', 'pago', 'atrasado', 'estornado', 'cancelado') DEFAULT 'aberto',
   metodo_pagamento ENUM('pix', 'cartao', 'dinheiro', 'boleto'),
+  link_pagamento TEXT NULL, -- NOVO: Para salvar o link gerado
   CONSTRAINT fk_fin_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL

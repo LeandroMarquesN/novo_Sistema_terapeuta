@@ -47,7 +47,8 @@ const financeiroController = {
       await connection.beginTransaction();
 
       const [result] = await connection.execute(
-        `UPDATE financeiro SET status_pagamento = 'pago', metodo_pagamento = ?, data_pagamento = NOW()
+        console.log(metodo_pagamento)
+          `UPDATE financeiro SET status_pagamento = 'pago', metodo_pagamento = ?, data_pagamento = NOW()
                  WHERE id = ? AND clinica_id = ?`,
         [metodo_pagamento, id, clinica_id]
       );
@@ -62,8 +63,17 @@ const financeiroController = {
 
       if (lancamento[0] && lancamento[0].agendamento_id) {
         await connection.execute(
-          `UPDATE agendamentos SET status_pagamento = 'confirmado' WHERE id = ?`,
+          `UPDATE agendamentos SET status_agendamento = 'confirmado' WHERE id = ?`,
           [lancamento[0].agendamento_id]
+        );
+      }
+
+      // 2. Atualiza o Paciente (Frase Curta: 16 caracteres)
+      if (paciente_id) {
+        await connection.execute(
+          `UPDATE pacientes SET status_pagamento = 'Consulta Paga OK'
+            WHERE id = ? AND clinica_id = ?`,
+          [paciente_id, clinica_id]
         );
       }
 

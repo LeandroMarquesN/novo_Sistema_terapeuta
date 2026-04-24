@@ -336,7 +336,7 @@
 
     // --- 2. FUNÇÃO PARA SELECIONAR O MÉTODO ---
     function selecionarMetodo(metodo, elemento) {
-        metodoSelecionado = metodo;
+        window.metodoSelecionado = metodo;
 
         // Remove destaques de todos os botões
         document.querySelectorAll('.metodo-btn').forEach(btn => {
@@ -347,6 +347,8 @@
         if (metodo === 'pix') elemento.classList.add('border-emerald-500', 'bg-emerald-50');
         if (metodo === 'cartao') elemento.classList.add('border-blue-500', 'bg-blue-50');
         if (metodo === 'dinheiro') elemento.classList.add('border-amber-500', 'bg-amber-50');
+
+        console.log("Método guardado no window:", window.metodoSelecionado);
     }
 
     async function processarBaixa() {
@@ -358,23 +360,47 @@
 
         if(window.itemParaBaixar) {
             // Aqui fazemos a lógica de troca de status
-            window.itemParaBaixar.status = 'pago';
+            window.itemParaBaixar.status_pagamento = 'pago';
 
             // O console.log deve usar o nome que vem do banco: paciente_nome
             console.log(`Sucesso: Pagamento de ${window.itemParaBaixar.paciente_nome} via ${window.metodoSelecionado.toUpperCase()} registrado.`);
 
-        /* FLUXO BACKEND (Onde entra o seu conhecimento de Full-Stack):
-        Aqui você dispararia o comando para o Node.js:
+                    // --- DISPARO REAL PARA O BACKEND ---
+            try {
+                const response = await fetch(`/api/financeiro/baixar/${window.itemParaBaixar.id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // Se você usa token de autenticação, ele entra aqui:
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({
+                        metodo_pagamento: window.metodoSelecionado, // Nome igual ao que o Controller espera
+                        clinica_id: window.itemParaBaixar.clinica_id
+                    })
+                });
 
-        const response = await fetch(`/api/financeiro/baixar/${itemParaBaixar.id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                metodo: metodoSelecionado,
-                clinica_id: 2 // O ID da clínica logada
-            })
-        });
-        */
+                const resultado = await response.json();
+
+                if (response.ok) {
+                    console.log("Banco de Dados Atualizado:", resultado.message);
+
+                    // 1. Só agora mudamos o status na tela
+                    window.itemParaBaixar.status_pagamento = 'pago';
+
+                    // 2. Fecha e limpa a interface
+                    fecharModal();
+                    renderizar();
+                    atualizarResumo();
+
+                    alert("Pagamento registrado com sucesso no banco de dados!");
+                } else {
+                    alert("Erro ao salvar no banco: " + resultado.error);
+                }
+            } catch (erro) {
+                console.error("Erro na requisição:", erro);
+                alert("Erro de conexão com o servidor.");
+            }
 
             // 1. Fecha o Modal
             fecharModal();
