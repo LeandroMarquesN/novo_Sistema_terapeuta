@@ -147,10 +147,36 @@ exports.criarAgendamento = async (req, res) => {
     }
 
     await connection.commit();
-    res.status(201).json({ mensagem: 'Processado com sucesso!', agendamentoId });
 
-    // Notificações
-    if (email) notificationService.sendEmailNotification({ nome, email, tipo_terapia, data_agendamento, motivo_consulta });
+
+    // ---- LOGICA PARA PEGAR OS DADOS DA CLINICA -------
+    const [clinicaResult] = await connection.query(
+      'SELECT nome_clinica, telefone_clinica FROM clinicas WHERE id = ?',
+      [clinicaId]
+    );
+
+    const dadosDaClinica = clinicaResult[0];
+
+    // ---- NOTIFICAÇÕES (Enviando os dados separados como a função pede) ---------
+    if (email && dadosDaClinica) {
+      // Criamos o objeto do agendamento para bater com o que a função espera
+      const dadosDoAgendamento = {
+        nome: nome,
+        tipo_terapia: tipo_terapia,
+        data_agendamento: data_agendamento,
+        motivo_consulta: motivo_consulta
+      };
+
+      // CHAMADA CORRETA: Passando (clinica, agendamento)
+      notificationService.sendEmailNotification(dadosDaClinica, dadosDoAgendamento)
+        .catch(err => console.error("[MED-LM] Erro no envio de e-mail:", err));
+    }
+
+    // Só responde ao frontend DEPOIS de organizar o envio (ou disparar ele)
+    return res.status(201).json({
+      mensagem: 'Processado com sucesso!',
+      agendamentoId
+    });
 
   } catch (err) {
     if (connection) await connection.rollback();
