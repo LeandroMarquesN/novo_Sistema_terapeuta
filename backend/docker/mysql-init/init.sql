@@ -1,11 +1,12 @@
 CREATE DATABASE IF NOT EXISTS terapia_system;
 USE terapia_system;
 
--- 1. CLINICAS (O "Pai" de tudo, tem que vir primeiro)
 CREATE TABLE IF NOT EXISTS clinicas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome_clinica VARCHAR(100) NOT NULL,
   dono_nome VARCHAR(100) NOT NULL,
+  telefone_clinica VARCHAR(20) NOT NULL, -- Novo campo
+  telefone_dono VARCHAR(20) NOT NULL,    -- Novo campo
   email_master VARCHAR(100) NOT NULL UNIQUE,
   senha_master VARCHAR(255) NOT NULL,
   limite_membros INT DEFAULT 3,

@@ -59,7 +59,7 @@ const replacePlaceholders = (template, data) => {
 // FUNÇÃO ADAPTADA PARA ENVIAR E-MAIL
 // Agora com suporte para reagendamento e cancelamento.
 // =========================================================================
-exports.sendEmailNotification = async (agendamento, isReagendamento = false, isCancelamento = false) => {
+exports.sendEmailNotification = async (clinica, agendamento, isReagendamento = false, isCancelamento = false) => {
   try {
     let subject;
     let templateName;
@@ -86,6 +86,8 @@ exports.sendEmailNotification = async (agendamento, isReagendamento = false, isC
       data_agendamento: new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR'),
       hora_agendamento: new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       motivo_consulta: agendamento.motivo_consulta,
+      telefone_clinica: clinica.telefone_clinica,
+      nome_clinica: clinica.nome_clinica,
       ano_atual: new Date().getFullYear(),
     };
 
@@ -110,7 +112,7 @@ exports.sendEmailNotification = async (agendamento, isReagendamento = false, isC
 // =========================================================================
 // FUNÇÃO ADAPTADA PARA ENVIAR NOTIFICAÇÃO VIA WHATSAPP
 // =========================================================================
-exports.sendWhatsAppNotification = async (agendamento, isReagendamento = false) => {
+exports.sendWhatsAppNotification = async (clinica, agendamento, isReagendamento = false) => {
   if (!waClient || !waClient.isReady) {
     console.log('Cliente WhatsApp não está pronto. Ignorando notificação.');
     return;
@@ -126,6 +128,12 @@ exports.sendWhatsAppNotification = async (agendamento, isReagendamento = false) 
       tipo_terapia: agendamento.tipo_terapia,
       data_agendamento: new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR'),
       hora_agendamento: new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+
+      // Pegando da clínica vinculada:
+      telefone_clinica: clinica.telefone_clinica,
+      nome_clinica: clinica.nome_clinica,
+      ano_atual: new Date().getFullYear()
+
     };
 
     textTemplate = replacePlaceholders(textTemplate, templateData);
@@ -139,5 +147,52 @@ exports.sendWhatsAppNotification = async (agendamento, isReagendamento = false) 
 
   } catch (error) {
     console.error('Erro ao enviar notificação WhatsApp:', error);
+  }
+};
+// ===========================================
+// FUNCAO PARA DASR bOAS VIDAS A NOVA cLINICA
+// ===========================================
+exports.sendWelcomeEmail = async (clinica) => {
+  console.log(`[MED-LM] 📩 Iniciando processo de e-mail para: ${clinica.email_master}`);
+
+  try {
+    // 1. DEFINIR A VARIÁVEL QUE ESTÁ FALTANDO
+    const assunto = 'Bem-vindo ao MedLM - Sua Clínica está Ativa!';
+
+    const templatePath = path.join(__dirname, '..', 'templates', 'boas_vindas.html');
+
+    // 2. Lendo o arquivo
+    const htmlTemplateOriginal = await fs.readFile(templatePath, 'utf-8');
+
+    // 3. Preparando os dados (Note que usamos clinica.email_master aqui)
+    const templateData = {
+      dono_nome: clinica.dono_nome,
+      nome_clinica: clinica.nome_clinica,
+      email: clinica.email_master,
+      senha: clinica.senha_master,
+      telefone_clinica: clinica.telefone_clinica,
+      ano_atual: new Date().getFullYear()
+    };
+
+    const htmlFinal = replacePlaceholders(htmlTemplateOriginal, templateData);
+
+    // 4. Configuração do Envio
+    const mailOptions = {
+      from: `"MedLM - Sistema Inteligente" <${process.env.EMAIL_USER}>`,
+      to: clinica.email_master, // Usando email_master como no seu banco
+      subject: assunto,         // AGORA A VARIÁVEL EXISTE!
+      html: htmlFinal
+    };
+
+    console.log("[MED-LM] 🚀 Enviando e-mail via Nodemailer...");
+    const info = await transporter.sendMail(mailOptions);
+
+    console.log(`[MED-LM] ✅ SUCESSO: E-mail enviado! ID: ${info.messageId}`);
+    const carimboTempo = new Date().toLocaleString('pt-BR');
+    console.log(`[MED-LM] [${carimboTempo}] ✅ SUCESSO...`);
+
+  } catch (error) {
+    const horaErro = new Date().toLocaleTimeString('pt-BR');
+    console.error(`[MED-LM] [${horaErro}] ❌ ERRO NO ENVIO:`, error.message);
   }
 };

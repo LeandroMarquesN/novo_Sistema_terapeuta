@@ -33,8 +33,21 @@
 
             <div>
                 <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail Profissional</label>
-                <input type="email" name="email_master" required placeholder="seu@email.com"
+                <input type="email" name="email_master" required placeholder="E-mail da clinica por favor!"
                     class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">WhatsApp da Clínica (Pacientes)</label>
+                    <input type="text" name="telefone_clinica" required placeholder="(00) 00000-0000"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Telefone do Dono (Comercial)</label>
+                    <input type="text" name="telefone_dono" required placeholder="(00) 00000-0000"
+                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                </div>
             </div>
 
             <div>
@@ -59,13 +72,35 @@
         </p>
     </div>
 
+    <!-- ======== MODAL CLINICA ======= -->
+    <div id="modalSucesso" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
+        <div style="background:white; padding:40px; border-radius:15px; text-align:center; max-width:400px; animation: slideIn 0.3s ease;">
+            <div style="font-size: 50px; color: #2ecc71;">✅</div>
+            <h2 style="color: #2c3e50;">Parabéns pela escolha!</h2>
+            <p style="color: #7f8c8d; margin-top:15px;">
+                Sua clínica <strong>MedLM</strong> já está ativa em nosso sistema.
+            </p>
+            <p style="font-size: 14px; color: #3498db;">
+                Enviamos um e-mail com seus dados de acesso.
+            </p>
+            <button onclick="window.location.href='/'" style="background:#2ecc71; color:white; border:none; padding:12px 30px; border-radius:5px; cursor:pointer; margin-top:20px; font-weight:bold;">
+                Acessar Sistema
+            </button>
+        </div>
+    </div>
+
+    <style>
+    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+    <!-- ===== fIM NODAL CLINICA ===== -->
+
     <script>
         document.getElementById('formCadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const btnSubmit = document.getElementById('btnSubmit');
             const originalText = btnSubmit.innerText;
-            
+
             // 1. Feedback visual: desativa o botão
             btnSubmit.disabled = true;
             btnSubmit.innerText = "Processando...";
@@ -84,8 +119,7 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    // SUCESSO: Redireciona com um parâmetro de sucesso
-                    window.location.href = '/?status=sucesso';
+                    document.getElementById('modalSucesso').style.display = 'flex';
                 } else {
                     // ERRO DO SERVIDOR (ex: e-mail já existe)
                     alert(result.error || "Erro ao criar clínica. Verifique os dados.");

@@ -2,104 +2,50 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-  <title>Confirmação de Agendamento</title>
+  <title>Confirmação de Agendamento - MedLM</title>
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: #f4f6f8;
-      margin: 0;
-      padding: 0;
-    }
-    .email-container {
-      max-width: 600px;
-      margin: 0 auto;
-      background-color: #ffffff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      position: relative; /* Adicionado para posicionamento absoluto da .footer */
-    }
-    .header {
-      background: linear-gradient(135deg, #5f9ea0, #4682b4);
-      padding: 20px;
-      text-align: center;
-      color: #ffffff;
-    }
-    .header .logo {
-      font-size: 22px;
-      font-weight: bold;
-      letter-spacing: 1px;
-    }
-    .content {
-      padding: 20px;
-      color: #333333;
-    }
-    .content h3 {
-      color: #4682b4;
-    }
-    .footer {
-      background-color: #f4f6f8;
-      text-align: center;
-      padding: 15px;
-      font-size: 12px;
-      color: #777777;
-    }
-    /* Estilo da Logo */
-    span.logo-img {
-      height: 280px;
-      width: 650px;
-      background-image: url('https://i.imgur.com/53FW2BV.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: left;
-      display: inline-block;
-      text-indent: -9999px;
-      overflow: hidden;
-    }
-    span.footer {
-      height: 30px; /* Aproximadamente o tamanho da linha de texto "Sua Terapeuta" */
-      width: 30px; /* Ajustado proporcionalmente à imagem */
-      background-image: url('https://i.imgur.com/X6cHZyN.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      position: absolute;
-      bottom: 10px; /* Distância do fundo */
-      right: 10px;  /* Posicionado no canto direito */
-    }
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .header { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); padding: 30px; text-align: center; }
+    .logo-img { max-width: 200px; height: auto; }
+    .content { padding: 40px; color: #444; line-height: 1.6; }
+    .content h2 { color: #2c5364; margin-top: 0; font-weight: 600; }
+    .info-box { background-color: #f8fafb; border-left: 4px solid #2c5364; padding: 20px; margin: 25px 0; border-radius: 4px; }
+    .info-item { margin-bottom: 10px; font-size: 15px; }
+    .info-item strong { color: #2c5364; }
+    .footer { background: #f4f7f9; padding: 25px; text-align: center; color: #888; font-size: 12px; }
+    .btn { display: inline-block; padding: 12px 25px; background: #2c5364; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; }
   </style>
 </head>
 <body>
-  <div class="email-container">
-    <!-- Cabeçalho -->
+  <div class="container">
     <div class="header">
-      <span class="logo-img"></span>
+      <img src="https://i.imgur.com/5pjegDN.png" alt="MedLM Logo" class="logo-img">
     </div>
-    <!-- <div class="header">
-      <img src="https://i.imgur.com/53FW2BV.png" alt="Karla Marques Logo" style="max-width: 300px; height: auto; display: block; margin: 0 auto;">
-    </div> -->
-
-    <!-- Conteúdo -->
     <div class="content">
-      <h3>Olá, {{nome_paciente}}!</h3>
-      <p>Seu agendamento para sua consulta foi agendada com sucesso</p>
-      <p>Foi registrado um atendimento <strong>{{tipo_terapia}}</strong>.</p>
-      <h3><strong>Detalhes do agendamento:</strong></h3>
-      <ul>
-        <li><strong>Data:</strong> {{data_agendamento}}</li>
-        <li><strong>Horário:</strong> {{hora_agendamento}}</li>
-        <li><strong>Motivo:</strong> {{motivo_consulta}}</li>
-      </ul>
-      <p>Chegar com 10 minutos de antecedência! </p>
-      <p>Se tiver alguma dúvida, por favor, entre em contato.11 97544-4577</p>
-      <p>Atenciosamente,</p>
-      <p><strong>Karla Marques </strong></p>
+      <h2>Olá, {{nome_paciente}}!</h2>
+      <p>Boas notícias! Sua consulta foi agendada com sucesso no <strong>MedLM</strong>.</p>
 
+      <div class="info-box">
+        <div class="info-item"><strong>📅 Data:</strong> {{data_agendamento}}</div>
+        <div class="info-item"><strong>⏰ Horário:</strong> {{hora_agendamento}}</div>
+        <div class="info-item"><strong>🔍 Procedimento:</strong> {{tipo_terapia}}</div>
+        <div class="info-item"><strong>📝 Motivo:</strong> {{motivo_consulta}}</div>
+      </div>
+
+      <p>Recomendamos chegar com <strong>10 minutos de antecedência</strong>.</p>
+
+      <p>Se precisar falar conosco, entre em contato pelo telefone: <br>
+      <strong>{{telefone_clinica}}</strong></p>
+
+      <p>Atenciosamente,<br>
+      <strong>Equipe {{nome_clinica}}</strong></p>
     </div>
-
-    <!-- Rodapé -->
     <div class="footer">
-      © {{ano_atual}} Sistema Terapeuta - Todos os direitos reservados.
+      © {{ano_atual}} MedLM - Gestão Inteligente para Clínicas.<br>
+      Este é um e-mail automático, por favor não responda.
     </div>
   </div>
 </body>

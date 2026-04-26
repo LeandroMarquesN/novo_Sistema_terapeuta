@@ -32,7 +32,7 @@ ${azul}${negrito}  ___________________________________________________
 
     SISTEMA CLÍNICO INTELIGENTE CONECTADO
   =================================================
-  🚀 Servidor rodando na porta meu querido: ${PORT}
+  🚀 Servidor rodando na porta ${PORT} meu querido!
   🕗 Horário local: ${new Date().toLocaleTimeString()}
   =================================================
   `);
