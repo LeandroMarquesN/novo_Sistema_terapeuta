@@ -162,6 +162,7 @@ exports.criarAgendamento = async (req, res) => {
       // Criamos o objeto do agendamento para bater com o que a função espera
       const dadosDoAgendamento = {
         nome: nome,
+        email: email, // <--- ADICIONE ESTA LINHA AQUI!
         tipo_terapia: tipo_terapia,
         data_agendamento: data_agendamento,
         motivo_consulta: motivo_consulta
