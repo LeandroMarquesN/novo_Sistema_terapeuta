@@ -93,11 +93,14 @@ exports.sendEmailNotification = async (clinica, agendamento, isReagendamento = f
 
     htmlTemplate = replacePlaceholders(htmlTemplate, templateData);
 
+    // DEBUG para você ver no terminal se o e-mail chegou aqui
+    console.log(`[MED-LM] Tentando enviar para: ${agendamento.email}`);
+
     const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: agendamento.email,
+      from: `"MedLM - ${clinica.nome_clinica}" <${process.env.EMAIL_USER}>`,
+      to: agendamento.email, // Aqui precisa ser o mesmo nome que você pós no controller
       subject: subject,
-      html: htmlTemplate,
+      html: htmlTemplate
     };
 
     await transporter.sendMail(mailOptions);
