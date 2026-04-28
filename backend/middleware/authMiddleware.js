@@ -1,23 +1,33 @@
 const jwt = require('jsonwebtoken');
 
 module.exports = (req, res, next) => {
-    // 1. Pega o token que vem no cabeçalho da requisição
+    // Tenta pegar o token do Header OU do Cookie
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Formato: "Bearer TOKEN"
+    let token = authHeader && authHeader.split(' ')[1];
+
+    // Se não achou no header, busca no cookie
+    if (!token && req.headers.cookie) {
+        const cookies = req.headers.cookie.split(';').reduce((acc, cookie) => {
+            const [key, value] = cookie.trim().split('=');
+            acc[key] = value;
+            return acc;
+        }, {});
+        token = cookies.token;
+    }
 
     if (!token) {
-        return res.status(401).json({ error: "Acesso negado. Faça login para continuar." });
+        // Se for uma rota de API, manda JSON. Se for página, redireciona pro login.
+        if (req.path.includes('/api/')) {
+            return res.status(401).json({ error: "Acesso negado." });
+        }
+        return res.redirect('/login');
     }
 
     try {
-        // 2. Verifica se o token é válido usando a sua JWT_SECRET do .env
         const verificado = jwt.verify(token, process.env.JWT_SECRET);
-
-        // 3. Adiciona os dados do usuário na requisição para os próximos controllers usarem
         req.usuario = verificado;
-
-        next(); // Pode seguir para a rota!
+        next();
     } catch (err) {
-        res.status(403).json({ error: "Token inválido ou expirado." });
+        res.redirect('/login');
     }
 };

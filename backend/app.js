@@ -3,22 +3,48 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 
+const authRoutes = require('./routes/authRoutes');
+const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
+const equipeRoutes = require('./routes/equipeRoutes');
+const financeiroRoutes = require('./routes/financeiroRoutes');
+
+const pacienteRoutes = require('./routes/pacienteRoutes');
+const usuarioRoutes = require('./routes/usuarioRoutes');
+const agendamentoRoutes = require('./routes/agendamentoRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes')
+const openAiRoutes = require('./routes/openAiRoutes'); // <-- Nova linha
+
 const app = express();
 
-// Middlewares
+// --- CONFIGURAÇÃO DO EJS (Coloque logo aqui no início) ---
+app.set('view engine', 'ejs');
+// Se o Docker der erro de "view not found", mude para path.join(__dirname, 'frontend', 'views')
+app.set('views', path.join(__dirname, '..', 'frontend', 'views'));
+
+// Middlewares padrão
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// --- 1. IMPORTAÇÃO DAS ROTAS ---
-const pacientesRoutes = require('./routes/pacienteRoutes');
-const usuarioRoutes = require('./routes/usuarioRoutes');
-const agendamentoRoutes = require('./routes/agendamentoRoutes');
-const openAiRoutes = require('./routes/openAiRoutes');
-const equipeRoutes = require('./routes/equipeRoutes'); // DECLARADO SÓ UMA VEZ!
-const authRoutes = require('./routes/authRoutes');
-const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
-const financeiroRoutes = require('./routes/financeiroRoutes');
+// ... (suas importações de rotas)
+
+// --- MAPEAMENTO DAS APIS ---
+app.use('/api/auth', authRoutes);
+app.use('/api/clinicas', cadastroClinicaRoutes);
+app.use('/api/pacientes', pacienteRoutes);
+app.use('/api/agendamentos', agendamentoRoutes);
+app.use('/api/equipe', equipeRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/openai', openAiRoutes);
+app.use('/api/financeiro', financeiroRoutes);
+
+// --- MAPEAMENTO DAS VIEWS (Dashboard) ---
+// Importante: coloque o app.use do dashboardRoutes AQUI
+app.use('/', dashboardRoutes);
+
+// --- LOGO ABAIXO DE app.set('view engine', 'ejs'); ---
+// Mantive o seu caminho original que você disse que funciona
+app.set('views', path.join(__dirname, 'frontend', 'views'));
 
 // ADICIONE AQUI: Middleware para desativar o cache e proteger os dados da clínica
 app.use((req, res, next) => {
@@ -31,13 +57,16 @@ app.use('/api/auth', authRoutes);
 
 app.use('/api/clinicas', cadastroClinicaRoutes);
 
-app.use('/api/pacientes', pacientesRoutes);
+app.use('/api/pacientes', pacienteRoutes);
 app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api/equipe', equipeRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/openai', openAiRoutes);
 // Define o prefixo das rotas financeiras
 app.use('/api/financeiro', financeiroRoutes);
+
+// rotas views --
+app.set('views', path.join(__dirname, '..', 'frontend', 'views'));
 
 // --- 3. SERVIDORES DE ARQUIVOS ESTÁTICOS ---
 app.use('/pages', express.static(path.join(__dirname, 'frontend', 'pages')));
@@ -68,9 +97,9 @@ app.get('/login', (req, res) => {
 });
 
 // ADICIONE ESTA ROTA AQUI:
-app.get('/dashboard', (req, res) => {
-  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
-});
+// app.get('/dashboard', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
+// });
 
 app.get('/agendamento', (req, res) => {
   res.sendFile(path.join(__dirname, 'frontend', 'pages', 'agendamento.html'));

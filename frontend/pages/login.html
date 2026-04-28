@@ -206,20 +206,18 @@
         const data = await response.json();
 
         if (response.ok) {
-          // --- A MÁGICA DO SAAS ACONTECE AQUI ---
+            // 1. Salva no localStorage (para o seu JS de frontend usar se precisar)
+            localStorage.setItem('token', data.token);
 
-          // 1. Salva o Token JWT (O seu passaporte para todas as rotas)
-          localStorage.setItem('token', data.token);
+            // 2. SALVA NO COOKIE (Isso é o que vai fazer o EJS funcionar!)
+            // O cookie é enviado automaticamente para o servidor em cada clique
+            document.cookie = `token=${data.token}; path=/; max-age=${8 * 60 * 60}; SameSite=Lax`;
 
-          // 2. Salva os dados do usuário e da clínica (Para personalizar a dashboard)
-          localStorage.setItem('usuarioNome', data.usuario.nome);
-          localStorage.setItem('usuarioCargo', data.usuario.cargo);
-          localStorage.setItem('clinicaNome', data.usuario.clinica);
+            // Redireciona
+            window.location.href = '/dashboard';
+        }
 
-          // Redireciona para a dashboard
-          window.location.href = '/dashboard';
-
-        } else {
+         else {
           // Mostra a mensagem de erro que vem do backend (ex: "E-mail ou senha inválidos")
           errorMessage.textContent = data.error || 'Erro ao realizar login.';
           errorMessage.style.display = 'block';
