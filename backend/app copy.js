@@ -66,49 +66,52 @@ app.use('/api/openai', openAiRoutes);
 // Define o prefixo das rotas financeiras
 app.use('/api/financeiro', financeiroRoutes);
 
-// --- 1. CRIAR UMA BASE PARA O FRONTEND (Saindo de backend para a raiz) ---
-const frontendPath = path.resolve(__dirname, '..', 'frontend');
+// --- 3. SERVIDORES DE ARQUIVOS ESTÁTICOS ---
+app.use('/pages', express.static(path.join(__dirname, 'frontend', 'pages')));
+app.use('/assets', express.static(path.join(__dirname, 'frontend', 'assets')));
+app.use('/css', express.static(path.join(__dirname, 'frontend', 'css')));
+app.use('/logo', express.static(path.join(__dirname, 'frontend', 'logo')));
 
-// --- 2. SERVIDORES DE ARQUIVOS ESTÁTICOS (Corrigidos com ..) ---
-app.use('/pages', express.static(path.join(frontendPath, 'pages')));
-app.use('/assets', express.static(path.join(frontendPath, 'assets')));
-app.use('/css', express.static(path.join(frontendPath, 'css')));
-app.use('/logo', express.static(path.join(frontendPath, 'logo')));
-app.use('/ScriptGlobal', express.static(path.join(frontendPath, 'ScriptGlobal')));
 
-// Servir a pasta frontend geral
-app.use(express.static(frontendPath));
 
-// Uploads (Geralmente fica na raiz do projeto ou dentro de backend)
-// Se estiver na raiz do projeto:
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
-// Se estiver dentro de backend:
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Se a pasta ScriptGlobal está dentro de frontend
+app.use('/ScriptGlobal', express.static(path.join(__dirname, 'frontend/ScriptGlobal')));
 
-// --- 3. ROTAS DE PÁGINAS (Corrigidas com frontendPath) ---
+// 1. Servir os arquivos estáticos da pasta frontend
+app.use(express.static(path.join(__dirname, 'frontend')));
+
+// Rota Completa (Fallback/Apelido)
+
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.get('/', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'pages', 'index.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'index.html'));
 });
 
+// ADICIONE ESTA LINHA AQUI:
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'pages', 'login.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'login.html'));
 });
+
+// ADICIONE ESTA ROTA AQUI:
+// app.get('/dashboard', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'frontend', 'pages', 'dashboard.html'));
+// });
 
 app.get('/agendamento', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'pages', 'agendamento.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'agendamento.html'));
 });
-
 app.get('/pacientes', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'pages', 'pacientes.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'pacientes.html'));
 });
-
 app.get('/equipe', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'pages', 'equipe.html'));
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'equipe.html'));
+});
+app.get('/financeiro', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend', 'pages', 'financeiro.html'));
 });
 
-app.get('/financeiro', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'pages', 'financeiro.html'));
-});
 
 
 

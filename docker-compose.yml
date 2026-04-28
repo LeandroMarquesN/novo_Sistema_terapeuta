@@ -6,12 +6,12 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./backend:/app
+      - .:/app # MAPEIA A RAIZ (onde estão backend e frontend)
       - /app/node_modules
-      - ./frontend:/app/frontend
-      - ./backend/uploads:/app/uploads # Mapeamento explícito para uploads
+      - ./backend/uploads:/app/uploads
     env_file:
       - .env
+    command: node backend/server.js # <-- ADICIONE ESTA LINHA
     depends_on:
       db: # Certifique-se de que 'db:' está alinhado com 'app:' e 'phpmyadmin:'
         condition: service_healthy # Indentado corretamente sob 'db:'

@@ -12,3 +12,9 @@ fs.access(caminhoIndex, fs.constants.F_OK, (err) => {
     console.log("✅ Arquivo index.html encontrado com sucesso!");
   }
 });
+// anotacao para o vlume do docker se der errado:
+// volumes:
+// - ./ backend: /app
+//   - /app/node_modules
+//   - ./ frontend: /app/frontend
+//     - ./ backend / uploads: /app/uploads # Mapeamento explícito para uploads
