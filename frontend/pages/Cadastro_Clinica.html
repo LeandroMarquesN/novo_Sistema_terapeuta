@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -6,76 +7,178 @@
     <title>Cadastro MedLM - Sistema Terapêutico</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .plan-card input:checked + div {
+            border-color: #2563eb;
+            background-color: #eff6ff;
+            ring: 2px;
+            ring-color: #2563eb;
+        }
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+        }
+        .promo-badge { animation: pulse-gold 2s infinite; }
+    </style>
 </head>
-<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4">
+<body class="bg-slate-50 min-h-screen">
 
-    <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-        <div class="text-center mb-8">
-            <div class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-200">
-                <i class="fas fa-clinic-medical text-white text-2xl"></i>
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- Banner de Promoção de Boas-vindas -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-1 mb-8 shadow-lg promo-badge">
+            <div class="bg-white/10 backdrop-blur-sm rounded-xl py-3 px-6 flex flex-col md:flex-row items-center justify-between text-white">
+                <div class="flex items-center gap-4 mb-2 md:mb-0">
+                    <span class="bg-yellow-400 text-blue-900 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">Oferta de Lançamento</span>
+                    <p class="font-medium text-sm md:text-base italic">Qualquer plano por apenas <span class="text-yellow-400 font-bold text-xl">R$ 69,90</span> nos primeiros 3 meses!</p>
+                </div>
+                <div class="text-xs text-blue-100 opacity-80">* Após o período, aplica-se o valor base do plano escolhido.</div>
             </div>
-            <h1 class="text-2xl font-bold text-slate-800">Crie sua Clínica</h1>
-            <p class="text-slate-500">Inicie seu teste grátis no MedLM hoje.</p>
         </div>
 
-        <form id="formCadastro" class="space-y-5">
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Nome da Clínica</label>
-                <input type="text" name="nome_clinica" required placeholder="Ex: Clínica Equilíbrio"
-                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-            </div>
+        <div class="grid lg:grid-cols-12 gap-8">
 
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Seu Nome Completo</label>
-                <input type="text" name="dono_nome" required placeholder="Seu nome"
-                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-            </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">E-mail Profissional</label>
-                <input type="email" name="email_master" required placeholder="E-mail da clinica por favor!"
-                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">WhatsApp da Clínica (Pacientes)</label>
-                    <input type="text" name="telefone_clinica" required placeholder="(00) 00000-0000"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+            <!-- Lado Esquerdo: Formulário -->
+            <div class="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+                <div class="mb-8">
+                    <h1 class="text-2xl font-bold text-slate-800">Configure sua Clínica</h1>
+                    <p class="text-slate-500 italic">Preencha os dados abaixo para criar sua conta master.</p>
                 </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">Telefone do Dono (Comercial)</label>
-                    <input type="text" name="telefone_dono" required placeholder="(00) 00000-0000"
-                        class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+
+                <form id="formCadastro" class="space-y-5">
+                    <!-- Nome e Dono -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome da Clínica</label>
+                            <input type="text" name="nome_clinica" required placeholder="Ex: Clínica Equilíbrio"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome do Responsável</label>
+                            <input type="text" name="dono_nome" required placeholder="Seu nome completo"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Email e Senha -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">E-mail Profissional</label>
+                            <input type="email" name="email_master" required placeholder="email@clinica.com"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Senha Master</label>
+                            <input type="password" name="senha_master" required minlength="6" placeholder="******"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- Telefones -->
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">WhatsApp Clínica</label>
+                            <input type="text" name="telefone_clinica" required placeholder="(00) 00000-0000"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Seu Celular</label>
+                            <input type="text" name="telefone_dono" required placeholder="(00) 00000-0000"
+                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        </div>
+                    </div>
+
+                    <!-- SELEÇÃO DE PLANOS (ID do plano para o banco) -->
+                    <div class="pt-4">
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Escolha seu Plano</label>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <!-- Trial -->
+                            <label class="plan-card cursor-pointer">
+                                <input type="radio" name="plano_id" value="1" checked class="hidden">
+                                <div class="p-4 border-2 border-slate-100 rounded-xl hover:border-blue-200 transition">
+                                    <p class="font-bold text-slate-800">Trial</p>
+                                    <p class="text-xs text-slate-500 italic">Até 3 membros</p>
+                                </div>
+                            </label>
+                            <!-- Premium -->
+                            <label class="plan-card cursor-pointer">
+                                <input type="radio" name="plano_id" value="2" class="hidden">
+                                <div class="p-4 border-2 border-slate-100 rounded-xl hover:border-blue-200 transition text-center">
+                                    <p class="font-bold text-slate-800">Premium</p>
+                                    <p class="text-xs text-slate-500 italic">Até 10 membros</p>
+                                </div>
+                            </label>
+                            <!-- Enterprise -->
+                            <label class="plan-card cursor-pointer">
+                                <input type="radio" name="plano_id" value="3" class="hidden">
+                                <div class="p-4 border-2 border-slate-100 rounded-xl hover:border-blue-200 transition text-right">
+                                    <p class="font-bold text-slate-800">Enterprise</p>
+                                    <p class="text-xs text-slate-500 italic">Ilimitado</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start space-x-2 pt-4">
+                        <input type="checkbox" id="termos" required class="mt-1 h-4 w-4 text-blue-600 border-slate-300 rounded">
+                        <label for="termos" class="text-xs text-slate-500">Concordo com os termos e entendo que o valor de 69,90 é válido por 90 dias.</label>
+                    </div>
+
+                    <button type="submit" id="btnSubmit"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01] active:scale-95">
+                        Finalizar e Criar Minha Clínica
+                    </button>
+                </form>
+            </div>
+
+            <!-- Lado Direito: Resumo e Benefícios -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="bg-slate-800 p-8 rounded-2xl text-white shadow-xl">
+                    <h3 class="text-xl font-bold mb-6">Por que escolher o MedLM?</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-emerald-400"></i>
+                            <span>Multitenancy: Seus dados 100% isolados</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-emerald-400"></i>
+                            <span>Notificações WhatsApp inclusas</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fas fa-check-circle text-emerald-400"></i>
+                            <span>Prontuários com IA integrada</span>
+                        </li>
+                    </ul>
+
+                    <div class="mt-8 pt-8 border-t border-slate-700">
+                        <p class="text-slate-400 text-sm">Resumo da Assinatura:</p>
+                        <div class="flex justify-between items-end mt-2">
+                            <div>
+                                <p class="text-2xl font-bold">R$ 69,90 <span class="text-sm font-normal text-slate-400">/mês</span></p>
+                                <p class="text-xs text-emerald-400">Preço garantido por 3 meses</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-slate-400">Expira em:</p>
+                                <p class="text-sm font-mono">29/05/2026</p> <!-- Aqui você pode injetar via JS depois -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center">
+                    <p class="text-sm text-slate-500 mb-2">Dúvidas sobre a migração de dados?</p>
+                    <a href="#" class="text-blue-600 font-bold hover:underline">Fale com um especialista</a>
                 </div>
             </div>
-
-            <div>
-                <label class="block text-sm font-semibold text-slate-700 mb-1">Senha de Acesso</label>
-                <input type="password" name="senha_master" required minlength="6" placeholder="No mínimo 6 caracteres"
-                    class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-            </div>
-
-            <div class="flex items-start space-x-2 py-2">
-                <input type="checkbox" id="termos" required class="mt-1 h-4 w-4 text-blue-600 border-slate-300 rounded">
-                <label for="termos" class="text-xs text-slate-500 cursor-pointer">Ao se cadastrar, você concorda com os termos de uso e política de privacidade.</label>
-            </div>
-
-            <button type="submit" id="btnSubmit"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                Criar Minha Clínica
-            </button>
-        </form>
-
-        <p class="text-center mt-6 text-sm text-slate-600">
-            Já tem uma conta? <a href="login.html" class="text-blue-600 font-bold hover:underline">Fazer Login</a>
-        </p>
+        </div>
     </div>
+
+    <!-- O MODAL DE SUCESSO CONTINUA O MESMO QUE VOCÊ JÁ TINHA... -->
 
     <!-- ======== MODAL CLINICA ======= -->
     <div id="modalSucesso" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
         <div style="background:white; padding:40px; border-radius:15px; text-align:center; max-width:400px; animation: slideIn 0.3s ease;">
-            <div style="font-size: 50px; color: #2ecc71;">✅</div>
+            <div style="font-size: 50px; color: #2563eb;">✅</div>
             <h2 style="color: #2c3e50;">Parabéns pela escolha!</h2>
             <p style="color: #7f8c8d; margin-top:15px;">
                 Sua clínica <strong>MedLM</strong> já está ativa em nosso sistema.
@@ -83,7 +186,7 @@
             <p style="font-size: 14px; color: #3498db;">
                 Enviamos um e-mail com seus dados de acesso.
             </p>
-            <button onclick="window.location.href='/'" style="background:#2ecc71; color:white; border:none; padding:12px 30px; border-radius:5px; cursor:pointer; margin-top:20px; font-weight:bold;">
+            <button onclick="window.location.href='/'" style="background:#2563eb; color:white; border:none; padding:12px 30px; border-radius:5px; cursor:pointer; margin-top:20px; font-weight:bold;">
                 Acessar Sistema
             </button>
         </div>
@@ -101,15 +204,22 @@
             const btnSubmit = document.getElementById('btnSubmit');
             const originalText = btnSubmit.innerText;
 
-            // 1. Feedback visual: desativa o botão
+            // 1. Feedback visual imediato
             btnSubmit.disabled = true;
-            btnSubmit.innerText = "Processando...";
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Criando sua conta...';
 
+            // 2. Captura os dados do formulário
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
 
+            /*
+               IMPORTANTE: Como usamos cards personalizados para os planos,
+               o 'plano_id' será enviado automaticamente porque os inputs
+               radio têm o name="plano_id".
+            */
+
             try {
-                // 2. Chamada para a API (Caminho relativo para não quebrar na nuvem)
+                // 3. Chamada para a sua API de Registro
                 const response = await fetch('/api/clinicas/register-clinica', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -119,19 +229,38 @@
                 const result = await response.json();
 
                 if (response.ok) {
+                    // 4. Se deu certo, mostra o modal de sucesso impactante
                     document.getElementById('modalSucesso').style.display = 'flex';
                 } else {
-                    // ERRO DO SERVIDOR (ex: e-mail já existe)
-                    alert(result.error || "Erro ao criar clínica. Verifique os dados.");
+                    // 5. Se houve erro (ex: email já cadastrado)
+                    alert(result.error || "Ocorreu um erro ao processar seu cadastro.");
                     btnSubmit.disabled = false;
                     btnSubmit.innerText = originalText;
                 }
             } catch (error) {
                 console.error("Erro na conexão:", error);
-                alert("Falha na conexão com o servidor.");
+                alert("Erro crítico de conexão. O servidor está ligado?");
                 btnSubmit.disabled = false;
                 btnSubmit.innerText = originalText;
             }
+        });
+
+        // BÔNUS: Máscara simples para os telefones enquanto o usuário digita
+        const handlePhone = (event) => {
+            let input = event.target;
+            input.value = phoneMask(input.value);
+        }
+
+        const phoneMask = (value) => {
+            if (!value) return "";
+            value = value.replace(/\D/g, '');
+            value = value.replace(/(\d{2})(\d)/, "($1) $2");
+            value = value.replace(/(\d)(\d{4})$/, "$1-$2");
+            return value;
+        }
+
+        document.querySelectorAll('input[name="telefone_clinica"], input[name="telefone_dono"]').forEach(input => {
+            input.addEventListener('keyup', handlePhone);
         });
     </script>
 </body>

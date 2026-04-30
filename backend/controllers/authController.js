@@ -1,17 +1,18 @@
-require('dotenv').config(); // Adicione isso aqui no topo
+require('dotenv').config();
 const db = require('../config/db');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs'); // Mantido para não quebrar o import, mas não usado no compare agora
 const jwt = require('jsonwebtoken');
 
 exports.login = async (req, res) => {
     const { email, senha } = req.body;
 
     try {
-        // 1. Busca o usuário e os dados da clínica dele (Join)
+        // 1. Busca o usuário (Note o LEFT JOIN para permitir que o ADMIN logue mesmo sem clínica)
         const [usuarios] = await db.execute(
-            `SELECT u.*, c.nome_clinica 
-             FROM usuarios u 
-             JOIN clinicas c ON u.clinica_id = c.id 
+            `SELECT u.*, c.status AS clinica_status, c.data_expiracao, p.nome_plano
+             FROM usuarios u
+             LEFT JOIN clinicas c ON u.clinica_id = c.id
+             LEFT JOIN planos p ON c.plano_id = p.id
              WHERE u.email = ?`,
             [email]
         );
@@ -22,33 +23,47 @@ exports.login = async (req, res) => {
 
         const usuario = usuarios[0];
 
-        // 2. Comparação de senha (Por enquanto texto puro, depois usaremos bcrypt.compare)
+        // 2. Verificação de senha (Texto Puro)
         if (senha !== usuario.senha) {
             return res.status(401).json({ error: "E-mail ou senha inválidos." });
         }
 
-        // Teste rápido: se quiser ter certeza absoluta, coloque um console log temporário:
-        console.log("Minha chave secreta é:", process.env.JWT_SECRET);
+        // 3. Trava de Segurança para Clínicas (Pula se for o seu e-mail master)
+        if (usuario.email !== 'medlm.com' && usuario.clinica_status === 'suspenso') {
+            return res.status(403).json({
+                error: "O acesso desta clínica foi suspenso. Entre em contato com o suporte."
+            });
+        }
 
-        // 3. Geração do Token usando a variável de ambiente
+        // 4. Geração do Token JWT (DEVE vir antes do redirecionamento!)
         const token = jwt.sign(
             {
                 id: usuario.id,
                 clinica_id: usuario.clinica_id,
-                cargo: usuario.cargo
+                cargo: usuario.cargo,
+                email: usuario.email
             },
-            process.env.JWT_SECRET, // Lendo do seu .env
-            { expiresIn: process.env.JWT_EXPIRES_IN || '8h' }
+            process.env.JWT_SECRET || 'seu_segredo_aqui',
+            { expiresIn: '8h' }
         );
 
-        // 4. Resposta para o Frontend
-        res.json({
-            message: "Bem-vindo ao Sistema Terapêutico!",
+        // 5. Lógica de Redirecionamento Inteligente
+        // Definimos para onde ele vai, mas só enviamos a resposta no final
+        let redirectUrl = '/dashboard';
+
+        if (usuario.email === 'admin@medlm.com' && usuario.cargo === 'dono') {
+            redirectUrl = '/admin';
+        }
+
+        // 6. Resposta Final Única
+        return res.json({
+            success: true,
+            message: "Bem-vindo ao MedLM!",
             token: token,
+            redirectUrl: redirectUrl,
             usuario: {
                 nome: usuario.nome,
-                cargo: usuario.cargo,
-                clinica: usuario.nome_clinica
+                cargo: usuario.cargo
             }
         });
 

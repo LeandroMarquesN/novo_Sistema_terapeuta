@@ -4,10 +4,20 @@ const db = require('../config/db');
 const notificacaoService = require('../services/notificationService');
 
 router.post('/register-clinica', async (req, res) => {
-    const { nome_clinica, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master } = req.body;
+    // 1. Capturamos o plano_id que vem do novo HTML
+    const {
+        nome_clinica,
+        dono_nome,
+        telefone_clinica,
+        telefone_dono,
+        email_master,
+        senha_master,
+        plano_id
+    } = req.body;
 
-    if (!nome_clinica || !dono_nome || !telefone_clinica || !telefone_dono || !email_master || !senha_master) {
-        return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+    // Validação básica
+    if (!nome_clinica || !dono_nome || !email_master || !senha_master || !plano_id) {
+        return res.status(400).json({ error: "Campos obrigatórios faltando, inclusive o plano." });
     }
 
     const connection = await db.getConnection();
@@ -15,51 +25,71 @@ router.post('/register-clinica', async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        // CORREÇÃO AQUI: Adicionado os campos e os valores correspondentes
+        // 2. Lógica de Datas (Regra de Negócio)
+        const data_cadastro = new Date();
+        const data_expiracao = new Date();
+        data_expiracao.setMonth(data_expiracao.getMonth() + 1); // 30 dias de acesso inicial
+
+        // 3. INSERT NA TABELA CLINICAS (Atualizado com plano_id e datas)
         const [resultClinica] = await connection.execute(
-            'INSERT INTO clinicas (nome_clinica, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master) VALUES (?, ?, ?, ?, ?, ?)',
-            [nome_clinica, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master]
+            `INSERT INTO clinicas
+            (nome_clinica, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao, data_cadastro, valor_atual)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                nome_clinica,
+                dono_nome,
+                telefone_clinica,
+                telefone_dono,
+                email_master,
+                senha_master,
+                plano_id,        // ID vindo do HTML (1, 2 ou 3)
+                data_expiracao,  // Calculado acima
+                data_cadastro,   // Hoje
+                69.90            // Valor promocional de entrada
+            ]
         );
 
         const novaClinicaId = resultClinica.insertId;
 
-        // 2. Criar o Usuário Dono (CORREÇÃO AQUI: 5 campos = 5 interrogações)
-        // Removido o 'nome_clinica' daqui, pois a tabela 'usuarios' foca na pessoa.
+        // 4. Criar o Usuário Dono (Isolamento Multitenancy)
         await connection.execute(
             'INSERT INTO usuarios (clinica_id, nome, email, senha, cargo) VALUES (?, ?, ?, ?, ?)',
             [novaClinicaId, dono_nome, email_master, senha_master, 'dono']
         );
 
         await connection.commit();
-        console.log(`✅ Sucesso: Clínica e Usuário criados com ID ${novaClinicaId}`);
 
-        // 3. ENVIAR E-MAIL (Agora com os dados certos)
-        console.log("Chamando o serviço de e-mail...");
-        // Não usamos 'await' aqui para a resposta ser instantânea para o usuário
+        console.log(`✅ Sucesso: Clínica ${nome_clinica} criada com ID ${novaClinicaId}`);
+
+        // 5. DISPARAR NOTIFICAÇÃO (E-mail de Boas-vindas)
+        // Passamos os dados para o seu serviço que já funciona
         notificacaoService.sendWelcomeEmail({
             nome_clinica,
             dono_nome,
-            telefone_clinica, // Agora o e-mail pode usar isso!
             email_master,
-            senha_master
-        });
+            senha_master,
+            data_expiracao: data_expiracao.toLocaleDateString('pt-BR')
+        }).catch(err => console.error("Erro no envio do e-mail:", err));
 
-        // 4. Resposta única para o Frontend
+        // 6. Resposta para o Frontend (Isso ativa o seu MODAL DE SUCESSO)
         return res.status(201).json({
             success: true,
-            message: 'Clínica e administrador cadastrados com sucesso!',
+            message: 'Clínica cadastrada com sucesso!',
             clinicaId: novaClinicaId
         });
 
     } catch (error) {
         if (connection) await connection.rollback();
-        console.error("❌ Erro no cadastro de clínica:", error.message);
+        console.error("❌ Erro no cadastro:", error);
 
-        if (!res.headersSent) {
-            return res.status(500).json({ error: "Erro ao processar cadastro." });
+        // Se o erro for de e-mail duplicado
+        if (error.code === 'ER_DUP_ENTRY') {
+            return res.status(400).json({ error: "Este e-mail já está em uso." });
         }
+
+        return res.status(500).json({ error: "Erro interno no servidor." });
     } finally {
-        if (connection) connection.release(); // LIBERA A CONEXÃO (Muito importante!)
+        if (connection) connection.release();
     }
 });
 

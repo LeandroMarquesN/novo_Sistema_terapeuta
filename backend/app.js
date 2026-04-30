@@ -2,36 +2,36 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-// meu arquivo original
+
+// Importação das Rotas
 const authRoutes = require('./routes/authRoutes');
 const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
 const equipeRoutes = require('./routes/equipeRoutes');
 const financeiroRoutes = require('./routes/financeiroRoutes');
-
 const pacienteRoutes = require('./routes/pacienteRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
-const dashboardRoutes = require('./routes/dashboardRoutes')
-const openAiRoutes = require('./routes/openAiRoutes'); // <-- Nova linha
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const openAiRoutes = require('./routes/openAiRoutes');
+const adminRoutes = require('./routes/adminRoutes'); // Rotas de API do Admin
+const authAdmin = require('./middleware/authAdmin'); // Middleware de proteção
 
 const app = express();
 
-// --- CONFIGURAÇÃO DO EJS (Coloque logo aqui no início) ---
+// --- CONFIGURAÇÃO DO EJS ---
 app.set('view engine', 'ejs');
-
-// AGORA VAI FUNCIONAR:
-// __dirname é /app/backend. O '..' volta para /app.
 app.set('views', path.join(__dirname, '..', 'frontend', 'views'));
-
-// LOG PARA VOCÊ COMEMORAR:
-console.log("CAMINHO DAS VIEWS:", path.join(__dirname, '..', 'frontend', 'views'));
 
 // Middlewares padrão
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ... (suas importações de rotas)
+// Middleware para desativar o cache (Segurança)
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  next();
+});
 
 // --- MAPEAMENTO DAS APIS ---
 app.use('/api/auth', authRoutes);
@@ -43,49 +43,25 @@ app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/openai', openAiRoutes);
 app.use('/api/financeiro', financeiroRoutes);
 
-// --- MAPEAMENTO DAS VIEWS (Dashboard) ---
-// Importante: coloque o app.use do dashboardRoutes AQUI
+// --- API ADMINISTRATIVA (MedLM Master) ---
+// Note que usamos o authAdmin aqui para proteger os dados do financeiro master
+app.use('/api/admin', authAdmin, adminRoutes);
+
+// --- MAPEAMENTO DAS VIEWS (Dashboard EJS) ---
 app.use('/', dashboardRoutes);
 
-// ADICIONE AQUI: Middleware para desativar o cache e proteger os dados da clínica
-app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  next();
-});
-
-// --- 2. MAPEAMENTO DAS APIS ---
-app.use('/api/auth', authRoutes);
-
-app.use('/api/clinicas', cadastroClinicaRoutes);
-
-app.use('/api/pacientes', pacienteRoutes);
-app.use('/api/agendamentos', agendamentoRoutes);
-app.use('/api/equipe', equipeRoutes);
-app.use('/api/usuarios', usuarioRoutes);
-app.use('/api/openai', openAiRoutes);
-// Define o prefixo das rotas financeiras
-app.use('/api/financeiro', financeiroRoutes);
-
-// --- 1. CRIAR UMA BASE PARA O FRONTEND (Saindo de backend para a raiz) ---
+// --- CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS ---
 const frontendPath = path.resolve(__dirname, '..', 'frontend');
-
-// --- 2. SERVIDORES DE ARQUIVOS ESTÁTICOS (Corrigidos com ..) ---
 app.use('/pages', express.static(path.join(frontendPath, 'pages')));
 app.use('/assets', express.static(path.join(frontendPath, 'assets')));
 app.use('/css', express.static(path.join(frontendPath, 'css')));
 app.use('/logo', express.static(path.join(frontendPath, 'logo')));
 app.use('/ScriptGlobal', express.static(path.join(frontendPath, 'ScriptGlobal')));
-
-// Servir a pasta frontend geral
 app.use(express.static(frontendPath));
-
-// Uploads (Geralmente fica na raiz do projeto ou dentro de backend)
-// Se estiver na raiz do projeto:
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
-// Se estiver dentro de backend:
-// app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// --- 3. ROTAS DE PÁGINAS (Corrigidas com frontendPath) ---
+// --- ROTAS DE PÁGINAS (HTML) ---
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'index.html'));
 });
@@ -93,9 +69,16 @@ app.get('/', (req, res) => {
 app.get('/login', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'login.html'));
 });
+// Redirecionamentos de segurança para evitar o "Cannot GET"
+app.get('/index.html', (req, res) => res.redirect('/'));
+app.get('/login.html', (req, res) => res.redirect('/login'));
 
 app.get('/agendamento', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'agendamento.html'));
+});
+app.get('/clinicas', (req, res) => {
+  // Aqui você vai apontar para o arquivo HTML que criaremos para listar as clínicas
+  res.sendFile(path.join(frontendPath, 'pages', 'listagem_clinicas.html'));
 });
 
 app.get('/pacientes', (req, res) => {
@@ -110,7 +93,10 @@ app.get('/financeiro', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'financeiro.html'));
 });
 
-
-
+// --- ROTA DO PAINEL ADMIN (MASTER) ---
+// Protegida: Só entra se for o admin@medlm.com
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(frontendPath, 'pages', 'admin.html'));
+});
 
 module.exports = app;

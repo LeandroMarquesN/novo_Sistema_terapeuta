@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>MedLM | Quantum Admin</title>
+    <script src="../ScriptGlobal/verifLog.js"></script>
+    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body { background: #050a15; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        .neon-blue { color: #00c3ff; text-shadow: 0 0 15px rgba(0, 195, 255, 0.4); }
+        .neon-border-blue { border-left: 4px solid #00c3ff; }
+        .neon-border-purple { border-left: 4px solid #a855f7; }
+
+        /* CORREÇÃO DOS GRÁFICOS: Container com altura fixa e posição relativa */
+        .chart-container {
+            position: relative;
+            height: 300px; /* Altura controlada */
+            width: 100%;
+        }
+
+        aside { box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+
+        @media (max-width: 768px) {
+            aside { transform: translateX(-100%); transition: 0.3s; }
+            main { margin-left: 0 !important; padding: 1rem !important; }
+        }
+
+        /* Estilo para os botões de ação na tabela */
+        .btn-action {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        /* MODAL DE LOGOUT */
+        #logoutModal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 10, 21, 0.9);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- MODAL DE LOGOUT (O script logout.js vai procurar por este ID) -->
+    <div id="logoutModal">
+        <div class="glass p-8 rounded-3xl text-center max-w-sm border-blue-500/30">
+            <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-sign-out-alt text-blue-400 text-2xl animate-pulse"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Encerrando Sessão</h3>
+            <p class="text-slate-400 text-sm">Limpando rastro de dados e desconectando do MedLM OS...</p>
+        </div>
+    </div>
+
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR -->
+        <aside class="w-64 border-r border-slate-800 bg-[#070e1d] flex flex-col fixed h-full z-50">
+            <div class="p-6">
+                <h1 class="text-2xl font-black italic tracking-tighter neon-blue">MedLM <span class="text-white not-italic font-light text-sm">v2.0</span></h1>
+                <p class="text-slate-500 text-[10px] uppercase tracking-widest mt-1">SaaS Command Center</p>
+            </div>
+
+            <nav class="flex-1 px-4 space-y-2">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="/clinicas" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition">
+                    <i class="fas fa-hospital"></i> Clínicas
+                </a>
+                <button onclick="aplicarReajustesGerais()" class="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-blue-500/10 hover:text-blue-400 transition">
+                    <i class="fas fa-sync-alt"></i> Sync & Reajuste
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-800">
+                <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-500/10 transition">
+                    <i class="fas fa-sign-out-alt"></i> Sair do Sistema
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <main class="flex-1 ml-64 p-8 md:p-12">
+            <div class="flex justify-between items-end mb-10">
+                <div>
+                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-[0.3em]">Visão Geral</h2>
+                    <h3 class="text-3xl font-bold">Performance Global</h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20">SISTEMA ONLINE</span>
+                </div>
+            </div>
+
+            <!-- KPI CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="glass p-6 rounded-3xl neon-border-blue">
+                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Receita Estimada</p>
+                    <h2 class="text-3xl font-black mt-2 text-white" id="mrrValue">R$ 0,00</h2>
+                </div>
+                <div class="glass p-6 rounded-3xl neon-border-purple">
+                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Clínicas Ativas</p>
+                    <h2 class="text-3xl font-black mt-2 text-white" id="totalAtivas">0</h2>
+                </div>
+                <div class="glass p-6 rounded-3xl border-l-4 border-l-orange-500">
+                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Upgrade Pendente</p>
+                    <h2 class="text-3xl font-black text-orange-400 mt-2" id="totalUpgrade">0</h2>
+                </div>
+                <div class="glass p-6 rounded-3xl border-l-4 border-l-red-500">
+                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Inadimplentes</p>
+                    <h2 class="text-3xl font-black text-red-400 mt-2" id="totalInadimplentes">0</h2>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS CORRIGIDOS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="glass p-6 rounded-3xl overflow-hidden">
+                    <h3 class="text-sm font-bold text-slate-400 mb-6 uppercase tracking-widest">Crescimento de Receita</h3>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="glass p-6 rounded-3xl overflow-hidden">
+                    <h3 class="text-sm font-bold text-slate-400 mb-6 uppercase tracking-widest">Distribuição de Planos</h3>
+                    <div class="chart-container">
+                        <canvas id="plansChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABELA -->
+            <div class="glass rounded-3xl overflow-hidden">
+                <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+                    <h3 class="font-bold">Ciclo de Vida das Unidades</h3>
+                    <div class="flex gap-2 items-center">
+                        <div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
+                        <span class="text-[10px] text-blue-400 font-bold uppercase">Monitoramento Ativo</span>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="text-slate-500 text-[10px] uppercase tracking-widest bg-slate-900/50">
+                            <tr>
+                                <th class="p-6">Clínica / Responsável</th>
+                                <th class="p-6 text-center">Fase do Ciclo</th>
+                                <th class="p-6">Valor Atual</th>
+                                <th class="p-6 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaClinicas" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="../ScriptGlobal/logout.js"></script>
+    <script>
+        let revenueChart;
+        let plansChart;
+
+        function initCharts() {
+            const ctxRev = document.getElementById('revenueChart').getContext('2d');
+            revenueChart = new Chart(ctxRev, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai'],
+                    datasets: [{
+                        label: 'Receita',
+                        data: [0, 0, 0, 0, 0],
+                        borderColor: '#00c3ff',
+                        backgroundColor: 'rgba(0, 195, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // CRITICAL: Permite o controle manual de altura
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+
+            const ctxPlano = document.getElementById('plansChart').getContext('2d');
+            plansChart = new Chart(ctxPlano, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Trial', 'Premium', 'Enterprise'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#38bdf8', '#a855f7', '#10b981'],
+                        borderWidth: 0,
+                        hoverOffset: 20
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#64748b', padding: 20, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function carregarDados() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/admin/dashboard-dados', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        localStorage.removeItem('token');
+                        window.location.replace('/login');
+                        return;
+                    }
+                    throw new Error("Falha na autenticação");
+                }
+
+                const data = await response.json();
+
+                // KPIs
+                document.getElementById('totalAtivas').innerText = data.estatisticas.ativas;
+                document.getElementById('totalUpgrade').innerText = data.estatisticas.precisamReajuste;
+                document.getElementById('totalInadimplentes').innerText = data.estatisticas.inadimplentes;
+                document.getElementById('mrrValue').innerText = `R$ ${data.estatisticas.mrrTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+
+                // Tabela
+                const tbody = document.getElementById('tabelaClinicas');
+                tbody.innerHTML = data.listagemCompleta.map(c => {
+                    const corFase = c.precisaUpgrade ? 'text-orange-400' : 'text-blue-400';
+                    const labelFase = c.precisaUpgrade ? 'Reajuste Necessário' : 'Período Inicial';
+                    const progresso = Math.min((c.dias_vida / 90) * 100, 100);
+
+                    return `
+                        <tr class="hover:bg-white/5 transition">
+                            <td class="p-6">
+                                <div class="font-bold text-slate-200">${c.nome_clinica}</div>
+                                <div class="text-[10px] text-slate-500 uppercase">${c.nome_plano} | ${new Date(c.data_cadastro).toLocaleDateString()}</div>
+                            </td>
+                            <td class="p-6">
+                                <div class="w-32 mx-auto bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
+                                    <div class="bg-blue-500 h-full shadow-[0_0_8px_#00c3ff]" style="width: ${progresso}%"></div>
+                                </div>
+                                <div class="text-center text-[9px] uppercase font-bold ${corFase}">${labelFase}</div>
+                            </td>
+                            <td class="p-6">
+                                <div class="text-[10px] text-slate-500 mb-1">${c.status.toUpperCase()}</div>
+                                <div class="font-black neon-blue">R$ ${parseFloat(c.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                            </td>
+                            <td class="p-6 text-right">
+                                <div class="flex justify-end gap-2">
+                                    <button onclick="mudarStatus(${c.id}, 'ativo')" class="btn-action bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button onclick="mudarStatus(${c.id}, 'suspenso')" class="btn-action bg-orange-500/10 text-orange-500 hover:bg-orange-500 hover:text-white">
+                                        <i class="fas fa-pause"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>`;
+                }).join('');
+
+                atualizarGraficoPlanos(data.listagemCompleta);
+
+            } catch (error) {
+                console.error("Erro:", error);
+            }
+        }
+
+        async function mudarStatus(id, status) {
+            if(!confirm(`Mudar status da clínica para ${status}?`)) return;
+            const token = localStorage.getItem('token');
+            await fetch('/api/admin/clinica/status', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ id, status })
+            });
+            carregarDados();
+        }
+
+        async function aplicarReajustesGerais() {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/admin/financeiro/reajustar-todos', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            alert(`${data.atualizados} clínicas atualizadas para o valor base.`);
+            carregarDados();
+        }
+
+        function atualizarGraficoPlanos(clinicas) {
+            // Normalizando os nomes para bater com os filtros (ajuste se necessário)
+            const trials = clinicas.filter(c => c.nome_plano.toLowerCase().includes('trial') || c.nome_plano.toLowerCase().includes('básico')).length;
+            const premiums = clinicas.filter(c => c.nome_plano.toLowerCase().includes('premium')).length;
+            const enterprises = clinicas.filter(c => c.nome_plano.toLowerCase().includes('enterprise')).length;
+
+            plansChart.data.datasets[0].data = [trials, premiums, enterprises];
+            plansChart.update();
+        }
+
+        window.onload = () => {
+            initCharts();
+            carregarDados();
+        };
+    </script>
+</body>
+</html>

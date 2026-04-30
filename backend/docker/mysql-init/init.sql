@@ -1,23 +1,44 @@
 CREATE DATABASE IF NOT EXISTS terapia_system;
 USE terapia_system;
 
+-- 1. TABELA DE PLANOS
+CREATE TABLE IF NOT EXISTS planos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome_plano ENUM('trial', 'premium', 'enterprise') NOT NULL,
+    valor_base DECIMAL(10,2) NOT NULL,
+    valor_promocional DECIMAL(10,2) NOT NULL,
+    limite_membros INT NOT NULL
+) ENGINE=InnoDB;
+
+-- 2. INSERIR OS VALORES DOS PLANOS
+INSERT IGNORE INTO planos (id, nome_plano, valor_base, valor_promocional, limite_membros) VALUES
+(1, 'trial', 109.90, 69.90, 3),
+(2, 'premium', 169.90, 129.90, 10),
+(3, 'enterprise', 209.90, 159.90, 999);
+
+-- 3. TABELA DE CLÍNICAS (Corrigida a vírgula)
 CREATE TABLE IF NOT EXISTS clinicas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome_clinica VARCHAR(100) NOT NULL,
   dono_nome VARCHAR(100) NOT NULL,
-  telefone_clinica VARCHAR(20) NOT NULL, -- Novo campo
-  telefone_dono VARCHAR(20) NOT NULL,    -- Novo campo
+  telefone_clinica VARCHAR(20) NOT NULL,
+  telefone_dono VARCHAR(20) NOT NULL,
   email_master VARCHAR(100) NOT NULL UNIQUE,
   senha_master VARCHAR(255) NOT NULL,
-  limite_membros INT DEFAULT 3,
-  plano ENUM('trial', 'premium', 'enterprise') DEFAULT 'trial',
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  plano_id INT NOT NULL,
+  valor_atual DECIMAL(10,2) DEFAULT 69.90,
+  status ENUM('ativo', 'inadimplente', 'suspenso', 'cancelado') DEFAULT 'ativo',
+  data_cadastro DATE DEFAULT (CURRENT_DATE),
+  data_expiracao DATE NOT NULL,
+  data_cancelamento DATE DEFAULT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_clinica_plano FOREIGN KEY (plano_id) REFERENCES planos(id)
 ) ENGINE=InnoDB;
 
--- 2. USUARIOS (Agora pode apontar para clinicas)
+-- 4. TABELA DE USUÁRIOS (clinica_id NULL para o Admin Master)
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    clinica_id INT NOT NULL,
+    clinica_id INT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
@@ -26,7 +47,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     CONSTRAINT fk_usuario_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 3. PACIENTES
+-- 5. PACIENTES
 CREATE TABLE IF NOT EXISTS pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -39,7 +60,6 @@ CREATE TABLE IF NOT EXISTS pacientes (
   tipo_sanguineo VARCHAR(5),
   peso DECIMAL(5,2),
   genero VARCHAR(20),
-  -- Aqui aceita a frase "Consulta Paga OK" perfeitamente
   status_pagamento VARCHAR(20) DEFAULT 'pendente',
   altura DECIMAL(3,2),
   condicoes_preexistentes TEXT,
@@ -48,12 +68,12 @@ CREATE TABLE IF NOT EXISTS pacientes (
   CONSTRAINT fk_paciente_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 4. AGENDAMENTOS (Removida a FK de membros_equipe e ajustada para usuarios)
+-- 6. AGENDAMENTOS
 CREATE TABLE IF NOT EXISTS agendamentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
   paciente_id INT NOT NULL,
-  usuario_id INT NOT NULL, -- Mudamos de membro_id para usuario_id
+  usuario_id INT NOT NULL,
   data_agendamento DATETIME NOT NULL,
   status_agendamento ENUM('aguardando_sinal', 'confirmado', 'cancelado', 'finalizado') DEFAULT 'aguardando_sinal',
   nome VARCHAR(100),
@@ -75,11 +95,11 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   CONSTRAINT fk_agend_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. FINANCEIRO (Atualizada com link e gateway)
+-- 7. FINANCEIRO
 CREATE TABLE IF NOT EXISTS financeiro (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
-  gateway_id VARCHAR(255) NULL, -- NOVO: Para integrar com Mercado Pago/Asaas
+  gateway_id VARCHAR(255) NULL,
   paciente_id INT NOT NULL,
   agendamento_id INT NULL,
   tipo ENUM('receita', 'despesa') NOT NULL,
@@ -89,13 +109,13 @@ CREATE TABLE IF NOT EXISTS financeiro (
   data_pagamento DATE NULL,
   status_pagamento ENUM('aberto', 'pago', 'atrasado', 'estornado', 'cancelado') DEFAULT 'aberto',
   metodo_pagamento ENUM('pix', 'cartao', 'dinheiro', 'boleto'),
-  link_pagamento TEXT NULL, -- NOVO: Para salvar o link gerado
+  link_pagamento TEXT NULL,
   CONSTRAINT fk_fin_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- 6. Anexos
+-- 8. ANEXOS
 CREATE TABLE IF NOT EXISTS anexos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -111,14 +131,18 @@ CREATE TABLE IF NOT EXISTS anexos (
   CONSTRAINT fk_anexo_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-
-
 --
--- INSERTS DE TESTE (Corrigidos para a nova estrutura)
--- Primeiro criamos a clinica
-INSERT IGNORE INTO clinicas (id, nome_clinica, dono_nome, email_master, senha_master)
-VALUES (1, 'Clínica Experimental', 'Leandro Marques', 'admin@sistema.com', '123456');
+-- INSERTS DE TESTE FINAL
+--
+-- Clínica 1 (Para testes do sistema)
+INSERT IGNORE INTO clinicas (id, nome_clinica, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao)
+VALUES (1, 'Clínica Experimental', 'Leandro Marques', '1199999999', '1188888888', 'admin@sistema.com', '123456', 1, '2026-12-31');
 
--- Depois o usuário dono vinculado à clinica 1
+-- Usuário dono vinculado à clinica 1
 INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo)
 VALUES (1, 'Leandro Marques', 'leandro@teste.com', '123456', 'dono');
+
+-- ACESSO MASTER AO PAINEL ADMINISTRATIVO (medlm.com / mariarosa)
+-- Note que o clinica_id é NULL aqui para ser o dono do MedLM
+INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo)
+VALUES (NULL, 'Administrador MedLM', 'admin@medlm.com', 'mariarosa', 'dono');
