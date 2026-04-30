@@ -3,6 +3,7 @@ const router = express.Router();
 const financeiroService = require('../services/financeiroService');
 const authAdmin = require('../middleware/authAdmin');
 // --- AQUI ESTAVA O ERRO 1: Faltava importar o banco de dados ---
+const path = require('path');
 const db = require('../config/db');
 
 /**
@@ -53,22 +54,28 @@ router.post('/financeiro/reajustar-todos', authAdmin, async (req, res) => {
  * --- AQUI ESTAVA O ERRO 2: Removi a duplicata e mantive a versão com segurança ---
  */
 router.put('/clinica/atualizar-completo', authAdmin, async (req, res) => {
-  const { id, status, plano_id, valor_atual } = req.body;
+  // Convertendo para Inteiro e garantindo que nunca seja NULL
+  const id = parseInt(req.body.id);
+  const status = req.body.status;
+
+  // Se parseInt falhar, ele assume 1 (ID do seu plano Trial) em vez de null
+  const plano_id = parseInt(req.body.plano_id) || 1;
+
+  const valor_atual = parseFloat(req.body.valor_atual) || 0;
 
   try {
     const sql = `
-      UPDATE cadastro_clinica
+      UPDATE clinicas
       SET status = ?, plano_id = ?, valor_atual = ?
       WHERE id = ?
     `;
 
-    // O db.execute agora vai funcionar porque importamos lá no topo!
     const [result] = await db.execute(sql, [status, plano_id, valor_atual, id]);
 
     if (result.affectedRows > 0) {
       res.json({ success: true, message: "Clínica atualizada com sucesso!" });
     } else {
-      res.status(404).json({ error: "Clínica não encontrada." });
+      res.status(404).json({ error: "Clínica não encontrada no banco." });
     }
   } catch (error) {
     console.error("ERRO CRÍTICO NO BANCO:", error);

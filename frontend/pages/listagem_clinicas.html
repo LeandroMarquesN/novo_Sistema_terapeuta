@@ -245,12 +245,24 @@ function closeModal() {
 document.getElementById('formEdicao').onsubmit = async (e) => {
     e.preventDefault();
 
+    // 1. Pegamos os valores brutos
+    const rawId = document.getElementById('editId').value;
+    const rawPlano = document.getElementById('editPlano').value;
+    const rawValor = document.getElementById('editValor').value;
+
+    // 2. Criamos o payload garantindo tipos numéricos
     const payload = {
-        id: document.getElementById('editId').value,
+        id: parseInt(rawId),
         status: document.getElementById('editStatus').value,
-        plano_id: document.getElementById('editPlano').value,
-        valor_atual: document.getElementById('editValor').value
+        plano_id: parseInt(rawPlano), // Se o select não tiver valor, isso vira NaN
+        valor_atual: parseFloat(rawValor) || 0
     };
+
+    // 3. VALIDAÇÃO CRÍTICA: Se o plano_id for inválido (NaN ou 0), paramos aqui
+    if (!payload.plano_id) {
+        alert("⚠️ Erro: Você precisa selecionar um Plano Válido antes de salvar.");
+        return;
+    }
 
     try {
         const res = await fetch('/api/admin/clinica/atualizar-completo', {
@@ -265,12 +277,14 @@ document.getElementById('formEdicao').onsubmit = async (e) => {
         if(res.ok) {
             alert("✅ Unidade atualizada com sucesso!");
             closeModal();
-            carregar(); // Recarrega a lista para mostrar os dados novos
+            if (typeof carregar === 'function') carregar();
         } else {
-            alert("❌ Erro ao atualizar a clínica.");
+            const erroApi = await res.json();
+            alert("❌ Erro no servidor: " + (erroApi.error || "Falha ao salvar"));
         }
     } catch (error) {
         console.error("Erro na requisição:", error);
+        alert("❌ Erro de conexão. Verifique se o servidor está rodando.");
     }
 };
 
