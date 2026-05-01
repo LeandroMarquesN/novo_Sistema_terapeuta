@@ -16,10 +16,11 @@ INSERT IGNORE INTO planos (id, nome_plano, valor_base, valor_promocional, limite
 (2, 'premium', 169.90, 129.90, 10),
 (3, 'enterprise', 209.90, 159.90, 999);
 
--- 3. TABELA DE CLÍNICAS (Corrigida a vírgula)
+-- 3. TABELA DE CLÍNICAS (Atualizada com a coluna SLUG)
 CREATE TABLE IF NOT EXISTS clinicas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome_clinica VARCHAR(100) NOT NULL,
+  slug VARCHAR(100) NOT NULL UNIQUE, -- O "nome de usuário" da clínica na URL
   dono_nome VARCHAR(100) NOT NULL,
   telefone_clinica VARCHAR(20) NOT NULL,
   telefone_dono VARCHAR(20) NOT NULL,
@@ -93,6 +94,18 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   CONSTRAINT fk_agend_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_agend_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_agend_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS clinica_configuracoes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  horario_abertura TIME DEFAULT '08:00:00',
+  horario_fechamento TIME DEFAULT '18:00:00',
+  duracao_atendimento INT DEFAULT 30, -- em minutos
+  valor_sinal DECIMAL(10,2) DEFAULT 50.00,
+  dias_semana VARCHAR(50) DEFAULT '1,2,3,4,5', -- 1=Segunda, 5=Sexta
+  cor_primaria VARCHAR(7) DEFAULT '#1A5FA1',
+  CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- 7. FINANCEIRO

@@ -157,45 +157,50 @@ exports.sendWhatsAppNotification = async (clinica, agendamento, isReagendamento 
 // ===========================================
 exports.sendWelcomeEmail = async (clinica) => {
   console.log(`[MED-LM] 📩 Iniciando processo de e-mail para: ${clinica.email_master}`);
+  // ADICIONE ISSO PARA TESTAR:
+  console.log("[DEBUG] Objeto recebido para e-mail:", JSON.stringify(clinica, null, 2));
 
   try {
-    // 1. DEFINIR A VARIÁVEL QUE ESTÁ FALTANDO
     const assunto = 'Bem-vindo ao MedLM - Sua Clínica está Ativa!';
-
     const templatePath = path.join(__dirname, '..', 'templates', 'boas_vindas.html');
-
-    // 2. Lendo o arquivo
     const htmlTemplateOriginal = await fs.readFile(templatePath, 'utf-8');
 
-    // 3. Preparando os dados (Note que usamos clinica.email_master aqui)
+    // Lógica para nome do plano amigável
+    const planos = { 1: 'Trial (Até 3 membros)', 2: 'Premium (Até 10 membros)', 3: 'Enterprise (Ilimitado)' };
+    const nomePlano = planos[clinica.plano_id] || 'Plano Personalizado';
+
+    // URL do Portal e QR Code
+    const urlPortal = `https://medlm.com.br/agendar/${clinica.slug}`;
+
+
+    // No seu notificationService.js, altere a linha da qrCodeUrl para esta:
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlPortal)}`;
+
     const templateData = {
       dono_nome: clinica.dono_nome,
       nome_clinica: clinica.nome_clinica,
       email: clinica.email_master,
       senha: clinica.senha_master,
-      telefone_clinica: clinica.telefone_clinica,
+      plano_nome: nomePlano,
+      url_portal: urlPortal,
+      qr_code_url: qrCodeUrl,
+      data_expiracao_promo: clinica.data_expiracao, // Já formatada no controller
       ano_atual: new Date().getFullYear()
     };
 
     const htmlFinal = replacePlaceholders(htmlTemplateOriginal, templateData);
 
-    // 4. Configuração do Envio
     const mailOptions = {
       from: `"MedLM - Sistema Inteligente" <${process.env.EMAIL_USER}>`,
-      to: clinica.email_master, // Usando email_master como no seu banco
-      subject: assunto,         // AGORA A VARIÁVEL EXISTE!
+      to: clinica.email_master,
+      subject: assunto,
       html: htmlFinal
     };
 
-    console.log("[MED-LM] 🚀 Enviando e-mail via Nodemailer...");
     const info = await transporter.sendMail(mailOptions);
-
     console.log(`[MED-LM] ✅ SUCESSO: E-mail enviado! ID: ${info.messageId}`);
-    const carimboTempo = new Date().toLocaleString('pt-BR');
-    console.log(`[MED-LM] [${carimboTempo}] ✅ SUCESSO...`);
 
   } catch (error) {
-    const horaErro = new Date().toLocaleTimeString('pt-BR');
-    console.error(`[MED-LM] [${horaErro}] ❌ ERRO NO ENVIO:`, error.message);
+    console.error(`[MED-LM] ❌ ERRO NO ENVIO:`, error.message);
   }
 };

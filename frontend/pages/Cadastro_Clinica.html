@@ -7,6 +7,7 @@
     <title>Cadastro MedLM - Sistema Terapêutico</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         .plan-card input:checked + div {
             border-color: #2563eb;
@@ -175,22 +176,47 @@
 
     <!-- O MODAL DE SUCESSO CONTINUA O MESMO QUE VOCÊ JÁ TINHA... -->
 
-    <!-- ======== MODAL CLINICA ======= -->
-    <div id="modalSucesso" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:999; justify-content:center; align-items:center;">
-        <div style="background:white; padding:40px; border-radius:15px; text-align:center; max-width:400px; animation: slideIn 0.3s ease;">
-            <div style="font-size: 50px; color: #2563eb;">✅</div>
-            <h2 style="color: #2c3e50;">Parabéns pela escolha!</h2>
-            <p style="color: #7f8c8d; margin-top:15px;">
-                Sua clínica <strong>MedLM</strong> já está ativa em nosso sistema.
+
+     <!-- ======== MODAL SUCESSO TURBINADO ======= -->
+<div id="modalSucesso" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.9); backdrop-blur: 8px; z-index:999; justify-content:center; align-items:center; overflow-y: auto; padding: 20px;">
+    <div class="bg-white rounded-3xl p-8 text-center max-w-lg w-full shadow-2xl border border-blue-100">
+        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-rocket text-blue-600 text-3xl"></i>
+        </div>
+
+        <h2 class="text-3xl font-black text-slate-800">Tudo pronto, <span id="nomeDonoModal" class="text-blue-600"></span>!</h2>
+        <p class="text-slate-500 mt-2 mb-8 italic">Sua clínica foi configurada com sucesso.</p>
+
+        <!-- PORTAL DE AGENDAMENTOS -->
+        <div class="bg-slate-50 rounded-2xl p-6 border-2 border-dashed border-slate-200 mb-6">
+            <h4 class="text-sm font-bold text-slate-700 uppercase tracking-widest mb-4">Seu Portal de Agendamentos Externo</h4>
+
+            <!-- QR CODE -->
+            <div id="qrcode" class="flex justify-center mb-4 bg-white p-3 inline-block rounded-xl shadow-sm mx-auto"></div>
+
+            <p class="text-xs text-slate-500 mb-4 px-4">
+                Use este link no <strong>Instagram</strong> ou <strong>Site</strong> para que seus pacientes agendem sozinhos.
             </p>
-            <p style="font-size: 14px; color: #3498db;">
-                Enviamos um e-mail com seus dados de acesso.
-            </p>
-            <button onclick="window.location.href='/'" style="background:#2563eb; color:white; border:none; padding:12px 30px; border-radius:5px; cursor:pointer; margin-top:20px; font-weight:bold;">
-                Acessar Sistema
+
+            <!-- INPUT COM BOTÃO COPIAR -->
+            <div class="relative flex items-center">
+                <input type="text" id="linkPortal" readonly
+                    class="w-full bg-white border border-slate-200 rounded-lg py-3 pl-4 pr-12 text-sm font-mono text-blue-600 outline-none">
+                <button onclick="copiarLink()" class="absolute right-2 bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+            <button onclick="window.location.href='/'"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all">
+                Acessar Painel Master
             </button>
+            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Enviamos seus dados de acesso para o e-mail cadastrado.</p>
         </div>
     </div>
+</div>
 
     <style>
     @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -228,10 +254,34 @@
 
                 const result = await response.json();
 
-                if (response.ok) {
-                    // 4. Se deu certo, mostra o modal de sucesso impactante
+
+                    if (response.ok) {
+                    // 1. Pegamos o slug e o nome que vieram do servidor
+                    const slug = result.portalUrl; // O backend já envia "/agendar/slug"
+                    const nomeDono = data.dono_nome.split(' ')[0]; // Pega só o primeiro nome
+
+                    // 2. Construímos a URL completa (ajuste para o seu domínio real depois)
+                    const urlCompleta = window.location.origin + slug;
+
+                    // 3. Preenchemos os campos do Modal
+                    document.getElementById('nomeDonoModal').innerText = nomeDono;
+                    document.getElementById('linkPortal').value = urlCompleta;
+
+                    // 4. Geramos o QR Code
+                    document.getElementById('qrcode').innerHTML = ""; // Limpa antes de gerar
+                    new QRCode(document.getElementById("qrcode"), {
+                        text: urlCompleta,
+                        width: 150,
+                        height: 150,
+                        colorDark : "#1e293b", // Slate 800
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.H
+                    });
+
+                    // 5. Exibe o Modal
                     document.getElementById('modalSucesso').style.display = 'flex';
-                } else {
+                }
+                 else {
                     // 5. Se houve erro (ex: email já cadastrado)
                     alert(result.error || "Ocorreu um erro ao processar seu cadastro.");
                     btnSubmit.disabled = false;
@@ -262,6 +312,16 @@
         document.querySelectorAll('input[name="telefone_clinica"], input[name="telefone_dono"]').forEach(input => {
             input.addEventListener('keyup', handlePhone);
         });
+        // === FUNCAO PARA COPIAR LINK ===
+        function copiarLink() {
+            const linkInput = document.getElementById('linkPortal');
+            linkInput.select();
+            linkInput.setSelectionRange(0, 99999); // Para mobile
+
+            navigator.clipboard.writeText(linkInput.value).then(() => {
+                alert("✅ Link copiado! Agora é só colar no seu Instagram.");
+            });
+        }
     </script>
 </body>
 </html>

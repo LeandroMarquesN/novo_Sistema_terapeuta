@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento | MedLM Premium</title>
+
+    <!-- Frameworks e Fontes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #1A5FA1;
+            --secondary: #34d399;
+            --gradient: linear-gradient(135deg, #1A5FA1 0%, #34d399 100%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #e0eafc, #f4f7f6);
+            min-height: 100vh;
+            color: #2c3e50;
+        }
+
+        h1, h2, h3 { font-family: 'Poppins', sans-serif; }
+
+        /* Gradiente nas Fontes */
+        .text-gradient {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        /* Card Efeito Vidro (Glassmorphism) */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Botões de Horário Premium */
+        .time-slot {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .time-slot:hover {
+            transform: translateY(-2px);
+            background: white;
+            border-color: var(--secondary);
+        }
+
+        .time-slot.selected {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 15px rgba(26, 95, 161, 0.2);
+        }
+
+        /* Animação de entrada */
+        .fade-in { animation: fadeIn 0.5s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Custom Date Picker */
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 2px;
+            filter: hue-rotate(180deg) brightness(0.8);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <div class="max-w-4xl mx-auto">
+
+        <!-- Header Dinâmico -->
+        <header class="flex flex-col items-center mb-10 text-center fade-in">
+            <div class="w-20 h-20 bg-white rounded-[2rem] shadow-sm flex items-center justify-center mb-4 border border-white/50 overflow:hidden">
+                <img id="logo-clinica" src="https://i.imgur.com/5pjegDN.png" alt="Logo" class="w-14">
+            </div>
+            <h1 id="nome-clinica" class="text-3xl font-bold tracking-tight text-gradient">MedLM Intelligent System</h1>
+            <p id="subtitulo-clinica" class="text-gray-500 text-sm font-light mt-1 uppercase tracking-widest">Portal de Agendamento Premium</p>
+        </header>
+
+        <!-- Stepper Visual -->
+        <div class="flex justify-center gap-3 mb-8">
+            <div id="dot-1" class="w-12 h-1.5 rounded-full bg-[#1A5FA1] transition-all duration-300"></div>
+            <div id="dot-2" class="w-12 h-1.5 rounded-full bg-gray-200 transition-all duration-300"></div>
+            <div id="dot-3" class="w-12 h-1.5 rounded-full bg-gray-200 transition-all duration-300"></div>
+        </div>
+
+        <div class="glass-card rounded-[2.5rem] p-8 md:p-12">
+
+            <!-- ETAPA 1: SELEÇÃO DE DATA E HORA -->
+            <div id="step-1" class="fade-in">
+                <div class="grid md:grid-cols-2 gap-10">
+                    <div>
+                        <h2 class="text-xl font-bold mb-6"><span class="text-gradient">1. Escolha a Data</span></h2>
+                        <input type="date" id="calendar" class="w-full bg-white/60 p-5 rounded-2xl border-none shadow-sm focus:ring-2 focus:ring-[#1A5FA1] outline-none text-gray-700 font-medium text-lg">
+                        <div class="mt-6 p-5 bg-white/40 rounded-2xl border border-white/60">
+                            <p class="text-xs text-gray-500 leading-relaxed italic">
+                                * Os horários são atualizados em tempo real de acordo com a disponibilidade da clínica.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h2 class="text-xl font-bold mb-6"><span class="text-gradient">2. Horários Livres</span></h2>
+                        <div class="grid grid-cols-3 gap-3" id="slots-container">
+                            <!-- Simulação de Horários (Será preenchido via Backend) -->
+                            <div class="time-slot p-4 rounded-2xl text-center text-sm font-semibold text-gray-600" onclick="selectSlot(this)">08:00</div>
+                            <div class="time-slot p-4 rounded-2xl text-center text-sm font-semibold text-gray-600" onclick="selectSlot(this)">09:00</div>
+                            <div class="time-slot p-4 rounded-2xl text-center text-sm font-semibold text-gray-600" onclick="selectSlot(this)">10:00</div>
+                            <div class="time-slot p-4 rounded-2xl text-center text-sm font-semibold text-gray-600" onclick="selectSlot(this)">14:00</div>
+                            <div class="time-slot p-4 rounded-2xl text-center text-sm font-semibold text-gray-600" onclick="selectSlot(this)">15:00</div>
+                            <div class="time-slot p-4 rounded-2xl text-center text-sm font-semibold text-gray-600" onclick="selectSlot(this)">16:00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-12 flex justify-end">
+                    <button onclick="goToStep(2)" class="bg-[#1A5FA1] text-white px-12 py-5 rounded-2xl font-bold hover:shadow-xl hover:shadow-blue-200 transition-all flex items-center gap-2">
+                        Próximo Passo <span>→</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ETAPA 2: DADOS DO PACIENTE -->
+            <div id="step-2" class="hidden fade-in">
+                <h2 class="text-2xl font-bold mb-8"><span class="text-gradient">Identificação do Paciente</span></h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter ml-2">Nome Completo</label>
+                        <input type="text" id="paciente_nome" class="w-full bg-white/80 p-5 rounded-2xl border border-white focus:ring-2 focus:ring-[#1A5FA1] outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter ml-2">WhatsApp</label>
+                        <input type="tel" id="paciente_tel" class="w-full bg-white/80 p-5 rounded-2xl border border-white focus:ring-2 focus:ring-[#1A5FA1] outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter ml-2">CPF</label>
+                        <input type="text" id="paciente_cpf" class="w-full bg-white/80 p-5 rounded-2xl border border-white focus:ring-2 focus:ring-[#1A5FA1] outline-none transition-all">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter ml-2">Modalidade</label>
+                        <select id="modalidade" class="w-full bg-white/80 p-5 rounded-2xl border border-white focus:ring-2 focus:ring-[#1A5FA1] outline-none appearance-none">
+                            <option>Presencial (Na Clínica)</option>
+                            <option>Online (Telemedicina)</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2 space-y-2">
+                        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter ml-2">Motivo da Consulta</label>
+                        <textarea id="motivo" class="w-full bg-white/80 p-5 rounded-2xl border border-white focus:ring-2 focus:ring-[#1A5FA1] outline-none transition-all h-24"></textarea>
+                    </div>
+                </div>
+                <div class="mt-10 flex justify-between items-center">
+                    <button onclick="goToStep(1)" class="text-gray-400 font-bold hover:text-gray-600 transition-colors">← Voltar</button>
+                    <button onclick="goToStep(3)" class="bg-[#1A5FA1] text-white px-12 py-5 rounded-2xl font-bold shadow-lg shadow-blue-100">Finalizar Reserva</button>
+                </div>
+            </div>
+
+            <!-- ETAPA 3: PAGAMENTO SINAL -->
+            <div id="step-3" class="hidden text-center fade-in">
+                <div class="mb-10">
+                    <div class="w-20 h-20 bg-green-50 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-100">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Reserva Pré-Confirmada</h2>
+                    <p class="text-gray-500 text-sm">Efetue o pagamento do sinal para validar sua agenda.</p>
+                </div>
+
+                <div class="bg-white/40 rounded-[2.5rem] p-10 mb-8 border border-white/60 shadow-inner">
+                    <p class="text-xs text-gray-400 uppercase font-bold tracking-widest mb-2">Valor do Sinal</p>
+                    <span class="text-5xl font-extrabold text-gradient">R$ 50,00</span>
+
+                    <div class="mt-10 flex flex-col items-center">
+                        <!-- QR Code Gerado Dinamicamente -->
+                        <div class="p-4 bg-white rounded-3xl shadow-sm mb-6">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MEDLM_PIX_SIMULACAO" class="w-44 h-44">
+                        </div>
+                        <button class="text-[#1A5FA1] text-xs font-bold border-b border-[#1A5FA1] pb-1 hover:text-green-500 hover:border-green-500 transition-all uppercase tracking-tighter">
+                            Copiar Código PIX
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="confirmarAgendamento()" class="w-full bg-gray-900 text-white p-6 rounded-[2rem] font-bold hover:bg-black transition shadow-2xl">
+                    Informar Pagamento Realizado
+                </button>
+            </div>
+        </div>
+
+        <footer class="mt-10 text-center text-gray-400 text-[10px] uppercase tracking-widest font-medium">
+            Powered by <strong>MedLM</strong> - Intelligent Health Solutions
+        </footer>
+    </div>
+
+    <script>
+        // --- LÓGICA DE NAVEGAÇÃO ---
+        function goToStep(step) {
+            // Esconde todos
+            document.querySelectorAll('[id^="step-"]').forEach(el => el.classList.add('hidden'));
+            // Reseta dots
+            document.querySelectorAll('[id^="dot-"]').forEach(el => {
+                el.classList.remove('bg-[#1A5FA1]', 'w-16');
+                el.classList.add('bg-gray-200', 'w-12');
+            });
+
+            // Mostra atual
+            document.getElementById('step-' + step).classList.remove('hidden');
+            // Destaca dot
+            const activeDot = document.getElementById('dot-' + step);
+            activeDot.classList.remove('bg-gray-200', 'w-12');
+            activeDot.classList.add('bg-[#1A5FA1]', 'w-16');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- SELEÇÃO DE HORÁRIO ---
+        function selectSlot(element) {
+            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        // --- INTEGRAÇÃO DINÂMICA (SLUG) ---
+        async function initPortal() {
+            const urlParts = window.location.pathname.split('/');
+            const slug = urlParts[urlParts.length - 1];
+
+            console.log("[MED-LM] Slug identificado:", slug);
+
+            // Aqui você fará o fetch para o backend futuramente:
+            // const res = await fetch(`/api/portal/config/${slug}`);
+            // const data = await res.json();
+            // ... preencher campos da clínica
+        }
+
+        function confirmarAgendamento() {
+            alert('Enviando dados para o MedLM... Em instantes você receberá a confirmação por e-mail!');
+            // Aqui entra o fetch POST para salvar na tabela agendamentos
+        }
+
+        window.onload = initPortal;
+    </script>
+</body>
+</html>

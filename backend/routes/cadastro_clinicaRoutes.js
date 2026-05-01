@@ -30,28 +30,39 @@ router.post('/register-clinica', async (req, res) => {
         const data_expiracao = new Date();
         data_expiracao.setMonth(data_expiracao.getMonth() + 1); // 30 dias de acesso inicial
 
-        // 3. INSERT NA TABELA CLINICAS (Atualizado com plano_id e datas)
+        // --- LOGICA DO SLUG (Coloque isso antes do INSERT se ainda não tiver) ---
+        const slug = nome_clinica
+            .toLowerCase()
+            .trim()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+            .replace(/[^a-z0-9 -]/g, '')     // Remove caracteres especiais
+            .replace(/\s+/g, '-')            // Espaço vira hifen
+            .replace(/-+/g, '-');            // Evita hifens duplos
+
+        // 3. INSERT NA TABELA CLINICAS (Agora com a coluna slug)
         const [resultClinica] = await connection.execute(
             `INSERT INTO clinicas
-            (nome_clinica, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao, data_cadastro, valor_atual)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        (nome_clinica, slug, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao, data_cadastro, valor_atual)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, // Adicionamos um "?" a mais aqui
             [
                 nome_clinica,
+                slug,            // <--- NOVO: Inserindo o slug gerado
                 dono_nome,
                 telefone_clinica,
                 telefone_dono,
                 email_master,
                 senha_master,
-                plano_id,        // ID vindo do HTML (1, 2 ou 3)
-                data_expiracao,  // Calculado acima
-                data_cadastro,   // Hoje
-                69.90            // Valor promocional de entrada
+                plano_id,
+                data_expiracao,
+                data_cadastro,
+                69.90
             ]
         );
 
         const novaClinicaId = resultClinica.insertId;
 
-        // 4. Criar o Usuário Dono (Isolamento Multitenancy)
+        // 4. Criar o Usuário Dono (Isolamento Multitenancy) - AQUI SEGUE IGUAL
         await connection.execute(
             'INSERT INTO usuarios (clinica_id, nome, email, senha, cargo) VALUES (?, ?, ?, ?, ?)',
             [novaClinicaId, dono_nome, email_master, senha_master, 'dono']
@@ -61,21 +72,25 @@ router.post('/register-clinica', async (req, res) => {
 
         console.log(`✅ Sucesso: Clínica ${nome_clinica} criada com ID ${novaClinicaId}`);
 
+        console.log(`✅ Sucesso: Clínica ${nome_clinica} criada com ID ${novaClinicaId}`);
+
         // 5. DISPARAR NOTIFICAÇÃO (E-mail de Boas-vindas)
-        // Passamos os dados para o seu serviço que já funciona
         notificacaoService.sendWelcomeEmail({
             nome_clinica,
+            slug,          // Necessário para o Link do Portal e QR Code
             dono_nome,
             email_master,
             senha_master,
-            data_expiracao: data_expiracao.toLocaleDateString('pt-BR')
+            plano_id,      // ESSENCIAL para mostrar qual plano ela contratou
+            data_expiracao: data_expiracao.toLocaleDateString('pt-BR') // Data formatada
         }).catch(err => console.error("Erro no envio do e-mail:", err));
 
-        // 6. Resposta para o Frontend (Isso ativa o seu MODAL DE SUCESSO)
+        // 6. Resposta para o Frontend (IMPORTANTE PARA O MODAL)
         return res.status(201).json({
             success: true,
             message: 'Clínica cadastrada com sucesso!',
-            clinicaId: novaClinicaId
+            clinicaId: novaClinicaId,
+            portalUrl: `/agendar/${slug}` // <--- ADICIONE ISSO para o Modal e o QR Code funcionarem!
         });
 
     } catch (error) {
