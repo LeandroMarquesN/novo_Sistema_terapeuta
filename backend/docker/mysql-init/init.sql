@@ -102,9 +102,8 @@ CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   horario_abertura TIME DEFAULT '08:00:00',
   horario_fechamento TIME DEFAULT '18:00:00',
   duracao_atendimento INT DEFAULT 30, -- em minutos
-  valor_sinal DECIMAL(10,2) DEFAULT 50.00,
+  valor_sinal DECIMAL(10,2) DEFAULT 00.00,
   dias_semana VARCHAR(50) DEFAULT '1,2,3,4,5', -- 1=Segunda, 5=Sexta
-  cor_primaria VARCHAR(7) DEFAULT '#1A5FA1',
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

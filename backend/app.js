@@ -12,9 +12,14 @@ const pacienteRoutes = require('./routes/pacienteRoutes');
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const configuracaoRoutes = require('./routes/configuracaoRoutes');
+const portalRoutes = require('./routes/portal-agendamento-routes');
 const openAiRoutes = require('./routes/openAiRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Rotas de API do Admin
+
+// importação Middleware
 const authAdmin = require('./middleware/authAdmin'); // Middleware de proteção
+const authMiddleware = require('./middleware/authMiddleware')
 
 const app = express();
 
@@ -33,6 +38,9 @@ app.use((req, res, next) => {
   next();
 });
 
+
+// ...
+
 // --- MAPEAMENTO DAS APIS ---
 app.use('/api/auth', authRoutes);
 app.use('/api/clinicas', cadastroClinicaRoutes);
@@ -42,6 +50,8 @@ app.use('/api/equipe', equipeRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/openai', openAiRoutes);
 app.use('/api/financeiro', financeiroRoutes);
+app.use('/api/config', configuracaoRoutes);
+app.use('/agendar', portalRoutes);
 
 // --- API ADMINISTRATIVA (MedLM Master) ---
 // Note que usamos o authAdmin aqui para proteger os dados do financeiro master
@@ -91,6 +101,11 @@ app.get('/equipe', (req, res) => {
 
 app.get('/financeiro', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'financeiro.html'));
+});
+
+// Rota para renderizar a página de configurações
+app.get('/dashboard/configuracoes', authMiddleware, (req, res) => {
+  res.render('configuracoes'); // Renderiza o arquivo views/configuracoes.ejs
 });
 
 // --- ROTA DO PAINEL ADMIN (MASTER) ---

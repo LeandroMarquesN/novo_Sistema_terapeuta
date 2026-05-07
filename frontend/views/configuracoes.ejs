@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações | MedLM</title>
+
+    <!-- Segurança -->
+    <script src="../ScriptGlobal/verifiLog.js"></script>
+    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+
+    <!-- Tailwind e Fontes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- CSS Dark Mode (Seu arquivo novo) -->
+    <link rel="stylesheet" href="../css/darkModeConfiguracao.css">
+
+
+    <style>
+        :root {
+            --primary: #1A5FA1;
+            --secondary: #34d399;
+            --gradient: linear-gradient(135deg, #1A5FA1 0%, #34d399 100%);
+        }
+        body { font-family: 'Inter', sans-serif; transition: background 0.3s ease; }
+        .text-gradient { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
+        .input-premium { background: rgba(255, 255, 255, 0.5); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        .input-premium:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(26, 95, 161, 0.1); outline: none; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <main class="flex-1 p-6 md:p-10">
+        <!-- Header com Ações Rápidas -->
+        <div class="mb-10 flex justify-between items-center">
+          <div>
+              <h1 class="text-3xl font-bold tracking-tight">
+                  <span class="text-gradient font-['Poppins']">Configurações</span>
+              </h1>
+              <p class="text-slate-500 mt-2">Personalize seu portal.</p>
+          </div>
+
+          <!-- Container de Botões (Voltar + Dark Mode) -->
+          <div class="flex items-center gap-3">
+              <!-- Botão Voltar para o Dashboard -->
+              <a href="/dashboard" class="w-12 h-12 rounded-2xl glass-card flex items-center justify-center hover:scale-110 transition-transform text-slate-500 hover:text-emerald-600" title="Voltar ao Painel">
+                  <i class="fas fa-arrow-left"></i>
+              </a>
+
+              <!-- Botão de Toggle Dark Mode -->
+              <button id="darkModeToggle" class="w-12 h-12 rounded-2xl glass-card flex items-center justify-center hover:scale-110 transition-transform text-blue-600">
+                  <i class="fas fa-moon"></i>
+              </button>
+          </div>
+        </div>
+
+
+
+        <div class="max-w-4xl">
+            <form id="formConfig" class="space-y-8">
+                <!-- Card de Horários -->
+                <div class="glass-card rounded-[2.5rem] p-8">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center"><i class="fas fa-clock"></i></div>
+                        <h2 class="text-xl font-bold">Expediente</h2>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Abertura</label>
+                            <input type="time" name="horario_abertura" id="horario_abertura" class="input-premium w-full p-4 rounded-2xl font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Fechamento</label>
+                            <input type="time" name="horario_fechamento" id="horario_fechamento" class="input-premium w-full p-4 rounded-2xl font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Duração (min)</label>
+                            <select name="duracao_atendimento" id="duracao_atendimento" class="input-premium w-full p-4 rounded-2xl font-semibold">
+                                <option value="30">30 min</option>
+                                <option value="60">1 hora</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Pagamento -->
+                <div class="glass-card rounded-[2.5rem] p-8">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center"><i class="fas fa-wallet"></i></div>
+                        <h2 class="text-xl font-bold">Taxa de Sinal</h2>
+                    </div>
+                    <div class="max-w-xs">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Valor PIX (R$)</label>
+                        <input type="number" step="0.01" name="valor_sinal" id="valor_sinal" class="input-premium w-full p-4 rounded-2xl font-bold text-xl">
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button type="submit" class="bg-[#1A5FA1] text-white px-12 py-5 rounded-[2rem] font-bold shadow-xl hover:scale-105 transition-all">
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Modal de Sucesso Customizado -->
+    <div id="modalSucesso" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+      <!-- Overlay Escuro com Desfoque -->
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+
+      <!-- Card do Modal -->
+      <div class="glass-card relative w-full max-w-sm p-8 rounded-[2.5rem] text-center scale-90 opacity-0 transition-all duration-300 ease-out" id="modalCard">
+          <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+              <i class="fas fa-check-circle"></i>
+          </div>
+          <h3 class="text-2xl font-bold mb-2 font-['Poppins'] dark:text-white">Sucesso!</h3>
+          <p class="text-slate-500 dark:text-slate-400 mb-8 text-sm">Suas configurações de expediente e sinal foram atualizadas com êxito.</p>
+
+          <button onclick="fecharModal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95">
+              Entendido
+          </button>
+      </div>
+    </div>
+
+    <!-- JS Dark Mode (Seu arquivo novo) -->
+    <script src="../ScriptGlobal/darkModeConfiguracao.js"></script>
+    <script src="../ScriptGlobal/logout.js"></script>
+
+    <script>
+        // Lógica de envio e carregamento igual à anterior...
+
+    const modal = document.getElementById('modalSucesso');
+    const modalCard = document.getElementById('modalCard');
+
+    function abrirModal() {
+        modal.classList.remove('hidden');
+        // Pequeno delay para a animação de escala funcionar
+        setTimeout(() => {
+            modalCard.classList.remove('scale-90', 'opacity-0');
+            modalCard.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function fecharModal() {
+        modalCard.classList.remove('scale-100', 'opacity-100');
+        modalCard.classList.add('scale-90', 'opacity-0');
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
+    }
+
+    async function carregarConfiguracoes() {
+        try {
+            const response = await fetch('/api/config/minha-configuracao', {
+                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                if (data && !data.useDefault) {
+                    document.getElementById('horario_abertura').value = data.horario_abertura || '';
+                    document.getElementById('horario_fechamento').value = data.horario_fechamento || '';
+                    document.getElementById('duracao_atendimento').value = data.duracao_atendimento || '30';
+                    document.getElementById('valor_sinal').value = data.valor_sinal || '';
+                }
+            }
+        } catch (error) { console.error('Erro ao carregar:', error); }
+    }
+
+    document.getElementById('formConfig').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = {
+            horario_abertura: document.getElementById('horario_abertura').value,
+            horario_fechamento: document.getElementById('horario_fechamento').value,
+            duracao_atendimento: document.getElementById('duracao_atendimento').value,
+            valor_sinal: document.getElementById('valor_sinal').value,
+            dias_semana: '1,2,3,4,5'
+        };
+
+        try {
+            const response = await fetch('/api/config/salvar-configuracao', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(formData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                abrirModal(); // <--- O SEU NOVO MODAL MODERNO CHAMADO AQUI
+            } else {
+                alert('Erro ao salvar: ' + (result.message || 'Erro no servidor'));
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+        }
+    });
+
+    window.onload = carregarConfiguracoes;
+
+    </script>
+</body>
+</html>
