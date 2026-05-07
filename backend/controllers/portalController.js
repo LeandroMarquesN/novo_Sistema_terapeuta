@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const agendaService = require('../services/agendaService');
-
+const notificationService = require('../services/notificationService');
 // Função para renderizar a página principal do portal
 exports.renderPortal = async (req, res) => {
   const { slug } = req.params;
@@ -88,13 +88,50 @@ exports.criarAgendamento = async (req, res) => {
     ]);
 
     await connection.commit();
-    res.json({ success: true, message: "Agendamento realizado! Aguardando sinal." });
+
+    // ---- INÍCIO DA LÓGICA DE NOTIFICAÇÃO ----
+
+    // 1. Buscamos os dados da clínica
+    const [clinicaResult] = await connection.execute(
+      'SELECT nome_clinica, telefone_clinica FROM clinicas WHERE id = ?',
+      [clinica_id]
+    );
+
+    const dadosDaClinica = clinicaResult[0];
+
+    // 2. Só dispara se tivermos o e-mail do paciente e os dados da clínica
+    if (email && dadosDaClinica) {
+      const dadosDoAgendamento = {
+        nome: nome,
+        email: email,
+        tipo_terapia: tipo_terapia || 'Não informado',
+        data_agendamento: dataAgendamentoCompleta,
+        motivo_consulta: motivo_consulta || 'Nenhum'
+      };
+
+      // Chamada única e eficiente
+      notificationService.sendEmailNotification(dadosDaClinica, dadosDoAgendamento)
+        .then(() => console.log(`[MED-LM] E-mail de confirmação enviado para: ${email}`))
+        .catch(err => console.error("[MED-LM] Erro no envio de e-mail:", err));
+    }
+
+    // 3. Resposta final para o frontend abrir o modal de sucesso
+    return res.json({
+      success: true,
+      message: "Agendamento realizado! Aguardando sinal."
+    });
 
   } catch (error) {
-    await connection.rollback();
+    if (connection) await connection.rollback();
     console.error("Erro na transação de agendamento:", error);
-    res.status(500).json({ success: false, message: "Falha ao gravar agendamento." });
+
+    // Garante que não enviamos resposta se os headers já foram enviados
+    if (!res.headersSent) {
+      res.status(500).json({ success: false, message: "Falha ao gravar agendamento." });
+    }
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 };
+
+

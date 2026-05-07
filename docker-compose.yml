@@ -1,20 +1,18 @@
-version: "3.8"
-
 services:
   app:
     build: .
     ports:
       - "3000:3000"
     volumes:
-      - .:/app # MAPEIA A RAIZ (onde estão backend e frontend)
+      - .:/app
       - /app/node_modules
       - ./backend/uploads:/app/uploads
     env_file:
       - .env
-    command: node backend/server.js # <-- ADICIONE ESTA LINHA
+    command: node backend/server.js
     depends_on:
-      db: # Certifique-se de que 'db:' está alinhado com 'app:' e 'phpmyadmin:'
-        condition: service_healthy # Indentado corretamente sob 'db:'
+      db:
+        condition: service_healthy
 
   db:
     image: mysql:8
@@ -26,18 +24,18 @@ services:
     volumes:
       - db_data:/var/lib/mysql
       - ./backend/docker/mysql-init:/docker-entrypoint-initdb.d
-    healthcheck: # <--- ESTA LINHA DEVE ESTAR ALINHADA COM 'image:', 'ports:', 'environment:', 'volumes:'
+    healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
       interval: 5s
       timeout: 10s
       retries: 5
-      start_period: 20s # Tempo para o DB iniciar antes de começar a verificar
+      start_period: 20s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: always
     ports:
-      - "8080:80"
+      - "8081:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306

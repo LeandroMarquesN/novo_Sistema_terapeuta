@@ -53,12 +53,14 @@ app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/config', configuracaoRoutes);
 app.use('/agendar', portalRoutes);
 
+
 // --- API ADMINISTRATIVA (MedLM Master) ---
 // Note que usamos o authAdmin aqui para proteger os dados do financeiro master
 app.use('/api/admin', authAdmin, adminRoutes);
 
 // --- MAPEAMENTO DAS VIEWS (Dashboard EJS) ---
 app.use('/', dashboardRoutes);
+
 
 // --- CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS ---
 const frontendPath = path.resolve(__dirname, '..', 'frontend');

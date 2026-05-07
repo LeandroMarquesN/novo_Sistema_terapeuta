@@ -15,5 +15,6 @@ router.get('/:slug', portalController.renderPortal);
  * Esta rota é chamada via JavaScript (fetch) dentro do portal.
  */
 router.get('/api/horarios', portalController.getHorariosLivres);
+router.post('/finalizar', portalController.criarAgendamento);
 
 module.exports = router;
