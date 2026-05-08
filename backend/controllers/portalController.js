@@ -43,91 +43,130 @@ exports.getHorariosLivres = async (req, res) => {
 };
 
 // A "Mágica": Cria o paciente e depois o agendamento
+// ... (mantenha os imports e as funções anteriores)
+
 exports.criarAgendamento = async (req, res) => {
   const {
     clinica_id, nome, email, telefone, cpf, data, horario,
     genero, data_nascimento, tipo_terapia, motivo_consulta
   } = req.body;
 
-  const connection = await db.getConnection(); // Usamos conexão para Transação (garante que ou faz tudo ou nada)
+  const connection = await db.getConnection();
 
   try {
     await connection.beginTransaction();
 
-    // 1. Criar ou Localizar o Paciente (Baseado no CPF ou Email)
-    // Para simplificar, vamos criar um novo registro na tabela pacientes primeiro
+    // 1. BUSCAR CONFIGURAÇÃO DA CLÍNICA (Valor do Sinal Dinâmico)
+    const [configuracoes] = await connection.execute(
+      'SELECT valor_sinal FROM clinica_configuracoes WHERE clinica_id = ?',
+      [clinica_id]
+    );
+
+    // Se não encontrar configuração, define como 0.00 para não quebrar o banco
+    const valorSinalDinamico = (configuracoes.length > 0 && configuracoes[0].valor_sinal)
+      ? configuracoes[0].valor_sinal
+      : 0.00;
+
+    // 2. CRIAR OU LOCALIZAR O PACIENTE
     const [resPaciente] = await connection.execute(
       `INSERT INTO pacientes (clinica_id, nome, email, telefone, cpf) VALUES (?, ?, ?, ?, ?)`,
       [clinica_id, nome, email, telefone, cpf]
     );
     const pacienteId = resPaciente.insertId;
 
-    // 2. Buscar o ID do primeiro usuário (Admin) da clínica para preencher usuario_id
+    // 3. BUSCAR USUÁRIO ADMIN DA CLÍNICA
     const [usuarios] = await connection.execute(
       'SELECT id FROM usuarios WHERE clinica_id = ? LIMIT 1',
       [clinica_id]
     );
-    const usuarioId = usuarios[0]?.id || 1; // Fallback para ID 1 caso não ache
 
-    // 3. Formatar data e hora para o MySQL
-    const dataAgendamentoCompleta = `${data} ${horario}:00`;
+    const adminId = usuarios.length > 0 ? usuarios[0].id : null;
 
-    // 4. Inserir na tabela agendamentos conforme seu SQL
-    const queryAgendamento = `
-            INSERT INTO agendamentos (
-                clinica_id, paciente_id, usuario_id, data_agendamento,
-                status_agendamento, nome, email, telefone, cpf,
-                genero, data_nascimento, tipo_terapia, motivo_consulta
-            ) VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-    await connection.execute(queryAgendamento, [
-      clinica_id, pacienteId, usuarioId, dataAgendamentoCompleta,
-      nome, email, telefone, cpf,
-      genero || null, data_nascimento || null, tipo_terapia || null, motivo_consulta || null
-    ]);
-
-    await connection.commit();
-
-    // ---- INÍCIO DA LÓGICA DE NOTIFICAÇÃO ----
-
-    // 1. Buscamos os dados da clínica
-    const [clinicaResult] = await connection.execute(
-      'SELECT nome_clinica, telefone_clinica FROM clinicas WHERE id = ?',
-      [clinica_id]
-    );
-
-    const dadosDaClinica = clinicaResult[0];
-
-    // 2. Só dispara se tivermos o e-mail do paciente e os dados da clínica
-    if (email && dadosDaClinica) {
-      const dadosDoAgendamento = {
-        nome: nome,
-        email: email,
-        tipo_terapia: tipo_terapia || 'Não informado',
-        data_agendamento: dataAgendamentoCompleta,
-        motivo_consulta: motivo_consulta || 'Nenhum'
-      };
-
-      // Chamada única e eficiente
-      notificationService.sendEmailNotification(dadosDaClinica, dadosDoAgendamento)
-        .then(() => console.log(`[MED-LM] E-mail de confirmação enviado para: ${email}`))
-        .catch(err => console.error("[MED-LM] Erro no envio de e-mail:", err));
+    if (!adminId) {
+      throw new Error("Clínica sem usuário administrador configurado.");
     }
 
-    // 3. Resposta final para o frontend abrir o modal de sucesso
+    // 4. CRIAR O AGENDAMENTO (Usando o status correto do seu ENUM)
+    const dataAgendamentoCompleta = `${data} ${horario}`;
+
+    const [resAgendamento] = await connection.execute(
+      `INSERT INTO agendamentos (
+        clinica_id, paciente_id, usuario_id, data_agendamento,
+        status_agendamento, motivo_consulta, nome, email, telefone, cpf, tipo_terapia
+      ) VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?, ?)`,
+      [
+        clinica_id,
+        pacienteId,
+        adminId,
+        dataAgendamentoCompleta,
+        motivo_consulta,
+        nome,
+        email,
+        telefone,
+        cpf,
+        tipo_terapia
+      ]
+    );
+    const agendamentoId = resAgendamento.insertId;
+
+    // 5. CRIAR LANÇAMENTO FINANCEIRO (Com valor dinâmico e tipo receita)
+    await connection.execute(
+      `INSERT INTO financeiro (
+        clinica_id,
+        paciente_id,
+        agendamento_id,
+        tipo,
+        valor,
+        data_vencimento,
+        status_pagamento,
+        descricao
+      ) VALUES (?, ?, ?, 'receita', ?, ?, 'aberto', ?)`,
+      [
+        clinica_id,
+        pacienteId,
+        agendamentoId,
+        valorSinalDinamico, // Valor capturado dinamicamente do banco
+        data,
+        `Sinal de Agendamento - ${nome}`
+      ]
+    );
+
+    // SE CHEGOU AQUI, TUDO DEU CERTO! EFETIVA NO BANCO.
+    await connection.commit();
+
+    // --- NOTIFICAÇÕES (Fora da transação para não travar o banco se o e-mail falhar) ---
+    // --- NOTIFICAÇÕES (Fora da transação) ---
+    const [clinicaResult] = await db.execute('SELECT * FROM clinicas WHERE id = ?', [clinica_id]);
+    const dadosDaClinica = clinicaResult[0];
+
+    if (email && dadosDaClinica) {
+      // MAPEAMENTO EXATO PARA O SEU notificationService
+      const dadosParaEmail = {
+        nome: nome, // O service usa agendamento.nome para nome_paciente
+        email: email,
+        tipo_terapia: tipo_terapia || 'Terapia Integrativa',
+        data_agendamento: dataAgendamentoCompleta, // O service vai extrair data e hora daqui
+        motivo_consulta: motivo_consulta || 'Consulta inicial'
+      };
+
+      notificationService.sendEmailNotification(dadosDaClinica, dadosParaEmail)
+        .then(() => console.log(`[MED-LM] E-mail enviado com sucesso!`))
+        .catch(err => console.error("[MED-LM] Erro ao enviar e-mail:", err));
+    }
     return res.json({
       success: true,
-      message: "Agendamento realizado! Aguardando sinal."
+      message: "Agendamento realizado com sucesso!"
     });
 
   } catch (error) {
     if (connection) await connection.rollback();
-    console.error("Erro na transação de agendamento:", error);
+    console.error("ERRO CRÍTICO NO AGENDAMENTO:", error);
 
-    // Garante que não enviamos resposta se os headers já foram enviados
     if (!res.headersSent) {
-      res.status(500).json({ success: false, message: "Falha ao gravar agendamento." });
+      res.status(500).json({
+        success: false,
+        message: "Falha ao processar agendamento. Verifique os dados."
+      });
     }
   } finally {
     if (connection) connection.release();

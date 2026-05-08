@@ -44,12 +44,14 @@ const financeiroController = {
       const { metodo_pagamento } = req.body;
       const { clinica_id } = req.usuario;
 
+      console.log("Processando baixa para ID:", id, "Método:", metodo_pagamento);
+
       await connection.beginTransaction();
 
+      // 1. Atualiza o Financeiro para 'pago'
       const [result] = await connection.execute(
-        console.log(metodo_pagamento)
-          `UPDATE financeiro SET status_pagamento = 'pago', metodo_pagamento = ?, data_pagamento = NOW()
-                 WHERE id = ? AND clinica_id = ?`,
+        `UPDATE financeiro SET status_pagamento = 'pago', metodo_pagamento = ?, data_pagamento = NOW()
+         WHERE id = ? AND clinica_id = ?`,
         [metodo_pagamento, id, clinica_id]
       );
 
@@ -57,30 +59,38 @@ const financeiroController = {
         throw new Error('Lançamento não encontrado ou acesso negado.');
       }
 
+      // 2. BUSCA O AGENDAMENTO E O PACIENTE VINCULADOS
       const [lancamento] = await connection.execute(
-        `SELECT agendamento_id FROM financeiro WHERE id = ?`, [id]
+        `SELECT agendamento_id, paciente_id FROM financeiro WHERE id = ?`, [id]
       );
 
-      if (lancamento[0] && lancamento[0].agendamento_id) {
-        await connection.execute(
-          `UPDATE agendamentos SET status_agendamento = 'confirmado' WHERE id = ?`,
-          [lancamento[0].agendamento_id]
-        );
-      }
+      const dadosLancamento = lancamento[0];
 
-      // 2. Atualiza o Paciente (Frase Curta: 16 caracteres)
-      if (paciente_id) {
-        await connection.execute(
-          `UPDATE pacientes SET status_pagamento = 'Consulta Paga OK'
-            WHERE id = ? AND clinica_id = ?`,
-          [paciente_id, clinica_id]
-        );
+      if (dadosLancamento) {
+        // 3. Atualiza o Agendamento para 'confirmado' (se houver um vinculado)
+        if (dadosLancamento.agendamento_id) {
+          await connection.execute(
+            `UPDATE agendamentos SET status_agendamento = 'confirmado' WHERE id = ?`,
+            [dadosLancamento.agendamento_id]
+          );
+        }
+
+        // 4. Atualiza o Paciente (Agora pegando o ID correto que veio do banco!)
+        if (dadosLancamento.paciente_id) {
+          await connection.execute(
+            `UPDATE pacientes SET status_pagamento = 'pago'
+             WHERE id = ? AND clinica_id = ?`,
+            [dadosLancamento.paciente_id, clinica_id]
+          );
+        }
       }
 
       await connection.commit();
-      res.json({ message: 'Baixa realizada com sucesso!' });
+      res.json({ success: true, message: 'Baixa realizada com sucesso!' });
+
     } catch (error) {
-      await connection.rollback();
+      if (connection) await connection.rollback();
+      console.error("ERRO NA BAIXA FINANCEIRA:", error.message);
       res.status(500).json({ error: error.message });
     } finally {
       connection.release();
