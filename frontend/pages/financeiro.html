@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="../css/darkModeFinanceiro.css">
+    <link rel="stylesheet" href="../css/acessoNegado.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
     <style>
@@ -143,6 +144,18 @@
             </div>
         </main>
     </div>
+ <!-- MOdal acesso negado para cargos que tentam acessa o odulo financeiro -->
+ <div id="modal-negado" class="modal-overlay" style="display: none;">
+    <div class="glass-card modal-content">
+        <i class="fas fa-lock" style="font-size: 2rem; color: #ff3b30; margin-bottom: 15px;"></i>
+        <h2>Acesso Restrito</h2>
+        <p id="mensagem-erro-modal">Você não tem permissão para acessar este módulo.</p>
+
+        <button onclick="voltarParaSeguranca()" class="btn-voltar">Entendido</button>
+    </div>
+</div>
+ <!--  fim do modulo  -->
+
 <!-- --------  modal de pagamentos ---------- -->
 <div id="modalPagamento" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/50 backdrop-blur-sm p-4">
   <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
@@ -192,24 +205,64 @@
 
 
         // FUNÇÃO PARA BUSCAR DADOS REAIS DO BACKEND
-    async function carregarDadosEstrategicos() {
-        try {
-            // Busca a lista de lançamentos
-            const dados = await apiFetch('/api/financeiro/lista');
-            if (dados) {
-                lancamentos = dados; // Atualiza o array global com os dados do banco (Daniel aparecerá aqui)
-                renderizar();
-            }
+        async function carregarDadosEstrategicos() {
+                try {
+                    // 1. Busca os dados (Assumindo que apiFetch lança erro ou retorna a resposta completa)
+                    const response = await fetch('/api/financeiro/lista', {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
 
-            // Busca os dados do resumo (Cards de Poder)
-            const resumo = await apiFetch('/api/financeiro/resumo');
-            if (resumo) {
-                atualizarCards(resumo);
+                    // 2. INTERCEPTOR DE ACESSO NEGADO (Cargo insuficiente)
+                    if (response.status === 403) {
+                        const erroData = await response.json();
+                        exibirModalNegado(erroData.error); // Exibe a mensagem: "Acesso negado. Apenas o administrador..."
+                        return; // Interrompe a execução aqui
+                    }
+
+                    if (!response.ok) throw new Error('Falha na requisição');
+
+                    const dados = await response.json();
+                    lancamentos = dados;
+                    renderizar();
+
+                    // Repete a lógica para o resumo ou centraliza em uma chamada única
+                    const resumoRes = await fetch('/api/financeiro/resumo', {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                    });
+
+                    if (resumoRes.ok) {
+                        const resumo = await resumoRes.json();
+                        atualizarCards(resumo);
+                    }
+
+                } catch (error) {
+                    console.error("Erro ao carregar dados estratégicos:", error);
+                }
             }
-        } catch (error) {
-            console.error("Erro ao carregar dados:", error);
+// ------ funcoe para o modal de acesso negado -----
+        function exibirModalNegado(mensagem) {
+            const modal = document.getElementById('modal-negado');
+            const msgElemento = document.getElementById('mensagem-erro-modal');
+
+            if (modal && msgElemento) {
+                msgElemento.innerText = mensagem;
+                modal.style.display = 'flex';
+            } else {
+                // Fallback caso o modal não esteja no HTML
+                alert(mensagem);
+                window.location.href = '/dashboard.html';
+            }
         }
-    }
+
+       // Adicione isso ao seu script do financeiro.html
+        function voltarParaSeguranca() {
+            console.log("Redirecionando usuário não autorizado...");
+            // Redireciona para o Dashboard ou Agenda (onde ele tem acesso)
+            window.location.href = '/';
+        }
+
+
+// -------- Fim da funcao de acesso negado ---------
 
     function atualizarCards(resumo) {
             if (!resumo) return;

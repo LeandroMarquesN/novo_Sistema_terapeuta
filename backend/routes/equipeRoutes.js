@@ -13,4 +13,7 @@ router.post('/adicionar', authMiddleware, equipeController.adicionarMembro);
 // Agora, só quem tem o TOKEN pode ver a lista da equipe
 router.get('/listar', authMiddleware, equipeController.listarMembros);
 
+// Adicione esta linha:
+router.get('/status-plano', authMiddleware, equipeController.obterStatusPlano);
+
 module.exports = router;
