@@ -39,6 +39,10 @@
                     <a href="/pacientes" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition">
                         <i class="fas fa-user-friends w-6"></i><span class="ml-4 opacity-0 group-hover:opacity-100">Pacientes</span>
                     </a>
+                    <a href="javascript:void(0)" onclick="abrirModalDespesas()" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <i class="fas fa-arrow-down-short-wide w-6"></i>
+                        <span class="ml-4 opacity-0 group-hover:opacity-100 font-medium">Lançar Despesa</span>
+                    </a>
                     <button id="theme-toggle-btn" class="flex items-center w-full p-3 rounded-xl text-gray-400 hover:bg-gray-100 transition mt-auto">
                         <i class="fas fa-moon w-6"></i>
                         <span id="theme-text" class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity">Modo Escuro</span>
@@ -91,6 +95,34 @@
                     <p class="text-[10px] text-gray-400 mt-1">Média por consulta</p>
                 </div>
             </div>
+            <!-- segundo greed de cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+                <div onclick="mostrarFeedback('lucro')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm border-l-4 border-l-emerald-400 cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Lucro Real</p>
+                    <h3 id="lucroReal" class="text-3xl font-black mt-2 text-emerald-600">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Sobras após despesas</p>
+                </div>
+
+                <div onclick="mostrarFeedback('cac')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">CAC</p>
+                    <h3 id="valorCAC" class="text-3xl font-black mt-2 text-orange-500">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Custo por novo paciente</p>
+                </div>
+
+                <div onclick="mostrarFeedback('ltv')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">LTV Médio</p>
+                    <h3 id="valorLTV" class="text-3xl font-black mt-2 text-blue-600">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Valor médio por ciclo</p>
+                </div>
+
+                <div onclick="mostrarFeedback('conversao')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Conversão Portal</p>
+                    <h3 id="taxaConversao" class="text-3xl font-black mt-2 text-purple-600">0%</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Agendamentos pagos</p>
+                </div>
+            </div>
+            <!-- fim do greeds de cards -->
 
             <div class="flex flex-wrap items-center gap-4 mb-6">
                 <div class="flex bg-white p-1 rounded-xl border border-gray-100 shadow-sm">
@@ -114,6 +146,7 @@
                                     <th class="px-8 py-5">Vencimento</th>
                                     <th class="px-8 py-5">Paciente</th>
                                     <th class="px-8 py-5">Descrição</th>
+                                    <th class="px-8 py-4 text-center text-xs font-bold text-gray-400 uppercase">Reagendar</th>
                                     <th class="px-8 py-5 text-right">Valor</th>
                                     <th class="px-8 py-5 text-center">Ações</th>
                                 </tr>
@@ -198,284 +231,138 @@
   </div>
 </div>
 <!-- -------------fim do modal -------------- -->
+<!-- ---- MOdal lançamento de despesas ---- -->
+<div id="modalDespesas" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="fecharModalDespesas()"></div>
+
+    <div class="relative bg-white/80 backdrop-blur-xl border border-white/40 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 transform transition-all overflow-hidden">
+
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-gray-900">Fluxo de Saída</h2>
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Gestão de Despesas e Custos</p>
+            </div>
+            <button onclick="fecharModalDespesas()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="formDespesa" onsubmit="salvarDespesa(event)" class="space-y-6">
+            <div>
+                <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Descrição da Despesa</label>
+                <input type="text" name="descricao" required placeholder="Ex: Investimento Google Ads"
+                    class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition font-medium">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Valor (R$)</label>
+                    <input type="number" step="0.01" name="valor" required placeholder="0,00"
+                        class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition font-bold text-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Vencimento</label>
+                    <input type="date" name="data_vencimento" required
+                        class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Categoria Estratégica</label>
+                <select name="categoria" class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 outline-none transition font-medium appearance-none">
+                    <option value="marketing">Marketing & Ads (CAC)</option>
+                    <option value="fixa">Custos Fixos (Aluguel/Luz)</option>
+                    <option value="variavel">Custos Variáveis</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full py-5 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black shadow-lg shadow-orange-500/30 transition transform hover:-translate-y-1 active:scale-95 uppercase tracking-wider">
+                Registrar Saída no Fluxo
+            </button>
+        </form>
+    </div>
+</div>
+<!--  --- final do modal de lancamento de despesas --- -->
 <script src="../ScriptGlobal/financeiroScript.js"></script>
-<script>
-        // Agora o array começa vazio e será preenchido pelo banco de dados
-        let lancamentos = [];
+  <script>
+    // Única parte que fica no HTML: Inicializar o Chart.js vinculando ao Canvas local
+    const ctx = document.getElementById('miniGraficoPizza').getContext('2d');
+    meuGrafico = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [0, 0], // Começa zerado, preenchido pelo carregarDadosEstrategicos()
+                backgroundColor: ['#E5E7EB', '#10B981'],
+                borderWidth: 0
+            }]
+        },
+        options: { cutout: '80%', plugins: { legend: { display: false } } }
+    });
 
+    function mostrarFeedback(tipo) {
+    const feedbacks = {
+        lucro: "O Lucro Real é o que sobra no seu bolso após subtrairmos todas as despesas pagas (Fixas, Variáveis e Marketing) do seu faturamento confirmado.",
+        cac: "O Custo de Aquisição de Clientes mostra quanto você gasta em marketing para trazer cada novo paciente pelo portal. Quanto menor este valor, mais eficiente é seu anúncio!",
+        ltv: "O Lifetime Value indica o valor total que um paciente deixa na sua clínica durante todo o tempo de tratamento. Isso ajuda a medir a fidelidade.",
+        conversao: "Esta é a eficiência do seu Portal. Mostra quantos pacientes que agendaram pelo link realmente realizaram o pagamento do sinal."
+    };
 
-        // FUNÇÃO PARA BUSCAR DADOS REAIS DO BACKEND
-        async function carregarDadosEstrategicos() {
-                try {
-                    // 1. Busca os dados (Assumindo que apiFetch lança erro ou retorna a resposta completa)
-                    const response = await fetch('/api/financeiro/lista', {
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                    });
+    // Você pode substituir por um modal bonito depois
+    alert(feedbacks[tipo]);
+}
+function abrirModalDespesas() {
+  const modal = document.getElementById('modalDespesas');
+  modal.classList.remove('hidden');
+  modal.classList.add('animate-fade-in'); // Se tiver animação
+}
 
-                    // 2. INTERCEPTOR DE ACESSO NEGADO (Cargo insuficiente)
-                    if (response.status === 403) {
-                        const erroData = await response.json();
-                        exibirModalNegado(erroData.error); // Exibe a mensagem: "Acesso negado. Apenas o administrador..."
-                        return; // Interrompe a execução aqui
-                    }
+function fecharModalDespesas() {
+  document.getElementById('modalDespesas').classList.add('hidden');
+}
 
-                    if (!response.ok) throw new Error('Falha na requisição');
+// --- COLOQUE ABAIXO DE fecharModalDespesas() ---
 
-                    const dados = await response.json();
-                    lancamentos = dados;
-                    renderizar();
+async function salvarDespesa(event) {
+    event.preventDefault(); // MATA O RECARREGAMENTO DA PÁGINA
 
-                    // Repete a lógica para o resumo ou centraliza em uma chamada única
-                    const resumoRes = await fetch('/api/financeiro/resumo', {
-                        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-                    });
+    console.log("Iniciando envio da despesa...");
 
-                    if (resumoRes.ok) {
-                        const resumo = await resumoRes.json();
-                        atualizarCards(resumo);
-                    }
+    const form = event.target;
+    const formData = new FormData(form);
+    const dados = Object.fromEntries(formData.entries());
 
-                } catch (error) {
-                    console.error("Erro ao carregar dados estratégicos:", error);
-                }
-            }
-// ------ funcoe para o modal de acesso negado -----
-        function exibirModalNegado(mensagem) {
-            const modal = document.getElementById('modal-negado');
-            const msgElemento = document.getElementById('mensagem-erro-modal');
-
-            if (modal && msgElemento) {
-                msgElemento.innerText = mensagem;
-                modal.style.display = 'flex';
-            } else {
-                // Fallback caso o modal não esteja no HTML
-                alert(mensagem);
-                window.location.href = '/dashboard.html';
-            }
-        }
-
-       // Adicione isso ao seu script do financeiro.html
-        function voltarParaSeguranca() {
-            console.log("Redirecionando usuário não autorizado...");
-            // Redireciona para o Dashboard ou Agenda (onde ele tem acesso)
-            window.location.href = '/';
-        }
-
-
-// -------- Fim da funcao de acesso negado ---------
-
-    function atualizarCards(resumo) {
-            if (!resumo) return;
-
-            // O Controller envia 'saldo_receber', o HTML tem que ler 'saldo_receber'
-            if (document.getElementById('saldoPendente')) {
-                document.getElementById('saldoPendente').innerText = `R$ ${parseFloat(resumo.saldo_receber || 0).toFixed(2)}`;
-            }
-            if (document.getElementById('faturamentoMes')) {
-                document.getElementById('faturamentoMes').innerText = `R$ ${parseFloat(resumo.faturamento_mes || 0).toFixed(2)}`;
-            }
-            // E assim por diante para os outros cards...
-        }
-
-
-
-    function renderizar() {
-        const tbody = document.getElementById('listaFinanceira');
-        if (!tbody) return;
-
-        tbody.innerHTML = lancamentos.map(item => `
-            <tr class="hover:bg-gray-50 transition">
-                <td class="px-8 py-6 text-sm font-medium text-gray-400">${new Date(item.data_vencimento).toLocaleDateString('pt-BR')}</td>
-                <td class="px-8 py-6">
-                    <div class="flex flex-col">
-                        <span class="text-sm font-bold text-gray-900">${item.paciente_nome}</span>
-                        <a href="https://wa.me/55${item.paciente_tel}" target="_blank" class="text-[10px] text-emerald-500 font-bold hover:underline">
-                            <i class="fab fa-whatsapp"></i> Contato Direto
-                        </a>
-                    </div>
-                </td>
-                <td class="px-8 py-6 text-xs text-gray-500 font-medium">Sinal de Consulta</td>
-                <td class="px-8 py-6 text-right">
-                    <span class="text-sm font-black ${item.status_pagamento === 'pago' ? 'text-emerald-500' : 'text-gray-900'}">
-                        R$ ${parseFloat(item.valor).toFixed(2)}
-                    </span>
-                </td>
-                <td class="px-8 py-6 text-center">
-                    <div class="flex justify-center gap-2">
-                        ${item.status_pagamento === 'aberto' ? `
-                            <button onclick="abrirModal(${item.id})" class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition shadow-sm">
-                                <i class="fas fa-check text-[10px]"></i>
-                            </button>
-                        ` : '<i class="fas fa-check-double text-emerald-500" title="Pagamento Realizado"></i>'}
-
-                        <button class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition shadow-sm">
-                            <i class="fas fa-file-pdf text-[10px]"></i>
-                        </button>
-                    </div>
-                </td>
-            </tr>
-        `).join('');
-
-
-         atualizarResumo();
-        }
-
-        function atualizarResumo() {
-            // Trocado .status por .status_pagamento
-            const abertos = lancamentos.filter(l => l.status_pagamento === 'aberto').reduce((a, b) => a + parseFloat(b.valor), 0);
-            const pagos = lancamentos.filter(l => l.status_pagamento === 'pago').reduce((a, b) => a + parseFloat(b.valor), 0);
-
-            const total = pagos + abertos;
-            const perc = total > 0 ? (pagos / total) * 100 : 0; // Evita divisão por zero
-
-            document.getElementById('textoSaude').innerText = `${Math.round(perc)}%`;
-            document.getElementById('barraProgressoSaude').style.width = `${perc}%`;
-
-            // Atualiza os outros campos também...
-            document.getElementById('saldoPendente').innerText = `R$ ${abertos.toFixed(2)}`;
-            document.getElementById('faturamentoMes').innerText = `R$ ${pagos.toFixed(2)}`;
-        }
-
-       // MINI CHART JS
-       const ctx = document.getElementById('miniGraficoPizza').getContext('2d');
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                datasets: [{
-                    data: [159.90, 250],
-                    backgroundColor: ['#E5E7EB', '#10B981'],
-                    borderWidth: 0
-                }]
+    try {
+        const resposta = await fetch('/api/financeiro/despesas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Token de segurança
             },
-            options: { cutout: '80%', plugins: { legend: { display: false } } }
+            body: JSON.stringify(dados)
         });
 
-        // CHAMADA MESTRE: Busca os dados no banco assim que a página carrega
-        document.addEventListener('DOMContentLoaded', () => {
-            carregarDadosEstrategicos();
-        });
-        // ======= Script pra o modal de pagamentos =====
+        const resultado = await resposta.json();
 
+        if (resultado.success) {
+            alert("Despesa registrada com sucesso!");
+            fecharModalDespesas();
+            form.reset();
 
-    // --- 1. FUNÇÃO PARA ABRIR O MODAL ---
-    function abrirModal(id) {
-        // Busca o lançamento no nosso array
-        const item = lancamentos.find(l => l.id === id);
-        if (!item) return;
-
-        // Usamos window. para evitar conflito com o script externo
-        window.itemParaBaixar = item;
-
-        // Garante que o valor vire número para o toFixed(2) não quebrar
-        const valorNumerico = parseFloat(item.valor || 0);
-
-        // Preenche os dados no Modal usando os nomes exatos do banco
-        const nomePaciente = document.getElementById('modalNomePaciente');
-        const valorModal = document.getElementById('modalValor');
-
-        if (nomePaciente) nomePaciente.innerText = item.paciente_nome;
-        if (valorModal) valorModal.innerText = `R$ ${valorNumerico.toFixed(2)}`;
-
-        // Reseta seleções anteriores
-        window.metodoSelecionado = '';
-        document.querySelectorAll('.metodo-btn').forEach(btn => {
-            btn.classList.remove('border-emerald-500', 'bg-emerald-50', 'border-blue-500', 'bg-blue-50', 'border-amber-500', 'bg-amber-50');
-        });
-
-        // Mostra o Modal
-        const modal = document.getElementById('modalPagamento');
-        if (modal) modal.classList.remove('hidden');
-    }
-
-    // --- 2. FUNÇÃO PARA SELECIONAR O MÉTODO ---
-    function selecionarMetodo(metodo, elemento) {
-        window.metodoSelecionado = metodo;
-
-        // Remove destaques de todos os botões
-        document.querySelectorAll('.metodo-btn').forEach(btn => {
-            btn.classList.remove('border-emerald-500', 'bg-emerald-50', 'border-blue-500', 'bg-blue-50', 'border-amber-500', 'bg-amber-50');
-        });
-
-        // Adiciona cor baseada no método (Seguindo seu padrão de cores claras)
-        if (metodo === 'pix') elemento.classList.add('border-emerald-500', 'bg-emerald-50');
-        if (metodo === 'cartao') elemento.classList.add('border-blue-500', 'bg-blue-50');
-        if (metodo === 'dinheiro') elemento.classList.add('border-amber-500', 'bg-amber-50');
-
-        console.log("Método guardado no window:", window.metodoSelecionado);
-    }
-
-    async function processarBaixa() {
-        // Usamos window para garantir que estamos acessando a variável do script externo
-        if (!window.metodoSelecionado) {
-            alert("Por favor, selecione a forma de pagamento.");
-            return;
-        }
-
-        if(window.itemParaBaixar) {
-            // Aqui fazemos a lógica de troca de status
-            window.itemParaBaixar.status_pagamento = 'pago';
-
-            // O console.log deve usar o nome que vem do banco: paciente_nome
-            console.log(`Sucesso: Pagamento de ${window.itemParaBaixar.paciente_nome} via ${window.metodoSelecionado.toUpperCase()} registrado.`);
-
-                    // --- DISPARO REAL PARA O BACKEND ---
-            try {
-                const response = await fetch(`/api/financeiro/baixar/${window.itemParaBaixar.id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        // Se você usa token de autenticação, ele entra aqui:
-                        'Authorization': `Bearer ${localStorage.getItem('token')}`
-                    },
-                    body: JSON.stringify({
-                        metodo_pagamento: window.metodoSelecionado, // Nome igual ao que o Controller espera
-                        clinica_id: window.itemParaBaixar.clinica_id
-                    })
-                });
-
-                const resultado = await response.json();
-
-                if (response.ok) {
-                    console.log("Banco de Dados Atualizado:", resultado.message);
-
-                    // 1. Só agora mudamos o status na tela
-                    window.itemParaBaixar.status_pagamento = 'pago';
-
-                    // 2. Fecha e limpa a interface
-                    fecharModal();
-                    renderizar();
-                    atualizarResumo();
-
-                    alert("Pagamento registrado com sucesso no banco de dados!");
-                } else {
-                    alert("Erro ao salvar no banco: " + resultado.error);
-                }
-            } catch (erro) {
-                console.error("Erro na requisição:", erro);
-                alert("Erro de conexão com o servidor.");
+            // ATUALIZA OS CARDS (CHAMA A FUNÇÃO QUE JÁ EXISTE NO SEU CÓDIGO)
+            if (typeof carregarDadosEstrategicos === 'function') {
+                carregarDadosEstrategicos();
             }
-
-            // 1. Fecha o Modal
-            fecharModal();
-
-            // 2. Renderiza a tabela novamente (Daniel ou Lavínia ficarão com check verde)
-            renderizar();
-
-            // 3. Atualiza os Cards (Saldo a Receber diminui, Faturamento aumenta)
-            atualizarResumo();
+        } else {
+            alert("Erro ao salvar: " + (resultado.error || "Verifique os dados"));
         }
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+        alert("Erro de conexão com o servidor.");
     }
+}
 
-   function fecharModal() {
-        const modal = document.getElementById('modalPagamento');
-        if(modal) modal.classList.add('hidden');
-
-        // Limpamos as globais no window
-        window.itemParaBaixar = null;
-        window.metodoSelecionado = '';
-    }
-
-
+    // CHAMADA MESTRE: Inicia o sistema
+    document.addEventListener('DOMContentLoaded', carregarDadosEstrategicos);
   </script>
 
   <script src="../ScriptGlobal/logout.js"></script>

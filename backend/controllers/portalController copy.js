@@ -42,7 +42,6 @@ exports.getHorariosLivres = async (req, res) => {
   }
 };
 
-
 // A "Mágica": Cria o paciente e depois o agendamento
 
 
@@ -63,21 +62,22 @@ exports.criarAgendamento = async (req, res) => {
       [clinica_id]
     );
 
+    // Se não encontrar configuração, define como 0.00 para não quebrar o banco
     const valorSinalDinamico = (configuracoes.length > 0 && configuracoes[0].valor_sinal)
       ? configuracoes[0].valor_sinal
       : 0.00;
 
-    // 2. CRIAR OU LOCALIZAR O PACIENTE (Adicionado a coluna ORIGEM)
-    // Note que inserimos 'portal' manualmente aqui, pois esta rota é exclusiva do Portal
+    // 2. CRIAR OU LOCALIZAR O PACIENTE
     const [resPaciente] = await connection.execute(
-      `INSERT INTO pacientes (clinica_id, nome, email, telefone, cpf, origem) VALUES (?, ?, ?, ?, ?, 'portal')`,
+      `INSERT INTO pacientes (clinica_id, nome, email, telefone, cpf) VALUES (?, ?, ?, ?, ?)`,
       [clinica_id, nome, email, telefone, cpf]
     );
     const pacienteId = resPaciente.insertId;
 
     // 3. BUSCAR USUÁRIO ADMIN DA CLÍNICA
     const [usuarios] = await connection.execute(
-      'SELECT id FROM usuarios WHERE clinica_id = ? LIMIT 1', [clinica_id]
+      'SELECT id FROM usuarios WHERE clinica_id = ? LIMIT 1',
+      [clinica_id]
     );
 
     const adminId = usuarios.length > 0 ? usuarios[0].id : null;
@@ -86,7 +86,7 @@ exports.criarAgendamento = async (req, res) => {
       throw new Error("Clínica sem usuário administrador configurado.");
     }
 
-    // 4. CRIAR O AGENDAMENTO
+    // 4. CRIAR O AGENDAMENTO (Usando o status correto do seu ENUM)
     const dataAgendamentoCompleta = `${data} ${horario}`;
 
     const [resAgendamento] = await connection.execute(
@@ -95,36 +95,57 @@ exports.criarAgendamento = async (req, res) => {
         status_agendamento, motivo_consulta, nome, email, telefone, cpf, tipo_terapia
       ) VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?, ?)`,
       [
-        clinica_id, pacienteId, adminId, dataAgendamentoCompleta,
-        motivo_consulta, nome, email, telefone, cpf, tipo_terapia
+        clinica_id,
+        pacienteId,
+        adminId,
+        dataAgendamentoCompleta,
+        motivo_consulta,
+        nome,
+        email,
+        telefone,
+        cpf,
+        tipo_terapia
       ]
     );
     const agendamentoId = resAgendamento.insertId;
 
-    // 5. CRIAR LANÇAMENTO FINANCEIRO
+    // 5. CRIAR LANÇAMENTO FINANCEIRO (Com valor dinâmico e tipo receita)
     await connection.execute(
       `INSERT INTO financeiro (
-        clinica_id, paciente_id, agendamento_id, tipo,
-        valor, data_vencimento, status_pagamento, descricao
+        clinica_id,
+        paciente_id,
+        agendamento_id,
+        tipo,
+        valor,
+        data_vencimento,
+        status_pagamento,
+        descricao
       ) VALUES (?, ?, ?, 'receita', ?, ?, 'aberto', ?)`,
       [
-        clinica_id, pacienteId, agendamentoId, valorSinalDinamico,
-        data, `Sinal de Agendamento - ${nome}`
+        clinica_id,
+        pacienteId,
+        agendamentoId,
+        valorSinalDinamico, // Valor capturado dinamicamente do banco
+        data,
+        `Sinal de Agendamento - ${nome}`
       ]
     );
 
+    // SE CHEGOU AQUI, TUDO DEU CERTO! EFETIVA NO BANCO.
     await connection.commit();
 
-    // --- NOTIFICAÇÕES ---
+    // --- NOTIFICAÇÕES (Fora da transação para não travar o banco se o e-mail falhar) ---
+    // --- NOTIFICAÇÕES (Fora da transação) ---
     const [clinicaResult] = await db.execute('SELECT * FROM clinicas WHERE id = ?', [clinica_id]);
     const dadosDaClinica = clinicaResult[0];
 
     if (email && dadosDaClinica) {
+      // MAPEAMENTO EXATO PARA O SEU notificationService
       const dadosParaEmail = {
-        nome: nome,
+        nome: nome, // O service usa agendamento.nome para nome_paciente
         email: email,
         tipo_terapia: tipo_terapia || 'Terapia Integrativa',
-        data_agendamento: dataAgendamentoCompleta,
+        data_agendamento: dataAgendamentoCompleta, // O service vai extrair data e hora daqui
         motivo_consulta: motivo_consulta || 'Consulta inicial'
       };
 
@@ -132,7 +153,6 @@ exports.criarAgendamento = async (req, res) => {
         .then(() => console.log(`[MED-LM] E-mail enviado com sucesso!`))
         .catch(err => console.error("[MED-LM] Erro ao enviar e-mail:", err));
     }
-
     return res.json({
       success: true,
       message: "Agendamento realizado com sucesso!"
@@ -141,10 +161,16 @@ exports.criarAgendamento = async (req, res) => {
   } catch (error) {
     if (connection) await connection.rollback();
     console.error("ERRO CRÍTICO NO AGENDAMENTO:", error);
+
     if (!res.headersSent) {
-      res.status(500).json({ success: false, message: "Falha ao processar agendamento." });
+      res.status(500).json({
+        success: false,
+        message: "Falha ao processar agendamento. Verifique os dados."
+      });
     }
   } finally {
     if (connection) connection.release();
   }
 };
+
+

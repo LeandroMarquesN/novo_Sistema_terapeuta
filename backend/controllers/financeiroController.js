@@ -9,7 +9,7 @@ const financeiroController = {
       const { status, busca } = req.query;
 
       let query = `
-                SELECT f.*, p.nome AS paciente_nome, p.telefone AS paciente_tel
+                SELECT f.*, p.nome AS paciente_nome, p.telefone AS paciente_tel, p.cpf AS paciente_cpf, p.email AS paciente_email
                 FROM financeiro f
                 JOIN pacientes p ON f.paciente_id = p.id
                 WHERE f.clinica_id = ?
@@ -97,20 +97,72 @@ const financeiroController = {
     }
   },
 
+  // Cancelar Lançamento (Paciente Desistiu ou Não Compareceu)
+  cancelar: async (req, res) => {
+    const connection = await db.getConnection();
+    try {
+      const { id } = req.params;
+      const { clinica_id } = req.usuario;
+
+      await connection.beginTransaction();
+
+      // 1. Atualiza o registro no Financeiro para 'cancelado'
+      const [result] = await connection.execute(
+        `UPDATE financeiro SET status_pagamento = 'cancelado'
+             WHERE id = ? AND clinica_id = ?`,
+        [id, clinica_id]
+      );
+
+      if (result.affectedRows === 0) {
+        throw new Error('Lançamento não encontrado ou acesso negado.');
+      }
+
+      // 2. Busca se existe um agendamento_id vinculado
+      const [financeiro] = await connection.execute(
+        `SELECT agendamento_id FROM financeiro WHERE id = ?`, [id]
+      );
+
+      // 3. Se houver agendamento vinculado, altera o status dele para 'cancelado'
+      if (financeiro[0] && financeiro[0].agendamento_id) {
+        await connection.execute(
+          `UPDATE agendamentos SET status_agendamento = 'cancelado' WHERE id = ?`,
+          [financeiro[0].agendamento_id]
+        );
+      }
+
+      await connection.commit();
+      res.json({ success: true, message: 'Cancelamento realizado com sucesso!' });
+
+    } catch (error) {
+      if (connection) await connection.rollback();
+      console.error("ERRO AO CANCELAR:", error.message);
+      res.status(500).json({ error: error.message });
+    } finally {
+      connection.release();
+    }
+  },
+
   // Dados para os "Cards de Poder"
   getResumo: async (req, res) => {
     try {
       const { clinica_id } = req.usuario;
 
       const query = `
-                SELECT
-                    COALESCE(SUM(CASE WHEN status_pagamento = 'aberto' THEN valor ELSE 0 END), 0) as saldo_receber,
-                    COALESCE(SUM(CASE WHEN status_pagamento = 'pago' THEN valor ELSE 0 END), 0) as faturamento_mes,
-                    COUNT(CASE WHEN status_pagamento = 'aberto' AND data_vencimento < CURDATE() THEN 1 END) as inadimplentes,
-                    COALESCE(AVG(CASE WHEN status_pagamento = 'pago' THEN valor END), 0) as ticket_medio
-                FROM financeiro
-                WHERE clinica_id = ? AND MONTH(data_vencimento) = MONTH(CURDATE())
-            `;
+    SELECT
+        COALESCE(SUM(CASE WHEN status_pagamento = 'aberto' THEN valor ELSE 0 END), 0) as saldo_receber,
+        COALESCE(SUM(CASE WHEN status_pagamento = 'pago' THEN valor ELSE 0 END), 0) as faturamento_mes,
+        COUNT(CASE WHEN (status_pagamento = 'aberto' AND data_vencimento < CURDATE()) OR status_pagamento = 'cancelado' THEN 1 END) as quantidade_inadimplentes,
+
+        /* CÁLCULO DO TICKET MÉDIO: Soma do Pago / Quantidade de Pagos */
+        COALESCE(
+            SUM(CASE WHEN status_pagamento = 'pago' THEN valor ELSE 0 END) /
+            NULLIF(COUNT(CASE WHEN status_pagamento = 'pago' THEN 1 END), 0),
+            0
+        ) as ticket_medio
+
+    FROM financeiro
+    WHERE clinica_id = ? AND MONTH(data_vencimento) = MONTH(CURDATE())
+`;
 
       const [rows] = await db.execute(query, [clinica_id]);
 

@@ -958,13 +958,19 @@ document.querySelector('form').addEventListener('submit', function(e) {
             throw new Error(`Erro HTTP: ${resposta.status}`);
         }
         const eventos = await resposta.json();
-        currentAppointments = eventos;
-        tabelaBody.innerHTML = '';
-        if (eventos.length === 0) {
-          tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento encontrado.</td></tr>`;
-          return;
-        }
-        eventos.forEach(evento => {
+
+          // TRAVA DE SEGURANÇA: Se não for array, transforma em array vazio para não dar erro no forEach
+          const listaEventos = Array.isArray(eventos) ? eventos : [];
+
+          currentAppointments = listaEventos;
+          tabelaBody.innerHTML = '';
+
+          if (listaEventos.length === 0) {
+              tabelaBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">Nenhum agendamento encontrado.</td></tr>`;
+              return;
+          }
+
+          listaEventos.forEach(evento => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td>${evento.nome || 'N/A'}</td>
@@ -1268,7 +1274,47 @@ document.querySelector('form').addEventListener('submit', function(e) {
       }
 
       carregarAgendamentos();
-    }); // Fecha o document.addEventListener('DOMContentLoaded')
+    });
+
+    // --- INÍCIO DO BLOCO DE REAGENDAMENTO ---
+    (function() {
+          const preencherCampos = () => {
+              const urlParams = new URLSearchParams(window.location.search);
+
+              if (urlParams.get('reagendamento') === 'true') {
+                  // Mapeamento: ID do Campo no HTML -> Chave na URL
+                  const mapaCampos = {
+                      'nomePaciente': 'nome',
+                      'cpfPaciente': 'cpf',
+                      'emailPaciente': 'email',
+                      'telefonePaciente': 'telefone'
+                  };
+
+                  Object.keys(mapaCampos).forEach(idCampo => {
+                      const valorUrl = urlParams.get(mapaCampos[idCampo]);
+                      const elemento = document.getElementById(idCampo);
+
+                      if (elemento && valorUrl) {
+                          elemento.value = decodeURIComponent(valorUrl);
+
+                          // Dispara o evento de 'input' para rodar suas máscaras de CPF e Telefone
+                          elemento.dispatchEvent(new Event('input', { bubbles: true }));
+                          // Dispara 'blur' para validar e-mail se necessário
+                          elemento.dispatchEvent(new Event('blur', { bubbles: true }));
+                      }
+                  });
+                  console.log("✅ Dados carregados para reagendamento.");
+              }
+          };
+
+          // Tenta em 3 tempos para garantir que o DOM e os scripts de máscara carregaram
+          preencherCampos();
+          document.addEventListener('DOMContentLoaded', preencherCampos);
+          setTimeout(preencherCampos, 600);
+      })();
+      // --- FIM DO BLOCO DE REAGENDAMENTO ---
+
+    // Fecha o document.addEventListener('DOMContentLoaded')
   </script>
    <script src="../ScriptGlobal/verifiLog.js"></script>
    <script src="../ScriptGlobal/logout.js"></script>

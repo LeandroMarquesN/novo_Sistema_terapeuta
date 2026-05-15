@@ -26,10 +26,10 @@ services:
       - ./backend/docker/mysql-init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 20s
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 50s
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin

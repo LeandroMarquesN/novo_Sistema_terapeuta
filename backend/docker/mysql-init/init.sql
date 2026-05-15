@@ -16,11 +16,11 @@ INSERT IGNORE INTO planos (id, nome_plano, valor_base, valor_promocional, limite
 (2, 'premium', 169.90, 129.90, 10),
 (3, 'enterprise', 209.90, 159.90, 999);
 
--- 3. TABELA DE CLÍNICAS (Atualizada com a coluna SLUG)
+-- 3. TABELA DE CLÍNICAS
 CREATE TABLE IF NOT EXISTS clinicas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nome_clinica VARCHAR(100) NOT NULL,
-  slug VARCHAR(100) NOT NULL UNIQUE, -- O "nome de usuário" da clínica na URL
+  slug VARCHAR(100) NOT NULL UNIQUE,
   dono_nome VARCHAR(100) NOT NULL,
   telefone_clinica VARCHAR(20) NOT NULL,
   telefone_dono VARCHAR(20) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS clinicas (
   CONSTRAINT fk_clinica_plano FOREIGN KEY (plano_id) REFERENCES planos(id)
 ) ENGINE=InnoDB;
 
--- 4. TABELA DE USUÁRIOS (clinica_id NULL para o Admin Master)
+-- 4. TABELA DE USUÁRIOS
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     clinica_id INT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     CONSTRAINT fk_usuario_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. PACIENTES
+-- 5. PACIENTES (Corrigido o ponto e vírgula fatal)
 CREATE TABLE IF NOT EXISTS pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -62,6 +62,7 @@ CREATE TABLE IF NOT EXISTS pacientes (
   peso DECIMAL(5,2),
   genero VARCHAR(20),
   status_pagamento VARCHAR(20) DEFAULT 'pendente',
+  origem ENUM('portal', 'manual', 'indicacao') DEFAULT 'manual',
   altura DECIMAL(3,2),
   condicoes_preexistentes TEXT,
   foto_perfil VARCHAR(255),
@@ -96,14 +97,15 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   CONSTRAINT fk_agend_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- CONFIGURAÇÕES (Corrigida a vírgula do valor_sinal)
 CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
   horario_abertura TIME DEFAULT '08:00:00',
   horario_fechamento TIME DEFAULT '18:00:00',
-  duracao_atendimento INT DEFAULT 30, -- em minutos
-  valor_sinal DECIMAL(10,2) DEFAULT 00.00,
-  dias_semana VARCHAR(50) DEFAULT '1,2,3,4,5', -- 1=Segunda, 5=Sexta
+  duracao_atendimento INT DEFAULT 30,
+  valor_sinal DECIMAL(10,2) DEFAULT 0.00,
+  dias_semana VARCHAR(50) DEFAULT '1,2,3,4,5',
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -127,7 +129,19 @@ CREATE TABLE IF NOT EXISTS financeiro (
   CONSTRAINT fk_fin_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- 8. ANEXOS
+-- 8. DESPESAS
+CREATE TABLE IF NOT EXISTS financeiro_despesas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  descricao VARCHAR(255) NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  categoria ENUM('marketing', 'fixa', 'variavel') NOT NULL,
+  data_vencimento DATE NOT NULL,
+  status_pagamento ENUM('aberto', 'pago') DEFAULT 'aberto',
+  CONSTRAINT fk_despesa_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 9. ANEXOS
 CREATE TABLE IF NOT EXISTS anexos (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -143,18 +157,12 @@ CREATE TABLE IF NOT EXISTS anexos (
   CONSTRAINT fk_anexo_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
---
--- INSERTS DE TESTE FINAL
---
--- Clínica 1 (Para testes do sistema)
-INSERT IGNORE INTO clinicas (id, nome_clinica, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao)
-VALUES (1, 'Clínica Experimental', 'Leandro Marques', '1199999999', '1188888888', 'admin@sistema.com', '123456', 1, '2026-12-31');
+-- INSERTS DE TESTE (Adicionado SLUG para não dar erro)
+INSERT IGNORE INTO clinicas (id, nome_clinica, slug, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao)
+VALUES (1, 'Clínica Experimental', 'clinica-experimental', 'Leandro Marques', '1199999999', '1188888888', 'admin@sistema.com', '123456', 1, '2026-12-31');
 
--- Usuário dono vinculado à clinica 1
 INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo)
 VALUES (1, 'Leandro Marques', 'leandro@teste.com', '123456', 'dono');
 
--- ACESSO MASTER AO PAINEL ADMINISTRATIVO (medlm.com / mariarosa)
--- Note que o clinica_id é NULL aqui para ser o dono do MedLM
 INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo)
 VALUES (NULL, 'Administrador MedLM', 'admin@medlm.com', 'mariarosa', 'dono');
