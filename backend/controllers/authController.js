@@ -1,19 +1,20 @@
 require('dotenv').config();
 const db = require('../config/db');
-const bcrypt = require('bcryptjs'); // Mantido para não quebrar o import, mas não usado no compare agora
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 exports.login = async (req, res) => {
     const { email, senha } = req.body;
 
     try {
-        // 1. Busca o usuário (Note o LEFT JOIN para permitir que o ADMIN logue mesmo sem clínica)
+        // 1. Busca o usuário (Adicionado 'c.nome AS clinica_nome' na query)
+
         const [usuarios] = await db.execute(
-            `SELECT u.*, c.status AS clinica_status, c.data_expiracao, p.nome_plano
-             FROM usuarios u
-             LEFT JOIN clinicas c ON u.clinica_id = c.id
-             LEFT JOIN planos p ON c.plano_id = p.id
-             WHERE u.email = ?`,
+            `SELECT u.*, c.nome_clinica AS clinica_nome, c.status AS clinica_status, c.data_expiracao, p.nome_plano
+                FROM usuarios u
+                LEFT JOIN clinicas c ON u.clinica_id = c.id
+                LEFT JOIN planos p ON c.plano_id = p.id
+                WHERE u.email = ?`,
             [email]
         );
 
@@ -35,7 +36,7 @@ exports.login = async (req, res) => {
             });
         }
 
-        // 4. Geração do Token JWT (DEVE vir antes do redirecionamento!)
+        // 4. Geração do Token JWT
         const token = jwt.sign(
             {
                 id: usuario.id,
@@ -48,23 +49,20 @@ exports.login = async (req, res) => {
         );
 
         // 5. Lógica de Redirecionamento Inteligente
-        // Definimos para onde ele vai, mas só enviamos a resposta no final
         let redirectUrl = '/dashboard';
 
         if (usuario.email === 'admin@medlm.com' && usuario.cargo === 'dono') {
             redirectUrl = '/admin';
         }
 
-        // 6. Resposta Final Única
+        // 6. Resposta Final Única (Atualizada com os campos exatos que o front espera)
         return res.json({
             success: true,
             message: "Bem-vindo ao MedLM!",
             token: token,
             redirectUrl: redirectUrl,
-            usuario: {
-                nome: usuario.nome,
-                cargo: usuario.cargo
-            }
+            usuarioNome: usuario.nome, // Enviando direto para facilitar o localStorage
+            clinicaNome: usuario.clinica_nome || 'MedLM Admin' // Se for o Admin master sem clínica, evita vir null
         });
 
     } catch (error) {

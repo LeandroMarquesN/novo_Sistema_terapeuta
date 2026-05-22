@@ -205,20 +205,20 @@
     const data = await response.json();
 
     if (response.ok) {
-        // 1. Salva no localStorage
+        // 1. Salva o token no localStorage e nos Cookies
         localStorage.setItem('token', data.token);
-
-        // 2. SALVA NO COOKIE
         document.cookie = `token=${data.token}; path=/; max-age=${8 * 60 * 60}; SameSite=Lax`;
 
-        // --- MUDANÇA AQUI ---
-        // Em vez de ir fixo para /dashboard, usamos o que o servidor mandou
-        // Se for você (medlm.com), o servidor mandará '/admin-financeiro'
-        // Se for uma clínica, o servidor mandará '/dashboard'
+        // 2. GUARDA OS DADOS DINÂMICOS DO TENANT (MUDANÇA AQUI)
+        // O seu backend deve retornar esses campos (ex: data.usuarioNome e data.clinicaNome)
+        if (data.usuarioNome) localStorage.setItem('medlm_user_name', data.usuarioNome);
+        if (data.clinicaNome) localStorage.setItem('medlm_clinic_name', data.clinicaNome);
+
+        // 3. Redirecionamento inteligente baseado no perfil do usuário
         if (data.redirectUrl) {
             window.location.href = data.redirectUrl;
         } else {
-            window.location.href = '/dashboard'; // Fallback por segurança
+            window.location.href = '/dashboard'; // Fallback de segurança
         }
     } else {
         errorMessage.textContent = data.error || 'Erro ao realizar login.';

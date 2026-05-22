@@ -3,7 +3,7 @@ const db = require('../config/db');
 const dashboardController = {
   index: async (req, res) => {
     try {
-      // 1. Log de controle do Token
+      // 1. Log para saber se o middleware passou o usuário certo
       console.log("DEBUG: Dados do usuário no token:", req.usuario);
 
       if (!req.usuario || !req.usuario.clinica_id) {
@@ -13,53 +13,23 @@ const dashboardController = {
 
       const clinicaId = req.usuario.clinica_id;
 
-      // 2. CAPTURA O FILTRO DA URL (Se não for passado, o padrão é exibir o 'dia' de hoje)
-      const filtro = req.query.filtro || 'dia';
-      console.log(`DEBUG: Filtro de listagem ativo na tabela: [${filtro}]`);
-
-      // 3. DEFINE A REGRA SQL ADICIONAL BASEADA NO BOTÃO CLICADO
-      let filtroSql = '';
-      if (filtro === 'dia') {
-        filtroSql = 'AND DATE(data_agendamento) = CURDATE()';
-      } else if (filtro === 'semana') {
-        filtroSql = 'AND YEARWEEK(data_agendamento, 1) = YEARWEEK(CURDATE(), 1)';
-      } else if (filtro === 'mes') {
-        filtroSql = 'AND MONTH(data_agendamento) = MONTH(CURDATE()) AND YEAR(data_agendamento) = YEAR(CURDATE())';
-      } else if (filtro === 'ano') {
-        filtroSql = 'AND YEAR(data_agendamento) = YEAR(CURDATE())';
-      }
-
-      // 4. QUERY 1: Busca APENAS os agendamentos filtrados para não inflar a tabela
-      const queryTabela = `
-                SELECT id, nome, data_agendamento, status_agendamento, tipo_terapia, telefone
-                FROM agendamentos
-                WHERE clinica_id = ? ${filtroSql}
-                ORDER BY data_agendamento DESC
-            `;
-
-      // 5. QUERY 2: Busca TODOS os dados do mês atual para os gráficos e calendário continuarem cheios
-      const queryMetricasGerais = `
+      // 2. Busca os agendamentos da clínica no banco de dados
+      const query = `
                 SELECT id, nome, data_agendamento, status_agendamento, tipo_terapia, telefone
                 FROM agendamentos
                 WHERE clinica_id = ?
-                AND MONTH(data_agendamento) = MONTH(CURDATE())
-                AND YEAR(data_agendamento) = YEAR(CURDATE())
+                ORDER BY data_agendamento DESC
             `;
 
-      // Executa as duas buscas em paralelo no MySQL (ganho de performance)
-      const [[rowsTabela], [rowsMetricas]] = await Promise.all([
-        db.execute(queryTabela, [clinicaId]),
-        db.execute(queryMetricasGerais, [clinicaId])
-      ]);
+      const [rows] = await db.execute(query, [clinicaId]);
+      console.log(`SUCESSO: ${rows.length} agendamentos encontrados.`);
 
-      console.log(`SUCESSO: ${rowsTabela.length} agendamentos renderizados na tabela.`);
-      console.log(`METRICAS: ${rowsMetricas.length} registros processados para os gráficos.`);
-
-      // 6. ESTRUTURAS DE GRÁFICOS E CALENDÁRIO
+      // 3. ESTRUTURAS PARA O CALENDÁRIO E PARA OS GRÁFICOS (INICIALIZAÇÃO)
       const resumoMensal = {};
       const fluxoSemanal = { "Seg": 0, "Ter": 0, "Qua": 0, "Qui": 0, "Sex": 0, "Sáb": 0, "Dom": 0 };
       const diasNome = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
+      // Nova estrutura para alimentar as 4 semanas isoladas do mês inteiro
       const fluxoMensalSemanas = {
         "Semana 1": { "Seg": 0, "Ter": 0, "Qua": 0, "Qui": 0, "Sex": 0, "Sáb": 0, "Dom": 0 },
         "Semana 2": { "Seg": 0, "Ter": 0, "Qua": 0, "Qui": 0, "Sex": 0, "Sáb": 0, "Dom": 0 },
@@ -67,13 +37,15 @@ const dashboardController = {
         "Semana 4": { "Seg": 0, "Ter": 0, "Qua": 0, "Qui": 0, "Sex": 0, "Sáb": 0, "Dom": 0 }
       };
 
-      // 7. LOOP DE PROCESSAMENTO (Usa rowsMetricas para alimentar os componentes visuais)
-      rowsMetricas.forEach(agend => {
+      // 4. UM ÚNICO LOOP PARA PROCESSAR TUDO
+      rows.forEach(agend => {
         const dataObj = new Date(agend.data_agendamento);
-        const diaReal = dataObj.getDate();
+        const diaReal = dataObj.getDate(); // Extrai o dia do mês (1 a 31)
 
+        // Regra de Negócio: Ignora os agendamentos cancelados tanto no calendário quanto nos gráficos
         if (agend.status_agendamento !== 'cancelado') {
-          // Calendário
+
+          // --- LÓGICA DO CALENDÁRIO ---
           const horaMinuto = dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
           if (!resumoMensal[diaReal]) {
@@ -82,29 +54,30 @@ const dashboardController = {
           resumoMensal[diaReal].total += 1;
           resumoMensal[diaReal].horarios.push(horaMinuto);
 
-          // Gráfico Geral
-          const diaSemanaNome = diasNome[dataObj.getDay()];
+          // --- LÓGICA DO GRÁFICO SEMANAL ATUAL ---
+          const diaSemanaNome = diasNome[dataObj.getDay()]; // Converte o número do dia (0-6) para texto ("Dom"-"Sáb")
           if (fluxoSemanal[diaSemanaNome] !== undefined) {
-            fluxoSemanal[diaSemanaNome] += 1;
+            fluxoSemanal[diaSemanaNome] += 1; // Soma +1 atendimento naquele dia da semana
           }
 
-          // Divisão das 4 Semanas do Mês
+          // --- LÓGICA DOS 4 GRÁFICOS DAS SEMANAS DO MÊS ---
+          // Divide os dias do mês: 1-7 (S1), 8-14 (S2), 15-21 (S3), 22+ (S4)
           let numeroSemana = Math.ceil(diaReal / 7);
-          if (numeroSemana > 4) numeroSemana = 4;
+          if (numeroSemana > 4) numeroSemana = 4; // Agrupa os dias 29, 30 e 31 na Semana 4
 
           const labelSemana = `Semana ${numeroSemana}`;
-          // Correção definitiva aplicada aqui (fluxoMensalSemanas com o "o")
           if (fluxoMensalSemanas[labelSemana] && fluxoMensalSemanas[labelSemana][diaSemanaNome] !== undefined) {
             fluxoMensalSemanas[labelSemana][diaSemanaNome] += 1;
           }
         }
       });
 
-      // Formata horários do calendário
+      // Transforma o array de horários do calendário em uma string separada por vírgulas
       Object.keys(resumoMensal).forEach(dia => {
         resumoMensal[dia].horarios = resumoMensal[dia].horarios.join(', ');
       });
 
+      // Organiza os dados estruturados do gráfico antigo (se você ainda o mantiver na tela)
       const dadosGrafico = {
         labels: ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"],
         valores: [
@@ -113,6 +86,7 @@ const dashboardController = {
         ]
       };
 
+      // Organiza com precisão os dados que os seus 4 novos gráficos do frontend precisam receber
       const dadosComparativoMensal = {
         semana1: [fluxoMensalSemanas["Semana 1"]["Seg"], fluxoMensalSemanas["Semana 1"]["Ter"], fluxoMensalSemanas["Semana 1"]["Qua"], fluxoMensalSemanas["Semana 1"]["Qui"], fluxoMensalSemanas["Semana 1"]["Sex"], fluxoMensalSemanas["Semana 1"]["Sáb"], fluxoMensalSemanas["Semana 1"]["Dom"]],
         semana2: [fluxoMensalSemanas["Semana 2"]["Seg"], fluxoMensalSemanas["Semana 2"]["Ter"], fluxoMensalSemanas["Semana 2"]["Qua"], fluxoMensalSemanas["Semana 2"]["Qui"], fluxoMensalSemanas["Semana 2"]["Sex"], fluxoMensalSemanas["Semana 2"]["Sáb"], fluxoMensalSemanas["Semana 2"]["Dom"]],
@@ -120,21 +94,22 @@ const dashboardController = {
         semana4: [fluxoMensalSemanas["Semana 4"]["Seg"], fluxoMensalSemanas["Semana 4"]["Ter"], fluxoMensalSemanas["Semana 4"]["Qua"], fluxoMensalSemanas["Semana 4"]["Qui"], fluxoMensalSemanas["Semana 4"]["Sex"], fluxoMensalSemanas["Semana 4"]["Sáb"], fluxoMensalSemanas["Semana 4"]["Dom"]]
       };
 
-      // 8. Envia tudo para o EJS Renderizar
+      // 5. Renderiza a view injetando TODOS os pacotes de dados necessários
       res.render('dashboard', {
-        agendamentos: rowsTabela,      // Lista filtrada (Evita tela gigante)
-        filtroAtivo: filtro,           // Mantém o estado visual do botão clicado
-        resumoMensal: resumoMensal,    // Calendário ativo
-        dadosGrafico: dadosGrafico,    // Gráficos do rodapé
-        dadosComparativoMensal: dadosComparativoMensal
+        agendamentos: rows,         // Alimenta a tabela e o card lateral
+        resumoMensal: resumoMensal,  // Alimenta o calendário dinâmico
+        dadosGrafico: dadosGrafico,  // Alimenta o gráfico de fluxo semanal antigo (com a vírgula corrigida! 😉)
+        dadosComparativoMensal: dadosComparativoMensal // Alimenta os 4 novos gráficos por semana!
       });
 
     } catch (error) {
+      // ESTE É O LOG QUE PRECISAMOS VER NO DOCKER SE ALGO FALHAR
       console.error('-----------------------------------------');
       console.error('ERRO REAL NO BANCO:', error.message);
       console.error('SQL STATE:', error.sqlState);
       console.error('-----------------------------------------');
-      res.status(500).send('Erro interno ao carregar o painel estratégico.');
+
+      res.status(500).send('Erro interno ao buscar dados. Verifique o console do servidor.');
     }
   }
 };
