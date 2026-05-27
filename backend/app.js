@@ -88,6 +88,9 @@ app.get('/login.html', (req, res) => res.redirect('/login'));
 app.get('/agendamento', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'agendamento.html'));
 });
+
+
+
 app.get('/clinicas', (req, res) => {
   // Aqui você vai apontar para o arquivo HTML que criaremos para listar as clínicas
   res.sendFile(path.join(frontendPath, 'pages', 'listagem_clinicas.html'));
@@ -104,6 +107,8 @@ app.get('/equipe', (req, res) => {
 app.get('/financeiro', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'financeiro.html'));
 });
+
+
 
 // Rota para renderizar a página de configurações
 app.get('/dashboard/configuracoes', authMiddleware, (req, res) => {

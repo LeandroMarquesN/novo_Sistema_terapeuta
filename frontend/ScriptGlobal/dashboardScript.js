@@ -470,7 +470,7 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
             const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
             const linhaHtml = `
-                <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors group">
+                 <tr class="hover:bg-white/80 dark:hover:bg-gray-800/40 transition-all group">
                     <td class="px-6 py-4 text-sm font-semibold text-gray-400 dark:text-gray-600 truncate">#${agendamento.id}</td>
                     <td class="px-6 py-4">
                         <div class="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate text-sm">${agendamento.nome}</div>
@@ -479,10 +479,13 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
                         </div>
                     </td>
 
-                    <td class="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-300">
-                        <div class="font-semibold text-gray-900 dark:text-white">${dataLinha}</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
-                            <i class="far fa-clock text-blue-500"></i> ${horaLinha}
+
+                    <td class="px-6 py-4 text-sm font-medium">
+                        <div class="font-bold text-gray-900 dark:text-gray-100 tracking-tight text-[14px]">${dataLinha}</div>
+
+                        <div class="mt-1.5 inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg text-xs font-black border border-blue-100/70 dark:border-blue-900/40 shadow-sm">
+                            <i class="far fa-clock text-blue-500 text-xs animate-pulse"></i>
+                            ${horaLinha} hs
                         </div>
                     </td>
 
@@ -497,10 +500,11 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
                             ${agendamento.status_agendamento}
                         </span>
                     </td>
+
                     <td class="px-6 py-4 text-right whitespace-nowrap">
-                        <a href="/agendamento/editar/${agendamento.id}" class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow shadow-sm transition-all">
+                        <button onclick="abrirGavetaProntuario('${agendamento.id}')" class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow shadow-sm transition-all">
                             Ver Prontuário
-                        </a>
+                        </button>
                     </td>
                 </tr>`;
 
@@ -511,3 +515,74 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
         console.error("Erro ao aplicar filtro assíncrono:", error);
     }
 }
+
+// FUNÇÃO PARA ABRIR A GAVETA (BUSCANDO DIRETO DO BANCO EM TEMPO REAL)
+async function abrirGavetaProntuario(agendamentoId) {
+    const gaveta = document.getElementById('gaveta-prontuario');
+    const backdrop = document.getElementById('gaveta-backdrop');
+    const painel = document.getElementById('gaveta-painel');
+
+    // Reseta os campos para o estado de carregamento
+    document.getElementById('gaveta-paciente-nome').innerText = "Carregando dados...";
+
+    // Torna a gaveta estruturalmente visível antes da animação
+    gaveta.classList.remove('invisible');
+
+    // Pequeno timeout para o Tailwind pegar a transição de CSS smoothly
+    setTimeout(() => {
+        backdrop.classList.remove('opacity-0');
+        backdrop.classList.add('opacity-100');
+        painel.classList.remove('-translate-x-full');
+        painel.classList.add('translate-x-0');
+    }, 10);
+
+    try {
+        // CORRIGIDO: Agora batendo na rota certa integrada com o Express
+        // Altere a linha do fetch para esta aqui (incluindo o /api e o 's' em agendamentos):
+        const response = await fetch(`/api/agendamentos/detalhes/${agendamentoId}`);
+        const dados = await response.json();
+
+        if (!response.ok) throw new Error(dados.erro || "Erro ao buscar prontuário.");
+
+        // Preenche os dados em tempo real vindos da tabela agendamentos
+        document.getElementById('gaveta-paciente-nome').innerText = dados.nome;
+        document.getElementById('gaveta-paciente-data').innerText = `${dados.data_formatada} às ${dados.hora_formatada}`;
+        document.getElementById('gaveta-paciente-terapia').innerText = dados.tipo_terapia;
+        document.getElementById('gaveta-paciente-whats').innerText = dados.telefone || 'Não informado';
+        document.getElementById('gaveta-paciente-cpf').innerText = dados.cpf;
+
+        document.getElementById('gaveta-paciente-idade').innerText = dados.idade ? `${dados.idade} anos` : '-';
+        document.getElementById('gaveta-paciente-peso').innerText = dados.peso ? `${dados.peso} kg` : '-';
+        document.getElementById('gaveta-paciente-altura').innerText = dados.altura ? `${dados.altura} m` : '-';
+
+        document.getElementById('gaveta-paciente-motivo').innerText = dados.motivo_consulta || 'Nenhuma queixa registrada.';
+        document.getElementById('gaveta-paciente-condicoes').innerText = dados.condicoes || 'Nenhuma condição registrada.';
+        document.getElementById('gaveta-paciente-obs').value = dados.observacoes || '';
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById('gaveta-paciente-nome').innerText = "Erro ao carregar dados";
+        alert("Não foi possível buscar as informações atualizadas do banco de dados.");
+        fecharGavetaProntuario();
+    }
+}
+
+// FUNÇÃO PARA FECHAR A GAVETA COM ANIMAÇÃO INVERSA
+function fecharGavetaProntuario() {
+    const gaveta = document.getElementById('gaveta-prontuario');
+    const backdrop = document.getElementById('gaveta-backdrop');
+    const painel = document.getElementById('gaveta-painel');
+
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0');
+    painel.classList.remove('translate-x-0');
+    painel.classList.add('-translate-x-full');
+
+    // Espera a animação de 300ms terminar para colocar a classe invisible de volta
+    setTimeout(() => {
+        gaveta.classList.add('invisible');
+    }, 300);
+}
+
+// Fecha a gaveta se clicar fora (no escuro)
+document.getElementById('gaveta-backdrop').addEventListener('click', fecharGavetaProntuario);

@@ -234,53 +234,54 @@
 
                 <div class="col-span-12 xl:col-span-9 space-y-8">
 
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 xl:p-8 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <div class="bg-gradient-to-br from-emerald-50/30 via-white to-blue-50/30 dark:from-gray-900 dark:to-slate-950 rounded-[2.5rem] p-6 xl:p-8 shadow-md border border-gray-200/60 dark:border-gray-800/80 backdrop-blur-sm">
+
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
                             <div>
                                 <h2 class="text-xl xl:text-2xl font-extrabold text-gray-950 dark:text-white tracking-tight">Fluxo de Atendimento</h2>
                                 <p class="text-gray-500 text-xs mt-0.5">Gerenciamento em tempo real dos prontuários e pacientes ativos.</p>
                             </div>
 
-                            <div class="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-700 shadow-inner" id="filtro-container">
+                            <div class="flex bg-gray-100/80 dark:bg-gray-800/80 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-700 shadow-inner" id="filtro-container">
                                 <button onclick="filtrarTabelaTerapeutica('dia')" data-filtro="dia"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'dia' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'dia' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Hoje
                                 </button>
                                 <button onclick="filtrarTabelaTerapeutica('semana')" data-filtro="semana"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'semana' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'semana' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Semana
                                 </button>
                                 <button onclick="filtrarTabelaTerapeutica('mes')" data-filtro="mes"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'mes' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'mes' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Mês
                                 </button>
                                 <button onclick="filtrarTabelaTerapeutica('ano')" data-filtro="ano"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'ano' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'ano' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Ano
                                 </button>
                             </div>
 
-                            <button onclick="window.print()" class="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-gray-100 dark:border-gray-700 transition-all shadow-sm">
+                            <button onclick="window.print()" class="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 transition-all shadow-sm">
                                 <i class="fas fa-print text-blue-500"></i> Imprimir Lista
                             </button>
                         </div>
 
-                        <div class="overflow-x-auto rounded-2xl border border-gray-100 dark:border-gray-800/60">
+                        <div class="overflow-x-auto rounded-2xl border border-gray-200/70 dark:border-gray-800/80 bg-white/60 dark:bg-gray-900/40 shadow-inner">
                             <table class="w-full text-left border-collapse table-fixed">
                                 <thead>
-                                    <tr class="bg-gray-50/70 dark:bg-gray-800/40 border-b border-gray-100 dark:border-gray-800">
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[60px]">ID</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 min-w-[200px]">Paciente</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[170px]">Data e Hora</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[140px]">Terapia</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[130px]">Status</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[140px] text-right">Ações</th>
+                                    <tr class="bg-gray-100/70 dark:bg-gray-800/60 border-b border-gray-200 dark:border-gray-800">
+                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[60px]">ID</th>
+                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-[200px]">Paciente</th>
+                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[170px]">Data e Hora</th>
+                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[140px]">Terapia</th>
+                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[130px]">Status</th>
+                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[140px] text-right">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800/60" id="tabela-pacientes-body">
+                                <tbody class="divide-y divide-gray-200/60 dark:divide-gray-800/60" id="tabela-pacientes-body">
                                     <% if (locals.agendamentos && agendamentos.length > 0) { %>
                                         <% agendamentos.forEach(agendamento => { %>
-                                            <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors group">
+                                            <tr class="hover:bg-white/80 dark:hover:bg-gray-800/40 transition-all group">
                                                 <td class="px-6 py-4 text-sm font-semibold text-gray-400 dark:text-gray-600 truncate">#<%= agendamento.id %></td>
                                                 <td class="px-6 py-4">
                                                     <div class="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate text-sm"><%= agendamento.nome %></div>
@@ -289,13 +290,14 @@
                                                     </div>
                                                 </td>
 
-                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-300">
-                                                    <div class="font-semibold text-gray-900 dark:text-white">
+                                                <td class="px-6 py-4 text-sm font-medium">
+                                                    <div class="font-bold text-gray-900 dark:text-gray-100 tracking-tight text-[14px]">
                                                         <%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %>
                                                     </div>
-                                                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
-                                                        <i class="far fa-clock text-blue-500"></i>
-                                                        <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %>
+
+                                                    <div class="mt-1.5 inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg text-xs font-black border border-blue-100/70 dark:border-blue-900/40 shadow-sm">
+                                                        <i class="far fa-clock text-blue-500 text-xs animate-pulse"></i>
+                                                        <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %> hs
                                                     </div>
                                                 </td>
 
@@ -321,9 +323,9 @@
                                                     </span>
                                                 </td>
                                                 <td class="px-6 py-4 text-right whitespace-nowrap">
-                                                    <a href="/agendamento/editar/<%= agendamento.id %>" class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow shadow-sm transition-all">
+                                                    <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow shadow-sm transition-all">
                                                         Ver Prontuário
-                                                    </a>
+                                                    </button>
                                                 </td>
                                             </tr>
                                         <% }); %>
@@ -496,6 +498,84 @@
 
         </main>
     </div>
+
+    <!-- Slide para ver prontuario -->
+    <div id="gaveta-prontuario" class="fixed inset-0 z-50 invisible transition-all duration-300">
+        <div id="gaveta-backdrop" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+
+        <div id="gaveta-painel" class="absolute inset-y-0 left-0 w-full max-w-lg bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-slate-950 shadow-2xl border-r border-gray-200 dark:border-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+
+            <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900/50">
+                <div>
+                    <span class="text-[10px] uppercase font-black tracking-widest text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded">Ficha Clínica</span>
+                    <h3 id="gaveta-paciente-nome" class="text-lg font-black text-gray-900 dark:text-white mt-1">Carregando...</h3>
+                </div>
+                <button onclick="fecharGavetaProntuario()" class="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-red-500 transition-colors">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6 overflow-y-auto flex-1 space-y-6 text-sm text-gray-600 dark:text-gray-400">
+                <div class="grid grid-cols-2 gap-4 bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-800/80 shadow-sm">
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block">Data e Hora</span>
+                        <span id="gaveta-paciente-data" class="font-bold text-gray-800 dark:text-gray-200">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block">Terapia</span>
+                        <span id="gaveta-paciente-terapia" class="font-bold text-blue-600 dark:text-blue-400">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block">WhatsApp</span>
+                        <span id="gaveta-paciente-whats" class="font-bold text-gray-800 dark:text-gray-200">-</span>
+                    </div>
+                    <div>
+                        <span class="text-xs text-gray-400 font-semibold block">CPF</span>
+                        <span id="gaveta-paciente-cpf" class="font-bold text-gray-800 dark:text-gray-200">-</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center text-xs">
+                    <div class="bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <span class="text-gray-400 block mb-0.5">Idade</span>
+                        <strong id="gaveta-paciente-idade" class="text-gray-800 dark:text-gray-200 text-sm">-</strong>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <span class="text-gray-400 block mb-0.5">Peso</span>
+                        <strong id="gaveta-paciente-peso" class="text-gray-800 dark:text-gray-200 text-sm">-</strong>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800">
+                        <span class="text-gray-400 block mb-0.5">Altura</span>
+                        <strong id="gaveta-paciente-altura" class="text-gray-800 dark:text-gray-200 text-sm">-</strong>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Queixa Principal / Motivo</label>
+                    <div id="gaveta-paciente-motivo" class="p-4 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800/60 leading-relaxed min-h-[60px] italic"></div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Condições Pré-existentes</label>
+                    <div id="gaveta-paciente-condicoes" class="p-4 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800/60 leading-relaxed"></div>
+                </div>
+
+                <div class="space-y-1.5 pt-2">
+                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
+                        <i class="fas fa-pen text-blue-500"></i> Observações / Evolução do Atendimento
+                    </label>
+                    <textarea id="gaveta-paciente-obs" class="w-full p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[120px] shadow-inner" placeholder="Digite as anotações desta sessão clínica..."></textarea>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex gap-3">
+                <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition-colors shadow-sm">
+                    Salvar Evolução
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- fim do slide ver prontuario -->
 
     <script>
         window.listaAgendamentosReais = <%- locals.agendamentos ? JSON.stringify(agendamentos) : '[]' %>;

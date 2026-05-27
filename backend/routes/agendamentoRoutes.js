@@ -28,4 +28,7 @@ router.put('/:id', authMiddleware, agendamentoController.reagendarAgendamento);
 // 5. Atualização COMPLETA (PUT)
 router.put('/completo/:id', authMiddleware, uploadFields, agendamentoController.atualizarAgendamentoCompleto);
 
+// O Express já vai entender que é /agendamento/detalhes/:id
+router.get('/detalhes/:id', authMiddleware, agendamentoController.obterDetalhesAgendamento);
+
 module.exports = router;

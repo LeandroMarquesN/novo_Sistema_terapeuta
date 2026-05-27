@@ -359,3 +359,46 @@ exports.reagendarAgendamento = async (req, res) => {
     connection.release();
   }
 };
+
+// =============================================================================
+// 6. BUSCAR UM AGENDAMENTO ESPECÍFICO (Para a Gaveta de Prontuário)
+// =============================================================================
+exports.obterDetalhesAgendamento = async (req, res) => {
+  if (!req.usuario) {
+    return res.status(401).json({ error: "Sessão inválida." });
+  }
+
+  const { id } = req.params;
+  const clinicaId = req.usuario.clinica_id;
+
+  try {
+    // ALTERADO: Removido 'a.observacoes' que estava quebrando e adicionado '' AS observacoes para manter o front seguro
+    const sql = `
+      SELECT
+        a.id, a.nome, a.cpf, a.email, a.telefone, a.tipo_terapia,
+        a.motivo_consulta, '' AS observacoes, a.status_agendamento, a.data_agendamento,
+        p.idade, p.peso, p.altura, p.genero, p.condicoes_preexistentes AS condicoes
+      FROM agendamentos a
+      INNER JOIN pacientes p ON a.paciente_id = p.id
+      WHERE a.id = ? AND a.clinica_id = ?
+    `;
+    const [resultado] = await db.query(sql, [id, clinicaId]);
+
+    if (resultado.length === 0) {
+      return res.status(404).json({ erro: 'Agendamento/Prontuário não encontrado.' });
+    }
+
+    const ag = resultado[0];
+
+    // Formata a resposta para o front-end
+    res.json({
+      ...ag,
+      data_formatada: new Date(ag.data_agendamento).toLocaleDateString('pt-BR'),
+      hora_formatada: new Date(ag.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    });
+
+  } catch (err) {
+    console.error("Erro interno no controller ao obter prontuário:", err);
+    res.status(500).json({ erro: 'Erro interno ao buscar dados do banco.' });
+  }
+};
