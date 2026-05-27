@@ -229,7 +229,7 @@
                     <span class="text-gray-400 text-[11px] font-medium block mt-1">8 sessões liquidadas</span>
                 </div>
             </div>
-
+<!-- inicio da listagem de pacientes -->
             <div class="grid grid-cols-12 gap-8 items-start mb-12">
 
                 <div class="col-span-12 xl:col-span-9 space-y-8">
@@ -241,23 +241,23 @@
                                 <p class="text-gray-500 text-xs mt-0.5">Gerenciamento em tempo real dos prontuários e pacientes ativos.</p>
                             </div>
 
-                            <div class="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-700 shadow-inner">
-                                <a href="/dashboard?filtro=dia"
-                                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'dia' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                            <div class="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-700 shadow-inner" id="filtro-container">
+                                <button onclick="filtrarTabelaTerapeutica('dia')" data-filtro="dia"
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'dia' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Hoje
-                                </a>
-                                <a href="/dashboard?filtro=semana"
-                                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'semana' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                                </button>
+                                <button onclick="filtrarTabelaTerapeutica('semana')" data-filtro="semana"
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'semana' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Semana
-                                </a>
-                                <a href="/dashboard?filtro=mes"
-                                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'mes' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                                </button>
+                                <button onclick="filtrarTabelaTerapeutica('mes')" data-filtro="mes"
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'mes' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Mês
-                                </a>
-                                <a href="/dashboard?filtro=ano"
-                                   class="px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'ano' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
+                                </button>
+                                <button onclick="filtrarTabelaTerapeutica('ano')" data-filtro="ano"
+                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'ano' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
                                     Ano
-                                </a>
+                                </button>
                             </div>
 
                             <button onclick="window.print()" class="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-gray-100 dark:border-gray-700 transition-all shadow-sm">
@@ -269,15 +269,15 @@
                             <table class="w-full text-left border-collapse table-fixed">
                                 <thead>
                                     <tr class="bg-gray-50/70 dark:bg-gray-800/40 border-b border-gray-100 dark:border-gray-800">
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[80px]">ID</th>
+                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[60px]">ID</th>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 min-w-[200px]">Paciente</th>
-                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[120px]">Data</th>
+                                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[170px]">Data e Hora</th>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[140px]">Terapia</th>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[130px]">Status</th>
                                         <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 w-[140px] text-right">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800/60">
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-800/60" id="tabela-pacientes-body">
                                     <% if (locals.agendamentos && agendamentos.length > 0) { %>
                                         <% agendamentos.forEach(agendamento => { %>
                                             <tr class="hover:bg-gray-50/50 dark:hover:bg-gray-800/20 transition-colors group">
@@ -288,9 +288,17 @@
                                                         <i class="fab fa-whatsapp text-emerald-500"></i> <%= agendamento.telefone %>
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-300 truncate">
-                                                    <%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %>
+
+                                                <td class="px-6 py-4 text-sm font-medium text-gray-600 dark:text-gray-300">
+                                                    <div class="font-semibold text-gray-900 dark:text-white">
+                                                        <%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %>
+                                                    </div>
+                                                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
+                                                        <i class="far fa-clock text-blue-500"></i>
+                                                        <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %>
+                                                    </div>
                                                 </td>
+
                                                 <td class="px-6 py-4 truncate">
                                                     <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 max-w-full truncate">
                                                         <%= agendamento.tipo_terapia %>
@@ -326,8 +334,8 @@
                                                     <div class="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-3 border border-gray-100 dark:border-gray-700">
                                                         <i class="fas fa-calendar-times text-lg"></i>
                                                     </div>
-                                                    <p class="text-gray-900 dark:text-white font-semibold text-sm">Nenhum atendimento para hoje</p>
-                                                    <p class="text-gray-400 dark:text-gray-500 text-xs mt-0.5">Sua agenda está livre no momento.</p>
+                                                    <p class="text-gray-900 dark:text-white font-semibold text-sm">Nenhum atendimento cadastrado</p>
+                                                    <p class="text-gray-400 dark:text-gray-500 text-xs mt-0.5">Sua agenda está livre para este período.</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -436,7 +444,7 @@
 
                 </div>
             </div>
-
+<!-- fim da listagem de pacientes -->
             <div class="border-t border-gray-200/50 dark:border-gray-800/60 pt-8 mt-12">
                 <div class="mb-6">
                     <h2 class="text-2xl font-extrabold text-gray-950 dark:text-white tracking-tight">Análise Comparativa Mensal</h2>

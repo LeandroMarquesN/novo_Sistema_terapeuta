@@ -120,12 +120,20 @@ const dashboardController = {
         semana4: [fluxoMensalSemanas["Semana 4"]["Seg"], fluxoMensalSemanas["Semana 4"]["Ter"], fluxoMensalSemanas["Semana 4"]["Qua"], fluxoMensalSemanas["Semana 4"]["Qui"], fluxoMensalSemanas["Semana 4"]["Sex"], fluxoMensalSemanas["Semana 4"]["Sáb"], fluxoMensalSemanas["Semana 4"]["Dom"]]
       };
 
-      // 8. Envia tudo para o EJS Renderizar
+      // 8. INTELIGÊNCIA AJAX: Se a requisição pedir JSON, devolvemos apenas a tabela filtrada
+      if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.json({
+          agendamentos: rowsTabela,
+          filtroAtivo: filtro
+        });
+      }
+
+      // Se for o acesso normal à página, renderiza o HTML completo do EJS
       res.render('dashboard', {
-        agendamentos: rowsTabela,      // Lista filtrada (Evita tela gigante)
-        filtroAtivo: filtro,           // Mantém o estado visual do botão clicado
-        resumoMensal: resumoMensal,    // Calendário ativo
-        dadosGrafico: dadosGrafico,    // Gráficos do rodapé
+        agendamentos: rowsTabela,
+        filtroAtivo: filtro,
+        resumoMensal: resumoMensal,
+        dadosGrafico: dadosGrafico,
         dadosComparativoMensal: dadosComparativoMensal
       });
 
