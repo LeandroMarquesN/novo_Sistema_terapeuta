@@ -65,7 +65,7 @@
 
                 <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-gray-100 shadow-sm w-full md:w-96">
                     <i class="fas fa-search text-gray-300"></i>
-                    <input type="text" id="buscaPaciente" placeholder="Nome, CPF ou Telefone..." class="bg-transparent border-none outline-none text-sm w-full">
+                    <input type="text" id="buscaFinanceiro" placeholder="Nome, CPF ou Telefone..." class="bg-transparent border-none outline-none text-sm w-full">
                 </div>
             </header>
 
@@ -282,7 +282,255 @@
         </form>
     </div>
 </div>
+
 <!--  --- final do modal de lancamento de despesas --- -->
+
+<!--  modal ou gaveta lateral par extrato pacientes --- -->
+<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-[600px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
+
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <div>
+            <h3 class="text-lg font-black text-gray-900">Extrato Financeiro</h3>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-0.5">
+                <p id="extratoPacienteNome" class="text-xs text-indigo-600 font-bold uppercase tracking-wider">Paciente: -</p>
+                <button onclick="prepararImpressaoExtrato()" class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded border border-indigo-100 text-[10px] font-black hover:bg-1A5FA1 hover:text-white transition flex items-center gap-1">
+                    <i class="fas fa-print"></i> Imprimir Extrato
+                </button>
+            </div>
+        </div>
+        <button onclick="fecharGavetaExtrato()" class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition flex items-center justify-center">
+            <i class="fas fa-times text-xs"></i>
+        </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex flex-col">
+                <span class="text-[10px] font-bold text-emerald-700 uppercase">Total Pago</span>
+                <span id="extratoCardPago" class="text-base font-black text-emerald-600 mt-1">R$ 0,00</span>
+            </div>
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col">
+                <span class="text-[10px] font-bold text-blue-700 uppercase">A Receber</span>
+                <span id="extratoCardAberto" class="text-base font-black text-blue-600 mt-1">R$ 0,00</span>
+            </div>
+            <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col">
+                <span class="text-[10px] font-bold text-gray-600 uppercase">Cancelado</span>
+                <span id="extratoCardCancelado" class="text-base font-black text-gray-500 mt-1">R$ 0,00</span>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+            <h4 class="text-xs font-black text-gray-700 uppercase tracking-wider">Histórico de Movimentações</h4>
+            <button onclick="abrirFormGastoAvulso()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[10px] font-bold hover:bg-indigo-700 transition shadow-sm">
+                <i class="fas fa-plus"></i> Adicionar Gasto Avulso
+            </button>
+        </div>
+
+        <div id="formGastoAvulso" class="bg-gray-50 border border-gray-200 rounded-xl p-4 hidden transition-all duration-300">
+            <input type="hidden" id="extratoPacienteId"> <h5 class="text-[10px] font-black text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-1 text-indigo-600">
+                <i class="fas fa-file-invoice-dollar"></i> Novo Lançamento Avulso
+            </h5>
+
+            <form id="meuFormAvulso" onsubmit="salvarGastoAvulso(event)" class="grid grid-cols-2 gap-3 text-xs">
+                <div class="col-span-2">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Descrição</label>
+                    <input type="text" id="avulsoDescricao" required placeholder="Ex: Livro 'O Estoico Inteligente' ou Sessão Extra" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Categoria</label>
+                    <select id="avulsoCategoria" class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-500">
+                        <option value="Consulta">Consulta</option>
+                        <option value="Material">Material Didático</option>
+                        <option value="Retorno">Taxa de Retorno</option>
+                        <option value="Multa">Multa por Falta</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Valor (R$)</label>
+                    <input type="number" id="avulsoValor" step="0.01" required placeholder="0.00" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Vencimento</label>
+                    <input type="date" id="avulsoVencimento" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status Inicial</label>
+                    <select id="avulsoStatus" class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-500">
+                        <option value="aberto">Em Aberto</option>
+                        <option value="pago">Já Pago</option>
+                    </select>
+                </div>
+
+                <div class="col-span-2 flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="fecharFormGastoAvulso()" class="px-3 py-1.5 bg-gray-200 text-gray-600 rounded-lg font-bold hover:bg-gray-300 transition">Cancelar</button>
+                    <button type="submit" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition shadow-sm">Salvar Registro</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                    <tr>
+                        <th class="px-4 py-3">Vencimento</th>
+                        <th class="px-4 py-3">Descrição / Cat</th>
+                        <th class="px-4 py-3 text-right">Valor</th>
+                        <th class="px-4 py-3 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaExtratoCorpo" class="divide-y divide-gray-50 text-xs">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300"></div>
+
+
+
+<!--  fim do modal  -->
+
+<!-- modal recibo  -->
+<!-- modal recibo  -->
+<div id="modalImpressaoRecibo" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm no-print">
+    <div class="bg-gray-100 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+
+        <div class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between no-print">
+            <div class="flex items-center gap-2 text-gray-800 font-bold">
+                <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
+                <span>Visualizar Recibo de Extrato</span>
+            </div>
+            <button onclick="fecharModalImpressao()" class="text-gray-400 hover:text-gray-600 transition">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Área de visualização interna -->
+        <div id="conteudoRecibo" class="overflow-y-auto bg-[#f4f7f6] p-4 flex justify-center">
+            <!-- O HTML do recibo premium é injetado aqui pelo JavaScript -->
+        </div>
+
+        <!-- Rodapé do Modal com o Botão de E-mail Injetado com Sucesso -->
+        <div class="px-6 py-4 bg-white border-t border-gray-100 flex justify-end gap-3 no-print">
+            <button onclick="fecharModalImpressao()" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition text-sm font-semibold">
+                Fechar
+            </button>
+
+            <!-- 🌟 BOTÃO DE ENVIAR POR E-MAIL ADICIONADO -->
+            <button id="btnEnviarEmailRecibo" onclick="dispararReciboEmail()" class="px-5 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+                <i class="fas fa-paper-plane"></i> Enviar por E-mail
+            </button>
+
+            <button onclick="window.print()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+                <i class="fas fa-print"></i> Imprimir / Salvar PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 🏎️ CSS de Impressão Corrigido contra Páginas Brancas -->
+<!-- 🏎️ CSS DE IMPRESSÃO PREMIUM - ANTI-CORTE DE CONTEÚDO E QR CODE -->
+<style>
+    @media print {
+        /* 1. Zera as margens físicas para dar liberdade total ao contêiner */
+        @page {
+            margin: 0 !important;
+        }
+
+        /* 2. Reseta o fundo e limpa scrolls */
+        html, body {
+            background-color: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        /* 3. Oculta os elementos do sistema em segundo plano */
+        body * {
+            visibility: hidden !important;
+        }
+
+        /* 4. Torna visível apenas o recibo e seus filhos */
+        #modalImpressaoRecibo,
+        #modalImpressaoRecibo *,
+        #conteudoRecibo,
+        #conteudoRecibo * {
+            visibility: visible !important;
+        }
+
+        /* 5. Transforma o modal em uma camada plana e contínua */
+        #modalImpressaoRecibo {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 100% !important;
+            background: none !important;
+            backdrop-filter: none !important;
+            display: block !important;
+        }
+
+        /* 🌟 6. ENCOLHIMENTO PROPORCIONAL DO RECIBO INTEIRO (A SOLUÇÃO DEFINITIVA) */
+        #conteudoRecibo {
+            width: 100% !important;
+            margin: 0 !important;
+            /* Adiciona um espaçamento confortável no topo e nas laterais da folha */
+            padding: 25px 0 0 0 !important;
+
+            /* Reduz o tamanho do recibo inteiro para 85% do tamanho original */
+            transform: scale(0.85) !important;
+            /* Mantém o ponto de ancoragem no topo e centralizado horizontalmente */
+            transform-origin: top center !important;
+        }
+
+        /* 7. Ajustes finos para o container do QR Code não ecoar espaços vazios */
+        #conteudoRecibo div[style*="border: 2px dashed"] {
+            margin: 15px auto !important;
+            padding: 12px !important;
+            max-width: 420px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        #conteudoRecibo div[style*="border: 2px dashed"] img {
+            width: 100px !important;
+            height: 100px !important;
+            margin-bottom: 6px !important;
+        }
+
+        /* 8. Evita quebras de linha bizarras na tabela de movimentações */
+        #conteudoRecibo table,
+        #conteudoRecibo tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        /* 9. Esconde rigidamente os botões de ação e cabeçalhos do modal */
+        .no-print {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* 10. Força o motor do Linux a estampar o gradiente e as cores originais */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+    }
+    </style>
+<!-- fim moda recibo -->
+
 <script src="../ScriptGlobal/financeiroScript.js"></script>
   <script>
     // Única parte que fica no HTML: Inicializar o Chart.js vinculando ao Canvas local
@@ -360,6 +608,7 @@ async function salvarDespesa(event) {
         alert("Erro de conexão com o servidor.");
     }
 }
+
 
     // CHAMADA MESTRE: Inicia o sistema
     document.addEventListener('DOMContentLoaded', carregarDadosEstrategicos);

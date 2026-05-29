@@ -59,3 +59,31 @@ exports.verProntuario = async (req, res) => {
         res.status(500).json({ erro: err.message });
     }
 };
+
+exports.obterFichaExpressa = async (req, res) => {
+    const { id } = req.params;
+    const clinicaId = req.usuario.clinica_id;
+
+    try {
+        // Buscamos os dados da tabela pacientes E pegamos o último motivo/condição do agendamento
+        const sql = `
+            SELECT p.*, a.motivo_consulta, a.condicoes as condicoes_saude
+            FROM pacientes p
+            LEFT JOIN agendamentos a ON p.id = a.paciente_id
+            WHERE p.id = ? AND p.clinica_id = ?
+            ORDER BY a.data_agendamento DESC
+            LIMIT 1
+        `;
+
+        const [resultados] = await db.query(sql, [id, clinicaId]);
+
+        if (!resultados || resultados.length === 0) {
+            return res.status(404).json({ error: "Paciente não localizado" });
+        }
+
+        res.json(resultados[0]);
+    } catch (err) {
+        console.error("ERRO NO BANCO:", err);
+        res.status(500).json({ erro: err.message });
+    }
+};

@@ -318,6 +318,8 @@ function inicializarTodosGraficos() {
     criarGraficoSemanal('chart-semana-4', 'Semana 4', dadosReais.semana4, labelsDias);
 }
 
+// ======= 0.5.1  Criar graficos semanais =============
+
 function criarGraficoSemanal(idContainer, nomeSerie, valores, labels) {
     const container = document.getElementById(idContainer);
     if (!container) return;

@@ -36,14 +36,26 @@ CREATE TABLE IF NOT EXISTS clinicas (
   CONSTRAINT fk_clinica_plano FOREIGN KEY (plano_id) REFERENCES planos(id)
 ) ENGINE=InnoDB;
 
--- 4. TABELA DE USUÁRIOS
+
+-- 4. TABELA DE USUÁRIOS (Atualizada com a nova gama de profissionais)
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     clinica_id INT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    cargo ENUM('dono', 'administrador', 'recepcao', 'terapeuta') DEFAULT 'terapeuta',
+    cargo ENUM(
+        'dono',
+        'admin',
+        'recepcao',
+        'terapeuta',
+        'medico',
+        'psicologo',
+        'fisioterapeuta',
+        'nutricionista',
+        'fonoaudiologo',
+        'profissional da saude'
+    ) DEFAULT 'terapeuta',
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_usuario_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -109,24 +121,30 @@ CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 7. FINANCEIRO
+-- 7. FINANCEIRO (Refatorado para Extrato Completo e Lançamentos Avulsos)
 CREATE TABLE IF NOT EXISTS financeiro (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
+  usuario_id INT NULL, -- Quem da equipe realizou/registrou o lançamento
   gateway_id VARCHAR(255) NULL,
   paciente_id INT NOT NULL,
-  agendamento_id INT NULL,
-  tipo ENUM('receita', 'despesa') NOT NULL,
-  descricao VARCHAR(255),
+  agendamento_id INT NULL, -- Fica NULL se for um gasto avulso (sem consulta atrelada)
+  tipo ENUM('receita', 'despesa') NOT NULL DEFAULT 'receita',
+  categoria VARCHAR(100) NOT NULL DEFAULT 'Consulta', -- Ex: 'Consulta', 'Material', 'Retorno', 'Multa'
+  descricao VARCHAR(255) NOT NULL,
   valor DECIMAL(10,2) NOT NULL,
   data_vencimento DATE NOT NULL,
   data_pagamento DATE NULL,
   status_pagamento ENUM('aberto', 'pago', 'atrasado', 'estornado', 'cancelado') DEFAULT 'aberto',
   metodo_pagamento ENUM('pix', 'cartao', 'dinheiro', 'boleto'),
+  observacoes TEXT NULL, -- Para anotações e histórico do terapeuta
   link_pagamento TEXT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
   CONSTRAINT fk_fin_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_fin_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL
+  CONSTRAINT fk_fin_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
+  CONSTRAINT fk_fin_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- 8. DESPESAS
@@ -155,6 +173,33 @@ CREATE TABLE IF NOT EXISTS anexos (
   CONSTRAINT fk_anexo_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_anexo_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_anexo_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 10. PRONTUÁRIOS / EVOLUÇÕES CLÍNICAS (Padrão de Mercado & Segurança Jurídica)
+CREATE TABLE IF NOT EXISTS prontuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  paciente_id INT NOT NULL,
+  usuario_id INT NOT NULL,      -- O profissional logado que realizou o atendimento
+  agendamento_id INT NULL,      -- Vincula à consulta da agenda (opcional, caso seja um atendimento avulso)
+
+  texto_evolucao LONGTEXT NOT NULL, -- Conteúdo da sessão (suporta HTML do editor Rich Text)
+  diagnostico_cid VARCHAR(10) NULL, -- Código CID-10/CID-11 se for aplicável
+
+  status_prontuario ENUM('rascunho', 'finalizado') DEFAULT 'rascunho', -- Trava jurídica
+  data_atendimento DATETIME NOT NULL, -- Data/Hora informada do atendimento
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  -- ÍNDICES DE PERFORMANCE (Agiliza a busca da timeline do paciente)
+  INDEX idx_prontuario_paciente (paciente_id),
+  INDEX idx_prontuario_clinica (clinica_id),
+
+  -- TRAVAS DE INTEGRIDADE (Chaves Estrangeiras)
+  CONSTRAINT fk_pront_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_pront_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_pront_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+  CONSTRAINT fk_pront_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
 -- INSERTS DE TESTE (Adicionado SLUG para não dar erro)

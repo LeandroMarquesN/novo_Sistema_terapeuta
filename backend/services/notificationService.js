@@ -204,3 +204,41 @@ exports.sendWelcomeEmail = async (clinica) => {
     console.error(`[MED-LM] ❌ ERRO NO ENVIO:`, error.message);
   }
 };
+
+// =========================================================================
+// 📧 ENVIAR EXTRACTO/RECIBO FINANCEIRO POR EMAIL
+// =========================================================================
+exports.sendReciboEmailNotification = async (clinica, dadosEmail) => {
+  try {
+    const templatePath = path.join(__dirname, '..', 'templates', 'recibo_email.html');
+    let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+
+    // Injeta os dados mapeados utilizando o replacePlaceholders existente no seu arquivo
+    htmlTemplate = replacePlaceholders(htmlTemplate, {
+      nome_paciente: dadosEmail.pacienteNome,
+      nome_clinica: clinica.nome_clinica,
+      nome_operador: dadosEmail.operadorNome,
+      data_emissao: dadosEmail.dataEmissao,
+      linhas_tabela: dadosEmail.linhasHTML,
+      valor_pago: dadosEmail.valorPago,
+      valor_aberto: dadosEmail.valorAberto,
+      qr_code_url: dadosEmail.qrCodeUrl,
+      url_portal: dadosEmail.urlPortal,
+      ano_atual: new Date().getFullYear()
+    });
+
+    const mailOptions = {
+      from: `"MedLM - ${clinica.nome_clinica}" <${process.env.EMAIL_USER}>`,
+      to: dadosEmail.pacienteEmail,
+      subject: `Extrato Financeiro - ${clinica.nome_clinica}`,
+      html: htmlTemplate
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[MED-LM] ✅ Recibo por e-mail enviado! ID: ${info.messageId}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Erro no notificationService ao enviar e-mail de recibo:", error);
+    throw error;
+  }
+};

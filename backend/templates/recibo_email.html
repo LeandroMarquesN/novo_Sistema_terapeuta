@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Seu Extrato Financeiro - MedLM</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+    </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f4f7f6; font-family: 'Poppins', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+            <td align="center" style="padding: 40px 0;">
+
+                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0px 10px 30px rgba(0,0,0,0.05);">
+
+                    <tr>
+                      <td align="center" style="padding: 30px 40px; background: linear-gradient(135deg, #1A5FA1 0%, #a8e6cf 100%);">
+                        <img src="https://i.imgur.com/5pjegDN.png" alt="MedLM Logo" width="220" style="display: block; border: 0;">
+                      </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 40px; color: #2c3e50; line-height: 1.8;">
+                            <h1 style="font-size: 24px; font-weight: 600; margin: 0 0 10px; color: #1A5FA1;">Olá, <strong>{{nome_paciente}}</strong>!</h1>
+                            <p style="font-size: 16px; font-weight: 300; margin: 0 0 25px;">Segue abaixo o extrato financeiro detalhado referente aos seus atendimentos clínicos.</p>
+
+                            <div style="background-color: #eaf2f8; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #d4e3ef;">
+                                <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 10px; color: #1A5FA1; text-transform: uppercase;">Dados de Emissão</h3>
+                                <p style="font-size: 14px; font-weight: 300; margin: 0; line-height: 1.6;">
+                                    <strong>Clínica de Origem:</strong> {{nome_clinica}}<br>
+                                    <strong>Emitido Por:</strong> {{nome_operador}}<br>
+                                    <strong>Data de Fechamento:</strong> {{data_emissao}}
+                                </p>
+                            </div>
+
+                            <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 12px; text-transform: uppercase; color: #2c3e50; letter-spacing: 0.5px;">Histórico de Lançamentos</h3>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 30px; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #eaf2f8; text-align: left;">
+                                        <th style="padding: 10px 5px; color: #7f8c8d; font-size: 12px; text-transform: uppercase; font-weight: 600; width: 25%;">Vencimento</th>
+                                        <th style="padding: 10px 5px; color: #7f8c8d; font-size: 12px; text-transform: uppercase; font-weight: 600; width: 50%;">Descrição / Categoria</th>
+                                        <th style="padding: 10px 5px; color: #7f8c8d; font-size: 12px; text-transform: uppercase; font-weight: 600; text-align: right; width: 25%;">Valor</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="color: #2c3e50;">
+                                    {{linhas_tabela}}
+                                </tbody>
+                            </table>
+
+                            <div style="background-color: #fef9c3; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #fde047;">
+                                <h3 style="font-size: 14px; font-weight: 600; margin: 0 0 10px; color: #856404; text-transform: uppercase;">Resumo Financeiro</h3>
+                                <p style="font-size: 15px; font-weight: 600; margin: 0; color: #856404; line-height: 1.7;">
+                                    <span style="display: inline-block; width: 140px; font-weight: 400;">Total Recebido:</span> <span style="color: #10b981;">{{valor_pago}}</span><br>
+                                    <span style="display: inline-block; width: 140px; font-weight: 400; margin-top: 4px;">Saldo em Aberto:</span> <span style="color: #1A5FA1;">{{valor_aberto}}</span>
+                                </p>
+                            </div>
+
+                            <div style="text-align: center; background-color: #ffffff; border: 2px dashed #1A5FA1; padding: 25px; border-radius: 15px; margin: 30px 0;">
+                                <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 8px; color: #1A5FA1;">Validação de Autenticidade</h3>
+                                <p style="font-size: 14px; color: #7f8c8d; margin-bottom: 20px; line-height: 1.5;">Aponte a câmera do seu celular para o código abaixo para acessar o seu Portal do Paciente ou validar este documento original.</p>
+
+                                <img src="{{qr_code_url}}" alt="QR Code" width="150" style="margin-bottom: 15px; display: inline-block;">
+
+                                <p style="font-size: 14px; margin: 0;">
+                                    <a href="{{url_portal}}" target="_blank" style="color: #1A5FA1; font-weight: 600; text-decoration: none; border-bottom: 1px solid #1A5FA1;">{{url_portal}}</a>
+                                </p>
+                            </div>
+
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding: 0 40px 40px;">
+                            <a href="{{url_portal}}" target="_blank" style="display: inline-block; padding: 15px 40px; background-color: #1A5FA1; color: #ffffff; text-decoration: none; border-radius: 50px; font-weight: 600; font-size: 16px; box-shadow: 0px 4px 12px rgba(26, 95, 161, 0.2);">Acessar Meu Portal</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding: 20px 40px; border-top: 1px solid #eeeeee; color: #95a5a6; font-size: 12px; font-weight: 300;">
+                            © {{ano_atual}} MedLM - Sistema Clínico Inteligente
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

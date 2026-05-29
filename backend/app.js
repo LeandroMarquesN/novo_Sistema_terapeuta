@@ -9,6 +9,7 @@ const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
 const equipeRoutes = require('./routes/equipeRoutes');
 const financeiroRoutes = require('./routes/financeiroRoutes');
 const pacienteRoutes = require('./routes/pacienteRoutes');
+const prontuarioRoutes = require('./routes/prontuarioRoutes'); // 🌟 1. Importa as rotas de prontuário
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
@@ -20,6 +21,7 @@ const adminRoutes = require('./routes/adminRoutes'); // Rotas de API do Admin
 // importação Middleware
 const authAdmin = require('./middleware/authAdmin'); // Middleware de proteção
 const authMiddleware = require('./middleware/authMiddleware')
+const authAtendimento = require('./middleware/authAtendimento'); // 🌟 Importa a trava de atendimento
 
 const app = express();
 
@@ -45,6 +47,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/clinicas', cadastroClinicaRoutes);
 app.use('/api/pacientes', pacienteRoutes);
+app.use('/api/prontuarios', prontuarioRoutes); // 🌟 2. Mapeia a API de prontuários
 app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api/equipe', equipeRoutes);
 app.use('/api/usuarios', usuarioRoutes);
@@ -96,9 +99,10 @@ app.get('/clinicas', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'listagem_clinicas.html'));
 });
 
-app.get('/pacientes', (req, res) => {
+app.get('/pacientes', authMiddleware, (req, res) => { // Recomendo garantir o authMiddleware aqui também!
   res.sendFile(path.join(frontendPath, 'pages', 'pacientes.html'));
 });
+
 
 app.get('/equipe', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'equipe.html'));
@@ -108,7 +112,11 @@ app.get('/financeiro', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'financeiro.html'));
 });
 
-
+// 🏎️ CORRIDA PURA: Rota oficial do Módulo de Atendimento Clínico
+// 🏎️ ROTA PROTEGIDA DA PISTA DE ATENDIMENTO
+app.get('/atendimento', authMiddleware, authAtendimento, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'pages', 'atendimento.html'));
+});
 
 // Rota para renderizar a página de configurações
 app.get('/dashboard/configuracoes', authMiddleware, (req, res) => {
