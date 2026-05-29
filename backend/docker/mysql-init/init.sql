@@ -202,6 +202,17 @@ CREATE TABLE IF NOT EXISTS prontuarios (
   CONSTRAINT fk_pront_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
+-- 🛡️ [AUDITORIA] Módulo de Segurança e Rastreabilidade
+CREATE TABLE IF NOT EXISTS logs_auditoria (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  prontuario_id INT NOT NULL,
+  acao VARCHAR(50) NOT NULL,
+  data_acesso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_log_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+  CONSTRAINT fk_log_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id)
+) ENGINE=InnoDB;
+
 -- INSERTS DE TESTE (Adicionado SLUG para não dar erro)
 INSERT IGNORE INTO clinicas (id, nome_clinica, slug, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao)
 VALUES (1, 'Clínica Experimental', 'clinica-experimental', 'Leandro Marques', '1199999999', '1188888888', 'admin@sistema.com', '123456', 1, '2026-12-31');

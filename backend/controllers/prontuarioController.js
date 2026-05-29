@@ -6,6 +6,7 @@ const fs = require('fs').promises;
 const path = require('path');
 // CORREÇÃO: Importamos o serviço corretamente
 const notificationService = require('../services/notificationService');
+const auditService = require('../services/auditService');
 
 // 1. SALVAR PRONTUÁRIO
 exports.salvarProntuario = async (req, res) => {
@@ -78,6 +79,10 @@ exports.obterDetalheProntuario = async (req, res) => {
     const [rows] = await db.query(sql, [id, clinicaId]);
 
     if (!rows || rows.length === 0) return res.status(404).json({ msg: "Registro não encontrado." });
+
+    // --- REGISTRO DE AUDITORIA ---
+    await auditService.registrarLog(req.usuario.id, id, 'VISUALIZOU');
+
     res.json(rows[0]);
   } catch (err) {
     res.status(500).json({ erro: err.message });
@@ -101,20 +106,20 @@ exports.enviarProntuarioEmail = async (req, res) => {
 
     const dados = rows[0];
 
+    // --- REGISTRO DE AUDITORIA ---
+    await auditService.registrarLog(req.usuario.id, prontuarioId, 'ENVIOU_EMAIL');
+
     const dadosEnvio = {
+      // ... (seu objeto dadosEnvio permanece igual)
       nome_paciente: dados.nome_paciente,
       email_paciente: dados.email_paciente,
       nome_profissional: dados.nome_profissional,
       data_atendimento: new Date(dados.data_atendimento).toLocaleDateString('pt-BR'),
-
-      // A correção está aqui: usamos o nome exato da coluna da sua tabela
       codigo_cid: dados.diagnostico_cid ? dados.diagnostico_cid : 'Não informado!',
-
       texto_evolucao: dados.texto_evolucao,
       qr_code_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://medlm.com.br/validar/" + dados.id
     };
 
-    // Agora sim, a variável notificationService existe e está pronta!
     await notificationService.sendProntuarioEmailNotification(dadosEnvio);
 
     res.json({ success: true, message: "Prontuário enviado com sucesso!" });
