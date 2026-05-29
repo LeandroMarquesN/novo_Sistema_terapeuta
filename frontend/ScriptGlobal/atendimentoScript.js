@@ -192,17 +192,17 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
       elementosFicha.diagnosticoCid.value = prontuario.diagnostico_cid || '';
     }
 
-    // 2. Preenche o Editor Quill com o texto antigo
-    // Usamos o delta (conteúdo estruturado) ou HTML puro se preferir
-    quill.clipboard.dangerouslyPasteHTML(prontuario.texto_evolucao || prontuario.relato_clinico || '');
+    // 2. Preenche o Editor Quill
+    quill.clipboard.dangerouslyPasteHTML(prontuario.texto_evolucao || '');
 
-    // === ADICIONE ESTA LINHA AQUI ===
-    // Isso garante que o botão de Enviar Email saiba qual prontuário está aberto
-    document.getElementById('idDoProntuarioAtual').value = prontuarioId;
-    // ================================
+    // 3. A CONEXÃO QUE FALTAVA:
+    // Pega o ID que veio da lista e coloca no campo hidden
+    const inputHidden = document.getElementById('idDoProntuarioAtual');
+    if (inputHidden) {
+      inputHidden.value = prontuarioId;
+    }
 
-    // Feedback visual opcional
-    // alert("Prontuário carregado com sucesso!");
+    console.log("Prontuário ID atualizado para:", prontuarioId);
 
   } catch (err) {
     console.error('Erro ao visualizar evolução:', err);

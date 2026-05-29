@@ -106,7 +106,10 @@ exports.enviarProntuarioEmail = async (req, res) => {
       email_paciente: dados.email_paciente,
       nome_profissional: dados.nome_profissional,
       data_atendimento: new Date(dados.data_atendimento).toLocaleDateString('pt-BR'),
-      codigo_cid: dados.diagnostico_cid || 'N/A',
+
+      // A correção está aqui: usamos o nome exato da coluna da sua tabela
+      codigo_cid: dados.diagnostico_cid ? dados.diagnostico_cid : 'Não informado!',
+
       texto_evolucao: dados.texto_evolucao,
       qr_code_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://medlm.com.br/validar/" + dados.id
     };
