@@ -250,6 +250,38 @@ async function enviarProntuarioEmail() {
     btn.innerText = "ENVIAR EMAIL";
   }
 }
+// ==funcao para auditoria de quem visualizou , enviou, ou modificou o prontuario
+
+async function abrirModalAuditoria() {
+  const prontuarioId = document.getElementById('idDoProntuarioAtual').value;
+  if (!prontuarioId) {
+    alert("Selecione um prontuário primeiro.");
+    return;
+  }
+
+  document.getElementById('modalAuditoria').classList.remove('hidden');
+  document.getElementById('modalAuditoria').classList.add('flex');
+
+  // Busca no Backend (Crie essa rota como te passei antes)
+  const response = await fetch(`/api/prontuarios/logs/${prontuarioId}`);
+  const logs = await response.json();
+
+  const lista = document.getElementById('listaLogs');
+  lista.innerHTML = logs.map(log => `
+      <div class="flex justify-between items-center bg-white/30 dark:bg-slate-700/30 p-3 rounded-xl border border-white/10">
+          <div>
+              <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">${log.acao}</p>
+              <p class="text-[9px] text-slate-500 dark:text-slate-400">Por: ${log.usuario_nome}</p>
+          </div>
+          <span class="text-[10px] font-bold text-slate-400">${new Date(log.data_acesso).toLocaleString('pt-BR')}</span>
+      </div>
+  `).join('');
+}
+
+function fecharModalAuditoria() {
+  document.getElementById('modalAuditoria').classList.add('hidden');
+  document.getElementById('modalAuditoria').classList.remove('flex');
+}
 
 // Isso garante que a função fique visível para o clique no HTML
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;

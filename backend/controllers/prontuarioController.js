@@ -129,3 +129,17 @@ exports.enviarProntuarioEmail = async (req, res) => {
     res.status(500).json({ erro: "Falha ao enviar e-mail: " + error.message });
   }
 };
+
+// prontuarioController.js
+exports.listarLogs = async (req, res) => {
+  const { prontuarioId } = req.params;
+  try {
+    const [logs] = await db.query(
+      'SELECT l.*, u.nome as usuario_nome FROM logs_auditoria l JOIN usuarios u ON l.usuario_id = u.id WHERE l.prontuario_id = ? ORDER BY l.data_acesso DESC',
+      [prontuarioId]
+    );
+    res.json(logs);
+  } catch (err) {
+    res.status(500).json({ erro: err.message });
+  }
+};

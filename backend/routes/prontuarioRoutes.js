@@ -17,4 +17,9 @@ router.post('/enviar-email', authMiddleware, prontuarioController.enviarProntuar
 router.get('/historico/:pacienteId', authMiddleware, authAtendimento, prontuarioController.listarHistorico);
 router.get('/detalhe/:id', authMiddleware, authAtendimento, prontuarioController.obterDetalheProntuario);
 
+// routes/prontuarioRoutes.js
+router.get('/logs/:prontuarioId', authMiddleware, prontuarioController.listarLogs);
+
+
+
 module.exports = router;
