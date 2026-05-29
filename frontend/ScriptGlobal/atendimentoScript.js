@@ -49,14 +49,26 @@ document.addEventListener('DOMContentLoaded', () => {
 // 🏢 1. DADOS DE SESSÃO
 function carregarDadosSessaoSaaS() {
   try {
+    const token = localStorage.getItem('token');
     if (!token) return;
-    const base64Url = token.split('.')[1];
-    const dadosToken = JSON.parse(atob(base64Url.replace(/-/g, '+').replace(/_/g, '/')));
 
-    if (elementosFicha.clinica) elementosFicha.clinica.innerText = dadosToken.nome_clinica || 'Clínica Vinculada';
-    if (elementosFicha.usuario) elementosFicha.usuario.innerText = dadosToken.nome || 'Profissional';
+    const payload = JSON.parse(atob(token.split('.')[1]));
+
+    // Extraindo dados do token
+    const nomeUsuario = payload.nome || 'Profissional';
+    const cargoUsuario = payload.cargo ? ` - ${payload.cargo.charAt(0).toUpperCase() + payload.cargo.slice(1)}` : '';
+    const nomeClinica = payload.nome_clinica || 'Clínica Vinculada';
+
+    // Atualiza o DOM
+    if (elementosFicha.clinica) elementosFicha.clinica.innerText = nomeClinica;
+
+    // Aqui incluímos o nome + cargo (ex: Lavinia Marques - Medico)
+    if (elementosFicha.usuario) {
+      elementosFicha.usuario.innerText = `${nomeUsuario}${cargoUsuario}`;
+    }
+
   } catch (error) {
-    console.error('Erro na sessão:', error);
+    console.error('Erro ao carregar sessão:', error);
   }
 }
 
@@ -184,12 +196,58 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
     // Usamos o delta (conteúdo estruturado) ou HTML puro se preferir
     quill.clipboard.dangerouslyPasteHTML(prontuario.texto_evolucao || prontuario.relato_clinico || '');
 
+    // === ADICIONE ESTA LINHA AQUI ===
+    // Isso garante que o botão de Enviar Email saiba qual prontuário está aberto
+    document.getElementById('idDoProntuarioAtual').value = prontuarioId;
+    // ================================
+
     // Feedback visual opcional
-    alert("Prontuário carregado com sucesso!");
+    // alert("Prontuário carregado com sucesso!");
 
   } catch (err) {
     console.error('Erro ao visualizar evolução:', err);
     alert("Não foi possível carregar esta evolução.");
+  }
+}
+// ==== enviar prontuario por email ====
+async function enviarProntuarioEmail() {
+  const inputId = document.getElementById('idDoProntuarioAtual');
+  const btn = document.getElementById('btnEnviarEmail');
+
+  // Verifica se o input existe e se tem valor
+  if (!inputId || !inputId.value) {
+    alert("Atenção: Por favor, selecione um prontuário na lista ao lado primeiro.");
+    return;
+  }
+
+  const prontuarioId = inputId.value;
+
+  try {
+    btn.disabled = true;
+    btn.innerText = "ENVIANDO...";
+
+    const response = await fetch('/api/prontuarios/enviar-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ prontuarioId: prontuarioId })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("Sucesso! E-mail enviado para o paciente.");
+    } else {
+      throw new Error(data.erro || "Erro ao enviar.");
+    }
+  } catch (error) {
+    console.error("Erro:", error);
+    alert("Erro no envio: " + error.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "ENVIAR EMAIL";
   }
 }
 

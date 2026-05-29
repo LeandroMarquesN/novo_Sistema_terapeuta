@@ -37,12 +37,15 @@ exports.login = async (req, res) => {
         }
 
         // 4. Geração do Token JWT
+        // 4. Geração do Token JWT (ENRIQUECIDO)
         const token = jwt.sign(
             {
                 id: usuario.id,
                 clinica_id: usuario.clinica_id,
                 cargo: usuario.cargo,
-                email: usuario.email
+                email: usuario.email,
+                nome: usuario.nome,           // Adicionado
+                nome_clinica: usuario.clinica_nome // Adicionado
             },
             process.env.JWT_SECRET || 'seu_segredo_aqui',
             { expiresIn: '8h' }

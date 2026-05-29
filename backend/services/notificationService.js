@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 const path = require('path');
 const qrcode = require('qrcode-terminal');
 const { Client } = require('whatsapp-web.js');
+const notificationService = require('../services/notificationService');
 
 // Configuração do Nodemailer
 const transporter = nodemailer.createTransport({
@@ -239,6 +240,41 @@ exports.sendReciboEmailNotification = async (clinica, dadosEmail) => {
     return true;
   } catch (error) {
     console.error("❌ Erro no notificationService ao enviar e-mail de recibo:", error);
+    throw error;
+  }
+};
+
+// =========================================================================
+// 📄 ENVIAR PRONTUÁRIO CLÍNICO POR EMAIL
+// =========================================================================
+exports.sendProntuarioEmailNotification = async (dadosProntuario) => {
+  try {
+    const templatePath = path.join(__dirname, '..', 'templates', 'emailProntuarioTemplate.html');
+    let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+
+    // Substitui os placeholders do template de prontuário
+    htmlTemplate = replacePlaceholders(htmlTemplate, {
+      nome_paciente: dadosProntuario.nome_paciente,
+      nome_profissional: dadosProntuario.nome_profissional,
+      data_atendimento: dadosProntuario.data_atendimento,
+      codigo_cid: dadosProntuario.codigo_cid || 'N/A',
+      texto_evolucao: dadosProntuario.texto_evolucao,
+      qr_code_url: dadosProntuario.qr_code_url, // URL do QR Code de validação
+      ano_atual: new Date().getFullYear()
+    });
+
+    const mailOptions = {
+      from: `"MedLM Clínico" <${process.env.EMAIL_USER}>`,
+      to: dadosProntuario.email_paciente,
+      subject: `Registro de Evolução Clínica - ${dadosProntuario.nome_paciente}`,
+      html: htmlTemplate
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`[MED-LM] ✅ Prontuário enviado com sucesso! ID: ${info.messageId}`);
+    return true;
+  } catch (error) {
+    console.error("❌ Erro no notificationService ao enviar prontuário:", error);
     throw error;
   }
 };

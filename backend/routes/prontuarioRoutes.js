@@ -10,9 +10,10 @@ const authAtendimento = require('../middleware/authAtendimento.js');
 const prontuarioController = require('../controllers/prontuarioController');
 
 // 🏎️ ROTA PREMIUM: Limpa, segura e seguindo o padrão MVC puro
+// Remova o '/prontuarios' de todas as rotas abaixo
 router.post('/salvar', authMiddleware, authAtendimento, prontuarioController.salvarProntuario);
+router.post('/enviar-email', authMiddleware, prontuarioController.enviarProntuarioEmail); // AQUI
 
-// ✅ ADICIONE ESSAS DUAS NOVAS ROTAS AQUI:
 router.get('/historico/:pacienteId', authMiddleware, authAtendimento, prontuarioController.listarHistorico);
 router.get('/detalhe/:id', authMiddleware, authAtendimento, prontuarioController.obterDetalheProntuario);
 
