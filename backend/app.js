@@ -22,6 +22,7 @@ const adminRoutes = require('./routes/adminRoutes'); // Rotas de API do Admin
 const authAdmin = require('./middleware/authAdmin'); // Middleware de proteção
 const authMiddleware = require('./middleware/authMiddleware')
 const authAtendimento = require('./middleware/authAtendimento'); // 🌟 Importa a trava de atendimento
+const { authorizeFeature } = require('./middleware/middlewareFeatures'); // 🌟 Importa o novo middleware
 
 const app = express();
 

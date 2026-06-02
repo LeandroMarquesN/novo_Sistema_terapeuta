@@ -121,6 +121,31 @@ CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+-- 7. TABELAS DE FEATURE FLAGS (Funcionalidades)
+CREATE TABLE IF NOT EXISTS features (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome_tecnico VARCHAR(50) NOT NULL UNIQUE,
+    descricao VARCHAR(255) NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS plano_features (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    plano_id INT NOT NULL,
+    feature_id INT NOT NULL,
+    is_enabled BOOLEAN DEFAULT true,
+    CONSTRAINT fk_plano_feat_plano FOREIGN KEY (plano_id) REFERENCES planos(id) ON DELETE CASCADE,
+    CONSTRAINT fk_plano_feat_feature FOREIGN KEY (feature_id) REFERENCES features(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS clinica_features (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clinica_id INT NOT NULL,
+    feature_id INT NOT NULL,
+    is_enabled BOOLEAN DEFAULT true,
+    CONSTRAINT fk_clinica_feat_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_clinica_feat_feature FOREIGN KEY (feature_id) REFERENCES features(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- 7. FINANCEIRO (Refatorado para Extrato Completo e Lançamentos Avulsos)
 CREATE TABLE IF NOT EXISTS financeiro (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -222,3 +247,19 @@ VALUES (1, 'Leandro Marques', 'leandro@teste.com', '123456', 'dono');
 
 INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo)
 VALUES (NULL, 'Administrador MedLM', 'admin@medlm.com', 'mariarosa', 'dono');
+
+-- 8. INSERTS DE CONFIGURAÇÃO
+INSERT IGNORE INTO features (nome_tecnico, descricao) VALUES
+('portal_paciente', 'Permite acesso ao portal de agendamento'),
+('notificacao_whatsapp', 'Envio automático de lembretes'),
+('relatorios_avancados', 'Dashboards financeiros completos');
+
+-- 9. POPULANDO AS FEATURE FLAGS (Opcional, mas recomendado para testes)
+-- Exemplo: Libera tudo para Enterprise, e apenas o básico para o Trial
+INSERT IGNORE INTO plano_features (plano_id, feature_id, is_enabled) VALUES
+-- TRIAL (Plano 1): Tem apenas portal_paciente
+(1, 1, true), (1, 2, false), (1, 3, false),
+-- PREMIUM (Plano 2): Tem portal e whatsapp
+(2, 1, true), (2, 2, true), (2, 3, false),
+-- ENTERPRISE (Plano 3): Tem tudo
+(3, 1, true), (3, 2, true), (3, 3, true);
