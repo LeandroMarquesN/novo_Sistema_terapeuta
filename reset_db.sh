@@ -1,19 +1,17 @@
 #!/bin/bash
 
 # Configurações
-# Configurações - ATUALIZADO PARA O NOVO SISTEMA
 DB_CONTAINER="sistema_limpeza-db-1"
 APP_CONTAINER="sistema_limpeza-app-1"
 PMA_CONTAINER="sistema_limpeza-phpmyadmin-1"
 DB_NAME="terapia_system"
-BACKUP_FILE="backup_limpeza_dev.sql" # Certifique-se de que este arquivo existe na pasta raiz
+BACKUP_FILE="backup_limpeza_dev.sql" # Este arquivo será criado/sobrescrito automaticamente
 
-# Limite de tentativas
 max_tentativas=3
 
-# Função de Backup
+# Função de Backup (Cria o dump do estado ATUAL do banco)
 fazer_backup() {
-    docker exec $DB_CONTAINER mysqldump -u root -proot --single-transaction --databases $DB_NAME > $BACKUP_FILE
+    docker exec $DB_CONTAINER mysqldump -u root -proot --single-transaction --routines --triggers --events $DB_NAME > $BACKUP_FILE
     [ -s "$BACKUP_FILE" ]
 }
 
@@ -24,55 +22,46 @@ check_status() {
     [ "$(docker inspect -f '{{.State.Running}}' $PMA_CONTAINER 2>/dev/null)" == "true" ]
 }
 
-echo "--- Iniciando processo de reset seguro (Máximo 3 tentativas) ---"
+echo "--- Iniciando processo de reset seguro ---"
 
-# 1. Backup
+# 1. Backup do estado atual
 if ! fazer_backup; then
     echo "ERRO: Backup falhou. Abortando."
     exit 1
 fi
 
-# 2. Reset e Tentativas de Subida
+# 2. Reset e Subida dos containers
 tentativas=0
 sucesso=false
-
 while [ $tentativas -lt $max_tentativas ]; do
     tentativas=$((tentativas + 1))
-    echo ">>> Tentativa $tentativas de $max_tentativas: Subindo serviços..."
+    echo ">>> Tentativa $tentativas: Reiniciando serviços..."
     
     docker-compose down -v
     docker-compose up -d --build
 
-    # Espera 15 segundos para os serviços estabilizarem
     sleep 15
-
     if check_status; then
-        echo "✅ Todos os serviços estão rodando!"
         sucesso=true
         break
-    else
-        echo "⚠️ Falha na tentativa $tentativas: Nem todos os containers subiram."
     fi
 done
 
-# 3. Verificação Final de Sucesso
-if [ "$sucesso" = false ]; then
-    echo "❌ Erro crítico: Serviços não subiram após $max_tentativas tentativas. Verifique os logs com 'docker-compose logs'."
-    exit 1
-fi
+if [ "$sucesso" = false ]; then echo "❌ Erro crítico."; exit 1; fi
 
-# 4. Esperar o banco responder
-echo "Aguardando banco de dados responder..."
-until docker exec $DB_CONTAINER mysqladmin ping -u root -proot &> /dev/null; do
-    sleep 2
-done
+# 3. Esperar o banco responder
+until docker exec $DB_CONTAINER mysqladmin ping -u root -proot &> /dev/null; do sleep 2; done
 
-# 5. Restauração
+# 4. Restauração Segura (Limpa o banco e importa o backup feito no passo 1)
 echo "Restaurando dados..."
-# Criar o banco caso ele não exista, e depois importar
-docker exec -i $DB_CONTAINER mysql -u root -proot -e "CREATE DATABASE IF NOT EXISTS $DB_NAME;"
+docker exec -i $DB_CONTAINER mysql -u root -proot -e "SET FOREIGN_KEY_CHECKS=0; DROP DATABASE IF EXISTS $DB_NAME; CREATE DATABASE $DB_NAME; SET FOREIGN_KEY_CHECKS=1;"
 cat $BACKUP_FILE | docker exec -i $DB_CONTAINER mysql -u root -proot $DB_NAME
 
-echo "--------------------------------------------------------"
-echo "✅ SUCESSO: O ambiente foi resetado e populado!"
-echo "--------------------------------------------------------"
+# 5. Seed do Administrador
+echo "Garantindo acesso do Administrador..."
+docker exec -i $DB_CONTAINER mysql -u root -proot $DB_NAME <<EOF
+INSERT IGNORE INTO usuarios (id, clinica_id, nome, email, senha, cargo, criado_em) 
+VALUES (2, NULL, 'Administrador MedLM', 'admin@medlm.com', 'mariarosa', 'dono', NOW());
+EOF
+
+echo "✅ SUCESSO: O ambiente foi resetado e seus dados estão preservados!"

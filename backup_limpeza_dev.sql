@@ -16,14 +16,6 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `terapia_system`
---
-
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `terapia_system` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-
-USE `terapia_system`;
-
---
 -- Table structure for table `agendamentos`
 --
 
@@ -58,7 +50,7 @@ CREATE TABLE `agendamentos` (
   CONSTRAINT `fk_agend_clinica` FOREIGN KEY (`clinica_id`) REFERENCES `clinicas` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_agend_paciente` FOREIGN KEY (`paciente_id`) REFERENCES `pacientes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_agend_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -67,6 +59,7 @@ CREATE TABLE `agendamentos` (
 
 LOCK TABLES `agendamentos` WRITE;
 /*!40000 ALTER TABLE `agendamentos` DISABLE KEYS */;
+INSERT INTO `agendamentos` VALUES (1,2,1,3,'2026-06-03 16:00:00','aguardando_sinal','Paciente Nova Clinica Leandro','leandrommarquess.n@gmail.com','11970166621','96397193899','Masculino','Presencial','motivo','Instagram',85.00,1.80,'1984-08-18',41,'A+','Neurológico, [\"Neurológico\"]'),(2,2,2,3,'2026-06-04 07:00:00','aguardando_sinal','leila paciente nova clinica','leandrommarquess.n@gmail.com','11970166621','31797193899',NULL,'Presencial','algum coisa',NULL,NULL,NULL,NULL,NULL,NULL,NULL),(3,4,3,4,'2026-06-04 15:10:00','aguardando_sinal','Livia Velha Guarda','livia@gmail.com','11970166621','31797193899','Feminino','Presencial','naosei oque dizer','Indicação',84.00,1.30,'1984-08-18',41,'A+','');
 /*!40000 ALTER TABLE `agendamentos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -124,7 +117,7 @@ CREATE TABLE `clinica_configuracoes` (
   PRIMARY KEY (`id`),
   KEY `fk_config_clinica` (`clinica_id`),
   CONSTRAINT `fk_config_clinica` FOREIGN KEY (`clinica_id`) REFERENCES `clinicas` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,6 +126,7 @@ CREATE TABLE `clinica_configuracoes` (
 
 LOCK TABLES `clinica_configuracoes` WRITE;
 /*!40000 ALTER TABLE `clinica_configuracoes` DISABLE KEYS */;
+INSERT INTO `clinica_configuracoes` VALUES (1,2,'07:00:00','20:00:00',60,250.00,'1,2,3,4,5'),(2,4,'07:00:00',NULL,60,150.00,'1,2,3,4,5');
 /*!40000 ALTER TABLE `clinica_configuracoes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -193,7 +187,7 @@ CREATE TABLE `clinicas` (
   UNIQUE KEY `email_master` (`email_master`),
   KEY `fk_clinica_plano` (`plano_id`),
   CONSTRAINT `fk_clinica_plano` FOREIGN KEY (`plano_id`) REFERENCES `planos` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -202,7 +196,7 @@ CREATE TABLE `clinicas` (
 
 LOCK TABLES `clinicas` WRITE;
 /*!40000 ALTER TABLE `clinicas` DISABLE KEYS */;
-INSERT INTO `clinicas` VALUES (1,'Clinica Evolucao Estoica','clinica-evolucao-estoica','Leandro Marques','(11) 97016-6621','(11) 97016-6621','leandrommarquess.n@gmail.com','mariarosa',1,69.90,'ativo','2026-06-02','2026-07-02',NULL,'2026-06-02 16:27:13');
+INSERT INTO `clinicas` VALUES (1,'ClÃ­nica Experimental','clinica-experimental','Leandro Marques','1199999999','1188888888','admin@sistema.com','123456',1,69.90,'ativo','2026-06-03','2026-12-31',NULL,'2026-06-03 17:54:10'),(2,'Clinica Nova ','clinica-nova','leandro','(11) 97016-6621','(11) 97016-6621','leandrommarquess.n@gmail.com','mariarosa',1,69.90,'ativo','2026-06-03','2026-07-03',NULL,'2026-06-03 17:55:44'),(4,'Clinica Velha guarda','clinica-velha-guarda','Maria','(11) 97016-6621','(11) 97016-6621','maria@gmail.com','mariarosa',2,69.90,'ativo','2026-06-03','2026-07-03',NULL,'2026-06-03 18:04:28');
 /*!40000 ALTER TABLE `clinicas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -219,7 +213,7 @@ CREATE TABLE `features` (
   `descricao` varchar(255) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `nome_tecnico` (`nome_tecnico`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -228,6 +222,7 @@ CREATE TABLE `features` (
 
 LOCK TABLES `features` WRITE;
 /*!40000 ALTER TABLE `features` DISABLE KEYS */;
+INSERT INTO `features` VALUES (1,'portal_paciente','Permite acesso ao portal de agendamento'),(2,'notificacao_whatsapp','Envio automÃ¡tico de lembretes'),(3,'relatorios_avancados','Dashboards financeiros completos');
 /*!40000 ALTER TABLE `features` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -265,7 +260,7 @@ CREATE TABLE `financeiro` (
   CONSTRAINT `fk_fin_clinica` FOREIGN KEY (`clinica_id`) REFERENCES `clinicas` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_fin_paciente` FOREIGN KEY (`paciente_id`) REFERENCES `pacientes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_fin_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -274,6 +269,7 @@ CREATE TABLE `financeiro` (
 
 LOCK TABLES `financeiro` WRITE;
 /*!40000 ALTER TABLE `financeiro` DISABLE KEYS */;
+INSERT INTO `financeiro` VALUES (1,2,NULL,NULL,1,1,'receita','Consulta','Sinal de Consulta - Paciente Nova Clinica Leandro',100.00,'2026-06-03',NULL,'aberto',NULL,NULL,NULL,'2026-06-03 18:00:03'),(2,2,NULL,NULL,2,2,'receita','Consulta','Sinal de Agendamento - leila paciente nova clinica',250.00,'2026-06-04',NULL,'aberto',NULL,NULL,NULL,'2026-06-03 18:01:03'),(3,4,NULL,NULL,3,3,'receita','Consulta','Sinal de Consulta - Livia Velha Guarda',100.00,'2026-06-03',NULL,'aberto',NULL,NULL,NULL,'2026-06-03 18:11:25');
 /*!40000 ALTER TABLE `financeiro` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -365,7 +361,7 @@ CREATE TABLE `pacientes` (
   PRIMARY KEY (`id`),
   KEY `fk_paciente_clinica` (`clinica_id`),
   CONSTRAINT `fk_paciente_clinica` FOREIGN KEY (`clinica_id`) REFERENCES `clinicas` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -374,6 +370,7 @@ CREATE TABLE `pacientes` (
 
 LOCK TABLES `pacientes` WRITE;
 /*!40000 ALTER TABLE `pacientes` DISABLE KEYS */;
+INSERT INTO `pacientes` VALUES (1,2,'Paciente Nova Clinica Leandro','96397193899','leandrommarquess.n@gmail.com','11970166621','1984-08-18',41,'A+',85.00,'Masculino','pendente','manual',1.80,'Neurológico, [\"Neurológico\"]',NULL,'2026-06-03 18:00:03'),(2,2,'leila paciente nova clinica','31797193899','leandrommarquess.n@gmail.com','11970166621',NULL,NULL,NULL,NULL,NULL,'pendente','portal',NULL,NULL,NULL,'2026-06-03 18:01:03'),(3,4,'Livia Velha Guarda','31797193899','livia@gmail.com','11970166621','1984-08-18',41,'A+',84.00,'Feminino','pendente','manual',1.30,'',NULL,'2026-06-03 18:11:25');
 /*!40000 ALTER TABLE `pacientes` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -394,7 +391,7 @@ CREATE TABLE `plano_features` (
   KEY `fk_plano_feat_feature` (`feature_id`),
   CONSTRAINT `fk_plano_feat_feature` FOREIGN KEY (`feature_id`) REFERENCES `features` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_plano_feat_plano` FOREIGN KEY (`plano_id`) REFERENCES `planos` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -403,6 +400,7 @@ CREATE TABLE `plano_features` (
 
 LOCK TABLES `plano_features` WRITE;
 /*!40000 ALTER TABLE `plano_features` DISABLE KEYS */;
+INSERT INTO `plano_features` VALUES (1,1,1,1),(2,1,2,0),(3,1,3,0),(4,2,1,1),(5,2,2,1),(6,2,3,0),(7,3,1,1),(8,3,2,1),(9,3,3,1);
 /*!40000 ALTER TABLE `plano_features` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -492,7 +490,7 @@ CREATE TABLE `usuarios` (
   UNIQUE KEY `email` (`email`),
   KEY `fk_usuario_clinica` (`clinica_id`),
   CONSTRAINT `fk_usuario_clinica` FOREIGN KEY (`clinica_id`) REFERENCES `clinicas` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -501,9 +499,17 @@ CREATE TABLE `usuarios` (
 
 LOCK TABLES `usuarios` WRITE;
 /*!40000 ALTER TABLE `usuarios` DISABLE KEYS */;
-INSERT INTO `usuarios` VALUES (1,1,'Leandro Marques','leandrommarquess.n@gmail.com','mariarosa','dono','2026-06-02 16:27:13');
+INSERT INTO `usuarios` VALUES (1,1,'Leandro Marques','leandro@teste.com','123456','dono','2026-06-03 17:54:10'),(2,NULL,'Administrador MedLM','admin@medlm.com','mariarosa','dono','2026-06-03 17:54:10'),(3,2,'leandro','leandrommarquess.n@gmail.com','mariarosa','dono','2026-06-03 17:55:44'),(4,4,'Maria','maria@gmail.com','mariarosa','dono','2026-06-03 18:04:28');
 /*!40000 ALTER TABLE `usuarios` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Dumping events for database 'terapia_system'
+--
+
+--
+-- Dumping routines for database 'terapia_system'
+--
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -514,4 +520,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-06-02 16:28:28
+-- Dump completed on 2026-06-03 18:19:43
