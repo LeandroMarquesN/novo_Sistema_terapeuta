@@ -1,5 +1,4 @@
-// agendamentoController.js
-console.log('--- agendamentoController.js carregado ---');
+
 
 const db = require('../config/db');
 const path = require('path');
