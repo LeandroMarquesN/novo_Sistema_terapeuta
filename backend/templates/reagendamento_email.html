@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Aviso de Reagendamento - MedLM</title>
+  <style>
+    /* Estilos idênticos para manter o padrão */
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .header { background: linear-gradient(135deg, #1e3c72, #2a5298); padding: 30px; text-align: center; }
+    .logo-img { max-width: 200px; height: auto; }
+    .content { padding: 40px; color: #444; line-height: 1.6; }
+    .content h2 { color: #1e3c72; margin-top: 0; font-weight: 600; }
+    .info-box { background-color: #fff9e6; border-left: 4px solid #f39c12; padding: 20px; margin: 25px 0; border-radius: 4px; }
+    .info-item { margin-bottom: 10px; font-size: 15px; }
+    .info-item strong { color: #1e3c72; }
+    .footer { background: #f4f7f9; padding: 25px; text-align: center; color: #888; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.imgur.com/5pjegDN.png" alt="MedLM Logo" class="logo-img">
+    </div>
+    <div class="content">
+      <h2>Olá, {{nome_paciente}}!</h2>
+      <p>Informamos que houve uma <strong>alteração</strong> no horário da sua consulta.</p>
+
+      <p>Confira abaixo os novos detalhes atualizados:</p>
+
+      <div class="info-box">
+        <div class="info-item"><strong>📅 Nova Data:</strong> {{data_agendamento}}</div>
+        <div class="info-item"><strong>⏰ Novo Horário:</strong> {{hora_agendamento}}</div>
+        <div class="info-item"><strong>🔍 Procedimento:</strong> {{tipo_terapia}}</div>
+      </div>
+
+      <p>Caso o novo horário não seja viável para você, por favor entre em contato pelo telefone <strong>{{telefone_clinica}}</strong> para encontrarmos uma melhor opção.</p>
+
+      <p>Atenciosamente,<br>
+      <strong>Equipe {{nome_clinica}}</strong></p>
+    </div>
+    <div class="footer">
+      © {{ano_atual}} MedLM - Gestão Inteligente para Clínicas.
+    </div>
+  </div>
+</body>
+</html>

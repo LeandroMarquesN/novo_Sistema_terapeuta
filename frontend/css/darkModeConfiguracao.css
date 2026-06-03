@@ -1,0 +1,36 @@
+/* Cores para o Dark Mode estilo Painel Admin */
+body.dark-mode {
+  background: #0f172a; /* Azul marinho muito escuro */
+  color: #f1f5f9;
+}
+
+body.dark-mode .glass-card {
+  background: rgba(30, 41, 59, 0.7); /* Slate 800 com transparência */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .input-premium {
+  background: rgba(15, 23, 42, 0.5);
+  border-color: #334155;
+  color: #f1f5f9;
+}
+
+body.dark-mode .input-premium:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.1);
+}
+
+body.dark-mode label {
+  color: #94a3b8; /* Texto secundário no dark */
+}
+
+body.dark-mode .text-gradient {
+  background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Ícones no Dark Mode */
+body.dark-mode .bg-blue-100 { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+body.dark-mode .bg-emerald-100 { background: rgba(52, 211, 153, 0.1); color: #34d399; }

@@ -1,0 +1,6 @@
+1. Pasta config
+Atualmente, você deve ter senhas de banco de dados, chaves do JWT e configurações de e-mail espalhadas pelo código ou apenas no .env.
+
+O que colocar nela: Arquivos como db.js (conexão com MySQL), mailer.js (configuração do Nodemailer) e passport.js (se usar autenticação social).
+
+Vantagem: Se precisar mudar do banco local para um banco na nuvem, você altera um arquivo centralizado aqui.

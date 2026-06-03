@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Cancelamento de Agendamento - MedLM</title>
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .header { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); padding: 30px; text-align: center; }
+    .logo-img { max-width: 200px; height: auto; }
+    .content { padding: 40px; color: #444; line-height: 1.6; }
+    .content h2 { color: #d32f2f; margin-top: 0; font-weight: 600; }
+    .info-box { background-color: #fceeee; border-left: 4px solid #d32f2f; padding: 20px; margin: 25px 0; border-radius: 4px; }
+    .info-item { margin-bottom: 10px; font-size: 15px; color: #333; }
+    .info-item strong { color: #d32f2f; }
+    .footer { background: #f4f7f9; padding: 25px; text-align: center; color: #888; font-size: 12px; }
+    .btn { display: inline-block; padding: 12px 25px; background: #2c5364; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.imgur.com/5pjegDN.png" alt="MedLM Logo" class="logo-img">
+    </div>
+
+    <div class="content">
+      <h2>Olá, {{nome_paciente}}!</h2>
+      <p>Confirmamos que o seu agendamento foi <strong>cancelado</strong> com sucesso.</p>
+
+      <p>Abaixo estão os detalhes do atendimento que foi removido:</p>
+
+      <div class="info-box">
+        <div class="info-item"><strong>📅 Data:</strong> {{data_agendamento}}</div>
+        <div class="info-item"><strong>⏰ Horário:</strong> {{hora_agendamento}}</div>
+        <div class="info-item"><strong>🔍 Procedimento:</strong> {{tipo_terapia}}</div>
+      </div>
+
+      <p>Se você não solicitou este cancelamento ou deseja realizar um <strong>novo agendamento</strong>, entre em contato conosco pelo telefone:</p>
+      <p style="font-size: 18px; color: #2c5364;"><strong>{{telefone_clinica}}</strong></p>
+
+      <p>Esperamos te ver em breve!</p>
+
+      <p>Atenciosamente,<br>
+      <strong>Equipe {{nome_clinica}}</strong></p>
+    </div>
+
+    <div class="footer">
+      © {{ano_atual}} MedLM - Gestão Inteligente para Clínicas.<br>
+      Este e-mail é automático, por favor não responda.
+    </div>
+  </div>
+</body>
+</html>

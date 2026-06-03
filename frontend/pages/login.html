@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang='pt-BR'>
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Login - MedLM Sistema Terapêutico</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/animacaoBack.css">
+
+  <style>
+    /* Aplica a fonte Poppins a todo o corpo do documento */
+    body {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        /* Fundo animado (backup caso o container-fluid falhe) */
+        background: linear-gradient(45deg, #c1d6ec, #a2c9f2, #2252b9);
+        background-size: 400% 400%;
+        animation: gradientFlow 15s ease infinite;
+    }
+
+    @keyframes gradientFlow {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+
+    .conteinerpai {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 20px;
+    }
+
+    /* Estilo do container com transparência (Glassmorphism) */
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.15); /* Mais transparente */
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px); /* Efeito de vidro mais intenso */
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      width: 100%;
+      max-width: 450px;
+      color: #000;
+    }
+
+    .form-label {
+      font-weight: 500;
+      color: #000;
+    }
+
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #000;
+    }
+
+    .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 0 0 0.25rem rgba(34, 82, 185, 0.25);
+        border-color: #2252b9;
+    }
+
+    h2 {
+        font-weight: 600;
+        margin-bottom: 2rem;
+        color: #000;
+    }
+
+    .btn-primary {
+        background-color: #2252b9;
+        border: none;
+        padding: 10px;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #1a3f8f;
+    }
+
+    /*========== Estilização logo MedLM ============ */
+    /* Mantendo e aprimorando seu efeito de Gradient Flow */
+    .gradient-bg {
+    background: linear-gradient(45deg,
+        #5a92d6, #60c6cb, #a2c9f2, #5a92d6, #60c6cb
+    );
+    background-size: 400% 400%;
+    animation: gradientFlow 15s ease-in-out infinite;
+
+    /* --- AS LINHAS QUE FAZEM A MÁGICA --- */
+    -webkit-background-clip: text; /* Recorta o fundo no formato das letras */
+    background-clip: text;         /* Versão padrão */
+    -webkit-text-fill-color: transparent; /* Torna a letra transparente para o fundo aparecer */
+    color: transparent;            /* Fallback */
+    /* ------------------------------------ */
+}
+
+@keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+    /* ================================== */
+    .logo-wrapper {
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    span.logo-img {
+        height: 120px; /* Ajustado para um tamanho mais comercial */
+        width: 100%;
+        max-width: 320px;
+        /* Aponta para o novo logo que vamos criar */
+        background-image: url('../logo/LogoTop.png');
+        background-size: 100%;
+        background-repeat: no-repeat;
+        background-position: center;
+        display: inline-block;
+        cursor: pointer;
+        margin: 0 auto 10px auto;
+
+        transition: transform 0.3s ease-in-out;
+    }
+
+    span.logo-img:hover {
+        transform: scale(1.05);
+    }
+
+    /* Mensagem de erro estilizada */
+    #error-message {
+        color: #ffd7d7;
+        background-color: rgba(255, 0, 0, 0.3);
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: none; /* Escondido por padrão */
+        text-align: center;
+        font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="conteinerpai">
+    <div class='login-container'>
+        <div class="logo-wrapper">
+            <span class="logo-img"></span>
+        </div>
+
+        <!-- <h2 class='text-center'>Login</h2> -->
+        <h2 class="text-xl font-bold gradient-bg">
+          Login do Sistema
+      </h2>
+
+
+        <div id="error-message"></div>
+
+        <form id="loginForm">
+          <div class='mb-3'>
+            <label for='email' class='form-label'>E-mail Profissional</label>
+            <input type='email' class='form-control' id='email' placeholder="seu@email.com" required>
+          </div>
+          <div class='mb-3'>
+            <label for='senha' class='form-label'>Senha</label>
+            <input type='password' class='form-control' id='senha' placeholder="******" required>
+          </div>
+          <button type='submit' class='btn btn-primary w-100'>Entrar</button>
+        </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+      const errorMessage = document.getElementById('error-message');
+
+
+
+      // Limpa mensagem de erro anterior
+      errorMessage.style.display = 'none';
+      errorMessage.textContent = '';
+      try {
+    const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, senha })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        // 1. Salva o token no localStorage e nos Cookies
+        localStorage.setItem('token', data.token);
+        document.cookie = `token=${data.token}; path=/; max-age=${8 * 60 * 60}; SameSite=Lax`;
+
+        // 2. GUARDA OS DADOS DINÂMICOS DO TENANT (MUDANÇA AQUI)
+        // O seu backend deve retornar esses campos (ex: data.usuarioNome e data.clinicaNome)
+        if (data.usuarioNome) localStorage.setItem('medlm_user_name', data.usuarioNome);
+        if (data.clinicaNome) localStorage.setItem('medlm_clinic_name', data.clinicaNome);
+
+        // 3. Redirecionamento inteligente baseado no perfil do usuário
+        if (data.redirectUrl) {
+            window.location.href = data.redirectUrl;
+        } else {
+            window.location.href = '/dashboard'; // Fallback de segurança
+        }
+    } else {
+        errorMessage.textContent = data.error || 'Erro ao realizar login.';
+        errorMessage.style.display = 'block';
+    }
+} catch (error) {
+    console.error('Erro no login:', error);
+    errorMessage.textContent = 'Erro de conexão com o servidor.';
+    errorMessage.style.display = 'block';
+}
+    });
+  </script>
+
+ <script src="../ScriptGlobal/logout.js"></script>
+  <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+</body>
+</html>

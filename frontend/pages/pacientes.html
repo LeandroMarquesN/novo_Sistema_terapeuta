@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prontuário de Pacientes | MedLM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Fontes e Ícones de Elite -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+  <!-- Estilos Globais do Sistema -->
+  <link rel="stylesheet" href="../css/stiloDataHora.css">
+  <link rel="stylesheet" href="../css/stileLogo.css">
+  <link rel="stylesheet" href="../css/darckModeStile.css">
+  <link rel="stylesheet" href="../css/prontuarioModal.css">
+  <link rel="stylesheet" href="../css/animacaoBack.css">
+  <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+
+  <style>
+    :root {
+      --bg-gradient: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+      --glass-bg: rgba(255, 255, 255, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.25);
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      min-height: 100vh;
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
+
+    /* Layout em Grid Lateral */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* 🧭 BARRA LATERAL (ASIDE NAVBAR) MODERNIZADA */
+    aside {
+      width: 280px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 2rem;
+    }
+
+    .brand-logo-circle {
+      width: 45px;
+      height: 45px;
+      background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .brand-logo-circle i {
+      background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.4rem;
+    }
+
+    .brand-name {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: white;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex-grow: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-item i {
+      width: 24px;
+      font-size: 1.15rem;
+      margin-right: 12px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.25);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      background: white;
+      color: #1e3a8a;
+      font-weight: 600;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .nav-item.active i {
+      color: #3b82f6;
+    }
+
+    /* 💎 PAINEL CENTRAL GLASSMORPHISM */
+    main {
+      flex-grow: 1;
+      margin-left: 280px;
+      padding: 2.5rem;
+      min-height: 100vh;
+    }
+
+    .glass-panel {
+      background: var(--glass-bg);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid var(--glass-border);
+      border-radius: 30px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+    }
+
+    /* 🪐 TOP BAR INTERNA */
+    .top-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 0.75rem 1.5rem;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* 🔍 BARRA DE BUSCA PREMIUM */
+    .search-wrapper {
+      position: relative;
+      max-width: 450px;
+      width: 100%;
+    }
+
+    .search-bar {
+      width: 100%;
+      border-radius: 20px;
+      padding: 14px 24px 14px 50px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255, 255, 255, 0.7);
+      font-weight: 500;
+      color: var(--text-main);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.02);
+      transition: all 0.3s ease;
+    }
+
+    .search-bar:focus {
+      background: white;
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);
+      border-color: #3b82f6;
+      outline: none;
+    }
+
+    .search-wrapper i {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+
+    /* 📇 CARDS DE PACIENTES ULTRA MODERNOS */
+    .patient-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .patient-card:hover {
+      transform: translateY(-8px);
+      background: white;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .card-avatar-box {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #e0f2fe 0%, #dcfce7 100%);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #3b82f6;
+    }
+
+    /* 🔘 BOTÕES DO CARD AJUSTADOS PARA TRÊS AÇÕES */
+    .btn-action-atender {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      font-weight: 600;
+      border-radius: 14px;
+      padding: 0.6rem 1.2rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-action-atender:hover {
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-action-outline {
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      background: rgba(255, 255, 255, 0.5);
+      color: #3b82f6;
+      border-radius: 14px;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-outline:hover {
+      background: #3b82f6;
+      color: white;
+      border-color: #3b82f6;
+    }
+
+    .btn-action-delete {
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      background: rgba(255, 255, 255, 0.5);
+      color: #ef4444;
+      border-radius: 14px;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action-delete:hover {
+      background: #ef4444;
+      color: white;
+      border-color: #ef4444;
+    }
+
+    /* Responsividade */
+    @media (max-width: 992px) {
+      aside { width: 80px; padding: 1.5rem 0.5rem; align-items: center; }
+      .brand-name, .nav-item span { display: none; }
+      .brand-area { justify-content: center; width: 100%; }
+      main { margin-left: 80px; padding: 1.5rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-container">
+
+    <!-- 🧭 INTERFACE SIDEBAR (MANTENDO O SEU PADRÃO COMPLETO) -->
+    <aside>
+      <div class="brand-area">
+        <div class="brand-logo-circle">
+          <i class="fas fa-heartbeat"></i>
+        </div>
+        <span class="brand-name">MedLM</span>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="/dashboard" class="nav-item">
+          <i class="fas fa-chart-line"></i><span>Dashboard</span>
+        </a>
+        <a href="/pacientes" class="nav-item active">
+          <i class="fas fa-user-injured"></i><span>Pacientes</span>
+        </a>
+        <a href="/financeiro" class="nav-item">
+          <i class="fas fa-hand-holding-usd"></i><span>Financeiro</span>
+        </a>
+        <a href="/agendamento" class="nav-item">
+          <i class="fas fa-calendar-check"></i><span>Agendamento</span>
+        </a>
+        <a href="/atendimento" class="nav-item">
+          <i class="fas fa-user-md"></i><span>Atendimento</span>
+        </a>
+        <a href="/equipe" class="nav-item">
+          <i class="fas fa-users-cog"></i><span>Minha Equipe</span>
+        </a>
+        <a href="/dashboard/configuracoes" class="nav-item">
+          <i class="fas fa-cogs"></i><span>Configurações</span>
+        </a>
+      </nav>
+
+      <div class="pt-4 border-top border-white border-opacity-10">
+        <a href="javascript:void(0)" onclick="handleLogout(event)" class="nav-item text-danger">
+          <i class="fas fa-sign-out-alt"></i><span>Sair</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- 💎 CONTEÚDO PRINCIPAL (DASHBOARD GLASSMORPHISM) -->
+    <main>
+
+      <!-- Barra Dinâmica Superior -->
+      <div class="top-meta-bar">
+        <div class="d-flex align-items-center gap-2 text-white font-medium">
+          <i class="fas fa-calendar-alt text-white opacity-75"></i>
+          <span id="data-hora" class="text-white"></span>
+        </div>
+        <button id="theme-toggle-btn" class="btn btn-sm btn-light rounded-pill px-3 opacity-75 hover:opacity-100">
+          <i class="fas fa-moon me-1"></i> Modo Escuro
+        </button>
+      </div>
+
+      <!-- Corpo do Painel -->
+      <div class="glass-panel">
+        <div class="row mb-5 align-items-center g-4">
+          <div class="col-md-6">
+            <h1 class="fw-bold tracking-tight text-dark mb-1">Gestão de Pacientes</h1>
+            <p class="text-secondary mb-0">Consulte, analise e inicie atendimentos clínicos em tempo real.</p>
+          </div>
+          <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="search-wrapper">
+              <i class="fas fa-search"></i>
+              <input type="text" id="inputBusca" class="form-control search-bar" placeholder="Buscar por Nome ou CPF..." onkeyup="filtrarPacientes()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid de Renderização dos Cards -->
+        <div id="container-pacientes" class="row">
+          <div class="text-center p-5">
+            <div class="spinner-border text-white" role="status"></div>
+            <p class="text-white mt-2 font-medium">Carregando carteira de pacientes...</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- 📑 MODAL DE PRONTUÁRIO DIGITAL -->
+  <div class="modal fade modal-glass" id="modalProntuario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content glass-card shadow-lg" style="background: rgba(255,255,255,0.9); backdrop-filter: blur(20px); border-radius: 24px;">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-dark"><i class="fas fa-folder-open text-primary me-2"></i>Histórico Clínico Digital</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="corpoModalProntuario"></div>
+            <div class="modal-footer border-0 pb-4 px-4">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fechar Registro</button>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- Scripts Operacionais -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // --- CARREGAR PACIENTES (FRONTEND INTEGRADO) ---
+    async function carregarPacientes() {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const pacientes = await res.json();
+
+        if (!Array.isArray(pacientes)) {
+          console.error("Backend retornou erro ou formato inválido:", pacientes);
+          return;
+        }
+
+        const container = document.getElementById('container-pacientes');
+
+        container.innerHTML = pacientes.map(p => `
+          <div class="col-md-6 col-lg-4 item-paciente">
+            <div class="card patient-card">
+              <div class="card-body p-4">
+                <div class="d-flex align-items-center mb-4">
+                  <div class="card-avatar-box me-3">
+                    <i class="fas fa-user fa-xl"></i>
+                  </div>
+                  <div>
+                    <h5 class="card-title mb-1 fw-bold text-dark">${p.nome}</h5>
+                    <span class="badge bg-light text-secondary border">CPF: ${p.cpf || 'Não informado'}</span>
+                  </div>
+                </div>
+
+                <div class="space-y-2 mb-4">
+                  <p class="card-text small text-secondary mb-1"><i class="fas fa-phone me-2 text-primary opacity-75"></i>${p.telefone}</p>
+                  <p class="card-text small text-secondary mb-0 text-truncate"><i class="fas fa-envelope me-2 text-primary opacity-75"></i>${p.email}</p>
+                </div>
+
+                <!-- 🚨 GRID DE TRÊS BOTÕES TOTALMENTE REALINHADO -->
+                <div class="d-flex align-items-center gap-2 pt-2 border-top border-light">
+                  <a href="/atendimento?pacienteId=${p.id}" class="btn-action-atender flex-grow-1 text-center">
+                    <i class="fas fa-user-md me-1.5"></i> Atender
+                  </a>
+                  <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário Antigo">
+                    <i class="fas fa-file-medical"></i>
+                  </button>
+                  <button class="btn-action-delete" onclick="deletarPaciente(${p.id})" title="Excluir Registro">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error("Erro fatal ao buscar carteira de pacientes", e);
+      }
+    }
+
+    // --- VER PRONTUÁRIO (DETALHES) ---
+    async function verProntuario(id) {
+      const modalProntuarioEl = document.getElementById('modalProntuario');
+      const conteudo = document.getElementById('corpoModalProntuario');
+
+      if (!conteudo) return;
+
+      conteudo.innerHTML = `
+          <div class="text-center p-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="mt-2 text-muted font-medium">Reunindo dados clínicos e históricos...</p>
+          </div>`;
+
+      const modalBootstrap = new bootstrap.Modal(modalProntuarioEl);
+      modalBootstrap.show();
+
+      try {
+          const token = localStorage.getItem('token');
+          const res = await fetch(`/api/pacientes/${id}/prontuario`, {
+              headers: { 'Authorization': `Bearer ${token}` }
+          });
+
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+
+          conteudo.innerHTML = `
+              <div class="row mb-4">
+                  <div class="col-md-4 text-center border-end">
+                      <img src="${data.dados.foto_perfil ? '/uploads/'+data.dados.foto_perfil : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+                           class="img-thumbnail rounded-circle mb-2 shadow-sm"
+                           style="width:110px; height:110px; object-fit:cover; border: 3px solid white;">
+                      <h5 class="fw-bold text-dark mt-2 mb-1">${data.dados.nome}</h5>
+                      <span class="badge rounded-pill bg-success-subtle text-success px-3 py-1">Ficha Ativa</span>
+                  </div>
+                  <div class="col-md-8">
+                      <div class="row g-3">
+                          <div class="col-6">
+                              <small class="text-muted d-block small">Idade</small>
+                              <span class="fw-semibold text-dark">${data.dados.idade || '--'} anos</span>
+                          </div>
+                          <div class="col-6">
+                              <small class="text-muted d-block small">Grupo Sanguíneo</small>
+                              <span class="badge bg-danger px-2">${data.dados.tipo_sanguineo || 'N/A'}</span>
+                          </div>
+                          <div class="col-6">
+                              <small class="text-muted d-block small">Massa Corporal</small>
+                              <span class="fw-semibold text-dark">${data.dados.peso || '--'} kg</span>
+                          </div>
+                          <div class="col-6">
+                              <small class="text-muted d-block small">Estatura</small>
+                              <span class="fw-semibold text-dark">${data.dados.altura || '--'} m</span>
+                          </div>
+                      </div>
+                      <hr class="my-3 opacity-25">
+                      <div class="bg-light p-3 rounded-3 border border-light">
+                          <h6 class="small fw-bold text-uppercase text-muted mb-1">Morbidades & Observações</h6>
+                          <p class="mb-0 small text-dark">${data.dados.condicoes_preexistentes || 'Nenhuma patologia registrada.'}</p>
+                      </div>
+                  </div>
+              </div>
+
+              <h6 class="fw-bold text-primary mb-3 pt-2 d-flex align-items-center">
+                  <i class="fas fa-clock-rotate-left me-2"></i> Evolução Temporal de Sessões
+              </h6>
+
+              <div class="history-list p-1">
+                  ${data.consultas && data.consultas.length > 0 ? data.consultas.map(c => `
+                      <div class="history-line">
+                          <div class="d-flex justify-content-between align-items-start">
+                              <small class="text-primary fw-bold bg-primary-subtle px-2 py-1 rounded">
+                                  ${new Date(c.data_agendamento.replace('T', ' ').replace('Z', '')).toLocaleDateString('pt-BR')}
+                              </small>
+                          </div>
+                          <p class="mt-2 mb-1 text-dark"><strong>${c.tipo_terapia}</strong></p>
+                          <p class="text-secondary small mb-0">${c.motivo_consulta || 'Sem notas complementares.'}</p>
+                      </div>
+                  `).join('') : '<div class="text-center p-4 text-muted">Nenhuma sessão pregressa localizada no banco.</div>'}
+              </div>
+          `;
+      } catch (e) {
+          conteudo.innerHTML = `
+              <div class="alert alert-danger border-0 text-center py-4">
+                  <i class="fas fa-exclamation-triangle fa-2x mb-2 d-block"></i> Falha estrutural ao recuperar prontuário eletrônico.
+              </div>`;
+      }
+    }
+
+    // --- FILTRO DE BUSCA INTELIGENTE ---
+    function filtrarPacientes() {
+      const termo = document.getElementById('inputBusca').value.toLowerCase();
+      const cards = document.querySelectorAll('.item-paciente');
+
+      cards.forEach(card => {
+        const texto = card.innerText.toLowerCase();
+        card.style.style.display = texto.includes(termo) ? 'block' : 'none';
+      });
+    }
+
+    // Inicialização do Motor de Tela
+    carregarPacientes();
+  </script>
+
+  <!-- Injeção dos Scripts Globais do Ecossistema -->
+  <script src="../ScriptGlobal/FuncDataHora.js"></script>
+  <script src="../ScriptGlobal/DarkMode.js"></script>
+  <script src="../ScriptGlobal/verifiLog.js"></script>
+  <script src="../ScriptGlobal/logout.js"></script>
+</body>
+</html>

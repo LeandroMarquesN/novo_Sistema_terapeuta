@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Equipe | MedLM</title>
+
+    <link rel="stylesheet" href="../css/stiloDataHora.css">
+    <link rel="stylesheet" href="../css/stileLogo.css">
+    <link rel="stylesheet" href="../css/darckModeStile.css">
+    <link rel="stylesheet" href="../css/animacaoBack.css">
+    <link rel="stylesheet" href="../css/limite_membros.css">
+    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Efeito de Vidro Puro (Glassmorphism) */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card-premium {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-card-premium:hover {
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+        /* Custom Scrollbar futurista */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.5); border-radius: 10px; }
+
+        body {
+            background: radial-gradient(circle at top right, #0f172a, #020617);
+            color: #f8fafc;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased flex overflow-x-hidden">
+
+    <aside class="fixed inset-y-0 left-0 w-64 glass-panel z-40 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col justify-between p-4 border-r border-slate-800" id="sidebarMenu">
+        <div>
+            <div class="flex items-center justify-between pb-6 border-b border-slate-800/60 mt-2">
+                <a class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent no-underline flex items-center space-x-2" href="/dashboard">
+                    <i class="fas fa-layer-group text-blue-400 text-xl"></i>
+                    <span>MedLM</span>
+                </a>
+                <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <nav class="mt-6 space-y-2">
+                <a href="/dashboard" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition">
+                    <i class="fas fa-chart-pie w-5"></i> <span class="font-medium text-sm">Dashboard</span>
+                </a>
+                <a href="/pacientes" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition">
+                    <i class="fas fa-user-injured w-5"></i> <span class="font-medium text-sm">Pacientes</span>
+                </a>
+                <a href="/agendamento" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800/50 transition">
+                    <i class="fas fa-calendar-alt w-5"></i> <span class="font-medium text-sm">Agendar Atendimento</span>
+                </a>
+                <a href="/equipe" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500/20 to-emerald-500/10 border-l-4 border-blue-500 text-white transition">
+                    <i class="fas fa-users-cog w-5 text-blue-400"></i> <span class="font-medium text-sm">Minha Equipe</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="pt-4 border-t border-slate-800/60 space-y-3">
+            <div id="data-hora-container" class="text-xs text-slate-400 flex items-center space-x-2 px-2">
+                <i class="fas fa-clock text-blue-400"></i>
+                <span id="data-hora" class="font-medium"></span>
+            </div>
+            <button id="theme-toggle-btn" class="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-slate-800/40 text-slate-300 hover:text-white transition text-xs">
+                <span>Modo de Exibição</span>
+                <i class="fas fa-moon text-blue-400"></i>
+            </button>
+            <a href="javascript:void(0)" onclick="handleLogout(event)" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-semibold transition text-sm">
+                <i class="fas fa-sign-out-alt"></i> <span>Encerrar Sessão</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="flex-1 min-h-screen lg:pl-64 flex flex-col transition-all duration-300 w-full">
+
+        <header class="lg:hidden w-full px-6 py-4 glass-panel flex items-center justify-between border-b border-slate-800/60 mb-4">
+            <span class="text-xl font-bold bg-gradient-to-r from-blue-400 to-emerald-400 bg-clip-text text-transparent">MedLM</span>
+            <button onclick="toggleSidebar()" class="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-300">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+
+        <div class="container-fluid p-4 lg:p-8 space-y-6 max-w-[1600px] mx-auto w-full">
+
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl lg:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                        <i class="fas fa-users text-blue-500"></i> Gerenciamento da Equipe
+                    </h1>
+                    <p class="text-sm text-slate-400 mt-1">Monitore, cadastre e controle as permissões dos profissionais da clínica.</p>
+                </div>
+                <button onclick="toggleModal()" class="w-full sm:w-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3 px-5 rounded-xl shadow-lg shadow-blue-500/10 hover:shadow-blue-500/20 transform hover:-translate-y-0.5 transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fas fa-plus"></i> Novo Profissional
+                </button>
+            </div>
+
+            <div id="status-plano-container" class="glass-card-premium rounded-2xl p-4 border-l-4 border-emerald-500" style="display: none;">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-emerald-500/10 rounded-xl text-emerald-400">
+                        <i class="fas fa-info-circle text-lg"></i>
+                    </div>
+                    <span id="plano-info-texto" class="text-slate-200 text-sm md:text-base">Carregando informações da licença do plano...</span>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl p-4 grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                <div class="md:col-span-12 relative">
+                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="campo-busca" oninput="filtrarEquipe()" placeholder="Filtrar instantaneamente por Nome, CPF ou E-mail corporativo..." class="w-full pl-11 pr-4 py-3 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition text-sm">
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-2xl overflow-hidden shadow-2xl">
+                <div class="overflow-x-auto w-full">
+                    <table class="min-w-full divide-y divide-slate-800/60">
+                        <thead>
+                            <tr class="bg-slate-900/40 text-slate-400 uppercase text-xs font-semibold tracking-wider">
+                                <th class="py-4 px-6 text-left">Profissional / Identificação</th>
+                                <th class="py-4 px-6 text-left">E-mail de Acesso</th>
+                                <th class="py-4 px-6 text-left">Atribuição / Cargo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="lista-equipe" class="divide-y divide-slate-800/40 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalMembro" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden flex items-center justify-center p-4 z-50 transition-all duration-300">
+        <div class="glass-panel rounded-2xl border border-slate-700/60 w-full max-w-lg p-6 lg:p-8 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800/60 mb-6">
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-user-plus text-blue-400"></i> Credenciar Integrante
+                </h2>
+                <button onclick="toggleModal()" class="p-2 text-slate-400 hover:text-white rounded-xl bg-slate-800/40 hover:bg-slate-800/80 transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form id="formMembro" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Nome Completo</label>
+                    <input type="text" name="nome" required class="w-full p-3 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">E-mail Corporativo (Login)</label>
+                    <input type="email" name="email" required class="w-full p-3 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Senha Provisória</label>
+                    <input type="password" name="senha" required class="w-full p-3 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition text-sm">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Atribuição Técnica (Cargo)</label>
+                    <select name="cargo" class="w-full p-3 bg-slate-900/60 border border-slate-700/60 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition text-sm cursor-pointer option-dark-style">
+                        <option value="terapeuta" class="bg-slate-900 text-white">Terapeuta</option>
+                        <option value="medico" class="bg-slate-900 text-white">Médico(a)</option>
+                        <option value="psicologo" class="bg-slate-900 text-white">Psicólogo(a)</option>
+                        <option value="fisioterapeuta" class="bg-slate-900 text-white">Fisioterapeuta</option>
+                        <option value="nutricionista" class="bg-slate-900 text-white">Nutricionista</option>
+                        <option value="fonoaudiologo" class="bg-slate-900 text-white">Fonoaudiólogo(a)</option>
+                        <option value="profissional da saude" class="bg-slate-900 text-white">Profissional da Saúde (Geral)</option>
+                        <option value="recepcao" class="bg-slate-900 text-white">Recepcionista</option>
+                        <option value="admin" class="bg-slate-900 text-white">Administrador de Sistema (Admin)</option>
+                    </select>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-4 mt-6 border-t border-slate-800/60">
+                    <button type="button" onclick="toggleModal()" class="px-5 py-2.5 rounded-xl text-slate-400 hover:text-white bg-slate-800/40 hover:bg-slate-800/80 font-medium transition text-sm">Cancelar</button>
+                    <button type="submit" id="btnSalvarMembro" class="px-5 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white rounded-xl font-semibold shadow-lg shadow-emerald-500/10 transition text-sm">Salvar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast-sucesso" class="fixed bottom-6 right-6 transform translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-50">
+        <div class="glass-panel border-l-4 border-emerald-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-4">
+            <div class="bg-emerald-500/20 p-2.5 rounded-xl text-emerald-400">
+                <i class="fas fa-check-circle text-xl"></i>
+            </div>
+            <div>
+                <p class="font-bold text-sm">Processo Concluído!</p>
+                <p class="text-xs text-slate-400">O profissional foi indexado à equipe com sucesso.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        let dadosEquipeMemoria = []; // Armazena a lista pura para filtros velozes no front
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebarMenu');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+
+        function toggleModal() {
+            const modal = document.getElementById('modalMembro');
+            const content = document.getElementById('modalContent');
+
+            if(modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => {
+                    modal.classList.add('opacity-100');
+                    content.classList.remove('scale-95', 'opacity-0');
+                    content.classList.add('scale-100', 'opacity-100');
+                }, 50);
+            } else {
+                content.classList.remove('scale-100', 'opacity-100');
+                content.classList.add('scale-95', 'opacity-0');
+                modal.classList.remove('opacity-100');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast-sucesso');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3500);
+        }
+
+        document.getElementById('formMembro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btnSalvar = document.getElementById('btnSalvarMembro');
+            btnSalvar.disabled = true;
+            btnSalvar.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i> Salvando...`;
+
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+
+            try {
+                const response = await fetch('/api/equipe/adicionar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    toggleModal();
+                    showToast();
+                    e.target.reset();
+                    carregarEquipe();
+                } else {
+                    const result = await response.json();
+                    alert('⚠️ ' + (result.error || 'Erro ao salvar integrante.'));
+                }
+            } catch (error) {
+                alert('❌ Falha crítica de comunicação com o servidor.');
+            } finally {
+                btnSalvar.disabled = false;
+                btnSalvar.innerText = "Salvar Registro";
+            }
+        });
+
+        // Formata as badges de cargo para exibição limpa
+        function obterEstiloBadge(cargo) {
+            const estilos = {
+                'dono': 'bg-red-500/10 text-red-400 border border-red-500/20',
+                'admin': 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
+                'terapeuta': 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
+                'medico': 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20',
+                'psicologo': 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20',
+                'fisioterapeuta': 'bg-teal-500/10 text-teal-400 border border-teal-500/20',
+                'nutricionista': 'bg-orange-500/10 text-orange-400 border border-orange-500/20',
+                'fonoaudiologo': 'bg-pink-500/10 text-pink-400 border border-pink-500/20',
+                'profissional da saude': 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+                'recepcao': 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+            };
+            return estilos[cargo] || 'bg-slate-700/20 text-slate-300';
+        }
+
+        function renderizarTabela(lista) {
+            const tabela = document.getElementById('lista-equipe');
+            tabela.innerHTML = '';
+
+            if(lista.length === 0) {
+                tabela.innerHTML = `
+                    <tr>
+                        <td colspan="3" class="text-center py-8 text-slate-500">
+                            <i class="fas fa-user-slash text-2xl mb-2 block"></i>Nenhum profissional encontrado.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            lista.forEach(membro => {
+                tabela.innerHTML += `
+                    <tr class="hover:bg-slate-800/20 transition duration-150">
+                        <td class="py-4 px-6 text-white font-medium flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-slate-800 flex items-center justify-center text-blue-400 border border-slate-700/50 font-semibold uppercase">
+                                ${membro.nome.charAt(0)}
+                            </div>
+                            <div>
+                                <span class="block">${membro.nome}</span>
+                                <span class="text-xs text-slate-500">ID: #${membro.id}</span>
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-slate-300 font-mono text-xs">${membro.email}</td>
+                        <td class="py-4 px-6">
+                            <span class="text-xs font-semibold px-3 py-1.5 rounded-xl uppercase tracking-wider ${obterEstiloBadge(membro.cargo)}">
+                                ${membro.cargo === 'admin' ? 'Administrador' : membro.cargo}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        async function carregarEquipe() {
+            try {
+                const response = await fetch('/api/equipe/listar', {
+                    method: 'GET',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                dadosEquipeMemoria = await response.json();
+                renderizarTabela(dadosEquipeMemoria);
+            } catch (error) {
+                console.error("Erro ao indexar os dados da equipe:", error);
+            }
+        }
+
+        function filtrarEquipe() {
+            const termo = document.getElementById('campo-busca').value.toLowerCase().trim();
+            if(!termo) {
+                renderizarTabela(dadosEquipeMemoria);
+                return;
+            }
+            const filtrados = dadosEquipeMemoria.filter(m =>
+                m.nome.toLowerCase().includes(termo) ||
+                m.email.toLowerCase().includes(termo) ||
+                (m.cargo && m.cargo.toLowerCase().includes(termo))
+            );
+            renderizarTabela(filtrados);
+        }
+
+        async function carregarStatusPlano() {
+            try {
+                const response = await fetch('/api/equipe/status-plano', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    const container = document.getElementById('status-plano-container');
+                    const texto = document.getElementById('plano-info-texto');
+
+                    container.style.display = 'block';
+                    texto.innerHTML = `Licença do Plano: <strong class="text-blue-400">${data.plano.toUpperCase()}</strong>. Volume de Alocação: <strong class="text-white">${data.usado}</strong> de <strong class="text-slate-400">${data.limite}</strong> integrantes cadastrados.`;
+
+                    if (data.restante === 0) {
+                        container.classList.remove('border-emerald-500');
+                        container.classList.add('border-red-500', 'bg-red-500/5');
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao sincronizar plano corporativo:", error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarStatusPlano();
+            carregarEquipe();
+        });
+    </script>
+
+    <script src="../ScriptGlobal/FuncDataHora.js"></script>
+    <script src="../ScriptGlobal/DarkMode.js"></script>
+    <script src="../ScriptGlobal/verifiLog.js"></script>
+    <script src="../ScriptGlobal/logout.js"></script>
+</body>
+</html>

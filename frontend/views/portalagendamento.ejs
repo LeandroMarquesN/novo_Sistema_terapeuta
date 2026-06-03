@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento | <%= clinica.nome %></title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Importação da Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            /* Degradê suave Azul para Verde */
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
+            min-height: 100 screen;
+            font-family: -apple-system, system-ui, sans-serif;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); color: white; }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 2rem;
+        }
+        .step { display: none; }
+        .step.active { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .ios-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 100%;
+        }
+        /* Stile do banner */
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+
+        .header-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+            border-radius: 0 0 3rem 3rem;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.2);
+        }
+
+        .text-glow {
+            background: linear-gradient(to right, #fff, #99f6e4, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <!-- Banner de Boas-Vindas -->
+    <!-- Banner de Boas-Vindas Premium -->
+    <header class="w-full header-gradient pt-12 pb-16 px-6 text-center mb-8 relative overflow-hidden font-poppins">
+        <!-- Círculos de brilho decorativos (Estilo iOS) -->
+        <div class="absolute top-[-10%] left-[-10%] w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-60 h-60 bg-emerald-400/20 rounded-full blur-3xl"></div>
+
+        <div class="relative z-10 max-w-lg mx-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full mb-6">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-[10px] text-white font-bold uppercase tracking-widest">Portal de Agendamento Oficial</span>
+            </div>
+
+            <h1 class="text-white/90 text-sm font-medium uppercase tracking-[0.2em] mb-2">Bem-vindo à</h1>
+
+            <!-- Nome da Clínica com Efeito de Brilho -->
+            <h2 class="text-4xl md:text-5xl font-extrabold text-glow leading-tight drop-shadow-lg">
+                <%= clinica.nome %>
+            </h2>
+
+            <div class="mt-4 flex justify-center items-center gap-2 text-white/70 text-xs">
+                <i class="fas fa-shield-check"></i>
+                <span>Ambiente Seguro e Criptografado</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-lg mx-auto">
+        <!-- Progress Bar -->
+        <div class="flex justify-between mb-8 px-10 relative">
+            <div class="absolute top-1/2 left-10 right-10 h-[2px] bg-slate-300 -z-10"></div>
+            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">1</div>
+            <div id="dot-2" class="w-8 h-8 rounded-full bg-slate-300 text-white flex items-center justify-center font-bold text-sm transition-colors">2</div>
+            <div id="dot-3" class="w-8 h-8 rounded-full bg-slate-300 text-white flex items-center justify-center font-bold text-sm transition-colors">3</div>
+        </div>
+
+        <form id="agendamentoForm">
+            <!-- PASSO 1: DADOS -->
+            <!-- PASSO 1: DADOS -->
+            <section id="step1" class="step active glass p-6 shadow-xl">
+                <div class="bg-blue-600 -mx-6 -mt-6 p-4 rounded-t-2xl mb-6 text-white text-center">
+                    <p class="font-bold text-lg">Seja bem-vindo!</p>
+                    <p class="text-xs opacity-90">Preencha seus dados para iniciar o agendamento.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- NOME -->
+                    <div>
+                        <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Nome Completo</label>
+                        <input type="text" id="nome" name="nome" placeholder="Como no seu RG" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- EMAIL -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="exemplo@email.com" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                        </div>
+                        <!-- WHATSAPP -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">WhatsApp</label>
+                            <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- CPF -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">CPF</label>
+                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                        </div>
+                        <!-- DATA NASCIMENTO -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Data de Nascimento</label>
+                            <input type="date" id="data_nascimento" name="data_nascimento" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                        </div>
+                    </div>
+
+                    <!-- GÊNERO -->
+                    <div>
+                        <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Gênero</label>
+                        <select id="genero" name="genero" class="ios-input focus:ring-2 focus:ring-blue-400">
+                            <option value="Masculino">Masculino</option>
+                            <option value="Feminino">Feminino</option>
+                            <option value="Não informado">Prefiro não informar</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" onclick="validateStep1()" class="w-full mt-8 bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+                    Próximo: Escolher Horário <i class="fas fa-calendar-alt"></i>
+                </button>
+            </section>
+
+            <!-- PASSO 2: HORÁRIO -->
+            <section id="step2" class="step glass p-6 shadow-xl">
+                <div class="bg-emerald-500 -mx-6 -mt-6 p-4 rounded-t-2xl mb-6 text-white text-center">
+                    <p class="font-bold">Passo 2: Escolha o Momento</p>
+                    <p class="text-xs opacity-80">Selecione o dia e o horário desejado</p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="text-xs font-bold text-slate-500 ml-1">SELECIONE A DATA</label>
+                    <input type="date" id="data_escolhida" onchange="carregarHorarios()" class="ios-input border-2 border-emerald-100">
+                </div>
+
+                <div id="container_horarios" class="grid grid-cols-3 gap-2 min-h-[100px]">
+                    <!-- Injetado via JS -->
+                </div>
+
+                <div class="mt-8 space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 ml-1">COMO DESEJA SER ATENDIDO?</label>
+                        <select name="tipo_terapia" class="ios-input">
+                            <option value="Presencial">Atendimento Presencial</option>
+                            <option value="Online">Atendimento Online (Vídeo)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 ml-1">MOTIVO DA CONSULTA (OPCIONAL)</label>
+                        <textarea id="motivo_consulta" name="motivo_consulta" placeholder="Conte brevemente o que você busca..." class="ios-input h-20"></textarea>
+                    </div>
+                </div>
+
+                <button type="button" id="btn-next-3" onclick="goToStep(3)" disabled class="w-full mt-8 bg-slate-300 text-white font-bold py-4 rounded-2xl transition">
+                    Revisar e Finalizar
+                </button>
+            </section>
+
+            <!-- PASSO 3: PAGAMENTO -->
+            <section id="step3" class="step glass p-6 shadow-xl text-center">
+                <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-calendar-check text-3xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Tudo Pronto!</h3>
+                <p class="text-slate-500 text-sm mb-6">Confirme abaixo para garantir sua vaga.</p>
+
+                <div class="bg-gradient-to-br from-blue-600 to-emerald-500 rounded-3xl p-6 text-white mb-6 text-left shadow-xl">
+                    <p class="text-[10px] uppercase tracking-tighter opacity-80">Sinal Sugerido</p>
+                    <h4 class="text-4xl font-black">R$ <%= config.valor_sinal || '0,00' %></h4>
+                    <hr class="my-4 opacity-20">
+                    <p class="text-[11px] leading-relaxed italic">
+                        O pagamento do sinal não é obrigatório, mas garante sua <strong>preferência</strong> na agenda da clínica.
+                    </p>
+                </div>
+
+                <div class="space-y-3">
+                    <button type="button" onclick="abrirModalPagamento()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3">
+                        <i class="fab fa-pix text-emerald-400"></i> Pagar Sinal (PIX)
+                    </button>
+                    <button type="button" onclick="finalizarAgendamentoCompleto('aguardando_sinal')" class="w-full bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 rounded-2xl">
+                        Confirmar sem pagar agora
+                    </button>
+                </div>
+            </section>
+        </form>
+    </main>
+    <!-- modal de agendamento realizzado -->
+    <!-- MODAL DE SUCESSO (ESTILO IOS/GLASSMORFISM) -->
+    <div id="modalSucesso" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 hidden backdrop-blur-md transition-all">
+        <div class="glass w-full max-w-sm p-8 text-center shadow-2xl bg-white/80 dark:bg-slate-900/80 animate-slide-up">
+
+            <!-- Ícone Animado -->
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200">
+                <i class="fas fa-check text-3xl text-white"></i>
+            </div>
+
+            <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-2">Agendado!</h3>
+            <p class="text-slate-500 dark:text-slate-300 text-sm mb-8">
+                Tudo certo, seu horário foi reservado. Enviamos os detalhes para o seu e-mail e WhatsApp.
+            </p>
+
+            <button onclick="fecharSucessoERecarregar()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-lg active:scale-95 transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // validacao de dados
+        function validateStep1() {
+            const campos = ['nome', 'email', 'telefone', 'cpf', 'data_nascimento'];
+            let valido = true;
+
+            campos.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el.value) {
+                    el.classList.add('border-red-500', 'bg-red-50');
+                    valido = false;
+                } else {
+                    el.classList.remove('border-red-500', 'bg-red-50');
+                }
+            });
+
+            if (valido) {
+                goToStep(2);
+            } else {
+                alert("Por favor, preencha todos os campos obrigatórios para prosseguir.");
+            }
+        }
+        let dados = { clinica_id: "<%= clinica.id %>", horario: "" };
+
+        function goToStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            if(step >= 2) document.getElementById('dot-2').classList.replace('bg-slate-300', 'bg-blue-600');
+            if(step >= 3) document.getElementById('dot-3').classList.replace('bg-slate-300', 'bg-blue-600');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function carregarHorarios() {
+            const dataInput = document.getElementById('data_escolhida').value;
+            const container = document.getElementById('container_horarios');
+            container.innerHTML = '<div class="col-span-3 text-center py-4"><i class="fas fa-spinner fa-spin text-blue-500"></i> Buscando horários...</div>';
+
+            const resp = await fetch(`/agendar/api/horarios?clinica_id=${dados.clinica_id}&data=${dataInput}`);
+            const json = await resp.json();
+
+            // LÓGICA DE FILTRO DE HORÁRIO PASSADO
+            const agora = new Date();
+            const hojeDataISO = agora.toISOString().split('T')[0];
+
+            container.innerHTML = '';
+
+            const horariosFiltrados = json.horarios.filter(h => {
+                if (dataInput !== hojeDataISO) return true; // Se for outro dia, mostra tudo
+
+                const [hora, min] = h.split(':').map(Number);
+                const dataSlot = new Date();
+                dataSlot.setHours(hora, min, 0, 0);
+
+                return dataSlot > agora; // Só retorna horários maiores que o momento atual
+            });
+
+            if (horariosFiltrados.length === 0) {
+                container.innerHTML = '<div class="col-span-3 text-center text-red-500 text-sm font-bold p-4">Ops! Não há mais horários disponíveis para hoje.</div>';
+                return;
+            }
+
+            horariosFiltrados.forEach(h => {
+                const btn = document.createElement('button');
+                btn.type = "button";
+                btn.innerText = h;
+                btn.className = "p-3 rounded-xl border-2 border-white bg-white/50 shadow-sm font-bold text-slate-700 transition-all active:scale-90";
+                btn.onclick = () => {
+                    document.querySelectorAll('#container_horarios button').forEach(b => b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'));
+                    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                    dados.horario = h;
+                    document.getElementById('btn-next-3').disabled = false;
+                    document.getElementById('btn-next-3').classList.replace('bg-slate-300', 'bg-emerald-500');
+                };
+                container.appendChild(btn);
+            });
+        }
+
+         async function finalizarAgendamentoCompleto(status) {
+                // Bloqueia cliques duplos durante o processamento
+                const btnConfirmar = event.target;
+                btnConfirmar.disabled = true;
+                btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+                const form = document.getElementById('agendamentoForm');
+                const payload = Object.fromEntries(new FormData(form).entries());
+
+                payload.clinica_id = dados.clinica_id;
+                payload.horario = dados.horario;
+                payload.data = document.getElementById('data_escolhida').value;
+                payload.status_agendamento = status;
+
+                try {
+                // Usamos o caminho completo para garantir que bata na rota certa
+                const resp = await fetch('/agendar/finalizar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                    const res = await resp.json();
+
+                    if(res.success) {
+                        // Se o modal de pagamento estiver aberto, fechamos ele antes
+                        if(typeof fecharModal === "function") fecharModal();
+
+                        // Chama o novo modal de sucesso
+                        abrirModalSucesso();
+                    } else {
+                        alert("Erro: " + res.message);
+                        btnConfirmar.disabled = false;
+                        btnConfirmar.innerText = "Confirmar Agendamento";
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Erro crítico ao salvar agendamento.");
+                    btnConfirmar.disabled = false;
+                }
+            }
+
+            // Funções auxiliares para o Modal de Sucesso
+            function abrirModalSucesso() {
+                document.getElementById('modalSucesso').classList.remove('hidden');
+            }
+
+            function fecharSucessoERecarregar() {
+                // Fecha o modal e recarrega a página ou redireciona
+                document.getElementById('modalSucesso').classList.add('hidden');
+                window.location.reload();
+            }
+
+        // Definir data mínima como HOJE para o input date
+        document.getElementById('data_escolhida').min = new Date().toISOString().split('T')[0];
+    </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>MedLM | Gestão Estratégica de Unidades</title>
+    <script src="../ScriptGlobal/verifLog.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #050a15; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .neon-blue { color: #00c3ff; text-shadow: 0 0 15px rgba(0, 195, 255, 0.3); }
+        .btn-filter { transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1); }
+        .btn-filter.active { background: #3b82f6; border-color: #3b82f6; color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+
+        #editModal {
+            display: none; /* Começa escondido */
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000; /* Garante que fica na frente de tudo */
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Alerta de Vencimento */
+        .status-vencido { color: #ef4444; font-weight: bold; animation: pulse-red 2s infinite; }
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen flex">
+
+    <!-- SIDEBAR -->
+    <aside class="w-64 border-r border-slate-800 bg-[#070e1d] flex flex-col fixed h-full z-50">
+        <div class="p-6 text-center">
+            <h1 class="text-2xl font-black italic neon-blue">MedLM</h1>
+            <p class="text-[9px] text-slate-500 uppercase tracking-[0.3em]">Master Control</p>
+        </div>
+        <nav class="flex-1 px-4 space-y-2">
+            <a href="/admin" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-800 transition">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="/clinicas" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                <i class="fas fa-hospital"></i> Clínicas
+            </a>
+        </nav>
+    </aside>
+
+    <!-- CONTEÚDO -->
+    <main class="flex-1 ml-64 p-8">
+        <header class="mb-10">
+            <h2 class="text-3xl font-bold">Gestão de Unidades</h2>
+            <p class="text-slate-500">Filtre, edite e monitore o ciclo de vida das clínicas MedLM.</p>
+        </header>
+
+        <!-- FILTROS E BUSCA -->
+        <div class="flex flex-wrap gap-4 mb-8 items-center justify-between">
+            <div class="flex gap-2" id="filterContainer">
+                <button onclick="filtrar('todos')" class="btn-filter active px-4 py-2 rounded-lg text-xs font-bold uppercase" data-filter="todos">Ver Todas</button>
+                <button onclick="filtrar('ativo')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase" data-filter="ativo text-emerald-500">Ativas</button>
+                <button onclick="filtrar('inadimplente')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase text-yellow-500" data-filter="inadimplente">Inadimplentes</button>
+                <button onclick="filtrar('suspenso')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase text-orange-500" data-filter="suspenso">Suspensas</button>
+            </div>
+
+            <div class="relative w-full md:w-80">
+                <i class="fas fa-search absolute left-4 top-3 text-slate-500 text-sm"></i>
+                <input type="text" id="searchInput" onkeyup="buscar()" placeholder="Buscar por clínica ou responsável..."
+                class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:border-blue-500 outline-none transition">
+            </div>
+        </div>
+
+        <!-- TABELA -->
+        <div class="glass rounded-3xl overflow-hidden border border-white/5">
+            <table class="w-full text-left text-sm" id="tabelaMaster">
+                <thead class="bg-slate-900/80 text-slate-500 uppercase text-[10px] tracking-widest">
+                    <tr>
+                        <th class="p-6">ID / Unidade</th>
+                        <th class="p-6">Gestor Master</th>
+                        <th class="p-6">Expiração</th>
+                        <th class="p-6">Plano / Valor</th>
+                        <th class="p-6">Status</th>
+                        <th class="p-6 text-right">Controle</th>
+                    </tr>
+                </thead>
+                <tbody id="listaCorpo" class="divide-y divide-white/5">
+                    <!-- Dinâmico -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- MODAL DE EDIÇÃO (MESMO DO ANTERIOR COM MELHORIAS) -->
+    <div id="editModal">
+        <!-- Estrutura do modal mantida conforme o anterior -->
+         <div class="glass p-8 rounded-3xl w-full max-w-md border-blue-500/30">
+            <h3 class="text-xl font-bold mb-6">Editar Unidade: <span id="modalNomeClinica" class="neon-blue"></span></h3>
+
+            <form id="formEdicao" class="space-y-4">
+                <input type="hidden" id="editId">
+
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">Status do Sistema</label>
+                    <select id="editStatus" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white">
+                        <option value="ativo">Ativo</option>
+                        <option value="inadimplente">Inadimplente</option>
+                        <option value="suspenso">Suspenso</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">Plano Ativo</label>
+                    <select id="editPlano" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white">
+                        <option value="1">Trial (90 dias)</option>
+                        <option value="2">Premium</option>
+                        <option value="3">Enterprise</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-slate-500 mb-1">Valor Mensal (R$)</label>
+                    <input type="number" step="0.01" id="editValor" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white">
+                </div>
+
+                <div class="flex gap-3 mt-8">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="flex-1 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 transition font-bold">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let todasAsClinicas = [];
+
+        async function carregar() {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/admin/dashboard-dados', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            todasAsClinicas = data.listagemCompleta;
+            renderizar(todasAsClinicas);
+        }
+
+        function renderizar(lista) {
+            const corpo = document.getElementById('listaCorpo');
+            const hoje = new Date();
+
+            corpo.innerHTML = lista.map(c => {
+                const dataExp = new Date(c.data_expiracao);
+                const isVencido = dataExp < hoje && c.status === 'ativo';
+                const statusClass = getStatusStyles(c.status);
+
+                return `
+                <tr class="hover:bg-white/5 transition group">
+                    <td class="p-6">
+                        <span class="text-[10px] font-mono text-slate-600 block">#${c.id}</span>
+                        <div class="font-bold text-slate-200">${c.nome_clinica}</div>
+                        <div class="text-[10px] text-slate-500 italic">${c.email_master}</div>
+                    </td>
+                    <td class="p-6">
+                        <div class="text-slate-300 font-medium">${c.dono_nome}</div>
+                        <div class="text-[11px] text-green-500"><i class="fab fa-whatsapp"></i> ${c.telefone_dono}</div>
+                    </td>
+                    <td class="p-6">
+                        <div class="text-xs ${isVencido ? 'status-vencido' : 'text-slate-400'}">
+                            <i class="far fa-calendar-alt mr-1"></i>
+                            ${dataExp.toLocaleDateString('pt-BR')}
+                        </div>
+                        ${isVencido ? '<span class="text-[8px] uppercase text-red-500 font-black">Reajuste Atrasado</span>' : ''}
+                    </td>
+                    <td class="p-6">
+                        <div class="text-[10px] uppercase font-bold text-blue-400">${c.nome_plano}</div>
+                        <div class="font-black text-white">R$ ${parseFloat(c.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                    </td>
+                    <td class="p-6">
+                        <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${statusClass}">${c.status}</span>
+                    </td>
+                    <td class="p-6 text-right">
+                        <button onclick='abrirEditor(${JSON.stringify(c)})' class="bg-blue-500/10 text-blue-400 p-2 rounded-lg hover:bg-blue-500 hover:text-white transition">
+                            <i class="fas fa-sliders-h"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function getStatusStyles(status) {
+            const map = {
+                'ativo': 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+                'inadimplente': 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
+                'suspenso': 'bg-orange-500/10 text-orange-500 border-orange-500/20',
+                'cancelado': 'bg-red-500/10 text-red-500 border-red-500/20'
+            };
+            return map[status] || '';
+        }
+
+        // --- LÓGICA DE FILTROS E BUSCA ---
+
+        function filtrar(status) {
+            // Estilizar botões
+            document.querySelectorAll('.btn-filter').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if(status === 'todos') {
+                renderizar(todasAsClinicas);
+            } else {
+                const filtradas = todasAsClinicas.filter(c => c.status === status);
+                renderizar(filtradas);
+            }
+        }
+
+        function buscar() {
+            const termo = document.getElementById('searchInput').value.toLowerCase();
+            const resultado = todasAsClinicas.filter(c =>
+                c.nome_clinica.toLowerCase().includes(termo) ||
+                c.dono_nome.toLowerCase().includes(termo) ||
+                c.email_master.toLowerCase().includes(termo)
+            );
+            renderizar(resultado);
+        }
+
+        // Função para abrir o modal e preencher os campos
+function abrirEditor(clinica) {
+    console.log("Abrindo editor para:", clinica.nome_clinica);
+
+    // Preenche os campos do modal com os dados da clínica clicada
+    document.getElementById('modalNomeClinica').innerText = clinica.nome_clinica;
+    document.getElementById('editId').value = clinica.id;
+    document.getElementById('editStatus').value = clinica.status;
+    document.getElementById('editPlano').value = clinica.plano_id;
+    document.getElementById('editValor').value = clinica.valor_atual;
+
+    // Faz o modal aparecer (muda de display: none para display: flex)
+    document.getElementById('editModal').style.display = 'flex';
+}
+
+// Função para fechar o modal
+function closeModal() {
+    document.getElementById('editModal').style.display = 'none';
+}
+
+// Lógica para salvar as alterações (O envio para o banco)
+document.getElementById('formEdicao').onsubmit = async (e) => {
+    e.preventDefault();
+
+    // 1. Pegamos os valores brutos
+    const rawId = document.getElementById('editId').value;
+    const rawPlano = document.getElementById('editPlano').value;
+    const rawValor = document.getElementById('editValor').value;
+
+    // 2. Criamos o payload garantindo tipos numéricos
+    const payload = {
+        id: parseInt(rawId),
+        status: document.getElementById('editStatus').value,
+        plano_id: parseInt(rawPlano), // Se o select não tiver valor, isso vira NaN
+        valor_atual: parseFloat(rawValor) || 0
+    };
+
+    // 3. VALIDAÇÃO CRÍTICA: Se o plano_id for inválido (NaN ou 0), paramos aqui
+    if (!payload.plano_id) {
+        alert("⚠️ Erro: Você precisa selecionar um Plano Válido antes de salvar.");
+        return;
+    }
+
+    try {
+        const res = await fetch('/api/admin/clinica/atualizar-completo', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if(res.ok) {
+            alert("✅ Unidade atualizada com sucesso!");
+            closeModal();
+            if (typeof carregar === 'function') carregar();
+        } else {
+            const erroApi = await res.json();
+            alert("❌ Erro no servidor: " + (erroApi.error || "Falha ao salvar"));
+        }
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+        alert("❌ Erro de conexão. Verifique se o servidor está rodando.");
+    }
+};
+
+        window.onload = carregar;
+    </script>
+</body>
+</html>

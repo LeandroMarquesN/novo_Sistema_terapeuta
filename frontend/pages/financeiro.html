@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedLM - Gestão de Caixa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/darkModeFinanceiro.css">
+    <link rel="stylesheet" href="../css/acessoNegado.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+    <style>
+        .bg-clean { background-color: #F9FAFB; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(243, 244, 246, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-clean">
+    <div class="flex h-screen overflow-hidden font-sans">
+
+        <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen bg-white border-r border-gray-100 overflow-hidden group shadow-sm">
+            <div class="flex flex-col h-full">
+                <div class="h-24 flex items-center px-6 border-b border-gray-50 overflow-hidden">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold">M</div>
+                    <span class="ml-4 font-bold text-xl text-gray-800 opacity-0 group-hover:opacity-100 transition-opacity">Med<span class="text-blue-500">LM</span></span>
+                </div>
+                <nav class="flex-1 px-3 pt-6 space-y-2">
+                    <a href="/dashboard" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition">
+                        <i class="fas fa-th-large w-6"></i><span class="ml-4 opacity-0 group-hover:opacity-100">Dashboard</span>
+                    </a>
+                    <a href="/financeiro" class="flex items-center p-3 rounded-xl bg-blue-50 text-blue-600">
+                        <i class="fas fa-wallet w-6"></i><span class="ml-4 font-bold opacity-0 group-hover:opacity-100">Financeiro</span>
+                    </a>
+                    <a href="/pacientes" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition">
+                        <i class="fas fa-user-friends w-6"></i><span class="ml-4 opacity-0 group-hover:opacity-100">Pacientes</span>
+                    </a>
+                    <a href="javascript:void(0)" onclick="abrirModalDespesas()" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-orange-50 hover:text-orange-600 transition">
+                        <i class="fas fa-arrow-down-short-wide w-6"></i>
+                        <span class="ml-4 opacity-0 group-hover:opacity-100 font-medium">Lançar Despesa</span>
+                    </a>
+                    <button id="theme-toggle-btn" class="flex items-center w-full p-3 rounded-xl text-gray-400 hover:bg-gray-100 transition mt-auto">
+                        <i class="fas fa-moon w-6"></i>
+                        <span id="theme-text" class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity">Modo Escuro</span>
+                    </button>
+                    <a href="javascript:void(0)" onclick="handleLogout(event)" class="flex items-center p-3 rounded-xl text-gray-400 hover:bg-red-50 hover:text-red-600 transition mt-auto mb-6">
+                        <i class="fas fa-sign-out-alt w-6"></i>
+                        <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity">Sair do Sistema</span>
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="flex-1 ml-20 p-8 lg:p-12 overflow-y-auto">
+
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+                <div>
+                    <h1 class="text-3xl font-black text-gray-900 tracking-tight">Centro Financeiro</h1>
+                    <p class="text-gray-400 font-medium">Gestão de recebíveis e fluxo de caixa.</p>
+                </div>
+
+                <div class="flex items-center gap-3 bg-white px-4 py-2 rounded-2xl border border-gray-100 shadow-sm w-full md:w-96">
+                    <i class="fas fa-search text-gray-300"></i>
+                    <input type="text" id="buscaFinanceiro" placeholder="Nome, CPF ou Telefone..." class="bg-transparent border-none outline-none text-sm w-full">
+                </div>
+            </header>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Saldo a Receber</p>
+                    <h3 id="saldoPendente" class="text-3xl font-black mt-2 text-gray-900">R$ 0,00</h3>
+                    <div class="mt-3 text-blue-500 text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-clock"></i> Pendências em aberto
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Faturamento Mês</p>
+                    <h3 id="faturamentoMes" class="text-3xl font-black mt-2 text-emerald-500">R$ 0,00</h3>
+                    <div class="mt-3 text-emerald-500 text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-arrow-up"></i> Fluxo confirmado
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm border-l-4 border-l-red-400">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Inadimplência</p>
+                    <h3 id="totalDevedores" class="text-3xl font-black mt-2 text-red-500">0</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Pacientes com atraso</p>
+                </div>
+                <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Ticket Médio</p>
+                    <h3 id="ticketMedio" class="text-3xl font-black mt-2 text-gray-900">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Média por consulta</p>
+                </div>
+            </div>
+            <!-- segundo greed de cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+
+                <div onclick="mostrarFeedback('lucro')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm border-l-4 border-l-emerald-400 cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Lucro Real</p>
+                    <h3 id="lucroReal" class="text-3xl font-black mt-2 text-emerald-600">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Sobras após despesas</p>
+                </div>
+
+                <div onclick="mostrarFeedback('cac')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">CAC</p>
+                    <h3 id="valorCAC" class="text-3xl font-black mt-2 text-orange-500">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Custo por novo paciente</p>
+                </div>
+
+                <div onclick="mostrarFeedback('ltv')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">LTV Médio</p>
+                    <h3 id="valorLTV" class="text-3xl font-black mt-2 text-blue-600">R$ 0,00</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Valor médio por ciclo</p>
+                </div>
+
+                <div onclick="mostrarFeedback('conversao')" class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm cursor-pointer hover:shadow-md transition">
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Conversão Portal</p>
+                    <h3 id="taxaConversao" class="text-3xl font-black mt-2 text-purple-600">0%</h3>
+                    <p class="text-[10px] text-gray-400 mt-1">Agendamentos pagos</p>
+                </div>
+            </div>
+            <!-- fim do greeds de cards -->
+
+            <div class="flex flex-wrap items-center gap-4 mb-6">
+                <div class="flex bg-white p-1 rounded-xl border border-gray-100 shadow-sm">
+                    <button onclick="filtrarPeriodo('hoje')" class="px-4 py-2 text-xs font-bold rounded-lg hover:bg-gray-50 transition">Hoje</button>
+                    <button onclick="filtrarPeriodo('semana')" class="px-4 py-2 text-xs font-bold rounded-lg hover:bg-gray-50 transition">Esta Semana</button>
+                    <button onclick="filtrarPeriodo('mes')" class="px-4 py-2 text-xs font-bold rounded-lg bg-blue-600 text-white shadow-md">Este Mês</button>
+                </div>
+                <select id="filtroStatus" class="bg-white px-4 py-2 rounded-xl border border-gray-100 text-xs font-bold outline-none shadow-sm text-gray-500">
+                    <option value="todos">Todos Status</option>
+                    <option value="aberto">Abertos</option>
+                    <option value="pago">Pagos</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                <div class="xl:col-span-3 bg-white rounded-[2rem] border border-gray-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="bg-gray-50/50 text-gray-400 text-[10px] uppercase tracking-widest border-b border-gray-50">
+                                    <th class="px-8 py-5">Vencimento</th>
+                                    <th class="px-8 py-5">Paciente</th>
+                                    <th class="px-8 py-5">Descrição</th>
+                                    <th class="px-8 py-4 text-center text-xs font-bold text-gray-400 uppercase">Reagendar</th>
+                                    <th class="px-8 py-5 text-right">Valor</th>
+                                    <th class="px-8 py-5 text-center">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaFinanceira" class="divide-y divide-gray-50">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col items-center">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase mb-6 tracking-widest text-center">Adesão de Sinais</h4>
+                        <div class="w-32 h-32 mb-6">
+                            <canvas id="miniGraficoPizza"></canvas>
+                        </div>
+                        <div class="w-full space-y-3">
+                            <div class="flex justify-between text-xs font-bold">
+                                <span class="text-gray-400">Status da Semana</span>
+                                <span id="textoSaude" class="text-blue-600">80%</span>
+                            </div>
+                            <div class="h-2 bg-gray-100 rounded-full overflow-hidden">
+                                <div id="barraProgressoSaude" class="h-full bg-blue-500 transition-all duration-500" style="width: 80%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+ <!-- MOdal acesso negado para cargos que tentam acessa o odulo financeiro -->
+ <div id="modal-negado" class="modal-overlay" style="display: none;">
+    <div class="glass-card modal-content">
+        <i class="fas fa-lock" style="font-size: 2rem; color: #ff3b30; margin-bottom: 15px;"></i>
+        <h2>Acesso Restrito</h2>
+        <p id="mensagem-erro-modal">Você não tem permissão para acessar este módulo.</p>
+
+        <button onclick="voltarParaSeguranca()" class="btn-voltar">Entendido</button>
+    </div>
+</div>
+ <!--  fim do modulo  -->
+
+<!-- --------  modal de pagamentos ---------- -->
+<div id="modalPagamento" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/50 backdrop-blur-sm p-4">
+  <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
+      <div class="p-8">
+          <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-black text-gray-900 tracking-tight">Confirmar Recebimento</h3>
+              <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
+          </div>
+
+          <div class="space-y-6">
+              <div class="bg-blue-50 p-4 rounded-2xl">
+                  <p class="text-[10px] font-bold text-blue-500 uppercase">Paciente</p>
+                  <p id="modalNomePaciente" class="font-bold text-gray-900">Lavinia Nascimento</p>
+                  <p id="modalValor" class="text-2xl font-black text-blue-600 mt-1">R$ 159,90</p>
+              </div>
+
+              <div>
+                  <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 block">Forma de Pagamento</label>
+                  <div class="grid grid-cols-3 gap-3">
+                      <button onclick="selecionarMetodo('pix', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-emerald-500 transition flex flex-col items-center gap-2">
+                          <i class="fab fa-pix text-emerald-500 text-xl"></i>
+                          <span class="text-[10px] font-bold">PIX</span>
+                      </button>
+                      <button onclick="selecionarMetodo('cartao', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-500 transition flex flex-col items-center gap-2">
+                          <i class="fas fa-credit-card text-blue-500 text-xl"></i>
+                          <span class="text-[10px] font-bold">CARTÃO</span>
+                      </button>
+                      <button onclick="selecionarMetodo('dinheiro', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-amber-500 transition flex flex-col items-center gap-2">
+                          <i class="fas fa-money-bill-wave text-amber-500 text-xl"></i>
+                          <span class="text-[10px] font-bold">DINHEIRO</span>
+                      </button>
+                  </div>
+              </div>
+          </div>
+
+          <button onclick="processarBaixa()" class="w-full mt-8 bg-gray-900 text-white font-bold py-4 rounded-2xl hover:bg-emerald-600 transition-colors shadow-lg shadow-gray-200">
+              Confirmar e Dar Baixa
+          </button>
+      </div>
+  </div>
+</div>
+<!-- -------------fim do modal -------------- -->
+<!-- ---- MOdal lançamento de despesas ---- -->
+<div id="modalDespesas" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="fecharModalDespesas()"></div>
+
+    <div class="relative bg-white/80 backdrop-blur-xl border border-white/40 w-full max-w-lg rounded-[2.5rem] shadow-2xl p-8 transform transition-all overflow-hidden">
+
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-black text-gray-900">Fluxo de Saída</h2>
+                <p class="text-xs text-gray-500 font-bold uppercase tracking-widest">Gestão de Despesas e Custos</p>
+            </div>
+            <button onclick="fecharModalDespesas()" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-600 transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="formDespesa" onsubmit="salvarDespesa(event)" class="space-y-6">
+            <div>
+                <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Descrição da Despesa</label>
+                <input type="text" name="descricao" required placeholder="Ex: Investimento Google Ads"
+                    class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition font-medium">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Valor (R$)</label>
+                    <input type="number" step="0.01" name="valor" required placeholder="0,00"
+                        class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 outline-none transition font-bold text-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Vencimento</label>
+                    <input type="date" name="data_vencimento" required
+                        class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-black text-gray-400 uppercase ml-1 mb-2">Categoria Estratégica</label>
+                <select name="categoria" class="w-full px-5 py-4 rounded-2xl bg-white/50 border border-gray-100 focus:border-orange-500 outline-none transition font-medium appearance-none">
+                    <option value="marketing">Marketing & Ads (CAC)</option>
+                    <option value="fixa">Custos Fixos (Aluguel/Luz)</option>
+                    <option value="variavel">Custos Variáveis</option>
+                </select>
+            </div>
+
+            <button type="submit" class="w-full py-5 bg-orange-500 hover:bg-orange-600 text-white rounded-2xl font-black shadow-lg shadow-orange-500/30 transition transform hover:-translate-y-1 active:scale-95 uppercase tracking-wider">
+                Registrar Saída no Fluxo
+            </button>
+        </form>
+    </div>
+</div>
+
+<!--  --- final do modal de lancamento de despesas --- -->
+
+<!--  modal ou gaveta lateral par extrato pacientes --- -->
+<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-[600px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
+
+    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+        <div>
+            <h3 class="text-lg font-black text-gray-900">Extrato Financeiro</h3>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-0.5">
+                <p id="extratoPacienteNome" class="text-xs text-indigo-600 font-bold uppercase tracking-wider">Paciente: -</p>
+                <button onclick="prepararImpressaoExtrato()" class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded border border-indigo-100 text-[10px] font-black hover:bg-1A5FA1 hover:text-white transition flex items-center gap-1">
+                    <i class="fas fa-print"></i> Imprimir Extrato
+                </button>
+            </div>
+        </div>
+        <button onclick="fecharGavetaExtrato()" class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition flex items-center justify-center">
+            <i class="fas fa-times text-xs"></i>
+        </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+        <div class="grid grid-cols-3 gap-3">
+            <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex flex-col">
+                <span class="text-[10px] font-bold text-emerald-700 uppercase">Total Pago</span>
+                <span id="extratoCardPago" class="text-base font-black text-emerald-600 mt-1">R$ 0,00</span>
+            </div>
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col">
+                <span class="text-[10px] font-bold text-blue-700 uppercase">A Receber</span>
+                <span id="extratoCardAberto" class="text-base font-black text-blue-600 mt-1">R$ 0,00</span>
+            </div>
+            <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col">
+                <span class="text-[10px] font-bold text-gray-600 uppercase">Cancelado</span>
+                <span id="extratoCardCancelado" class="text-base font-black text-gray-500 mt-1">R$ 0,00</span>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-center border-t border-gray-100 pt-4">
+            <h4 class="text-xs font-black text-gray-700 uppercase tracking-wider">Histórico de Movimentações</h4>
+            <button onclick="abrirFormGastoAvulso()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[10px] font-bold hover:bg-indigo-700 transition shadow-sm">
+                <i class="fas fa-plus"></i> Adicionar Gasto Avulso
+            </button>
+        </div>
+
+        <div id="formGastoAvulso" class="bg-gray-50 border border-gray-200 rounded-xl p-4 hidden transition-all duration-300">
+            <input type="hidden" id="extratoPacienteId"> <h5 class="text-[10px] font-black text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-1 text-indigo-600">
+                <i class="fas fa-file-invoice-dollar"></i> Novo Lançamento Avulso
+            </h5>
+
+            <form id="meuFormAvulso" onsubmit="salvarGastoAvulso(event)" class="grid grid-cols-2 gap-3 text-xs">
+                <div class="col-span-2">
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Descrição</label>
+                    <input type="text" id="avulsoDescricao" required placeholder="Ex: Livro 'O Estoico Inteligente' ou Sessão Extra" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Categoria</label>
+                    <select id="avulsoCategoria" class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-500">
+                        <option value="Consulta">Consulta</option>
+                        <option value="Material">Material Didático</option>
+                        <option value="Retorno">Taxa de Retorno</option>
+                        <option value="Multa">Multa por Falta</option>
+                        <option value="Outros">Outros</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Valor (R$)</label>
+                    <input type="number" id="avulsoValor" step="0.01" required placeholder="0.00" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Vencimento</label>
+                    <input type="date" id="avulsoVencimento" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status Inicial</label>
+                    <select id="avulsoStatus" class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-500">
+                        <option value="aberto">Em Aberto</option>
+                        <option value="pago">Já Pago</option>
+                    </select>
+                </div>
+
+                <div class="col-span-2 flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="fecharFormGastoAvulso()" class="px-3 py-1.5 bg-gray-200 text-gray-600 rounded-lg font-bold hover:bg-gray-300 transition">Cancelar</button>
+                    <button type="submit" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition shadow-sm">Salvar Registro</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
+            <table class="w-full text-left border-collapse">
+                <thead class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
+                    <tr>
+                        <th class="px-4 py-3">Vencimento</th>
+                        <th class="px-4 py-3">Descrição / Cat</th>
+                        <th class="px-4 py-3 text-right">Valor</th>
+                        <th class="px-4 py-3 text-center">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelaExtratoCorpo" class="divide-y divide-gray-50 text-xs">
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300"></div>
+
+
+
+<!--  fim do modal  -->
+
+<!-- modal recibo  -->
+<!-- modal recibo  -->
+<div id="modalImpressaoRecibo" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm no-print">
+    <div class="bg-gray-100 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+
+        <div class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between no-print">
+            <div class="flex items-center gap-2 text-gray-800 font-bold">
+                <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
+                <span>Visualizar Recibo de Extrato</span>
+            </div>
+            <button onclick="fecharModalImpressao()" class="text-gray-400 hover:text-gray-600 transition">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Área de visualização interna -->
+        <div id="conteudoRecibo" class="overflow-y-auto bg-[#f4f7f6] p-4 flex justify-center">
+            <!-- O HTML do recibo premium é injetado aqui pelo JavaScript -->
+        </div>
+
+        <!-- Rodapé do Modal com o Botão de E-mail Injetado com Sucesso -->
+        <div class="px-6 py-4 bg-white border-t border-gray-100 flex justify-end gap-3 no-print">
+            <button onclick="fecharModalImpressao()" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition text-sm font-semibold">
+                Fechar
+            </button>
+
+            <!-- 🌟 BOTÃO DE ENVIAR POR E-MAIL ADICIONADO -->
+            <button id="btnEnviarEmailRecibo" onclick="dispararReciboEmail()" class="px-5 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+                <i class="fas fa-paper-plane"></i> Enviar por E-mail
+            </button>
+
+            <button onclick="window.print()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+                <i class="fas fa-print"></i> Imprimir / Salvar PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 🏎️ CSS de Impressão Corrigido contra Páginas Brancas -->
+<!-- 🏎️ CSS DE IMPRESSÃO PREMIUM - ANTI-CORTE DE CONTEÚDO E QR CODE -->
+<style>
+    @media print {
+        /* 1. Zera as margens físicas para dar liberdade total ao contêiner */
+        @page {
+            margin: 0 !important;
+        }
+
+        /* 2. Reseta o fundo e limpa scrolls */
+        html, body {
+            background-color: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        /* 3. Oculta os elementos do sistema em segundo plano */
+        body * {
+            visibility: hidden !important;
+        }
+
+        /* 4. Torna visível apenas o recibo e seus filhos */
+        #modalImpressaoRecibo,
+        #modalImpressaoRecibo *,
+        #conteudoRecibo,
+        #conteudoRecibo * {
+            visibility: visible !important;
+        }
+
+        /* 5. Transforma o modal em uma camada plana e contínua */
+        #modalImpressaoRecibo {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            min-height: 100% !important;
+            background: none !important;
+            backdrop-filter: none !important;
+            display: block !important;
+        }
+
+        /* 🌟 6. ENCOLHIMENTO PROPORCIONAL DO RECIBO INTEIRO (A SOLUÇÃO DEFINITIVA) */
+        #conteudoRecibo {
+            width: 100% !important;
+            margin: 0 !important;
+            /* Adiciona um espaçamento confortável no topo e nas laterais da folha */
+            padding: 25px 0 0 0 !important;
+
+            /* Reduz o tamanho do recibo inteiro para 85% do tamanho original */
+            transform: scale(0.85) !important;
+            /* Mantém o ponto de ancoragem no topo e centralizado horizontalmente */
+            transform-origin: top center !important;
+        }
+
+        /* 7. Ajustes finos para o container do QR Code não ecoar espaços vazios */
+        #conteudoRecibo div[style*="border: 2px dashed"] {
+            margin: 15px auto !important;
+            padding: 12px !important;
+            max-width: 420px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        #conteudoRecibo div[style*="border: 2px dashed"] img {
+            width: 100px !important;
+            height: 100px !important;
+            margin-bottom: 6px !important;
+        }
+
+        /* 8. Evita quebras de linha bizarras na tabela de movimentações */
+        #conteudoRecibo table,
+        #conteudoRecibo tr {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+        }
+
+        /* 9. Esconde rigidamente os botões de ação e cabeçalhos do modal */
+        .no-print {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* 10. Força o motor do Linux a estampar o gradiente e as cores originais */
+        * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+        }
+    }
+    </style>
+<!-- fim moda recibo -->
+
+<script src="../ScriptGlobal/financeiroScript.js"></script>
+  <script>
+    // Única parte que fica no HTML: Inicializar o Chart.js vinculando ao Canvas local
+    const ctx = document.getElementById('miniGraficoPizza').getContext('2d');
+    meuGrafico = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [0, 0], // Começa zerado, preenchido pelo carregarDadosEstrategicos()
+                backgroundColor: ['#E5E7EB', '#10B981'],
+                borderWidth: 0
+            }]
+        },
+        options: { cutout: '80%', plugins: { legend: { display: false } } }
+    });
+
+    function mostrarFeedback(tipo) {
+    const feedbacks = {
+        lucro: "O Lucro Real é o que sobra no seu bolso após subtrairmos todas as despesas pagas (Fixas, Variáveis e Marketing) do seu faturamento confirmado.",
+        cac: "O Custo de Aquisição de Clientes mostra quanto você gasta em marketing para trazer cada novo paciente pelo portal. Quanto menor este valor, mais eficiente é seu anúncio!",
+        ltv: "O Lifetime Value indica o valor total que um paciente deixa na sua clínica durante todo o tempo de tratamento. Isso ajuda a medir a fidelidade.",
+        conversao: "Esta é a eficiência do seu Portal. Mostra quantos pacientes que agendaram pelo link realmente realizaram o pagamento do sinal."
+    };
+
+    // Você pode substituir por um modal bonito depois
+    alert(feedbacks[tipo]);
+}
+function abrirModalDespesas() {
+  const modal = document.getElementById('modalDespesas');
+  modal.classList.remove('hidden');
+  modal.classList.add('animate-fade-in'); // Se tiver animação
+}
+
+function fecharModalDespesas() {
+  document.getElementById('modalDespesas').classList.add('hidden');
+}
+
+// --- COLOQUE ABAIXO DE fecharModalDespesas() ---
+
+async function salvarDespesa(event) {
+    event.preventDefault(); // MATA O RECARREGAMENTO DA PÁGINA
+
+    console.log("Iniciando envio da despesa...");
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const dados = Object.fromEntries(formData.entries());
+
+    try {
+        const resposta = await fetch('/api/financeiro/despesas', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Token de segurança
+            },
+            body: JSON.stringify(dados)
+        });
+
+        const resultado = await resposta.json();
+
+        if (resultado.success) {
+            alert("Despesa registrada com sucesso!");
+            fecharModalDespesas();
+            form.reset();
+
+            // ATUALIZA OS CARDS (CHAMA A FUNÇÃO QUE JÁ EXISTE NO SEU CÓDIGO)
+            if (typeof carregarDadosEstrategicos === 'function') {
+                carregarDadosEstrategicos();
+            }
+        } else {
+            alert("Erro ao salvar: " + (resultado.error || "Verifique os dados"));
+        }
+    } catch (error) {
+        console.error("Erro na requisição:", error);
+        alert("Erro de conexão com o servidor.");
+    }
+}
+
+
+    // CHAMADA MESTRE: Inicia o sistema
+    document.addEventListener('DOMContentLoaded', carregarDadosEstrategicos);
+  </script>
+
+  <script src="../ScriptGlobal/logout.js"></script>
+  <script src="../ScriptGlobal/verifiLog.js"></script>
+  <script src="../ScriptGlobal/darkMOdeFinanceiro.js"></script>
+
+</body>
+</html>

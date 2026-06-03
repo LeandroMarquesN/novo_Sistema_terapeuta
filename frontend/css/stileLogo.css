@@ -1,0 +1,73 @@
+span.logo-img {
+  background-image: url('/logo/LogoTop.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: left center;
+  display: inline-block;
+  height: 80px;
+  width: 250px;
+  text-indent: -9999px;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative; /* Necessário para o efeito de brilho */
+  /* 1. ARREDONDAMENTO: 15% ou use pixels para mais precisão (ex: 15px) */
+  border-radius: 15px;
+
+  /* 2. O SEGREDO: Isso corta qualquer coisa (brilho) que sair do raio da borda */
+  overflow: hidden;
+  /* --- AJUSTE DE POSICIONAMENTO --- */
+  margin-top: 15px;      /* Afasta do topo do navegador */
+  margin-left: 40px;     /* Afasta da borda esquerda da tela */
+
+  /* Define que o aumento (scale) comece da esquerda para não "tremer" */
+  transform-origin: left center;
+
+
+  /* Transição suave para escala e sombra */
+  transition: all 0.5s ease-in-out;
+}
+
+/* Efeito de Brilho (O "Pulo do Gato") */
+span.logo-img::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%; /* Começa fora da logo */
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg); /* Inclina o brilho */
+  transition: none;
+}
+
+span.logo-img:hover {
+  transform: scale(1.1); /* Um aumento mais sutil (10%) para não perder o foco */
+  filter: drop-shadow(0px 10px 15px rgba(0, 0, 0, 0.1)); /* Sombra suave de profundidade */
+}
+
+/* Quando o mouse passa, o brilho atravessa a logo */
+span.logo-img:hover::after {
+  left: 150%;
+  transition: all 0.9s ease-in-out;
+}
+
+.bg-transparente {
+background-color: transparent !important;
+}
+
+ /* Ajustes para telas menores (responsividade) */
+ @media (max-width: 768px) {
+  span.logo-img {
+      height: 150px;
+      width: 350px;
+      background-position: center;
+  }
+  #data-hora-container {
+      display: none; /* Esconde a data/hora em telas pequenas para economizar espaço */
+  }
+}

@@ -1,0 +1,61 @@
+/* --- CONTAINER DE NOTIFICAÇÕES --- */
+.clinical-alert-container {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* --- ALERTA GLASSMORPHISM MINIMALISTA --- */
+.clinical-alert {
+  min-width: 280px;
+  padding: 14px 20px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  /* Efeito Vidro Suave */
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+
+  /* Animação de Entrada/Saída */
+  transform: translateX(130%);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.clinical-alert.show {
+  transform: translateX(0);
+}
+
+/* --- CORES PASTÉIS E SUTIS --- */
+/* Sucesso (Verde Água) */
+.clinical-alert.success {
+  border-left: 5px solid #a8dadc;
+}
+.clinical-alert.success i {
+  color: #457b9d;
+}
+
+/* Erro (Rosa Pastel) */
+.clinical-alert.error {
+  border-left: 5px solid #fad2e1;
+}
+.clinical-alert.error i {
+  color: #e5989b;
+}
+
+/* --- TEXTO --- */
+.clinical-alert-message {
+  font-size: 0.88rem;
+  color: #555;
+  font-weight: 500;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}

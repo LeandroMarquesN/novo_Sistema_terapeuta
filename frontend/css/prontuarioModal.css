@@ -1,0 +1,27 @@
+/* Efeito de Vidro no Modal */
+.modal-glass {
+  backdrop-filter: blur(15px) saturate(180%);
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  background-color: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(209, 213, 219, 0.3);
+}
+
+.modal-content.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.history-line {
+  border-left: 3px solid #0d6efd;
+  padding-left: 15px;
+  margin-bottom: 20px;
+  position: relative;
+}

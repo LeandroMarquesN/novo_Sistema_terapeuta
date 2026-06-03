@@ -1,0 +1,20 @@
+# Dependências
+node_modules/
+
+# Configurações sensíveis
+.env
+*.env.*
+
+# Logs e arquivos temporários
+*.log
+*.DS_Store
+dist/
+
+# Banco de dados e Backups (se não quiser versionar os dumps)
+docker/mysql-init/init.sql.save
+
+# Uploads e arquivos de mídia (para manter o repositório leve)
+backend/uploads/
+*.pdf
+*.jpeg
+*.jpg

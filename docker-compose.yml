@@ -1,0 +1,52 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mapeia apenas as pastas de código, não a raiz inteira
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+
+      # O node_modules fica isolado dentro do container para não conflitar com o seu Windows/Linux
+      - /app/backend/node_modules
+
+      # Mapeamento limpo para os uploads
+      - ./backend/uploads:/app/backend/uploads
+    env_file:
+      - .env
+    command: node backend/server.js
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: terapia_system
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/docker/mysql-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 50s
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+    depends_on:
+      - db
+
+volumes:
+  db_data:

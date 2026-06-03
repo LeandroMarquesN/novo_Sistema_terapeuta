@@ -1,0 +1,134 @@
+  /* ==================================== */
+        /* ESTILOS PARA O MODO ESCURO */
+        /* ==================================== */
+        body.dark-mode {
+          background-color: #121212 !important;
+          color: #e0e0e0;
+      }
+      .dark-mode .dashboard-box {
+          background-color: rgba(30, 30, 30, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .dark-mode #data-hora-container {
+          background-color: rgba(50, 50, 50, 0.7);
+      }
+      .dark-mode .dashboard-box .table tbody tr:nth-of-type(even) {
+          background-color: rgba(255, 255, 255, 0.1) !important;
+      }
+      .dark-mode .dashboard-box .table tbody tr:hover {
+          background-color: rgba(255, 255, 255, 0.2) !important;
+      }
+      .dark-mode .text-muted {
+          color: #a0a0a0 !important;
+      }
+      .dark-mode .modal-content {
+          background-color: #212529;
+          color: #e0e0e0;
+      }
+      .dark-mode .modal-header,
+      .dark-mode .modal-footer {
+          border-color: #444;
+      }
+      .dark-mode .modal-title {
+          color: #fff;
+      }
+      .dark-mode .btn-close {
+          filter: invert(1);
+      }
+      .dark-mode .fc-col-header-cell-cushion,
+      .dark-mode .fc-daygrid-day-number {
+          color: #e0e0e0;
+      }
+      .dark-mode .fc-theme-standard td,
+      .dark-mode .fc-theme-standard th {
+          border-color: #333 !important;
+      }
+      .dark-mode .fc-button-primary {
+          background-color: #333;
+          border-color: #555;
+          color: #e0e0e0;
+      }
+      .dark-mode .fc-button-primary:hover,
+      .dark-mode .fc-button-primary:not(:disabled):active {
+          background-color: #555;
+          border-color: #777;
+      }
+      .dark-mode .fc-toolbar-title {
+          color: #fff;
+      }
+
+      /* Estilização para os botões de ação */
+      .btn-acao {
+          margin-right: 5px;
+          font-weight: 500;
+          padding: 8px 15px;
+          border-radius: 20px;
+          transition: all 0.2s ease-in-out;
+      }
+
+      .btn-atender {
+          margin-right: 10px;
+          background-color: #1c4e9e;
+          color: #fff;
+          transition: all 0.2s ease-in-out;
+          border-color: #1c4e9e;
+      }
+      .btn-atender:hover {
+          opacity: 0.9;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-reagendar {
+          margin-right: 10px;
+          background-color: #1887af;
+          color: #fff;
+          border-color: #1887af;
+      }
+      .btn-reagendar:hover {
+          opacity: 0.9;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .btn-cancelar {
+          background-color: #dc3545;
+          color: #fff;
+          border-color: #dc3545;
+      }
+      .btn-cancelar:hover {
+          opacity: 0.9;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .btn-acao i {
+          margin-right: 8px;
+      }
+      .nome-paciente {
+          cursor: pointer;
+          text-decoration: underline;
+      }
+
+         /* ======= Estilo para a função do dark mode */
+    /* Cores para o Modo Escuro */
+[data-bs-theme="dark"] body {
+  background: linear-gradient(45deg, #1a1a2e, #16213e, #0f3460) !important;
+  color: #ffffff;
+}
+
+[data-bs-theme="dark"] .login-container,
+[data-bs-theme="dark"] .card,
+[data-bs-theme="dark"] .navbar {
+  background-color: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+}
+
+[data-bs-theme="dark"] .form-label,
+[data-bs-theme="dark"] h2,
+[data-bs-theme="dark"] h1 {
+  color: #ffffff !important;
+}
+[data-bs-theme="dark"] #boasVindas {
+  color: #a2c9f2 !important; /* Um azul clarinho para destacar no escuro */
+  text-shadow: 0 0 10px rgba(162, 201, 242, 0.3); /* Um brilho leve */

@@ -1,0 +1,101 @@
+
+/* Fundo suave azul clarinho */
+body {
+  background-color: #a2c9f2;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333333;
+  line-height: 1.6;
+  padding-bottom: 40px;
+}
+
+/* Container centralizado e com sombra sutil */
+.container {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+}
+
+/* Título com cor azul moderado e espaçamento */
+h2 {
+  color: #3a78b7;
+  font-weight: 700;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+/* Labels com cor suave */
+label.form-label {
+  color: #4a4a4a;
+  font-weight: 600;
+}
+
+/* Inputs e selects arredondados com borda suave */
+input.form-control,
+select.form-select,
+textarea.form-control {
+  border-radius: 8px;
+  border: 1.5px solid #6688bb;
+  padding: 10px;
+  transition: border-color 0.3s ease;
+}
+
+/* Foco nos inputs com borda azul vibrante */
+input.form-control:focus,
+select.form-select:focus,
+textarea.form-control:focus {
+  border-color: #2367ab;
+  box-shadow: 0 0 6px #2c649daa;
+  outline: none;
+}
+
+/* Checkbox label melhor alinhada e com cursor pointer */
+.form-check-label {
+  cursor: pointer;
+  user-select: none;
+  color: #555555;
+}
+
+/* Checkbox customizados com cor azul ao marcar */
+.form-check-input:checked {
+  background-color: #3a78b7;
+  border-color: #3a78b7;
+}
+
+/* Botão primário com cor azul e cantos arredondados */
+.btn-primary {
+  background-color: #3a78b7;
+  border-color: #2e669d;
+  border-radius: 8px;
+  padding: 10px 30px;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #2e5c90;
+  border-color: #2e5c90;
+}
+
+/* Seção de condições de saúde com margem */
+h5.mt-4 {
+  color: #3a78b7;
+  font-weight: 700;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #3d5982;
+  padding-bottom: 5px;
+}
+
+/* Espaçamento extra entre checkboxes */
+.form-check {
+  margin-bottom: 8px;
+}
+
+/* Ajustes responsivos para telas pequenas */
+@media (max-width: 576px) {
+  .container {
+    padding: 20px;
+  }
+}
+
