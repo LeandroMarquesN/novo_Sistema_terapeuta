@@ -3,6 +3,7 @@
 const db = require('../config/db');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Importa o serviço de notificações
 const notificationService = require('../services/notificationService');
@@ -17,22 +18,18 @@ if (!fs.existsSync(uploadDir)) {
 // =============================================================================
 // 1. CRIAR AGENDAMENTO
 // =============================================================================
-
 exports.criarAgendamento = async (req, res) => {
-  // --- TRAVA DE SEGURANÇA ---
   if (!req.usuario) {
     return res.status(401).json({ error: "Sessão inválida. Por favor, faça login novamente." });
   }
 
-  // 1. Capturando dados (incluindo genero e valor_sinal)
   let {
     nome, cpf, email, telefone, data_nascimento, idade,
     peso, genero, altura, tipo_sanguineo, tipo_terapia,
     data_agendamento, motivo_consulta, origem_indicacao, observacoes,
-    valor_sinal // Valor vindo do seu novo input com máscara
+    valor_sinal
   } = req.body;
 
-  // 2. Blindagem de fuso horário
   if (data_agendamento) {
     data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
   }
@@ -40,7 +37,6 @@ exports.criarAgendamento = async (req, res) => {
   const clinicaId = req.usuario.clinica_id;
   const usuarioId = req.usuario.id;
 
-  // Tratamento de arquivos
   const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = req.files['anexos'] || [];
   let fotoPerfilFilename = patientPhoto ? patientPhoto.filename : null;
@@ -62,32 +58,37 @@ exports.criarAgendamento = async (req, res) => {
     await connection.query("SET time_zone = '-03:00'");
     await connection.beginTransaction();
 
+    // --- LÓGICA DE TOKEN DE ACESSO ---
+    const novoToken = crypto.randomBytes(32).toString('hex');
+    const dataExpiracao = new Date();
+    dataExpiracao.setMonth(dataExpiracao.getMonth() + 3);
+    dataExpiracao.setDate(dataExpiracao.getDate() + 10);
+
     let paciente_id;
     const [pacientesExistentes] = await connection.query(
       'SELECT id FROM pacientes WHERE cpf = ? AND clinica_id = ?',
       [cpf, clinicaId]
     );
 
-    // --- LOGICA DE PACIENTE (COM GÊNERO E STATUS PAGAMENTO) ---
     if (pacientesExistentes.length > 0) {
       paciente_id = pacientesExistentes[0].id;
-      // Ao criar novo agendamento, marcamos o paciente com pendência (status_pagamento)
       await connection.query(
         `UPDATE pacientes SET
           telefone = ?, email = ?, peso = ?, altura = ?,
           idade = ?, tipo_sanguineo = ?, genero = ?,
-          condicoes_preexistentes = ?, status_pagamento = 'pendente'
+          condicoes_preexistentes = ?, status_pagamento = 'pendente',
+          token_acesso = ?, token_expiracao = ?
          WHERE id = ?`,
-        [telefone, email, peso, altura, idade, tipo_sanguineo, genero, condicoesString, paciente_id]
+        [telefone, email, peso, altura, idade, tipo_sanguineo, genero, condicoesString, novoToken, dataExpiracao, paciente_id]
       );
     } else {
       const [novoPacResult] = await connection.query(
         `INSERT INTO pacientes (
           clinica_id, nome, cpf, email, telefone, data_nascimento,
           idade, tipo_sanguineo, peso, altura, genero,
-          condicoes_preexistentes, foto_perfil, status_pagamento
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente')`,
-        [clinicaId, nome, cpf, email, telefone, data_nascimento, idade, tipo_sanguineo, peso, altura, genero, condicoesString, fotoPerfilFilename]
+          condicoes_preexistentes, foto_perfil, status_pagamento, token_acesso, token_expiracao
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?)`,
+        [clinicaId, nome, cpf, email, telefone, data_nascimento, idade, tipo_sanguineo, peso, altura, genero, condicoesString, fotoPerfilFilename, novoToken, dataExpiracao]
       );
       paciente_id = novoPacResult.insertId;
     }
@@ -111,28 +112,18 @@ exports.criarAgendamento = async (req, res) => {
     const [agendamentoResult] = await connection.query(sqlAgendamento, valoresAgendamento);
     const agendamentoId = agendamentoResult.insertId;
 
-    // --- 🚀 LOGICA FINANCEIRA DINÂMICA ---
-    // Limpando a máscara do valor vindo do front (ex: "159,90" -> 159.90)
+    // --- LOGICA FINANCEIRA ---
     let valorLimpo = 0.00;
     if (valor_sinal) {
       valorLimpo = parseFloat(valor_sinal.replace(/\./g, '').replace(',', '.'));
     }
 
     if (valorLimpo > 0) {
-      const sqlFinanceiro = `
-        INSERT INTO financeiro (
-          clinica_id, paciente_id, agendamento_id, tipo,
-          descricao, valor, data_vencimento, status_pagamento
-        ) VALUES (?, ?, ?, 'receita', ?, ?, CURDATE(), 'aberto')
-      `;
-
-      await connection.query(sqlFinanceiro, [
-        clinicaId,
-        paciente_id,
-        agendamentoId,
-        `Sinal de Consulta - ${nome}`,
-        valorLimpo
-      ]);
+      await connection.query(
+        `INSERT INTO financeiro (clinica_id, paciente_id, agendamento_id, tipo, descricao, valor, data_vencimento, status_pagamento) 
+         VALUES (?, ?, ?, 'receita', ?, ?, CURDATE(), 'aberto')`,
+        [clinicaId, paciente_id, agendamentoId, `Sinal de Consulta - ${nome}`, valorLimpo]
+      );
     }
 
     // --- ANEXOS ---
@@ -147,32 +138,25 @@ exports.criarAgendamento = async (req, res) => {
 
     await connection.commit();
 
-
-    // ---- LOGICA PARA PEGAR OS DADOS DA CLINICA -------
-    const [clinicaResult] = await connection.query(
-      'SELECT nome_clinica, telefone_clinica FROM clinicas WHERE id = ?',
-      [clinicaId]
-    );
-
+    // --- NOTIFICAÇÕES ---
+    const [clinicaResult] = await connection.query('SELECT nome_clinica, telefone_clinica FROM clinicas WHERE id = ?', [clinicaId]);
     const dadosDaClinica = clinicaResult[0];
 
-    // ---- NOTIFICAÇÕES (Enviando os dados separados como a função pede) ---------
     if (email && dadosDaClinica) {
-      // Criamos o objeto do agendamento para bater com o que a função espera
       const dadosDoAgendamento = {
         nome: nome,
-        email: email, // <--- ADICIONE ESTA LINHA AQUI!
+        email: email,
+        telefone: telefone, // Adicionado aqui para o WhatsApp funcionar
         tipo_terapia: tipo_terapia,
         data_agendamento: data_agendamento,
-        motivo_consulta: motivo_consulta
+        motivo_consulta: motivo_consulta,
+        token_acesso: novoToken // Enviado para o service construir o link
       };
 
-      // CHAMADA CORRETA: Passando (clinica, agendamento)
       notificationService.sendEmailNotification(dadosDaClinica, dadosDoAgendamento)
         .catch(err => console.error("[MED-LM] Erro no envio de e-mail:", err));
     }
 
-    // Só responde ao frontend DEPOIS de organizar o envio (ou disparar ele)
     return res.status(201).json({
       mensagem: 'Processado com sucesso!',
       agendamentoId

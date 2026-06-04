@@ -1,62 +1,61 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Evolução Clínica - MedLM</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Registro de Evolução Clínica - MedLM</title>
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    
+    /* GRADIENTE PREMIUM */
+    .header { background: linear-gradient(135deg, #059669 0%, #1d4ed8 100%); padding: 30px; text-align: center; }
+    
+    .logo-img { max-width: 200px; height: auto; }
+    .content { padding: 40px; color: #444; line-height: 1.6; }
+    
+    /* VERDE PROFUNDO */
+    .content h2 { color: #065f46; margin-top: 0; font-weight: 600; }
+    .info-box { background-color: #f0fdf4; border-left: 4px solid #065f46; padding: 20px; margin: 25px 0; border-radius: 4px; }
+    .info-item { margin-bottom: 8px; font-size: 15px; }
+    .info-item strong { color: #065f46; }
+    
+    .evolution-box { background-color: #ffffff; border: 1px solid #e1e8ed; padding: 20px; border-radius: 8px; margin-top: 20px; font-style: italic; color: #555; }
+    .footer { background: #f4f7f9; padding: 25px; text-align: center; color: #888; font-size: 12px; }
+    
+    /* BOTÃO NO PADRÃO */
+    .btn { display: inline-block; padding: 12px 25px; background: #065f46; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f4f7f6; font-family: 'Poppins', Arial, sans-serif;">
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.imgur.com/5pjegDN.png" alt="MedLM Logo" class="logo-img">
+    </div>
+    <div class="content">
+      <h2>Olá, {{nome_paciente}}!</h2>
+      <p>Um registro de <strong>evolução clínica</strong> foi adicionado ao seu prontuário pelo profissional <strong>{{nome_profissional}}</strong>.</p>
 
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
-        <tr>
-            <td align="center" style="padding: 40px 0;">
-                <table border="0" cellpadding="0" cellspacing="0" width="600" style="background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0px 10px 30px rgba(0,0,0,0.05);">
+      <div class="info-box">
+        <div class="info-item"><strong>📅 Data do Atendimento:</strong> {{data_atendimento}}</div>
+        <div class="info-item"><strong>📂 CID:</strong> {{codigo_cid}}</div>
+      </div>
 
-                    <!-- Cabeçalho (Azul Profissional) -->
-                    <tr>
-                      <td align="center" style="padding: 30px 40px; background: linear-gradient(135deg, #059669 0%, #1d4ed8 100%);">
-                        <img src="https://i.imgur.com/5pjegDN.png" alt="MedLM Logo" width="200" style="display: block;">
-                      </td>
-                    </tr>
+      <div class="evolution-box">
+        <strong>Evolução:</strong><br>
+        {{texto_evolucao}}
+      </div>
 
-                    <!-- Conteúdo -->
-                    <tr>
-                        <td style="padding: 40px; color: #2c3e50; line-height: 1.8;">
-                            <h1 style="font-size: 22px; margin: 0 0 10px; color: #1d4ed8;">Registro de Evolução Clínica</h1>
-                            <p style="font-size: 16px; margin: 0 0 25px;">Olá, <strong>{{nome_paciente}}</strong>, segue o registro da sua evolução clínica realizada em nossa unidade.</p>
-
-                            <!-- Dados do Atendimento -->
-                            <div style="background-color: #f0fdf4; padding: 20px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #bbf7d0;">
-                                <h3 style="font-size: 13px; margin: 0 0 10px; color: #065f46; text-transform: uppercase;">Informações da Consulta</h3>
-                                <p style="font-size: 14px; margin: 0;">
-                                    <strong>Profissional:</strong> {{nome_profissional}}<br>
-                                    <strong>Data:</strong> {{data_atendimento}}<br>
-                                    <strong>CID:</strong> {{codigo_cid}}
-                                </p>
-                            </div>
-
-                            <!-- O Prontuário -->
-                            <h3 style="font-size: 14px; margin: 0 0 12px; text-transform: uppercase; color: #1d4ed8;">Relatório Clínico</h3>
-                            <div style="padding: 20px; border-left: 4px solid #1d4ed8; background-color: #f8fafc; margin-bottom: 30px; font-size: 15px;">
-                                {{texto_evolucao}}
-                            </div>
-
-                            <!-- Autenticidade -->
-                            <div style="text-align: center; border: 2px dashed #cbd5e1; padding: 20px; border-radius: 15px;">
-                                <p style="font-size: 13px; color: #64748b; margin-bottom: 15px;">Documento digital assinado eletronicamente.</p>
-                                <img src="{{qr_code_url}}" width="120">
-                            </div>
-                        </td>
-                    </tr>
-
-                    <!-- Rodapé -->
-                    <tr>
-                        <td align="center" style="padding: 20px; background-color: #f8fafc; color: #94a3b8; font-size: 11px;">
-                            © {{ano_atual}} MedLM - Sistema de Gestão Clínica Inteligente
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+      <p style="margin-top: 30px;">Para visualizar o histórico completo ou acessar outros documentos, utilize o seu portal:</p>
+      <div style="text-align: center;">
+        <a href="{{link_portal_paciente}}" class="btn">Acessar Meu Prontuário</a>
+      </div>
+    </div>
+    <div class="footer">
+      © {{ano_atual}} MedLM - Gestão Inteligente para Clínicas.<br>
+      Este é um e-mail automático, por favor não responda.
+    </div>
+  </div>
 </body>
 </html>

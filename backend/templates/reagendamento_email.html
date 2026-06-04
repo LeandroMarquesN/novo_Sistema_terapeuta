@@ -6,7 +6,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
   <title>Aviso de Reagendamento - MedLM</title>
   <style>
-    /* Estilos idênticos para manter o padrão */
     body { font-family: 'Poppins', sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; }
     .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .header { background: linear-gradient(135deg, #1e3c72, #2a5298); padding: 30px; text-align: center; }
@@ -17,6 +16,8 @@
     .info-item { margin-bottom: 10px; font-size: 15px; }
     .info-item strong { color: #1e3c72; }
     .footer { background: #f4f7f9; padding: 25px; text-align: center; color: #888; font-size: 12px; }
+    /* Botão integrado com o estilo do design */
+    .btn { display: inline-block; padding: 12px 25px; background: #2a5298; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; }
   </style>
 </head>
 <body>
@@ -36,13 +37,19 @@
         <div class="info-item"><strong>🔍 Procedimento:</strong> {{tipo_terapia}}</div>
       </div>
 
-      <p>Caso o novo horário não seja viável para você, por favor entre em contato pelo telefone <strong>{{telefone_clinica}}</strong> para encontrarmos uma melhor opção.</p>
+      <p>Você pode conferir todos os seus agendamentos no seu portal exclusivo:</p>
+      <div style="text-align: center;">
+        <a href="{{link_portal_paciente}}" class="btn">Visualizar Novo Agendamento</a>
+      </div>
+
+      <p style="margin-top: 30px;">Caso o novo horário não seja viável para você, por favor entre em contato pelo telefone <strong>{{telefone_clinica}}</strong> para encontrarmos uma melhor opção.</p>
 
       <p>Atenciosamente,<br>
       <strong>Equipe {{nome_clinica}}</strong></p>
     </div>
     <div class="footer">
-      © {{ano_atual}} MedLM - Gestão Inteligente para Clínicas.
+      © {{ano_atual}} MedLM - Gestão Inteligente para Clínicas.<br>
+      Este é um e-mail automático, por favor não responda.
     </div>
   </div>
 </body>

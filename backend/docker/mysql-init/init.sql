@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     CONSTRAINT fk_usuario_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. PACIENTES (Corrigido o ponto e vírgula fatal)
+-- 5. PACIENTES (Versão Atualizada com Sistema de Tokens)
 CREATE TABLE IF NOT EXISTS pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -78,7 +78,16 @@ CREATE TABLE IF NOT EXISTS pacientes (
   altura DECIMAL(3,2),
   condicoes_preexistentes TEXT,
   foto_perfil VARCHAR(255),
+  
+  -- Novas colunas para o Portal do Paciente
+  token_acesso VARCHAR(128) DEFAULT NULL,
+  token_expiracao DATETIME DEFAULT NULL,
+  
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  -- Índice para busca rápida de tokens
+  INDEX idx_token_acesso (token_acesso),
+  
   CONSTRAINT fk_paciente_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

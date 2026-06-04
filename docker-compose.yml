@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: medlm_app
     build: .
     ports:
       - "3000:3000"
@@ -22,6 +23,7 @@ services:
 
   db:
     image: mysql:8
+    container_name: medlm_db
     ports:
       - "3307:3306"
     environment:

@@ -16,7 +16,7 @@
     .info-item { margin-bottom: 10px; font-size: 15px; color: #333; }
     .info-item strong { color: #d32f2f; }
     .footer { background: #f4f7f9; padding: 25px; text-align: center; color: #888; font-size: 12px; }
-    .btn { display: inline-block; padding: 12px 25px; background: #2c5364; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; }
+    .btn { display: inline-block; padding: 12px 25px; background: #2c5364; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -27,7 +27,7 @@
 
     <div class="content">
       <h2>Olá, {{nome_paciente}}!</h2>
-      <p>Confirmamos que o seu agendamento foi <strong>cancelado</strong> com sucesso.</p>
+      <p>Confirmamos que o seu agendamento foi <strong>cancelado</strong> com sucesso conforme solicitado.</p>
 
       <p>Abaixo estão os detalhes do atendimento que foi removido:</p>
 
@@ -37,8 +37,15 @@
         <div class="info-item"><strong>🔍 Procedimento:</strong> {{tipo_terapia}}</div>
       </div>
 
-      <p>Se você não solicitou este cancelamento ou deseja realizar um <strong>novo agendamento</strong>, entre em contato conosco pelo telefone:</p>
-      <p style="font-size: 18px; color: #2c5364;"><strong>{{telefone_clinica}}</strong></p>
+      <!-- PORTAL DE REAGENDAMENTO (Diferencial) -->
+      <div style="text-align: center; background-color: #f8fafb; border: 2px dashed #2c5364; padding: 20px; border-radius: 12px; margin: 30px 0;">
+        <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 10px; color: #2c5364;">Precisa reagendar?</h3>
+        <p style="font-size: 14px; color: #444; margin-bottom: 15px;">Não se preocupe! Acesse o portal da clínica abaixo e escolha um novo horário que seja melhor para você:</p>
+        
+        <a href="{{url_portal}}" class="btn">Agendar Nova Consulta</a>
+      </div>
+
+      <p>Se preferir falar conosco diretamente, entre em contato pelo telefone: <strong>{{telefone_clinica}}</strong>.</p>
 
       <p>Esperamos te ver em breve!</p>
 

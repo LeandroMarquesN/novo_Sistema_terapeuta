@@ -15,6 +15,7 @@ const agendamentoRoutes = require('./routes/agendamentoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const configuracaoRoutes = require('./routes/configuracaoRoutes');
 const portalRoutes = require('./routes/portal-agendamento-routes');
+const portalPacientelroutes = require('./routes/portalPacienteroutes');
 const openAiRoutes = require('./routes/openAiRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Rotas de API do Admin
 
@@ -34,12 +35,24 @@ app.set('views', path.join(__dirname, '..', 'frontend', 'views'));
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+const session = require('express-session');
 
 // Middleware para desativar o cache (Segurança)
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   next();
 });
+
+app.use(session({
+  secret: process.env.SESSION_SECRET, // Lê do arquivo .env
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 2,
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production' // Fica 'true' apenas se estiver em produção
+  }
+}));
 
 
 // ...
@@ -56,6 +69,7 @@ app.use('/api/openai', openAiRoutes);
 app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/config', configuracaoRoutes);
 app.use('/agendar', portalRoutes);
+app.use('/portal_paciente', portalPacientelroutes);
 
 
 // --- API ADMINISTRATIVA (MedLM Master) ---
@@ -130,4 +144,9 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'admin.html'));
 });
 
+// Middleware de tratamento de erro genérico
+app.use((err, req, res, next) => {
+  console.error("Erro capturado:", err.stack);
+  res.status(500).json({ error: "Algo deu errado no servidor!" });
+});
 module.exports = app;
