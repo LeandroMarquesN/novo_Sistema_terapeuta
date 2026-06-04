@@ -40,23 +40,27 @@ exports.validarAcessoPortal = async (req, res) => {
 exports.getDadosPortal = async (req, res) => {
     try {
         const pId = req.session.pacienteId;
+        const cId = req.session.clinicaId; // Já carregamos isso na sessão no login
 
-        // Verificação crítica: se não houver ID na sessão, barra o acesso
-        if (!pId) {
-            return res.status(401).json({ error: "Sessão expirada ou não autenticada." });
-        }
+        // 1. Dados do Paciente + Clínica
+        const [paciente] = await db.query(`
+            SELECT p.*, c.nome_clinica 
+            FROM pacientes p 
+            JOIN clinicas c ON p.clinica_id = c.id 
+            WHERE p.id = ?`, [pId]);
 
-        const [paciente] = await db.query('SELECT * FROM pacientes WHERE id = ?', [pId]);
-        const [agendamentos] = await db.query('SELECT * FROM agendamentos WHERE paciente_id = ? ORDER BY data_agendamento ASC', [pId]);
+        // 2. Configurações da Clínica
+        const [config] = await db.query('SELECT * FROM clinica_configuracoes WHERE clinica_id = ?', [cId]);
 
-        // Verificação se o paciente existe
-        if (!paciente || paciente.length === 0) {
-            return res.status(404).json({ error: "Paciente não encontrado." });
-        }
+        // 3. Agendamentos e Prontuários
+        const [agendamentos] = await db.query('SELECT * FROM agendamentos WHERE paciente_id = ? ORDER BY data_agendamento DESC', [pId]);
+        const [prontuarios] = await db.query('SELECT * FROM prontuarios WHERE paciente_id = ? ORDER BY data_atendimento DESC', [pId]);
 
-        res.json({ paciente: paciente[0], agendamentos });
-    } catch (e) {
-        console.error("ERRO NO GET DADOS:", e);
-        res.status(500).json({ error: "Erro crítico no banco de dados." });
-    }
+        res.json({
+            paciente: paciente[0],
+            config: config[0],
+            agendamentos,
+            prontuarios
+        });
+    } catch (e) { res.status(500).json({ error: "Erro ao buscar dados" }); }
 };

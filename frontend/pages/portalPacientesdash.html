@@ -2,66 +2,109 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        body { background: linear-gradient(135deg, #064e3b 0%, #0e7490 50%, #1e3a8a 100%); min-height: 100vh; }
+        body { font-family: 'Poppins', sans-serif; background: #f8fafc; }
     </style>
 </head>
-<body class="text-white p-6">
-    <div class="max-w-md mx-auto">
-        <h1 id="boasVindas" class="text-3xl font-bold mb-8">Carregando...</h1>
-        
-        <div id="carrossel" class="glass p-6 rounded-3xl h-40 flex items-center justify-center overflow-hidden relative">
-            <div id="slides" class="text-center"></div>
+<body>
+
+    <nav class="fixed top-0 w-full bg-indigo-900 text-white p-4 shadow-lg z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <span id="nomeClinica" class="font-bold text-lg">MED-LM</span>
+            <span id="boasVindas">Olá, bem-vindo!</span>
         </div>
-    </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto pt-24 p-6">
+        <div id="bannerClinica" class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-8 text-white mb-8 shadow-xl">
+            <h2 class="text-2xl font-semibold">Horário de Atendimento</h2>
+            <p id="horarioInfo" class="mt-2 text-emerald-50 text-lg">Carregando...</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card Perfil (IDs ADICIONADOS AQUI) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                <div class="text-emerald-600 mb-4 text-5xl">👤</div>
+                <h3 class="font-bold text-xl">Seus Dados</h3>
+                <p class="text-sm text-slate-700 mt-2">Nome: <span id="nome" class="font-semibold">...</span></p>
+                <p class="text-sm text-slate-700">Idade: <span id="idade">...</span></p>
+                <p class="text-sm text-slate-700">Tipo Sanguíneo: <span id="sangue">...</span></p>
+            </div>
+
+            <!-- Card Agendamentos (ID ADICIONADO AQUI) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="text-blue-600 mb-4 text-5xl text-center">📅</div>
+                <h3 class="font-bold text-xl text-center">Agendamentos</h3>
+                <div id="lista-agendamentos" class="mt-4 space-y-2"></div>
+            </div>
+
+            <!-- Card Prontuário (ID ADICIONADO AQUI) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="text-purple-600 mb-4 text-5xl text-center">📝</div>
+                <h3 class="font-bold text-xl text-center">Prontuário</h3>
+                <div id="timeline-prontuarios" class="mt-4 space-y-2"></div>
+            </div>
+        </div>
+    </main>
 
     <script>
-        async function carregarDados() {
-    try {
-        const res = await fetch('/portal_paciente/api/dados');
-        if (!res.ok) throw new Error('Erro ao buscar dados');
-        
-        const data = await res.json();
-        
-        document.getElementById('boasVindas').innerText = `Olá, ${data.paciente.nome}!`;
-        
-        const slides = document.getElementById('slides');
-        const ags = data.agendamentos;
-
-        if (!ags || ags.length === 0) {
-            slides.innerHTML = `<p>Nenhum agendamento futuro encontrado.</p>`;
-            return;
-        }
-
-        let i = 0;
-        const atualizarSlide = () => {
-            // Adiciona um pequeno efeito de transição via classe do Tailwind
-            slides.classList.add('opacity-0'); 
-            
-            setTimeout(() => {
-                slides.innerHTML = `
-                    <p class="text-emerald-300 font-bold uppercase text-xs">Próxima Consulta</p>
-                    <p class="text-2xl font-bold">${new Date(ags[i].data_agendamento).toLocaleDateString('pt-BR')}</p>
-                    <p class="text-sm opacity-90 italic">${ags[i].tipo_terapia}</p>`;
-                
-                slides.classList.remove('opacity-0');
-            }, 300);
-            
-            i = (i + 1) % ags.length;
-        };
-
-        atualizarSlide(); // Primeira execução imediata
-        setInterval(atualizarSlide, 4000);
-
-    } catch (err) {
-        console.error(err);
-        document.getElementById('boasVindas').innerText = "Erro ao carregar dados.";
-    }
-}
-        
-        carregarDados();
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch('/portal_paciente/api/dados')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data || !data.paciente) throw new Error("Dados não encontrados");
+    
+                    // Atualiza cabeçalho
+                    document.getElementById('boasVindas').innerText = `Olá, ${data.paciente.nome}`;
+                    document.getElementById('nomeClinica').innerText = data.paciente.nome_clinica || "Clínica MED-LM";
+    
+                    // Perfil
+                    document.getElementById('nome').innerText = data.paciente.nome;
+                    document.getElementById('idade').innerText = (data.paciente.idade || '--') + ' anos';
+                    document.getElementById('sangue').innerText = data.paciente.tipo_sanguineo || 'N/A';
+                    
+                    // Horários
+                    if (data.config && document.getElementById('horarioInfo')) {
+                        document.getElementById('horarioInfo').innerText = 
+                            `Aberto de ${data.config.horario_abertura.substring(0,5)} às ${data.config.horario_fechamento.substring(0,5)}`;
+                    }
+    
+                    // Agendamentos
+                    const agendaDiv = document.getElementById('lista-agendamentos');
+                    if (agendaDiv) {
+                        if (data.agendamentos.length === 0) agendaDiv.innerHTML = "<p class='text-sm text-slate-500'>Nenhum agendamento.</p>";
+                        else {
+                            agendaDiv.innerHTML = "";
+                            data.agendamentos.forEach(a => {
+                                agendaDiv.innerHTML += `
+                                    <div class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-100">
+                                        <p class="font-bold">${new Date(a.data_agendamento).toLocaleDateString()}</p>
+                                        <p class="text-blue-600">${a.status_agendamento}</p>
+                                    </div>`;
+                            });
+                        }
+                    }
+    
+                    // Prontuários
+                    const timelineDiv = document.getElementById('timeline-prontuarios');
+                    if (timelineDiv && data.prontuarios) {
+                        data.prontuarios.forEach(p => {
+                            timelineDiv.innerHTML += `
+                                <div class="bg-purple-50 p-3 rounded-lg text-sm border border-purple-100">
+                                    <p class="text-xs text-purple-400">${new Date(p.data_atendimento).toLocaleDateString()}</p>
+                                    <p class="text-purple-800">${(p.texto_evolucao || '').substring(0, 100)}...</p>
+                                </div>`;
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro no carregamento:", err);
+                    const el = document.getElementById('boasVindas');
+                    if (el) el.innerText = "Erro ao carregar.";
+                });
+        });
     </script>
 </body>
 </html>

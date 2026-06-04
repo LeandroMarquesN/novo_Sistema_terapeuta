@@ -69,7 +69,7 @@ app.use('/api/openai', openAiRoutes);
 app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/config', configuracaoRoutes);
 app.use('/agendar', portalRoutes);
-app.use('/portal_paciente', portalPacientelroutes);
+app.use('/portal_paciente', portalPacientelroutes); // Aqui mapeamos o prefixo
 
 
 // --- API ADMINISTRATIVA (MedLM Master) ---
