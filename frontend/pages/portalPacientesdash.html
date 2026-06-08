@@ -10,10 +10,21 @@
 </head>
 <body>
 
-    <nav class="fixed top-0 w-full bg-indigo-900 text-white p-4 shadow-lg z-50">
+    <nav class="fixed top-0 w-full bg-slate-900 text-white p-4 shadow-lg z-50">
         <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <span id="nomeClinica" class="font-bold text-lg">MED-LM</span>
-            <span id="boasVindas">Olá, bem-vindo!</span>
+            <!-- Logo customizada com iniciais -->
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-700 flex items-center justify-center font-bold text-2xl shadow-lg border border-white/10">
+                    ML
+                </div>
+                <div class="flex flex-col">
+                    <span id="nomeClinica" class="font-bold text-lg tracking-wider uppercase leading-tight">MED-LM</span>
+                    <span class="text-[10px] uppercase tracking-widest text-emerald-400">Portal do Paciente</span>
+                </div>
+            </div>
+            
+            <!-- Boas vindas -->
+            <span id="boasVindas" class="font-medium opacity-80 text-sm">Olá, bem-vindo!</span>
         </div>
     </nav>
 
@@ -47,6 +58,37 @@
                 <div id="timeline-prontuarios" class="mt-4 space-y-2"></div>
             </div>
         </div>
+        <br>
+        <br>
+        <!-- Container de Ação do Paciente -->
+        <div id="propaganda-carousel" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border-l-8 border-emerald-600">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="flex-1">
+                    <!-- Título Dinâmico -->
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Gerencie sua saúde com autonomia</h3>
+                    <p class="text-slate-600 mb-6">
+                        Como você já possui acesso ao nosso portal exclusivo, reagendar sua consulta ficou muito mais rápido e prático. 
+                        Esqueça filas e esperas telefônicas: tenha o controle total da sua agenda na palma da sua mão.
+                    </p>
+                    <ul class="text-sm text-slate-500 space-y-2 mb-6">
+                        <li>✅ <strong>Agendamento em segundos:</strong> Escolha o melhor horário para você.</li>
+                        <li>✅ <strong>Sem burocracia:</strong> Disponível 24h por dia, 7 dias por semana.</li>
+                        <li>✅ <strong>Segurança total:</strong> Seus dados protegidos com criptografia.</li>
+                    </ul>
+                    
+                    <!-- Botão Dinâmico -->
+                    <a id="btnAgendar" href="#" 
+                    class="inline-block bg-gradient-to-r from-emerald-600 to-blue-800 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
+                        Reagendar Consulta Agora
+                    </a>
+                </div>
+                
+                <!-- Ícone representativo -->
+                <div class="hidden md:block w-48 h-48 bg-emerald-50 rounded-full flex items-center justify-center border-4 border-emerald-100">
+                    <span class="text-7xl">⚡</span>
+                </div>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -64,6 +106,14 @@
                     document.getElementById('nome').innerText = data.paciente.nome;
                     document.getElementById('idade').innerText = (data.paciente.idade || '--') + ' anos';
                     document.getElementById('sangue').innerText = data.paciente.tipo_sanguineo || 'N/A';
+
+                    // Injeta o slug no link do botão de agendamento
+                        const btnAgendar = document.getElementById('btnAgendar');
+                        if (btnAgendar && data.paciente.slug) {
+                            btnAgendar.href = `/agendar/${data.paciente.slug}`;
+                        } else {
+                            console.warn("Slug da clínica não encontrado ou botão inexistente.");
+                        }
                     
                     // Horários
                     if (data.config && document.getElementById('horarioInfo')) {

@@ -44,10 +44,10 @@ exports.getDadosPortal = async (req, res) => {
 
         // 1. Dados do Paciente + Clínica
         const [paciente] = await db.query(`
-            SELECT p.*, c.nome_clinica 
-            FROM pacientes p 
-            JOIN clinicas c ON p.clinica_id = c.id 
-            WHERE p.id = ?`, [pId]);
+        SELECT p.*, c.nome_clinica, c.slug 
+        FROM pacientes p 
+        JOIN clinicas c ON p.clinica_id = c.id 
+        WHERE p.id = ?`, [pId]);
 
         // 2. Configurações da Clínica
         const [config] = await db.query('SELECT * FROM clinica_configuracoes WHERE clinica_id = ?', [cId]);

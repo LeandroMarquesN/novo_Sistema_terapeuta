@@ -110,19 +110,19 @@
                     <!-- NOME -->
                     <div>
                         <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Nome Completo</label>
-                        <input type="text" id="nome" name="nome" placeholder="Como no seu RG" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                        <input type="text" id="nome" name="nome" placeholder="Como no seu RG" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.nome : '' %>" required>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <!-- EMAIL -->
                         <div>
                             <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">E-mail</label>
-                            <input type="email" id="email" name="email" placeholder="exemplo@email.com" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                            <input type="email" id="email" name="email" placeholder="exemplo@email.com" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.email : '' %>" required>
                         </div>
                         <!-- WHATSAPP -->
                         <div>
                             <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">WhatsApp</label>
-                            <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                            <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.telefone : '' %>" required>
                         </div>
                     </div>
 
@@ -130,12 +130,12 @@
                         <!-- CPF -->
                         <div>
                             <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">CPF</label>
-                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.cpf : '' %>" required>
                         </div>
                         <!-- DATA NASCIMENTO -->
                         <div>
                             <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Data de Nascimento</label>
-                            <input type="date" id="data_nascimento" name="data_nascimento" class="ios-input focus:ring-2 focus:ring-blue-400" required>
+                            <input type="date" id="data_nascimento" name="data_nascimento" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado && pacienteLogado.data_nascimento ? new Date(pacienteLogado.data_nascimento).toISOString().split('T')[0] : '' %>" required>
                         </div>
                     </div>
 

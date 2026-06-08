@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MEDLM | Gestão Inteligente para Clínicas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- comapara -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- final comparar -->
+    
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+        .animated-bg { background: linear-gradient(180deg, #020617 0%, #064e3b 100%); background-size: 400% 400%; animation: moveGradient 20s ease infinite; }
+        @keyframes moveGradient { 0% { background-position: 50% 0%; } 50% { background-position: 50% 100%; } 100% { background-position: 50% 0%; } }
+        .glass { background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(15px); border: 1px solid rgba(52, 211, 153, 0.2); position: relative; overflow: hidden; transition: transform 0.3s ease; }
+        .gradient-text { background: linear-gradient(90deg, #34d399 0%, #3b82f6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .glass::before { content: ""; position: absolute; top: var(--y, 0); left: var(--x, 0); width: 300px; height: 300px; background: radial-gradient(circle, rgba(52, 211, 153, 0.12) 0%, transparent 70%); transform: translate(-50%, -50%); pointer-events: none; }
+        .btn-custom { background: linear-gradient(45deg, #064e3b, #1e40af); border: 2px solid #34d399; color: white; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-custom:hover { background: transparent !important; border-color: #60a5fa; color: #60a5fa; box-shadow: 0 0 20px rgba(52, 211, 153, 0.2); }
+
+        @keyframes marquee {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+            animation: marquee 20s linear infinite;
+            width: max-content;
+        }
+
+        /* Efeito de movimento para o ícone */
+        .card-hover:hover i {
+            transform: scale(1.2) rotate(5deg);
+            transition: transform 0.3s ease-in-out;
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+        }
+
+    </style>
+    
+</head>
+
+<body class="animated-bg text-white selection:bg-emerald-500" id="#hero">
+    <nav class="fixed top-0 left-0 w-full p-6 z-50 flex justify-between items-center bg-black/20 backdrop-blur-md border-b border-white/5">
+        <img src="../logo/LogoTop2.png" alt="Logo MEDLM" class="w-28">
+        <a href="#cadastro" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-sm font-bold transition-all">
+            Acessar Área
+        </a>
+    </nav>
+
+    <header id="hero" class="min-h-screen flex flex-col items-center justify-center text-center px-4 pt-10">
+    
+       
+    
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-semibold mb-6 animate__animated animate__fadeIn">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Plataforma 100% Adequada à LGPD</span>
+        </div>
+    
+        <h1 class="text-5xl md:text-7xl font-black mb-6 leading-[1.1] tracking-tight">
+            A gestão clínica que coloca o <br>
+            <span class="gradient-text">paciente no centro.</span>
+        </h1>
+    
+        <p class="text-xl text-gray-300 mb-10 max-w-2xl font-light">
+            Centralize prontuários, financeiro e agenda em um sistema inteligente. 
+            <strong class="text-white">Mais tempo para cuidar, menos tempo burocratizando.</strong>
+        </p>
+    
+        <div class="flex flex-col md:flex-row gap-4 mb-16">
+            <a href="#cadastro" class="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold transition-all flex items-center gap-2">
+                <i data-lucide="rocket"></i> Iniciar Programa Fundadores
+            </a>
+            <a href="#" class="px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-xl font-bold transition-all">
+                Agendar Demonstração
+            </a>
+        </div>
+    
+        <div class="w-full max-w-5xl glass rounded-3xl p-2 shadow-[0_0_80px_rgba(0,0,0,0.5)] border border-white/10 relative ">
+            <div class="h-64 md:h-[450px] w-full relative rounded-2xl overflow-hidden">
+                <img src="../logo/logoChamadaAcao.png" class="absolute w-full h-full object-cover opacity-100 carousel-item">
+                <img src="../logo/atendimentoimagen.png" class="absolute w-full h-full object-cover opacity-0 carousel-item">
+                 <img src="../logo/logoChamadaAcao.png" class="absolute w-full h-full object-cover opacity-100 carousel-item">
+                <img src="../logo/atendimento2.png" class="absolute w-full h-full object-cover opacity-0 carousel-item">
+            </div>
+        </div>
+    </header>
+
+   
+   
+    <div class="relative py-20 px-4 fade-in-section py-20 px-4 fade-in-section py-20 px-4">
+    
+        <div class="glass relative p-8 md:p-12 rounded-[32px] text-center max-w-3xl mx-auto border border-emerald-500/20 backdrop-blur-xl fade-in-section py-20 px-4">
+    
+            <div class="inline-block px-6 py-2 mb-6 rounded-full bg-emerald-500 text-black text-sm font-bold">
+                🚀 VAGAS LIMITADAS
+            </div>
+    
+            <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-emerald-500/10 flex items-center justify-center">
+                <i data-lucide="rocket" class="w-10 h-10 text-emerald-400"></i>
+            </div>
+    
+            <h2 class="text-3xl md:text-6xl font-black mb-6 leading-tight">
+                Seja um <span class="bg-gradient-to-r from-emerald-400 via-cyan-400 to-purple-500 bg-clip-text text-transparent">Fundador</span> do MEDLM
+            </h2>
+    
+            <p class="text-base md:text-xl text-gray-200 leading-relaxed max-w-2xl mx-auto mb-8">
+                Faça parte das primeiras clínicas a utilizar uma plataforma criada para transformar a gestão clínica. 
+                <span class="text-emerald-400 font-bold">Ganhe 3 meses totalmente grátis</span> e participe da evolução do sistema desde o início.
+            </p>
+    
+            <div class="grid md:grid-cols-2 gap-4 mt-8 text-left">
+                <div class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span>3 meses grátis</span></div>
+                <div class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span>Suporte prioritário</span></div>
+                <div class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span>Treinamento individual</span></div>
+                <div class="flex items-center gap-3"><i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i><span>Influencie funcionalidades</span></div>
+            </div>
+    
+            <div class="mt-8 inline-flex items-center gap-3 px-6 py-3 rounded-full bg-white/5 border border-white/10">
+                <i data-lucide="badge-dollar-sign" class="w-5 h-5 text-emerald-400"></i>
+                <span class="font-semibold">Planos a partir de R$ 69,90 após o período gratuito</span>
+            </div>
+    
+            <div class="mt-10">
+                <a href="#cadastro" class="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-cyan-500 text-white px-8 py-4 rounded-2xl font-bold">
+                    <i data-lucide="rocket"></i>
+                    Quero Participar do Programa Fundadores
+                </a>
+            </div>
+    
+        </div>
+    </div>
+    
+    <!-- sesao de dores das clinicas -->
+    <section class="py-20 px-4 fade-in-section py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="text-center mb-16 fade-in-section py-20 px-4">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    Sua clínica sofre com estes <span class="gradient-text">desafios diários?</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">
+                    Identificamos os pontos críticos que drenam a produtividade e o faturamento das clínicas modernas.
+                </p>
+            </div>
+    
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in-section py-20 px-4">
+                
+                <div class="glass p-8 rounded-2xl border-l-4 border-l-red-500/50 card-hover">
+                    <i data-lucide="calendar-x" class="w-10 h-10 text-red-400 mb-6 card-hover"></i>
+                    <h3 class="text-xl font-bold mb-3">Agenda Desorganizada</h3>
+                    <p class="text-gray-400 text-sm">Faltas não confirmadas e buracos na agenda que custam caro ao final do mês.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border-l-4 border-l-red-500/50 card-hover">
+                    <i data-lucide="file-warning" class="w-10 h-10 text-red-400 mb-6 card-hover"></i>
+                    <h3 class="text-xl font-bold mb-3">Caos nos Prontuários</h3>
+                    <p class="text-gray-400 text-sm">Dificuldade em localizar informações críticas do paciente durante o atendimento.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border-l-4 border-l-red-500/50 card-hover">
+                    <i data-lucide="trending-down" class="w-10 h-10 text-red-400 mb-6 card-hover"></i>
+                    <h3 class="text-xl font-bold mb-3">Financeiro Nublado</h3>
+                    <p class="text-gray-400 text-sm">Contas misturadas e falta de clareza sobre o real lucro da sua operação.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border-l-4 border-l-red-500/50 card-hover">
+                    <i data-lucide="user-x" class="w-10 h-10 text-red-400 mb-6 card-hover"></i>
+                    <h3 class="text-xl font-bold mb-3">Retenção Baixa</h3>
+                    <p class="text-gray-400 text-sm">Pacientes que não retornam e comunicação ineficiente no pós-consulta.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border-l-4 border-l-red-500/50 card-hover">
+                    <i data-lucide="shield-alert" class="w-10 h-10 text-red-400 mb-6 card-hover"></i>
+                    <h3 class="text-xl font-bold mb-3">Insegurança LGPD</h3>
+                    <p class="text-gray-400 text-sm">Risco de multas e vazamento de dados por sistemas defasados.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border-l-4 border-l-emerald-500 bg-emerald-950/20 flex flex-col justify-center card-hover">
+                    <h3 class="text-xl font-bold mb-3 text-emerald-400 card-hover">Chega de sofrer!</h3>
+                    <p class="text-gray-300 text-sm mb-6">O MEDLM foi desenhado para eliminar cada um desses problemas de forma automatizada.</p>
+                    <a href="#cadastro" class="text-emerald-400 font-bold flex items-center gap-2 hover:underline">
+                        Conheça a solução <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+                
+    
+            </div>
+        </div>
+    </section>
+
+    <!-- Beneficio -->
+    <div class="text-center mb-16 px-4 fade-in-section py-20 px-4">
+        <h2 class="text-4xl md:text-5xl font-bold mb-6">
+            Transforme sua clínica em um <span class="gradient-text">centro de excelência</span>
+        </h2>
+        <p class="text-gray-300 max-w-3xl mx-auto text-lg leading-relaxed">
+            Mais do que um software de gestão, o <strong>MEDLM</strong> é a ponte entre sua clínica e o atendimento que o seu paciente deseja. 
+            Potencialize a jornada do paciente, aumente a confiança na sua marca e garanta a satisfação que gera fidelização.
+        </p>
+    </div>
+    <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-8 fade-in-section py-20 px-4"">
+
+        
+        <!-- Prontuário -->
+        <div class="glass p-8 rounded-2xl group transition-all duration-500 hover:-translate-y-3 hover:border-cyan-500 hover:shadow-[0_0_35px_rgba(6,182,212,.25)]">
+            <div class="w-14 h-14 rounded-xl bg-cyan-500/10 flex items-center justify-center mb-6">
+                <i data-lucide="file-text" class="w-7 h-7 text-cyan-400 group-hover:scale-110 transition-all"></i>
+            </div>
+    
+            <h3 class="text-xl font-bold mb-3">
+                Prontuário Eletrônico
+            </h3>
+    
+            <p class="text-gray-300">
+                Elimine fichas em papel e tenha acesso instantâneo ao histórico completo dos pacientes.
+            </p>
+        </div>
+    
+        <!-- Financeiro -->
+        <div class="glass p-8 rounded-2xl group transition-all duration-500 hover:-translate-y-3 hover:border-emerald-500 hover:shadow-[0_0_35px_rgba(16,185,129,.25)]">
+            <div class="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
+                <i data-lucide="wallet" class="w-7 h-7 text-emerald-400 group-hover:scale-110 transition-all"></i>
+            </div>
+    
+            <h3 class="text-xl font-bold mb-3">
+                Controle Financeiro
+            </h3>
+    
+            <p class="text-gray-300">
+                Visualize receitas, despesas e faturamento em tempo real.
+            </p>
+        </div>
+    
+        <!-- LGPD -->
+        <div class="glass p-8 rounded-2xl group transition-all duration-500 hover:-translate-y-3 hover:border-purple-500 hover:shadow-[0_0_35px_rgba(168,85,247,.25)]">
+            <div class="w-14 h-14 rounded-xl bg-purple-500/10 flex items-center justify-center mb-6">
+                <i data-lucide="shield-check" class="w-7 h-7 text-purple-400 group-hover:scale-110 transition-all"></i>
+            </div>
+    
+            <h3 class="text-xl font-bold mb-3">
+                Segurança e LGPD
+            </h3>
+    
+            <p class="text-gray-300">
+                Proteja dados sensíveis com auditoria completa e conformidade com a LGPD.
+            </p>
+        </div>
+    
+        <!-- Multi-Tenant -->
+        <div class="glass p-8 rounded-2xl group transition-all duration-500 hover:-translate-y-3 hover:border-blue-500 hover:shadow-[0_0_35px_rgba(59,130,246,.25)]">
+            <div class="w-14 h-14 rounded-xl bg-blue-500/10 flex items-center justify-center mb-6">
+                <i data-lucide="building-2" class="w-7 h-7 text-blue-400 group-hover:scale-110 transition-all"></i>
+            </div>
+    
+            <h3 class="text-xl font-bold mb-3">
+                Multi-Tenant
+            </h3>
+    
+            <p class="text-gray-300">
+                Gerencie múltiplas clínicas ou unidades em uma única plataforma escalável.
+            </p>
+        </div>
+    
+        <!-- Portais -->
+        <div class="glass p-8 rounded-2xl group transition-all duration-500 hover:-translate-y-3 hover:border-pink-500 hover:shadow-[0_0_35px_rgba(236,72,153,.25)]">
+            <div class="w-14 h-14 rounded-xl bg-pink-500/10 flex items-center justify-center mb-6">
+                <i data-lucide="globe" class="w-7 h-7 text-pink-400 group-hover:scale-110 transition-all"></i>
+            </div>
+    
+            <h3 class="text-xl font-bold mb-3">
+                Portais Integrados
+            </h3>
+    
+            <p class="text-gray-300">
+                Portal para clínicas e área exclusiva para pacientes realizarem agendamentos.
+            </p>
+        </div>
+    
+        <!-- Fundadores -->
+        <div class="glass p-8 rounded-2xl group border border-emerald-500/30 transition-all duration-500 hover:-translate-y-3 hover:shadow-[0_0_40px_rgba(16,185,129,.35)]">
+            <div class="w-14 h-14 rounded-xl bg-emerald-500/10 flex items-center justify-center mb-6">
+                <i data-lucide="rocket" class="w-7 h-7 text-emerald-400 group-hover:scale-110 transition-all"></i>
+            </div>
+    
+            <h3 class="text-xl font-bold mb-3">
+                Programa Fundadores
+            </h3>
+    
+            <p class="text-gray-300">
+                Ganhe 3 meses grátis, treinamento individual e condições exclusivas de lançamento.
+            </p>
+            <span class="absolute top-4 right-4 text-xs px-3 py-1 rounded-full bg-emerald-500 text-black font-bold animate-pulse">
+                Vagas Limitadas
+               </span>
+        </div>
+    
+    </div>
+    <section class="py-20 px-4 fade-in-section py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    A tecnologia que <span class="gradient-text">transforma sua clínica</span>
+                </h2>
+                <p class="text-gray-400 max-w-2xl mx-auto text-lg">
+                    Mais do que gestão, o MEDLM é o motor de crescimento do seu negócio. Veja como resolvemos cada desafio para garantir a máxima satisfação.
+                </p>
+            </div>
+    
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 fade-in-section py-20 px-4">
+                
+                <div class="glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
+                    <i data-lucide="clock" class="w-10 h-10 text-emerald-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Economia de Tempo</h3>
+                    <p class="text-gray-400 text-sm">Automatize agendamentos e burocracias. Menos tempo na tela, mais tempo atendendo quem realmente importa: seu paciente.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
+                    <i data-lucide="lock" class="w-10 h-10 text-emerald-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Segurança Blindada</h3>
+                    <p class="text-gray-400 text-sm">Dados sensíveis protegidos com tecnologia de ponta. Tranquilidade total para você e conformidade rigorosa com a LGPD.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
+                    <i data-lucide="layout-grid" class="w-10 h-10 text-emerald-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Organização Inteligente</h3>
+                    <p class="text-gray-400 text-sm">Tudo centralizado. Do histórico do paciente ao controle financeiro, encontre o que precisa em poucos cliques.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
+                    <i data-lucide="line-chart" class="w-10 h-10 text-emerald-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Foco no Crescimento</h3>
+                    <p class="text-gray-400 text-sm">Dados reais para decisões estratégicas. Entenda seu faturamento e escale seu lucro com previsibilidade.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
+                    <i data-lucide="layers" class="w-10 h-10 text-emerald-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Escalabilidade Multi-Tenant</h3>
+                    <p class="text-gray-400 text-sm">Sua clínica cresceu? O MEDLM acompanha. Gerencie unidades, profissionais e especialidades em um único ecossistema.</p>
+                </div>
+    
+                <div class="glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
+                    <i data-lucide="smile" class="w-10 h-10 text-emerald-400 mb-6"></i>
+                    <h3 class="text-xl font-bold mb-3">Satisfação do Paciente</h3>
+                    <p class="text-gray-400 text-sm">Agendamento rápido e prontuário humanizado elevam o nível do seu atendimento, gerando fidelidade imediata.</p>
+                </div>
+    
+            </div>
+        </div>
+    </section>
+    <!-- Programa fundadores medLm -->
+    <section class="py-20 px-4 fade-in-section py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            
+            <div class="text-center mb-16 fade-in-section py-20 px-4">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">
+                    PROGRAMA <span class="gradient-text">FUNDADORES MEDLM</span>
+                </h2>
+                <p class="text-gray-300 text-lg">
+                    Estamos selecionando as primeiras clínicas para participar do lançamento oficial. 
+                    <span class="text-emerald-400 font-bold block mt-2">Vagas limitadas para os primeiros participantes.</span>
+                </p>
+            </div>
+    
+            <div class="glass p-8 md:p-12 rounded-3xl border border-emerald-500/30 ">
+                <div class="grid md:grid-cols-2 gap-6">
+                    
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                        <div><h4 class="font-bold text-white">3 meses grátis</h4><p class="text-sm text-gray-400">Acesso total ao sistema sem custo inicial.</p></div>
+                    </div>
+    
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                        <div><h4 class="font-bold text-white">Suporte prioritário</h4><p class="text-sm text-gray-400">Atendimento VIP para sua clínica.</p></div>
+                    </div>
+    
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                        <div><h4 class="font-bold text-white">Treinamento individual</h4><p class="text-sm text-gray-400">Personalizado para sua equipe.</p></div>
+                    </div>
+    
+                    <div class="flex items-start gap-4 ">
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                        <div><h4 class="font-bold text-white">Influencie funcionalidades</h4><p class="text-sm text-gray-400">Dê sugestões diretamente para o time de dev.</p></div>
+                    </div>
+    
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                        <div><h4 class="font-bold text-white">Condições especiais</h4><p class="text-sm text-gray-400">Preços exclusivos para fundadores.</p></div>
+                    </div>
+    
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400 shrink-0"></i>
+                        <div><h4 class="font-bold text-white">Migração assistida</h4><p class="text-sm text-gray-400">Trazemos seus dados de forma segura.</p></div>
+                    </div>
+    
+                </div>
+    
+                <div class="mt-12 p-8 rounded-2xl bg-emerald-950/30 border border-emerald-500/50 text-center fade-in-section py-20 px-4">
+                    <h3 class="text-2xl font-bold mb-2">Comece sem riscos</h3>
+                    <p class="text-gray-300 mb-6">Implantação acompanhada, treinamento e suporte incluso.</p>
+                    <div class="text-4xl font-black text-emerald-400">
+                        A partir de R$ 69,90 <span class="text-lg font-normal text-gray-400">/mês após o período gratuito</span>
+                    </div>
+                    <div class="mt-8">
+                        <a href="#cadastro" class="inline-block bg-white text-black font-bold px-10 py-4 rounded-xl hover:bg-emerald-400 transition-colors fade-in-section py-20 px-4">
+                            Garantir minha vaga no Programa Fundadores
+                        </a>
+                    </div>
+                </div>
+            </div>
+    
+        </div>
+    </section>
+
+    <!-- formulario -->
+    <section id="cadastro" class="py-20 px-4 fade-in-section py-20 px-4">
+        <div class="max-w-xl mx-auto glass p-10 rounded-3xl">
+    
+            <h2 class="text-3xl font-bold mb-2 text-center">
+                Garantir Minha Vaga
+            </h2>
+    
+            <p class="text-center text-gray-400 mb-8">
+                Participe do Programa Fundadores MEDLM
+            </p>
+    
+            <form class="space-y-5">
+    
+                <!-- Clínica -->
+                <div class="relative group">
+                    <i data-lucide="building-2"
+                       class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-400 transition-all duration-300 group-hover:scale-110">
+                    </i>
+    
+                    <input
+                        type="text"
+                        placeholder="Nome da Clínica"
+                        class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
+                        outline-none transition-all duration-300
+                        hover:border-emerald-500
+                        focus:border-emerald-500
+                        focus:shadow-[0_0_20px_rgba(16,185,129,.3)]">
+                </div>
+    
+                <!-- Nome -->
+                <div class="relative group">
+                    <i data-lucide="user"
+                       class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-cyan-400 transition-all duration-300 group-hover:scale-110">
+                    </i>
+    
+                    <input
+                        type="text"
+                        placeholder="Seu Nome"
+                        class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
+                        outline-none transition-all duration-300
+                        hover:border-cyan-500
+                        focus:border-cyan-500
+                        focus:shadow-[0_0_20px_rgba(6,182,212,.3)]">
+                </div>
+    
+                <!-- WhatsApp -->
+                <div class="relative group">
+                    <i data-lucide="phone"
+                       class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-green-400 transition-all duration-300 group-hover:scale-110">
+                    </i>
+    
+                    <input
+                        type="tel"
+                        placeholder="WhatsApp"
+                        class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
+                        outline-none transition-all duration-300
+                        hover:border-green-500
+                        focus:border-green-500
+                        focus:shadow-[0_0_20px_rgba(34,197,94,.3)]">
+                </div>
+    
+                <!-- Email -->
+                <div class="relative group">
+                    <i data-lucide="mail"
+                       class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-purple-400 transition-all duration-300 group-hover:scale-110">
+                    </i>
+    
+                    <input
+                        type="email"
+                        placeholder="E-mail"
+                        class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
+                        outline-none transition-all duration-300
+                        hover:border-purple-500
+                        focus:border-purple-500
+                        focus:shadow-[0_0_20px_rgba(168,85,247,.3)]">
+                </div>
+    
+                <button
+                    class="w-full btn-custom py-4 rounded-xl font-bold
+                    transition-all duration-300
+                    hover:scale-105
+                    hover:shadow-[0_0_30px_rgba(16,185,129,.5)]">
+                    Quero Garantir Minha Vaga
+                </button>
+    
+            </form>
+        </div>
+    </section>
+    <!-- secao de faq respondendo possiveis duvidas -->
+    <section class="py-20 px-4 fade-in-section py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-6">Perguntas Frequentes</h2>
+                <p class="text-gray-400">Tire suas dúvidas e entenda por que o MEDLM é a escolha ideal para sua clínica.</p>
+            </div>
+    
+            <div class="space-y-4">
+                
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            Quais profissionais o MEDLM atende?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            O MEDLM foi desenhado para clínicas multidisciplinares, atendendo com excelência psicólogos, fisioterapeutas, nutricionistas e terapeutas em geral que buscam organizar o consultório de forma profissional.
+                        </div>
+                    </details>
+                </div>
+    
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            Como funciona a segurança dos dados?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            Levamos a LGPD a sério. Utilizamos criptografia de nível bancário em todas as transmissões e realizamos backups diários automatizados para garantir que nenhuma informação clínica seja perdida.
+                        </div>
+                    </details>
+                </div>
+    
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            Preciso de uma equipe de TI para instalar?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            De forma alguma! O MEDLM é 100% web (SaaS). Basta um navegador de internet para acessar. Não há necessidade de instalações ou qualquer suporte técnico especializado.
+                        </div>
+                    </details>
+                </div>
+    
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            Como funciona a migração de outro sistema?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            Nós oferecemos migração assistida. Nossa equipe auxilia no processo de transição para que você não perca seu histórico, permitindo que você mude para o MEDLM sem esforço.
+                        </div>
+                    </details>
+                </div>
+    
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            Existe fidelidade no plano?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            Acreditamos na qualidade do nosso sistema. Por isso, trabalhamos com um modelo de assinatura flexível, sem amarras desnecessárias. Você permanece enquanto estiver satisfeito.
+                        </div>
+                    </details>
+                </div>
+    
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            Posso testar antes de assinar?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            Sim! Através do nosso Programa Fundadores, você ganha 3 meses de uso totalmente gratuitos para conhecer todas as funcionalidades e ver a transformação na sua rotina.
+                        </div>
+                    </details>
+                </div>
+    
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            O sistema é multi-clínica?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            Sim. Ele foi projetado para gestores que possuem mais de um consultório ou unidade. Você centraliza toda a gestão em uma única conta, com total controle de cada unidade.
+                        </div>
+                    </details>
+                </div>
+    
+                <div class="glass rounded-2xl border border-emerald-500/10 overflow-hidden">
+                    <details class="group">
+                        <summary class="p-6 cursor-pointer font-bold flex justify-between items-center outline-none">
+                            Como funciona o suporte?
+                            <i data-lucide="chevron-down" class="group-open:rotate-180 transition-transform"></i>
+                        </summary>
+                        <div class="px-6 pb-6 text-gray-400 border-t border-emerald-500/10 pt-4">
+                            O suporte é rápido e humano. Como participante do Programa Fundadores, você tem acesso prioritário ao nosso time de atendimento diretamente via WhatsApp.
+                        </div>
+                    </details>
+                </div>
+    
+            </div>
+        </div>
+    </section>
+    <!-- secao de depoimentos -->
+    <section class="py-20 px-4 overflow-hidden">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6">Apoiado por <span class="gradient-text">especialistas</span></h2>
+        </div>
+    
+        <div class="flex gap-8 overflow-hidden" id="marquee-container">
+            <div class="flex gap-8 animate-marquee">
+                <div class="glass p-8 rounded-3xl w-80 border border-white/5 flex-shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-emerald-500/20 mb-6"></div>
+                    <h3 class="font-bold">Dra. Amanda Souza</h3>
+                    <p class="text-emerald-400 text-sm mb-4">Gestão Clínica</p>
+                    <p class="text-gray-400 italic text-sm">"O MEDLM resolve a lacuna entre complexidade e usabilidade."</p>
+                </div>
+                <div class="glass p-8 rounded-3xl w-80 border border-white/5 flex-shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-blue-500/20 mb-6"></div>
+                    <h3 class="font-bold">Dr. Ricardo Mello</h3>
+                    <p class="text-blue-400 text-sm mb-4">Tech Investor</p>
+                    <p class="text-gray-400 italic text-sm">"A arquitetura multi-tenant é o diferencial que faltava."</p>
+                </div>
+                <div class="glass p-8 rounded-3xl w-80 border border-white/5 flex-shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-purple-500/20 mb-6"></div>
+                    <h3 class="font-bold">Sofia Andrade</h3>
+                    <p class="text-purple-400 text-sm mb-4">Compliance LGPD</p>
+                    <p class="text-gray-400 italic text-sm">"Segurança nativa e conformidade que dão paz de espírito."</p>
+                </div>
+                <div class="glass p-8 rounded-3xl w-80 border border-white/5 flex-shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-pink-500/20 mb-6"></div>
+                    <h3 class="font-bold">Dr. Felipe Gusmão</h3>
+                    <p class="text-pink-400 text-sm mb-4">Psicólogo Clínico</p>
+                    <p class="text-gray-400 italic text-sm">"O prontuário do MEDLM respeita o sigilo e a privacidade que a nossa profissão exige."</p>
+                </div>
+                
+                <div class="glass p-8 rounded-3xl w-80 border border-white/5 flex-shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-cyan-500/20 mb-6"></div>
+                    <h3 class="font-bold">Beatriz Rocha</h3>
+                    <p class="text-cyan-400 text-sm mb-4">Estrategista Digital</p>
+                    <p class="text-gray-400 italic text-sm">"A experiência do paciente no MEDLM é fluida e moderna, exatamente o que o mercado exige hoje."</p>
+                </div>
+                
+                <div class="glass p-8 rounded-3xl w-80 border border-white/5 flex-shrink-0">
+                    <div class="w-16 h-16 rounded-full bg-amber-500/20 mb-6"></div>
+                    <h3 class="font-bold">Dr. Marcos Vinicius</h3>
+                    <p class="text-amber-400 text-sm mb-4">Fisioterapeuta</p>
+                    <p class="text-gray-400 italic text-sm">"A automação da agenda me devolveu horas semanais que antes eu perdia com burocracias."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+     <!-- ?botao quero gantir vaga -->
+     <a href="#cadastro" 
+     class="fixed bottom-6 right-6 z-50 px-6 py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-cyan-500 text-white font-bold shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center gap-2 animate-bounce hover:scale-105 transition-all duration-300">
+            <i data-lucide="rocket" class="w-5 h-5"></i>
+            <span>Quero Garantir Minha Vaga</span>
+     </a>
+
+    <!-- footer -->
+    <footer class="bg-gray-950/50 pt-16 pb-8 border-t border-emerald-900/50 fade-in-section py-20 px-4">
+        <div class="max-w-6xl mx-auto px-4 grid md:grid-cols-3 gap-12 text-center md:text-left">
+            
+            <div class="flex flex-col items-center md:items-start gap-4">
+                <img src="../logo/LogoTop2.png" alt="Logo MEDLM" class="w-32">
+                <p class="text-sm text-gray-400 max-w-xs">
+                    Sua parceira estratégica na gestão clínica inteligente. Tecnologia, segurança e eficiência em uma única plataforma.
+                </p>
+            </div>
+    
+            <div class="flex flex-col items-center gap-4">
+                <h4 class="text-emerald-500 font-bold uppercase tracking-widest">Fale com nossa Equipe</h4>
+                <div class="flex flex-col gap-2">
+                    <a href="https://wa.me/5511970166621" class="flex items-center gap-2 text-gray-200 hover:text-emerald-400 transition-colors">
+                        <i data-lucide="phone" class="w-5 h-5"></i>
+                        <span>(11) 97016-6621</span>
+                    </a>
+                    <a href="mailto:lenadrommarquess.n@gmail.com" class="flex items-center gap-2 text-gray-200 hover:text-emerald-400 transition-colors">
+                        <i data-lucide="mail" class="w-5 h-5"></i>
+                        <span>lenadrommarquess.n@gmail.com</span>
+                    </a>
+                </div>
+            </div>
+    
+            <div class="flex flex-col items-center md:items-end gap-4">
+                <h4 class="text-emerald-500 font-bold uppercase tracking-widest">Navegação</h4>
+                <a href="#hero" class="text-gray-400 hover:text-white transition-colors">Início</a>
+                <a href="#cadastro" class="text-gray-400 hover:text-white transition-colors">Programa Fundadores</a>
+            </div>
+        </div>
+    
+        <div class="max-w-6xl mx-auto px-4 mt-12 pt-8 border-t border-white/5 text-center">
+            <p class="text-gray-500 text-sm">
+                © 2026 MED LM | Sistema Clínico Inteligente. Todos os direitos reservados.
+            </p>
+        </div>
+    </footer>
+   
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            // 1. Inicialização Geral
+            lucide.createIcons();
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Aplica animação em todos os elementos com a classe .fade-in-section
+            document.querySelectorAll('.fade-in-section').forEach((section) => {
+                gsap.from(section, {
+                opacity: 0,
+                y: 50,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: section,
+                    start: "top 80%", // Começa a animar quando 80% da seção estiver visível
+                    toggleActions: "play none none none"
+                }
+                });
+            });
+            
+    
+            // 2. Efeito Brilho Holográfico (Glass Cards)
+            document.querySelectorAll('.glass').forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const rect = card.getBoundingClientRect();
+                    gsap.to(card, { 
+                        "--x": `${e.clientX - rect.left}px`, 
+                        "--y": `${e.clientY - rect.top}px`, 
+                        duration: 0.3 
+                    });
+                });
+            });
+    
+            // 3. Lógica do Carrossel Automático
+            let currentIndex = 0;
+            const items = document.querySelectorAll('.carousel-item');
+            
+            if (items.length > 0) {
+                setInterval(() => {
+                    items[currentIndex].classList.replace('opacity-100', 'opacity-0');
+                    currentIndex = (currentIndex + 1) % items.length;
+                    items[currentIndex].classList.replace('opacity-0', 'opacity-100');
+                }, 4000);
+            }
+    
+            // 4. Animações GSAP ScrollTrigger (Parallax e Entrada)
+            
+            // Entrada suave dos cards
+            gsap.from(".card-item", {
+                scrollTrigger: {
+                    trigger: ".parallax-cards",
+                    start: "top 80%",
+                    toggleActions: "play none none reverse"
+                },
+                y: 100,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2
+            });
+    
+            // Parallax no Hero (Efeito de desaparecimento e movimento)
+            gsap.to("#hero", {
+                scrollTrigger: {
+                    trigger: "#hero",
+                    scrub: true,
+                    start: "top top",
+                    end: "bottom top"
+                },
+                y: 200,
+                opacity: 0
+            });
+        });
+    </script>
+</body>  
+
+</html>
