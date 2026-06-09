@@ -16,6 +16,18 @@ INSERT IGNORE INTO planos (id, nome_plano, valor_base, valor_promocional, limite
 (2, 'premium', 169.90, 129.90, 10),
 (3, 'enterprise', 209.90, 159.90, 999);
 
+-- 2.1  LISTA DE ESPERA DE FUNDADORES DO MED LM
+CREATE TABLE IF NOT EXISTS lista_espera (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome_clinica VARCHAR(100) NOT NULL,
+    responsavel VARCHAR(50) NOT NULL,
+    whatsapp VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    status ENUM('pendente', 'contatado', 'convertido') DEFAULT 'pendente',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 -- 3. TABELA DE CLÍNICAS
 CREATE TABLE IF NOT EXISTS clinicas (
   id INT AUTO_INCREMENT PRIMARY KEY,

@@ -15,6 +15,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+   
     <!-- final comparar -->
     
     <style>
@@ -322,7 +323,7 @@
     
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 fade-in-section py-20 px-4">
                 
-                <div class="glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
+                <div class="card-item glass p-8 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300">
                     <i data-lucide="clock" class="w-10 h-10 text-emerald-400 mb-6"></i>
                     <h3 class="text-xl font-bold mb-3">Economia de Tempo</h3>
                     <p class="text-gray-400 text-sm">Automatize agendamentos e burocracias. Menos tempo na tela, mais tempo atendendo quem realmente importa: seu paciente.</p>
@@ -439,7 +440,7 @@
                 Participe do Programa Fundadores MEDLM
             </p>
     
-            <form class="space-y-5">
+            <form class="space-y-5" id="formFundador">
     
                 <!-- Clínica -->
                 <div class="relative group">
@@ -450,6 +451,7 @@
                     <input
                         type="text"
                         placeholder="Nome da Clínica"
+                        id="nomeClinica"
                         class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
                         outline-none transition-all duration-300
                         hover:border-emerald-500
@@ -465,7 +467,8 @@
     
                     <input
                         type="text"
-                        placeholder="Seu Nome"
+                        placeholder="Nome do responsavel"
+                        id="nomeResponsavel"
                         class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
                         outline-none transition-all duration-300
                         hover:border-cyan-500
@@ -482,6 +485,7 @@
                     <input
                         type="tel"
                         placeholder="WhatsApp"
+                        id="whatsapp"
                         class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
                         outline-none transition-all duration-300
                         hover:border-green-500
@@ -498,6 +502,7 @@
                     <input
                         type="email"
                         placeholder="E-mail"
+                        id="email"
                         class="w-full pl-12 p-4 rounded-xl bg-black/20 border border-white/10
                         outline-none transition-all duration-300
                         hover:border-purple-500
@@ -509,7 +514,7 @@
                     class="w-full btn-custom py-4 rounded-xl font-bold
                     transition-all duration-300
                     hover:scale-105
-                    hover:shadow-[0_0_30px_rgba(16,185,129,.5)]">
+                    hover:shadow-[0_0_30px_rgba(16,185,129,.5)]"id="btnSubmit">
                     Quero Garantir Minha Vaga
                 </button>
     
@@ -721,6 +726,19 @@
             </p>
         </div>
     </footer>
+    <!-- modal de sucesso -->
+    <div id="modalSucesso" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm transition-opacity duration-300">
+        <div class="glass border border-emerald-500/30 p-8 rounded-3xl max-w-md w-full text-center transform scale-95 transition-transform duration-300" id="modalContent">
+            <div class="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i data-lucide="check-circle-2" class="w-10 h-10 text-emerald-400"></i>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Iniciativa Brilhante!</h2>
+            <p class="text-gray-400 mb-8">Recebemos seu interesse na MedLM. Você acaba de dar o primeiro passo para o ecossistema de gestão clínica mais completo do mundo. Entraremos em contato em breve!</p>
+            <button onclick="fecharModal()" class="w-full py-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 font-bold transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
    
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -795,6 +813,73 @@
                 opacity: 0
             });
         });
+        // script do formulario
+                
+        document.getElementById('formFundador').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // 1. Elementos da UI
+    const btn = document.getElementById('btnSubmit');
+    const form = e.target;
+    const modal = document.getElementById('modalSucesso'); // Referência ao modal
+    
+    // 2. Coleta de dados
+    const dados = {
+        nome_clinica: document.getElementById('nomeClinica').value.trim(),
+        responsavel: document.getElementById('nomeResponsavel').value.trim(),
+        whatsapp: document.getElementById('whatsapp').value.replace(/\D/g, ''),
+        email: document.getElementById('email').value.toLowerCase().trim()
+    };
+
+    // 3. Validação
+    if (dados.nome_clinica.length < 3) return alert('Por favor, informe um nome de clínica válido.');
+    if (dados.whatsapp.length < 10) return alert('WhatsApp inválido. Inclua o DDD.');
+    if (!dados.email.includes('@') || !dados.email.includes('.')) return alert('E-mail inválido.');
+
+    // 4. Estado de envio
+    btn.disabled = true;
+    btn.textContent = 'Processando...';
+
+    try {
+        const response = await fetch('/programa-fundadores/salvar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // --- AQUI A MÁGICA DO MODAL ---
+            form.reset(); // Limpa o formulário
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+
+            // 3. A ANIMAÇÃO QUE VOCÊ PEDIU (cole aqui!)
+            gsap.fromTo("#modalContent", { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.3 });
+            
+            // Animação GSAP (se você estiver usando)
+            if (typeof gsap !== 'undefined') {
+                gsap.fromTo("#modalContent", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.7)" });
+            }
+        } else {
+            alert(result.error || 'Erro ao enviar. Tente novamente.');
+        }
+    } catch (err) {
+        console.error('Erro de conexão:', err);
+        alert('Não foi possível conectar ao servidor. Verifique sua internet.');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Quero Garantir Minha Vaga';
+    }
+});
+// Função para fechar
+function fecharModal() {
+    const modal = document.getElementById('modalSucesso');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
     </script>
 </body>  
 

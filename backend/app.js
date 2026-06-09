@@ -18,6 +18,7 @@ const portalRoutes = require('./routes/portal-agendamento-routes');
 const portalPacientelroutes = require('./routes/portalPacienteroutes');
 const openAiRoutes = require('./routes/openAiRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Rotas de API do Admin
+const landingPageRoutes = require('./routes/lading_pageRoutes');
 
 // importação Middleware
 const authAdmin = require('./middleware/authAdmin'); // Middleware de proteção
@@ -70,6 +71,8 @@ app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/config', configuracaoRoutes);
 app.use('/agendar', portalRoutes);
 app.use('/portal_paciente', portalPacientelroutes); // Aqui mapeamos o prefixo
+app.use('/programa-fundadores', landingPageRoutes)
+console.log("Rota /programa-fundadores montada com sucesso!");
 
 
 // --- API ADMINISTRATIVA (MedLM Master) ---

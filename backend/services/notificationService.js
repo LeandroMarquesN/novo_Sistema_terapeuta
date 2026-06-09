@@ -266,3 +266,34 @@ exports.sendProntuarioEmailNotification = async (dadosProntuario) => {
     throw error;
   }
 };
+
+// =========================================================================
+// 6. E-MAIL PROGRAMA FUNDADORES (Landing Page)
+// =========================================================================
+exports.sendProgramaFundadoresEmail = async (dados) => {
+  console.log(`[MED-LM] 📩 Enviando confirmação de interesse para: ${dados.email}`);
+
+  try {
+    const templatePath = path.join(__dirname, '..', 'templates', 'lading_pageTemplate.html');
+    const htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+
+    const templateData = {
+      dono_nome: dados.responsavel,
+      nome_clinica: dados.nome_clinica,
+      ano_atual: new Date().getFullYear()
+    };
+
+    await transporter.sendMail({
+      from: `"Equipe MedLM" <${process.env.EMAIL_USER}>`,
+      to: dados.email,
+      // Adicionamos o BCC para o seu e-mail pessoal
+      bcc: 'leandrommarquess.n@gmail.com',
+      subject: 'Bem-vindo ao Programa Fundadores MedLM!',
+      html: replacePlaceholders(htmlTemplate, templateData)
+    });
+
+    console.log(`[MED-LM] ✅ E-mail de Fundadores enviado com sucesso para: ${dados.email}`);
+  } catch (error) {
+    console.error(`[MED-LM] ❌ ERRO NO ENVIO DE FUNDADORES:`, error.message);
+  }
+};
