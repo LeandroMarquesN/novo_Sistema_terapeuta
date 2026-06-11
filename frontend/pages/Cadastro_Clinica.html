@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -7,340 +6,718 @@
     <title>Cadastro MedLM - Sistema Terapêutico</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
-        .plan-card input:checked + div {
-            border-color: #2563eb;
-            background-color: #eff6ff;
-            ring: 2px;
-            ring-color: #2563eb;
+        :root {
+            --emerald:   #34d399;
+            --emerald-d: #059669;
+            --cyan:      #22d3ee;
+            --teal:      #0f766e;
+            --amber:     #fbbf24;   /* complementar quente — só para acentos pontuais */
+            --amber-d:   #d97706;
+            --slate-bg:  #020c12;
         }
-        @keyframes pulse-gold {
-            0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(234, 179, 8, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
+
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .display { font-family: 'Space Grotesk', sans-serif; }
+
+        /* ── FUNDO ───────────────────────────────────────────── */
+        body {
+            background: var(--slate-bg);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
-        .promo-badge { animation: pulse-gold 2s infinite; }
+
+        /* orbs de luz ambiente */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(120px);
+            opacity: 0.18;
+            z-index: 0;
+        }
+        body::before {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, #059669, transparent 70%);
+            top: -150px; left: -150px;
+            animation: driftA 18s ease-in-out infinite alternate;
+        }
+        body::after {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, #0891b2, transparent 70%);
+            bottom: -100px; right: -100px;
+            animation: driftB 22s ease-in-out infinite alternate;
+        }
+        @keyframes driftA { to { transform: translate(80px, 80px); } }
+        @keyframes driftB { to { transform: translate(-60px, -60px); } }
+
+        /* grade sutil */
+        .grid-bg {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(52,211,153,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52,211,153,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* ── WRAPPER ─────────────────────────────────────────── */
+        .page-wrap { position: relative; z-index: 1; }
+
+        /* ── BADGE PROMO ─────────────────────────────────────── */
+        @keyframes pulse-glow {
+            0%,100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+            50%      { box-shadow: 0 0 24px 4px rgba(52,211,153,0.25); }
+        }
+        .promo-badge { animation: pulse-glow 3s ease-in-out infinite; }
+
+        .promo-strip {
+            background: linear-gradient(135deg,
+                rgba(5,150,105,0.25) 0%,
+                rgba(8,145,178,0.20) 50%,
+                rgba(251,191,36,0.12) 100%);
+            border: 1px solid rgba(52,211,153,0.25);
+            backdrop-filter: blur(16px);
+        }
+
+        .promo-price {
+            background: linear-gradient(135deg, var(--emerald), var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ── GLASS PANELS ────────────────────────────────────── */
+        .glass-panel {
+            background: rgba(255,255,255,0.04);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.09);
+        }
+        .glass-card-dark {
+            background: rgba(2,12,18,0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* ── INPUTS COM ÍCONE ────────────────────────────────── */
+        .input-group { position: relative; }
+
+        .input-icon {
+            position: absolute;
+            left: 14px; top: 50%; transform: translateY(-50%);
+            color: rgba(52,211,153,0.45);
+            font-size: 14px;
+            transition: color 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .glass-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05) !important;
+            border: 1px solid rgba(255,255,255,0.10) !important;
+            color: #fff !important;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+            font-size: 14px;
+        }
+        .glass-input::placeholder { color: rgba(255,255,255,0.30) !important; }
+
+        /* focus */
+        .glass-input:-webkit-autofill,
+        .glass-input:-webkit-autofill:hover, 
+        .glass-input:-webkit-autofill:focus {
+            -webkit-text-fill-color: #fff !important;
+            -webkit-box-shadow: 0 0 0px 1000px rgba(15, 23, 42, 0.9) inset !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        .glass-input:focus {
+            border-color: var(--emerald) !important;
+            background: rgba(52,211,153,0.07) !important;
+            box-shadow: 0 0 0 3px rgba(52,211,153,0.15), 0 0 20px rgba(52,211,153,0.08) !important;
+        }
+        .input-group:focus-within .input-icon {
+            color: var(--emerald);
+            transform: translateY(-50%) scale(1.15);
+        }
+
+        /* hover */
+        .input-group:hover .glass-input:not(:focus) {
+            border-color: rgba(52,211,153,0.35) !important;
+            background: rgba(255,255,255,0.07) !important;
+        }
+        .input-group:hover .input-icon { color: rgba(52,211,153,0.65); }
+
+        /* ── LABELS ──────────────────────────────────────────── */
+        .field-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 700;
+            color: rgba(110,231,183,0.75);
+            text-transform: uppercase; letter-spacing: 0.08em;
+            margin-bottom: 6px;
+        }
+        .field-label i { font-size: 9px; color: var(--amber); }
+
+        /* ── PLAN CARDS ──────────────────────────────────────── */
+        .plan-card input:checked + .plan-inner {
+            border-color: var(--emerald) !important;
+            background: rgba(52,211,153,0.10) !important;
+            box-shadow: 0 0 0 1px rgba(52,211,153,0.4), 0 0 20px rgba(52,211,153,0.12);
+        }
+        .plan-inner {
+            padding: 16px; border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.04);
+            transition: border-color 0.3s, background 0.3s, box-shadow 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        .plan-inner:hover {
+            border-color: rgba(52,211,153,0.40) !important;
+            background: rgba(52,211,153,0.06) !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(52,211,153,0.08);
+        }
+        .plan-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+        .plan-badge {
+            display: inline-block;
+            font-size: 9px; font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 99px;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            margin-top: 6px;
+        }
+
+        /* ── BOTÃO PRINCIPAL ─────────────────────────────────── */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 15px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: none;
+            background: linear-gradient(135deg, var(--emerald-d) 0%, #0284c7 100%);
+            color: #fff;
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, var(--emerald) 0%, var(--cyan) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 12px 40px rgba(52,211,153,0.30), 0 0 0 1px rgba(52,211,153,0.30);
+        }
+        .btn-primary:hover::before { opacity: 1; }
+        .btn-primary:active { transform: scale(0.99); }
+        .btn-primary span, .btn-primary i { position: relative; z-index: 1; }
+        @keyframes shimmer {
+            0%   { transform: translateX(-120%) skewX(-15deg); }
+            100% { transform: translateX(320%) skewX(-15deg); }
+        }
+        .btn-primary::after {
+            content: '';
+            position: absolute; top: 0; left: 0;
+            width: 40%; height: 100%;
+            background: rgba(255,255,255,0.12);
+            transform: translateX(-120%) skewX(-15deg);
+            transition: none;
+        }
+        .btn-primary:hover::after { animation: shimmer 0.7s ease forwards; }
+
+        /* ── BENEFITS ────────────────────────────────────────── */
+        .benefit-row {
+            display: flex; align-items: center; gap: 12px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            transition: background 0.25s;
+        }
+        .benefit-row:hover { background: rgba(52,211,153,0.06); }
+        .benefit-icon-wrap {
+            width: 34px; height: 34px; flex-shrink: 0;
+            border-radius: 8px;
+            background: rgba(52,211,153,0.10);
+            border: 1px solid rgba(52,211,153,0.20);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px;
+            transition: background 0.25s, transform 0.25s;
+        }
+        .benefit-row:hover .benefit-icon-wrap {
+            background: rgba(52,211,153,0.18);
+            transform: scale(1.10);
+        }
+
+        /* ── PREÇO SIDE ──────────────────────────────────────── */
+        .price-gradient {
+            background: linear-gradient(135deg, #fff 30%, var(--emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ── SUPORTE CTA ─────────────────────────────────────── */
+        .support-cta {
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: border-color 0.3s, background 0.3s;
+        }
+        .support-cta:hover {
+            border-color: rgba(52,211,153,0.30);
+            background: rgba(52,211,153,0.04) !important;
+        }
+        .support-link {
+            color: var(--emerald);
+            transition: color 0.25s, gap 0.25s;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
+        .support-link:hover { color: #fff; }
+        .support-link i { transition: transform 0.3s; }
+        .support-link:hover i { transform: translateX(3px); }
+
+        /* ── CHECKBOX ────────────────────────────────────────── */
+        input[type=checkbox] {
+            accent-color: var(--emerald);
+            width: 15px; height: 15px;
+            cursor: pointer;
+        }
+
+        /* ── MODAL ───────────────────────────────────────────── */
+        @keyframes modalIn {
+            from { transform: translateY(30px) scale(0.97); opacity: 0; }
+            to   { transform: translateY(0) scale(1); opacity: 1; }
+        }
+        .modal-card { animation: modalIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+
+        /* ── HEADER LOGO ─────────────────────────────────────── */
+        .logo-dot { animation: pulse-glow 2.5s ease-in-out infinite; }
+
+        /* ── STEP INDICATOR ──────────────────────────────────── */
+        .step-line {
+            height: 2px;
+            background: linear-gradient(90deg, var(--emerald), var(--cyan), transparent);
+            border-radius: 1px;
+            margin-bottom: 28px;
+        }
+
+        /* section titles */
+        .section-eyebrow {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 10px; font-weight: 700;
+            color: var(--amber);
+            text-transform: uppercase; letter-spacing: 0.12em;
+            margin-bottom: 4px;
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+        ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 3px; }
+
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="text-slate-100">
+<div class="grid-bg"></div>
 
-    <div class="max-w-6xl mx-auto px-4 py-8">
-        <!-- Banner de Promoção de Boas-vindas -->
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-1 mb-8 shadow-lg promo-badge">
-            <div class="bg-white/10 backdrop-blur-sm rounded-xl py-3 px-6 flex flex-col md:flex-row items-center justify-between text-white">
-                <div class="flex items-center gap-4 mb-2 md:mb-0">
-                    <span class="bg-yellow-400 text-blue-900 font-bold px-3 py-1 rounded-full text-xs uppercase tracking-wider">Oferta de Lançamento</span>
-                    <p class="font-medium text-sm md:text-base italic">Qualquer plano por apenas <span class="text-yellow-400 font-bold text-xl">R$ 69,90</span>apos os 3 meses de gratuidade!</p>
-                </div>
-                <div class="text-xs text-blue-100 opacity-80">* Após o período, aplica-se o valor base do plano escolhido.</div>
+<div class="page-wrap max-w-6xl mx-auto px-4 py-10">
+
+    <!-- ── HEADER ──────────────────────────────────────────── -->
+    <div class="flex items-center justify-between mb-8">
+        <div class="flex items-center gap-3">
+            <div class="logo-dot w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                <i class="fas fa-heartbeat text-white text-sm"></i>
             </div>
+            <span style="font-family:'Space Grotesk',sans-serif" class="text-xl font-bold text-white tracking-tight">Med<span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">LM</span></span>
         </div>
-
-        <div class="grid lg:grid-cols-12 gap-8">
-
-            <!-- Lado Esquerdo: Formulário -->
-            <div class="lg:col-span-7 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
-                <div class="mb-8">
-                    <h1 class="text-2xl font-bold text-slate-800">Configure sua Clínica</h1>
-                    <p class="text-slate-500 italic">Preencha os dados abaixo para criar sua conta master.</p>
-                </div>
-
-                <form id="formCadastro" class="space-y-5">
-                    <!-- Nome e Dono -->
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome da Clínica</label>
-                            <input type="text" name="nome_clinica" required placeholder="Ex: Clínica Equilíbrio"
-                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Nome do Responsável</label>
-                            <input type="text" name="dono_nome" required placeholder="Seu nome completo"
-                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                        </div>
-                    </div>
-
-                    <!-- Email e Senha -->
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">E-mail Profissional</label>
-                            <input type="email" name="email_master" required placeholder="email@clinica.com"
-                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Senha Master</label>
-                            <input type="password" name="senha_master" required minlength="6" placeholder="******"
-                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                        </div>
-                    </div>
-
-                    <!-- Telefones -->
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">WhatsApp Clínica</label>
-                            <input type="text" name="telefone_clinica" required placeholder="(00) 00000-0000"
-                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Seu Celular</label>
-                            <input type="text" name="telefone_dono" required placeholder="(00) 00000-0000"
-                                class="w-full px-4 py-3 rounded-lg border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none transition">
-                        </div>
-                    </div>
-
-                    <!-- SELEÇÃO DE PLANOS (ID do plano para o banco) -->
-                    <div class="pt-4">
-                        <label class="block text-xs font-bold text-slate-500 uppercase mb-3">Escolha seu Plano</label>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <!-- Trial -->
-                            <label class="plan-card cursor-pointer">
-                                <input type="radio" name="plano_id" value="1" checked class="hidden">
-                                <div class="p-4 border-2 border-slate-100 rounded-xl hover:border-blue-200 transition">
-                                    <p class="font-bold text-slate-800">Trial</p>
-                                    <p class="text-xs text-slate-500 italic">Até 3 membros</p>
-                                </div>
-                            </label>
-                            <!-- Premium -->
-                            <label class="plan-card cursor-pointer">
-                                <input type="radio" name="plano_id" value="2" class="hidden">
-                                <div class="p-4 border-2 border-slate-100 rounded-xl hover:border-blue-200 transition text-center">
-                                    <p class="font-bold text-slate-800">Premium</p>
-                                    <p class="text-xs text-slate-500 italic">Até 10 membros</p>
-                                </div>
-                            </label>
-                            <!-- Enterprise -->
-                            <label class="plan-card cursor-pointer">
-                                <input type="radio" name="plano_id" value="3" class="hidden">
-                                <div class="p-4 border-2 border-slate-100 rounded-xl hover:border-blue-200 transition text-right">
-                                    <p class="font-bold text-slate-800">Enterprise</p>
-                                    <p class="text-xs text-slate-500 italic">Ilimitado</p>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="flex items-start space-x-2 pt-4">
-                        <input type="checkbox" id="termos" required class="mt-1 h-4 w-4 text-blue-600 border-slate-300 rounded">
-                        <label for="termos" class="text-xs text-slate-500">Concordo com os termos e entendo que o valor de 69,90 é válido por 90 dias.</label>
-                    </div>
-
-                    <button type="submit" id="btnSubmit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all transform hover:scale-[1.01] active:scale-95">
-                        Finalizar e Criar Minha Clínica
-                    </button>
-                </form>
-            </div>
-
-            <!-- Lado Direito: Resumo e Benefícios -->
-            <div class="lg:col-span-5 space-y-6">
-                <div class="bg-slate-800 p-8 rounded-2xl text-white shadow-xl">
-                    <h3 class="text-xl font-bold mb-6">Por que escolher o MedLM?</h3>
-                    <ul class="space-y-4">
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check-circle text-emerald-400"></i>
-                            <span>Multitenancy: Seus dados 100% isolados</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check-circle text-emerald-400"></i>
-                            <span>Notificações WhatsApp inclusas</span>
-                        </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fas fa-check-circle text-emerald-400"></i>
-                            <span>Sistema seguro conforme o LGPD</span>
-                        </li>
-                    </ul>
-
-                    <div class="mt-8 pt-8 border-t border-slate-700">
-                        <p class="text-slate-400 text-sm">Resumo da Assinatura:</p>
-                        <div class="flex justify-between items-end mt-2">
-                            <div>
-                                <p class="text-2xl font-bold">R$ 69,90 <span class="text-sm font-normal text-slate-400">/mês</span></p>
-                                <p class="text-xs text-emerald-400">Preço garantido por 3 meses</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs text-slate-400">Expira em:</p>
-                                <p id="data-expiracao" class="text-sm font-mono font-bold text-white"></p> <!-- Aqui você pode injetar via JS depois -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-2xl border border-slate-100 text-center">
-                    <p class="text-sm text-slate-500 mb-2">Dúvidas sobre a migração de dados?</p>
-                    <a href="#" class="text-blue-600 font-bold hover:underline">Fale com um especialista</a>
-                </div>
-            </div>
+        <div class="flex items-center gap-2 text-xs text-emerald-300/60">
+            <i class="fas fa-shield-alt text-emerald-400/50 text-xs"></i>
+            Ambiente seguro · LGPD
         </div>
     </div>
 
-    <!-- O MODAL DE SUCESSO CONTINUA O MESMO QUE VOCÊ JÁ TINHA... -->
+    <!-- ── PROMO BANNER ────────────────────────────────────── -->
+    <div class="promo-strip promo-badge rounded-2xl p-4 mb-8 flex flex-col md:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+            <span class="bg-gradient-to-r from-amber-400 to-amber-500 text-slate-900 font-black px-3 py-1 rounded-full text-xs uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                <i class="fas fa-bolt text-xs"></i> Oferta de Lançamento
+            </span>
+            <p class="font-medium text-sm md:text-base text-white/90">
+                Qualquer plano por apenas
+                <span class="promo-price font-black text-2xl ml-1">R$ 89,90</span>
+                <span class="text-white/50 text-sm"> após 3 meses grátis!</span>
+            </p>
+        </div>
+        <div class="flex items-center gap-2 text-xs text-cyan-300/70 bg-white/5 rounded-lg px-3 py-1.5 border border-white/10">
+            <i class="fas fa-info-circle text-cyan-400/60"></i>
+            Após o período, aplica-se o valor base do plano.
+        </div>
+    </div>
 
+    <div class="grid lg:grid-cols-12 gap-8">
 
-     <!-- ======== MODAL SUCESSO TURBINADO ======= -->
-<div id="modalSucesso" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.9); backdrop-blur: 8px; z-index:999; justify-content:center; align-items:center; overflow-y: auto; padding: 20px;">
-    <div class="bg-white rounded-3xl p-8 text-center max-w-lg w-full shadow-2xl border border-blue-100">
-        <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fas fa-rocket text-blue-600 text-3xl"></i>
+        <!-- ── FORMULÁRIO ──────────────────────────────────── -->
+        <div class="lg:col-span-7 p-8 rounded-2xl shadow-2xl glass-panel">
+
+            <div class="mb-7">
+                <div class="section-eyebrow">
+                    <i class="fas fa-sparkles" style="font-size:9px"></i> Programa de Fundadores
+                </div>
+                <h1 class="text-2xl font-bold text-white tracking-tight">Configure sua Clínica</h1>
+                <p class="text-emerald-200/50 text-sm mt-1">Preencha os dados abaixo para criar sua conta master.</p>
+                <div class="step-line mt-4"></div>
+            </div>
+
+            <form id="formCadastro" class="space-y-5">
+
+                <!-- Nome e Dono -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="field-label"><i class="fas fa-circle"></i> Nome da Clínica</div>
+                        <div class="input-group">
+                            <i class="fas fa-hospital input-icon"></i>
+                            <input type="text" name="nome_clinica" required placeholder="Ex: Clínica Equilíbrio" class="glass-input">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="field-label"><i class="fas fa-circle"></i> Nome do Responsável</div>
+                        <div class="input-group">
+                            <i class="fas fa-user-md input-icon"></i>
+                            <input type="text" name="dono_nome" required placeholder="Seu nome completo" class="glass-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email e Senha -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="field-label"><i class="fas fa-circle"></i> E-mail Profissional</div>
+                        <div class="input-group">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" name="email_master" required placeholder="email@clinica.com" class="glass-input">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="field-label"><i class="fas fa-circle"></i> Senha Master</div>
+                        <div class="input-group">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" name="senha_master" required minlength="6" placeholder="••••••••" class="glass-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Telefones -->
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <div class="field-label"><i class="fas fa-circle"></i> WhatsApp Clínica</div>
+                        <div class="input-group">
+                            <i class="fab fa-whatsapp input-icon" style="font-size:15px"></i>
+                            <input type="text" name="telefone_clinica" required placeholder="(00) 00000-0000" class="glass-input">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="field-label"><i class="fas fa-circle"></i> Seu Celular</div>
+                        <div class="input-group">
+                            <i class="fas fa-mobile-alt input-icon"></i>
+                            <input type="text" name="telefone_dono" required placeholder="(00) 00000-0000" class="glass-input">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Planos -->
+                <div class="pt-2">
+                    <div class="field-label mb-3"><i class="fas fa-circle"></i> Escolha seu Plano</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+
+                        <!-- Trial -->
+                        <label class="plan-card cursor-pointer">
+                            <input type="radio" name="plano_id" value="1" checked class="hidden">
+                            <div class="plan-inner">
+                                <div class="plan-icon bg-emerald-500/10 border border-emerald-500/20">
+                                    <i class="fas fa-seedling text-emerald-400"></i>
+                                </div>
+                                <p class="font-bold text-white text-sm">Trial</p>
+                                <p class="text-xs text-white/40 mt-0.5">Até 3 membros</p>
+                                <span class="plan-badge bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">Gratuito</span>
+                            </div>
+                        </label>
+
+                        <!-- Premium -->
+                        <label class="plan-card cursor-pointer">
+                            <input type="radio" name="plano_id" value="2" class="hidden">
+                            <div class="plan-inner relative overflow-hidden">
+                                <div class="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_6px_2px_rgba(251,191,36,0.4)]"></div>
+                                <div class="plan-icon bg-cyan-500/10 border border-cyan-500/20">
+                                    <i class="fas fa-star text-cyan-400"></i>
+                                </div>
+                                <p class="font-bold text-white text-sm">Premium</p>
+                                <p class="text-xs text-white/40 mt-0.5">Até 10 membros</p>
+                                <span class="plan-badge bg-cyan-500/15 text-cyan-300 border border-cyan-500/20">Popular</span>
+                            </div>
+                        </label>
+
+                        <!-- Enterprise -->
+                        <label class="plan-card cursor-pointer">
+                            <input type="radio" name="plano_id" value="3" class="hidden">
+                            <div class="plan-inner">
+                                <div class="plan-icon bg-amber-500/10 border border-amber-500/20">
+                                    <i class="fas fa-crown text-amber-400"></i>
+                                </div>
+                                <p class="font-bold text-white text-sm">Enterprise</p>
+                                <p class="text-xs text-white/40 mt-0.5">Ilimitado</p>
+                                <span class="plan-badge bg-amber-500/15 text-amber-300 border border-amber-500/20">Completo</span>
+                            </div>
+                        </label>
+
+                    </div>
+                </div>
+
+                <!-- Termos -->
+                <div class="flex items-start gap-3 pt-2 p-3 rounded-lg bg-white/[0.03] border border-white/[0.06]">
+                    <input type="checkbox" id="termos" required class="mt-0.5">
+                    <label for="termos" class="text-xs text-white/55 leading-relaxed cursor-pointer select-none">
+                        Concordo com os termos de uso e entendo que o valor de
+                        <span class="text-emerald-400 font-semibold">R$ 89,90</span> é válido por
+                        <span class="text-emerald-400 font-semibold">90 dias</span> após o período gratuito.
+                    </label>
+                </div>
+
+                <!-- CTA -->
+                <button type="submit" id="btnSubmit" class="btn-primary">
+                    <i class="fas fa-rocket mr-2"></i>
+                    <span>Finalizar e Criar Minha Clínica</span>
+                </button>
+
+            </form>
         </div>
 
-        <h2 class="text-3xl font-black text-slate-800">Tudo pronto, <span id="nomeDonoModal" class="text-blue-600"></span>!</h2>
-        <p class="text-slate-500 mt-2 mb-8 italic">Sua clínica foi configurada com sucesso.</p>
+        <!-- ── LADO DIREITO ─────────────────────────────────── -->
+        <div class="lg:col-span-5 space-y-5">
 
-        <!-- PORTAL DE AGENDAMENTOS -->
-        <div class="bg-slate-50 rounded-2xl p-6 border-2 border-dashed border-slate-200 mb-6">
-            <h4 class="text-sm font-bold text-slate-700 uppercase tracking-widest mb-4">Seu Portal de Agendamentos Externo</h4>
+            <!-- Benefits card -->
+            <div class="p-7 rounded-2xl text-white shadow-2xl glass-card-dark">
+                <div class="section-eyebrow mb-1">
+                    <i class="fas fa-shield-check" style="font-size:9px"></i> Vantagens
+                </div>
+                <h3 style="font-family:'Space Grotesk',sans-serif" class="text-xl font-bold text-white mb-5">Por que escolher o MedLM?</h3>
 
-            <!-- QR CODE -->
-            <div id="qrcode" class="flex justify-center mb-4 bg-white p-3 inline-block rounded-xl shadow-sm mx-auto"></div>
+                <div class="space-y-1">
+                    <div class="benefit-row">
+                        <div class="benefit-icon-wrap">
+                            <i class="fas fa-database text-emerald-400" style="font-size:13px"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Dados 100% isolados</p>
+                            <p class="text-xs text-white/40">Arquitetura multitenancy segura</p>
+                        </div>
+                    </div>
+                    <div class="benefit-row">
+                        <div class="benefit-icon-wrap">
+                            <i class="fab fa-whatsapp text-emerald-400" style="font-size:13px"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Notificações WhatsApp</p>
+                            <p class="text-xs text-white/40">Lembretes automáticos inclusos</p>
+                        </div>
+                    </div>
+                    <div class="benefit-row">
+                        <div class="benefit-icon-wrap">
+                            <i class="fas fa-gavel text-emerald-400" style="font-size:13px"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-white">Conforme a LGPD</p>
+                            <p class="text-xs text-white/40">Privacidade garantida por lei</p>
+                        </div>
+                    </div>
+                </div>
 
-            <p class="text-xs text-slate-500 mb-4 px-4">
-                Use este link no <strong>Instagram</strong> ou <strong>Site</strong> para que seus pacientes agendem sozinhos.
+                <!-- Preço resumo -->
+                <div class="mt-7 pt-6 border-t border-white/[0.08]">
+                    <p class="text-white/40 text-xs uppercase tracking-wider mb-3">Resumo da Assinatura</p>
+                    <div class="flex justify-between items-end">
+                        <div>
+                            <p class="price-gradient text-3xl font-black" style="font-family:'Space Grotesk',sans-serif">
+                                R$ 89,90 <span class="text-sm font-normal text-white/40">/mês</span>
+                            </p>
+                            <div class="flex items-center gap-1.5 mt-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
+                                <p class="text-xs text-emerald-400 font-medium">Preço garantido por 3 meses</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs text-white/35 mb-1">Expira em:</p>
+                            <p id="data-expiracao" class="text-sm font-mono font-bold text-emerald-400"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Suporte -->
+            <div class="p-5 rounded-2xl glass-panel support-cta text-center">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+                    <i class="fas fa-headset text-emerald-400"></i>
+                </div>
+                <p class="text-sm text-white/55 mb-2">Dúvidas sobre a migração de dados?</p>
+                <a href="#" class="support-link font-bold text-sm">
+                    <i class="fas fa-comment-alt"></i> Fale com um especialista
+                    <i class="fas fa-arrow-right ml-1" style="font-size:10px"></i>
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- ── MODAL SUCESSO ────────────────────────────────────────── -->
+<div id="modalSucesso" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,12,18,0.90); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); z-index:999; justify-content:center; align-items:center; overflow-y:auto; padding:20px;">
+    <div class="modal-card bg-slate-900/95 rounded-3xl p-8 text-center max-w-lg w-full shadow-2xl border border-white/10 text-white">
+
+        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(52,211,153,0.20)]">
+            <i class="fas fa-rocket text-emerald-400 text-3xl"></i>
+        </div>
+
+        <h2 style="font-family:'Space Grotesk',sans-serif" class="text-3xl font-black text-white">
+            Tudo pronto, <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400" id="nomeDonoModal"></span>!
+        </h2>
+        <p class="text-white/40 mt-2 mb-8 text-sm">Sua clínica foi configurada com sucesso.</p>
+
+        <!-- Portal -->
+        <div class="bg-white/[0.04] rounded-2xl p-6 border border-white/[0.08] mb-6 text-left">
+            <div class="section-eyebrow justify-center mb-4">
+                <i class="fas fa-link" style="font-size:9px"></i> Seu Portal de Agendamentos Externo
+            </div>
+
+            <div id="qrcode" class="flex justify-center mb-4">
+                <div class="bg-white p-3 rounded-xl shadow-lg inline-block"></div>
+            </div>
+
+            <p class="text-xs text-white/50 text-center mb-4 px-2">
+                Use este link no <strong class="text-white/70">Instagram</strong> ou <strong class="text-white/70">Site</strong> para que seus pacientes agendem sozinhos.
             </p>
 
-            <!-- INPUT COM BOTÃO COPIAR -->
             <div class="relative flex items-center">
                 <input type="text" id="linkPortal" readonly
-                    class="w-full bg-white border border-slate-200 rounded-lg py-3 pl-4 pr-12 text-sm font-mono text-blue-600 outline-none">
-                <button onclick="copiarLink()" class="absolute right-2 bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 transition">
-                    <i class="fas fa-copy"></i>
+                    class="w-full bg-black/30 border border-white/10 rounded-xl py-3 pl-4 pr-12 text-sm font-mono text-emerald-400 outline-none focus:border-emerald-500 transition">
+                <button onclick="copiarLink()" class="absolute right-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-900 p-2 rounded-lg hover:scale-105 transition-transform shadow-md">
+                    <i class="fas fa-copy text-sm"></i>
                 </button>
             </div>
         </div>
 
         <div class="flex flex-col gap-3">
             <button onclick="window.location.href='/'"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all">
-                Acessar Painel Master
+                class="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 text-slate-900 font-black py-4 rounded-xl shadow-lg transition-all uppercase tracking-wider text-sm hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(52,211,153,0.30)]">
+                <i class="fas fa-th-large mr-2"></i> Acessar Painel Master
             </button>
-            <p class="text-[10px] text-slate-400 uppercase font-bold tracking-tighter">Enviamos seus dados de acesso para o e-mail cadastrado.</p>
+            <p class="text-[10px] text-white/30 uppercase font-bold tracking-wider">
+                <i class="fas fa-envelope mr-1"></i> Enviamos seus dados de acesso para o e-mail cadastrado.
+            </p>
         </div>
     </div>
 </div>
 
-    <style>
-    @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    </style>
-    <!-- ===== fIM NODAL CLINICA ===== -->
-
     <script>
         document.getElementById('formCadastro').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const btnSubmit = document.getElementById('btnSubmit');
-            const originalText = btnSubmit.innerText;
-
-            // 1. Feedback visual imediato
+            const originalHTML = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Criando sua conta...';
-
-            // 2. Captura os dados do formulário
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Criando sua conta...</span>';
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
+
 
             /*
                IMPORTANTE: Como usamos cards personalizados para os planos,
                o 'plano_id' será enviado automaticamente porque os inputs
                radio têm o name="plano_id".
             */
-
             try {
-                // 3. Chamada para a sua API de Registro
                 const response = await fetch('/api/clinicas/register-clinica', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
                 const result = await response.json();
-
-
-                    if (response.ok) {
-                    // 1. Pegamos o slug e o nome que vieram do servidor
-                    const slug = result.portalUrl; // O backend já envia "/agendar/slug"
-                    const nomeDono = data.dono_nome.split(' ')[0]; // Pega só o primeiro nome
-
-                    // 2. Construímos a URL completa (ajuste para o seu domínio real depois)
+                if (response.ok) {
+                    const slug = result.portalUrl;
+                    const nomeDono = data.dono_nome.split(' ')[0];
                     const urlCompleta = window.location.origin + slug;
-
-                    // 3. Preenchemos os campos do Modal
                     document.getElementById('nomeDonoModal').innerText = nomeDono;
                     document.getElementById('linkPortal').value = urlCompleta;
-
-                    // 4. Geramos o QR Code
-                    document.getElementById('qrcode').innerHTML = ""; // Limpa antes de gerar
+                    document.getElementById('qrcode').innerHTML = "";
                     new QRCode(document.getElementById("qrcode"), {
                         text: urlCompleta,
-                        width: 150,
-                        height: 150,
-                        colorDark : "#1e293b", // Slate 800
-                        colorLight : "#ffffff",
-                        correctLevel : QRCode.CorrectLevel.H
+                        width: 150, height: 150,
+                        colorDark: "#0f172a", colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.H
                     });
-
-                    // 5. Exibe o Modal
                     document.getElementById('modalSucesso').style.display = 'flex';
-                }
-                 else {
-                    // 5. Se houve erro (ex: email já cadastrado)
+                } else {
                     alert(result.error || "Ocorreu um erro ao processar seu cadastro.");
                     btnSubmit.disabled = false;
-                    btnSubmit.innerText = originalText;
+                    btnSubmit.innerHTML = originalHTML;
                 }
             } catch (error) {
                 console.error("Erro na conexão:", error);
                 alert("Erro crítico de conexão. O servidor está ligado?");
                 btnSubmit.disabled = false;
-                btnSubmit.innerText = originalText;
+                btnSubmit.innerHTML = originalHTML;
             }
         });
+       
 
-        // BÔNUS: Máscara simples para os telefones enquanto o usuário digita
         const handlePhone = (event) => {
-            let input = event.target;
-            input.value = phoneMask(input.value);
-        }
-
+        let input = event.target;
+        input.value = phoneMask(input.value);
+    }
         const phoneMask = (value) => {
             if (!value) return "";
             value = value.replace(/\D/g, '');
             value = value.replace(/(\d{2})(\d)/, "($1) $2");
             value = value.replace(/(\d)(\d{4})$/, "$1-$2");
             return value;
-        }
-
+        };
         document.querySelectorAll('input[name="telefone_clinica"], input[name="telefone_dono"]').forEach(input => {
-            input.addEventListener('keyup', handlePhone);
+            input.addEventListener('keyup', e => { e.target.value = phoneMask(e.target.value); });
         });
-        // === FUNCAO PARA COPIAR LINK ===
+
         function copiarLink() {
             const linkInput = document.getElementById('linkPortal');
             linkInput.select();
-            linkInput.setSelectionRange(0, 99999); // Para mobile
-
+            linkInput.setSelectionRange(0, 99999);
             navigator.clipboard.writeText(linkInput.value).then(() => {
                 alert("✅ Link copiado! Agora é só colar no seu Instagram.");
             });
         }
+
         function calcularDataExpiracao() {
-        const hoje = new Date();
-        // Adiciona 90 dias (3 meses de ~30 dias)
-        const expiraEm = new Date();
-        expiraEm.setDate(hoje.getDate() + 90);
-
-        // Formata para DD/MM/AAAA
-        const dia = String(expiraEm.getDate()).padStart(2, '0');
-        const mes = String(expiraEm.getMonth() + 1).padStart(2, '0');
-        const ano = expiraEm.getFullYear();
-
-        const dataFormatada = `${dia}/${mes}/${ano}`;
-        
-        // Insere no elemento HTML
-        document.getElementById('data-expiracao').textContent = dataFormatada;
-    }
-
-    // Executa a função ao carregar a página
-    window.onload = calcularDataExpiracao;
+            const hoje = new Date();
+            const expiraEm = new Date();
+            expiraEm.setDate(hoje.getDate() + 90);
+            const dia = String(expiraEm.getDate()).padStart(2, '0');
+            const mes = String(expiraEm.getMonth() + 1).padStart(2, '0');
+            const ano = expiraEm.getFullYear();
+            document.getElementById('data-expiracao').textContent = `${dia}/${mes}/${ano}`;
+        }
+        window.onload = calcularDataExpiracao;
     </script>
 </body>
 </html>

@@ -39,12 +39,23 @@ CREATE TABLE IF NOT EXISTS clinicas (
   email_master VARCHAR(100) NOT NULL UNIQUE,
   senha_master VARCHAR(255) NOT NULL,
   plano_id INT NOT NULL,
+  
+  -- Novas colunas integradas
+  gateway_id VARCHAR(255) NULL,
+  origem_cadastro ENUM('LADING_PAGE', 'INSTAGRAM_DIRETO') DEFAULT 'LADING_PAGE',
+  tipo_plano ENUM('FUNDADOR', 'PADRAO') DEFAULT 'PADRAO',
+  data_inicio_trial DATE NULL,
+  asaas_customer_id VARCHAR(100) NULL,
+  asaas_subscription_id VARCHAR(100) NULL,
+  status_pagamento ENUM('trial', 'ativo', 'inadimplente', 'cancelado') DEFAULT 'trial',
+  
   valor_atual DECIMAL(10,2) DEFAULT 69.90,
   status ENUM('ativo', 'inadimplente', 'suspenso', 'cancelado') DEFAULT 'ativo',
   data_cadastro DATE DEFAULT (CURRENT_DATE),
   data_expiracao DATE NOT NULL,
   data_cancelamento DATE DEFAULT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
   CONSTRAINT fk_clinica_plano FOREIGN KEY (plano_id) REFERENCES planos(id)
 ) ENGINE=InnoDB;
 
