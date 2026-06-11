@@ -31,44 +31,42 @@ exports.sendWelcomeEmail = async (clinica) => {
 // ============================================================
 exports.registerClinica = async (req, res) => {
     const {
-        nome_clinica,
-        dono_nome,
-        email_master,
-        senha_master,
-        telefone_clinica,
-        telefone_dono,
-        plano_id
+        nome_clinica, dono_nome, email_master, senha_master,
+        telefone_clinica, telefone_dono, plano_id, origem_cadastro
     } = req.body;
 
-    // GERANDO O SLUG DINAMICAMENTE
-    const slug = gerarSlug(nome_clinica);
+    // 1. Definição lógica baseada na origem
+    const isFundador = (origem_cadastro === 'fundador');
 
+    // Calcula datas
+    const data_cadastro = new Date();
+    const data_expiracao = new Date();
+
+    if (isFundador) {
+        data_expiracao.setDate(data_cadastro.getDate() + 90); // 90 dias
+    } else {
+        data_expiracao.setDate(data_cadastro.getDate() + 7);  // 7 dias padrão
+    }
+
+    // Define valores baseados no plano
+    const tipo_plano = isFundador ? 'FUNDADOR' : 'PADRAO';
+    const valor_atual = isFundador ? 69.90 : 89.90; // Exemplo de diferença de preço
+    const status_pagamento = 'trial';
+
+    const slug = gerarSlug(nome_clinica);
     const conn = await db.getConnection();
     await conn.beginTransaction();
 
     try {
-        // 1. Lógica de Datas
-        const data_cadastro = new Date();
-        const data_expiracao = new Date();
-        data_expiracao.setMonth(data_expiracao.getMonth() + 1);
-
-        // 2. Inserir a Clínica (INCLUINDO O SLUG)
+        // 2. Inserir a Clínica
         const [resultClinica] = await conn.execute(
             `INSERT INTO clinicas
-            (nome_clinica, slug, dono_nome, email_master, senha_master, telefone_clinica, telefone_dono, plano_id, data_expiracao, valor_atual, data_cadastro)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            (nome_clinica, slug, dono_nome, email_master, senha_master, telefone_clinica, telefone_dono, 
+             plano_id, origem_cadastro, tipo_plano, data_expiracao, valor_atual, status_pagamento, data_cadastro)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
-                nome_clinica,
-                slug, // Inserindo o slug gerado
-                dono_nome,
-                email_master,
-                senha_master,
-                telefone_clinica,
-                telefone_dono,
-                plano_id,
-                data_expiracao,
-                69.90,
-                data_cadastro
+                nome_clinica, slug, dono_nome, email_master, senha_master, telefone_clinica, telefone_dono,
+                plano_id, (origem_cadastro || 'direto'), tipo_plano, data_expiracao, valor_atual, status_pagamento, data_cadastro
             ]
         );
 
@@ -76,8 +74,7 @@ exports.registerClinica = async (req, res) => {
 
         // 3. Criar o primeiro usuário (Dono)
         await conn.execute(
-            `INSERT INTO usuarios (clinica_id, nome, email, senha, cargo)
-             VALUES (?, ?, ?, ?, ?)`,
+            `INSERT INTO usuarios (clinica_id, nome, email, senha, cargo) VALUES (?, ?, ?, ?, ?)`,
             [novaClinicaId, dono_nome, email_master, senha_master, 'dono']
         );
 
@@ -87,26 +84,19 @@ exports.registerClinica = async (req, res) => {
         const dadosClinicaParaEnvio = {
             ...req.body,
             id: novaClinicaId,
-            slug: slug, // Enviando o slug para o e-mail também se quiser
             data_expiracao: data_expiracao.toLocaleDateString('pt-BR')
         };
 
-        this.sendWelcomeEmail(dadosClinicaParaEnvio).catch(err => console.error("Erro envio email:", err));
+        this.sendWelcomeEmail(dadosClinicaParaEnvio).catch(err => console.error("Erro email:", err));
 
         res.status(201).json({
-            message: "Clínica e usuário master criados com sucesso!",
-            clinicaId: novaClinicaId,
-            portalUrl: `/agendar/${slug}` // Retornamos a URL para o front-end se precisar
+            message: "Clínica criada com sucesso!",
+            portalUrl: `/agendar/${slug}`
         });
 
     } catch (error) {
         await conn.rollback();
-        console.error("Erro no Registro de Clínica:", error);
-
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ error: "Este e-mail ou nome de clínica já existe." });
-        }
-
+        console.error("Erro:", error);
         res.status(500).json({ error: "Erro interno ao criar clínica." });
     } finally {
         conn.release();
