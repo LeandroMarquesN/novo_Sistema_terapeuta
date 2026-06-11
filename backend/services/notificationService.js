@@ -270,6 +270,7 @@ exports.sendProntuarioEmailNotification = async (dadosProntuario) => {
 // =========================================================================
 // 6. E-MAIL PROGRAMA FUNDADORES (Landing Page)
 // =========================================================================
+
 exports.sendProgramaFundadoresEmail = async (dados) => {
   console.log(`[MED-LM] 📩 Enviando confirmação de interesse para: ${dados.email}`);
 
@@ -277,23 +278,30 @@ exports.sendProgramaFundadoresEmail = async (dados) => {
     const templatePath = path.join(__dirname, '..', 'templates', 'lading_pageTemplate.html');
     const htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 
+    // 1. Criamos a URL com os parâmetros dinâmicos
+    const baseUrl = "http://localhost:3000/pages/Cadastro_Clinica.html";
+    const linkCadastro = `${baseUrl}?origem=fundador&email=${encodeURIComponent(dados.email)}`;
+
+    // 2. Adicionamos o link no objeto de dados para o template
     const templateData = {
       dono_nome: dados.responsavel,
       nome_clinica: dados.nome_clinica,
-      ano_atual: new Date().getFullYear()
+      ano_atual: new Date().getFullYear(),
+      link_cadastro: linkCadastro // <--- Nova variável para o template
     };
 
+    // 3. Supondo que sua função replacePlaceholders faça substituições chave-valor:
+    // Certifique-se de que ela suporte a substituição de '{{link_cadastro}}'
     await transporter.sendMail({
       from: `"Equipe MedLM" <${process.env.EMAIL_USER}>`,
       to: dados.email,
-      // Adicionamos o BCC para o seu e-mail pessoal
       bcc: 'leandrommarquess.n@gmail.com',
       subject: 'Bem-vindo ao Programa Fundadores MedLM!',
       html: replacePlaceholders(htmlTemplate, templateData)
     });
 
-    console.log(`[MED-LM] ✅ E-mail de Fundadores enviado com sucesso para: ${dados.email}`);
+    console.log(`[MED-LM] ✅ E-mail enviado. Link: ${linkCadastro}`);
   } catch (error) {
-    console.error(`[MED-LM] ❌ ERRO NO ENVIO DE FUNDADORES:`, error.message);
+    console.error(`[MED-LM] ❌ ERRO:`, error.message);
   }
 };
