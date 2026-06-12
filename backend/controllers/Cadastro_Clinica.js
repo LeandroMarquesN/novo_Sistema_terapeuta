@@ -32,7 +32,7 @@ exports.sendWelcomeEmail = async (clinica) => {
 exports.registerClinica = async (req, res) => {
     const {
         nome_clinica, dono_nome, email_master, senha_master,
-        telefone_clinica, telefone_dono, plano_id, origem_cadastro
+        telefone_clinica, telefone_dono, plano_id
     } = req.body;
 
     const conn = await db.getConnection();
@@ -73,13 +73,13 @@ exports.registerClinica = async (req, res) => {
         const [resultClinica] = await conn.execute(
             `INSERT INTO clinicas
             (nome_clinica, slug, dono_nome, email_master, senha_master, telefone_clinica, telefone_dono, 
-             plano_id, origem_cadastro, tipo_plano, data_cadastro, data_expiracao, 
+             plano_id, tipo_plano, data_cadastro, data_expiracao, 
              data_fim_gratuidade, data_fim_promocao, valor_atual, status_pagamento)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
             [
                 nome_clinica, gerarSlug(nome_clinica), dono_nome, email_master, senha_master,
                 telefone_clinica, telefone_dono, plano_id,
-                (origem_cadastro || 'DIRETO'),
+
                 (isFundador ? 'FUNDADOR' : 'PADRAO'),
                 hoje.toISOString().split('T')[0],
                 data_fim_gratuidade.toISOString().split('T')[0],

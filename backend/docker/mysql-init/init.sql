@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS clinicas (
   
   -- Novas colunas integradas
   gateway_id VARCHAR(255) NULL,
-  origem_cadastro ENUM('LADING_PAGE', 'INSTAGRAM_DIRETO') DEFAULT 'LADING_PAGE',
+
   tipo_plano ENUM('FUNDADOR', 'PADRAO') DEFAULT 'PADRAO',
   data_inicio_trial DATE NULL,
   asaas_customer_id VARCHAR(100) NULL,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS clinicas (
   -- novas colunas
   data_fim_gratuidade DATE NULL,
   data_fim_promocao DATE NULL,
-  
+
   valor_atual DECIMAL(10,2) DEFAULT 89.90,
   status ENUM('ativo', 'inadimplente', 'suspenso', 'cancelado') DEFAULT 'ativo',
   data_cadastro DATE DEFAULT (CURRENT_DATE),
