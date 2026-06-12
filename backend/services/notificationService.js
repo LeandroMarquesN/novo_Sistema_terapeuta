@@ -92,7 +92,8 @@ exports.sendEmailNotification = async (clinica, agendamento, isReagendamento = f
       link_portal_paciente: linkPortal,
       ano_atual: new Date().getFullYear(),
       url_portal: `https://localhost:3000/agendar/${clinica.slug}`,
-      qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://localhost:3000/agendar/${clinica.slug}`)}`
+      qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://localhost:3000/agendar/${clinica.slug}`)}`,
+
     };
 
     htmlTemplate = replacePlaceholders(htmlTemplate, templateData);
@@ -136,7 +137,8 @@ exports.sendWhatsAppNotification = async (clinica, agendamento, isReagendamento 
       hora_agendamento: new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
       telefone_clinica: clinica.telefone_clinica,
       nome_clinica: clinica.nome_clinica,
-      ano_atual: new Date().getFullYear()
+      ano_atual: new Date().getFullYear(),
+
     };
 
     textTemplate = replacePlaceholders(textTemplate, templateData);
@@ -182,6 +184,7 @@ exports.sendWelcomeEmail = async (clinica) => {
       plano_nome: planos[clinica.plano_id] || 'Plano Personalizado',
       url_portal: `https://localhost:3000/agendar/${clinica.slug}`,
       qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://localhost:3000/agendar/${clinica.slug}`)}`,
+      data_expiracao: clinica.data_expiracao, // <--- ADICIONE ESTA LINHA
       ano_atual: new Date().getFullYear()
     };
 

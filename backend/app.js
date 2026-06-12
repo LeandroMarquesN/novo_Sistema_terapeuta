@@ -3,6 +3,10 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 
+
+
+
+
 // Importação das Rotas
 const authRoutes = require('./routes/authRoutes');
 const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
@@ -37,6 +41,7 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const session = require('express-session');
+const { monitorEventLoopDelay } = require('perf_hooks');
 
 // Middleware para desativar o cache (Segurança)
 app.use((req, res, next) => {

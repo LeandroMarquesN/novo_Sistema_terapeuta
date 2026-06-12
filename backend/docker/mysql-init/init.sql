@@ -12,9 +12,9 @@ CREATE TABLE IF NOT EXISTS planos (
 
 -- 2. INSERIR OS VALORES DOS PLANOS
 INSERT IGNORE INTO planos (id, nome_plano, valor_base, valor_promocional, limite_membros) VALUES
-(1, 'trial', 109.90, 69.90, 3),
-(2, 'premium', 169.90, 129.90, 10),
-(3, 'enterprise', 209.90, 159.90, 999);
+(1, 'trial', 109.90, 89.90, 3),
+(2, 'premium', 169.90, 89.90, 10),
+(3, 'enterprise', 269.90, 89.90, 999);
 
 -- 2.1  LISTA DE ESPERA DE FUNDADORES DO MED LM
 CREATE TABLE IF NOT EXISTS lista_espera (
@@ -48,8 +48,12 @@ CREATE TABLE IF NOT EXISTS clinicas (
   asaas_customer_id VARCHAR(100) NULL,
   asaas_subscription_id VARCHAR(100) NULL,
   status_pagamento ENUM('trial', 'ativo', 'inadimplente', 'cancelado') DEFAULT 'trial',
+
+  -- novas colunas
+  data_fim_gratuidade DATE NULL,
+  data_fim_promocao DATE NULL,
   
-  valor_atual DECIMAL(10,2) DEFAULT 69.90,
+  valor_atual DECIMAL(10,2) DEFAULT 89.90,
   status ENUM('ativo', 'inadimplente', 'suspenso', 'cancelado') DEFAULT 'ativo',
   data_cadastro DATE DEFAULT (CURRENT_DATE),
   data_expiracao DATE NOT NULL,
