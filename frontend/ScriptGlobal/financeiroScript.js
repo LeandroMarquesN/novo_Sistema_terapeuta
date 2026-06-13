@@ -300,8 +300,8 @@ async function processarBaixa() {
 
   if (!idLancamento) return alert("❌ Erro: Lançamento não identificado.");
 
-  // Define se o método HTTP do seu backend é POST ou PUT (sua rota avulsa usa PUT)
-  const metodoHTTP = itemParaBaixar ? 'POST' : 'PUT';
+  // CORREÇÃO: Como sua rota no backend é router.post, o método deve ser SEMPRE 'POST'
+  const metodoHTTP = 'POST';
 
   const resultado = await apiFetch(`/api/financeiro/baixar/${idLancamento}`, {
     method: metodoHTTP,
