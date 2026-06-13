@@ -7,7 +7,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -15,32 +15,30 @@
     <link rel="stylesheet" href="https://unpkg.com/tippy.js@6/dist/tippy.css" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="../ScriptGlobal/verifiLog.js"></script>
-
     <script>
       tailwind.config = {
           darkMode: 'class',
           theme: {
               extend: {
                   fontFamily: {
-                      sans: ['Poppins', 'sans-serif'],
+                      sans: ['Inter', 'sans-serif'],
+                      display: ['Space Grotesk', 'sans-serif'],
                   },
                   animation: {
                       'gradient-x': 'gradient-x 15s ease infinite',
                       'gradient-y': 'gradient-y 15s ease infinite',
                       'gradient-xy': 'gradient-xy 15s ease infinite',
+                      'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                      'scan': 'scan 4s linear infinite',
                   },
                   keyframes: {
                       'gradient-x': {
                           '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'left center' },
                           '50%': { 'background-size': '200% 200%', 'background-position': 'right center' }
                       },
-                      'gradient-y': {
-                          '0%, 100%': { 'background-size': '200% 200%', 'background-position': 'center top' },
-                          '50%': { 'background-size': '200% 200%', 'background-position': 'center bottom' }
-                      },
-                      'gradient-xy': {
-                          '0%, 100%': { 'background-size': '400% 400%', 'background-position': 'left center' },
-                          '50%': { 'background-size': '400% 400%', 'background-position': 'right center' }
+                      'scan': {
+                          '0%': { transform: 'translateY(-100%)' },
+                          '100%': { transform: 'translateY(100vh)' }
                       }
                   }
               }
@@ -49,64 +47,679 @@
     </script>
 
     <style>
-        /* ---- Logo Hover Effect ---- */
-        .h-24 div.bg-gradient-to-br {
+        /* ─── Design Tokens ─── */
+        :root {
+            --emerald:   #34d399;
+            --emerald-d: #059669;
+            --cyan:      #22d3ee;
+            --teal:      #0f766e;
+            --amber:     #fbbf24;
+            --amber-d:   #d97706;
+            --slate-bg:  #020c12;
+            --card-bg:   rgba(255,255,255,0.035);
+            --border:    rgba(52,211,153,0.15);
+            --border-cyan: rgba(34,211,238,0.18);
+            --glow-em:   rgba(52,211,153,0.25);
+            --glow-cy:   rgba(34,211,238,0.25);
+        }
+
+        /* ─── Base ─── */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            background-color: var(--slate-bg);
+            background-image:
+                radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(8,145,178,0.20) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 90% 100%, rgba(5,150,105,0.18) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 50% 50%,  rgba(251,191,36,0.04) 0%, transparent 70%);
+            color: #cbd5e1;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Subtle scan line atmosphere */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.08) 2px,
+                rgba(0,0,0,0.08) 4px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Scrollbar ─── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+        /* ─── Sidebar ─── */
+        aside {
+            background: rgba(2,12,18,0.92) !important;
+            border-right: 1px solid var(--border) !important;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Logo block */
+        .logo-block {
+            border-bottom: 1px solid var(--border);
+        }
+        .logo-icon {
+            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+            box-shadow: 0 0 20px rgba(8,145,178,0.5), 0 0 40px rgba(5,150,105,0.2);
+        }
+        .logo-text-brand { color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; }
+        .logo-text-accent { color: var(--emerald); text-shadow: 0 0 12px rgba(52,211,153,0.6); }
+
+        /* Nav links */
+        .nav-link {
+            color: rgba(148,163,184,0.7);
+            border-radius: 14px;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s ease;
         }
-        .h-24:hover div.bg-gradient-to-br {
-            transform: scale(1.1) rotate(-5deg);
-        }
-        .h-24 div.bg-gradient-to-br::after {
-            content: "";
+        .nav-link::before {
+            content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
+            inset: 0;
+            opacity: 0;
+            background: linear-gradient(90deg, rgba(52,211,153,0.08), transparent);
+            transition: opacity 0.3s;
+        }
+        .nav-link:hover { color: var(--emerald); border-color: var(--border); }
+        .nav-link:hover::before { opacity: 1; }
+        .nav-link:hover i { text-shadow: 0 0 10px rgba(52,211,153,0.7); }
+
+        .nav-link-active {
+            background: linear-gradient(135deg, rgba(8,145,178,0.25) 0%, rgba(5,150,105,0.20) 100%);
+            border: 1px solid rgba(52,211,153,0.35);
+            color: var(--emerald) !important;
+            box-shadow: 0 0 20px rgba(52,211,153,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .nav-link-active i { text-shadow: 0 0 12px rgba(52,211,153,0.8); }
+
+        /* Theme toggle */
+        #theme-toggle-btn {
+            color: rgba(148,163,184,0.6);
+            border-radius: 14px;
+            border: 1px solid transparent;
+            transition: all 0.25s;
+        }
+        #theme-toggle-btn:hover { color: var(--cyan); border-color: var(--border-cyan); }
+
+        /* ─── Header ─── */
+        header {
+            border-bottom: 1px solid var(--border) !important;
+        }
+
+        #boasVindas { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+        #boasVindas .separator { color: rgba(52,211,153,0.3); }
+
+        #clinicaNome {
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(34,211,238,0.3));
+        }
+
+        /* Date pill */
+        #data-hora-container-tailwind {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--border) !important;
+            color: #94a3b8 !important;
+            backdrop-filter: blur(10px);
+            border-radius: 99px;
+        }
+
+        /* New appointment button */
+        .btn-new-appt {
+            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+            border: none;
+            box-shadow: 0 0 20px rgba(8,145,178,0.4), 0 0 40px rgba(5,150,105,0.15);
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 0.02em;
+            transition: all 0.3s;
+        }
+        .btn-new-appt:hover {
+            box-shadow: 0 0 30px rgba(8,145,178,0.6), 0 0 60px rgba(5,150,105,0.25);
+            transform: translateY(-1px);
+        }
+
+        /* Avatar badge */
+        .header-avatar {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--border) !important;
+            color: var(--emerald) !important;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 9px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── Stat Cards ─── */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(52,211,153,0.5), transparent);
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(52,211,153,0.35);
+            box-shadow: 0 8px 40px rgba(52,211,153,0.12), 0 0 0 1px rgba(52,211,153,0.1);
+        }
+        .stat-card .card-label { color: rgba(148,163,184,0.6); font-size: 10px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+        .stat-card .card-value { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+
+        .stat-card-cyan::before { background: linear-gradient(90deg, transparent, rgba(34,211,238,0.5), transparent); }
+        .stat-card-cyan:hover { border-color: rgba(34,211,238,0.35); box-shadow: 0 8px 40px rgba(34,211,238,0.12); }
+
+        .stat-card-amber::before { background: linear-gradient(90deg, transparent, rgba(251,191,36,0.5), transparent); }
+        .stat-card-amber:hover { border-color: rgba(251,191,36,0.35); box-shadow: 0 8px 40px rgba(251,191,36,0.12); }
+
+        .stat-card-red::before { background: linear-gradient(90deg, transparent, rgba(248,113,113,0.5), transparent); }
+        .stat-card-red:hover { border-color: rgba(248,113,113,0.35); box-shadow: 0 8px 40px rgba(248,113,113,0.12); }
+
+        /* ─── Flow Panel ─── */
+        .flow-panel {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .flow-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+            opacity: 0.5;
+        }
+
+        .panel-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+        .panel-subtitle { color: rgba(148,163,184,0.5); font-size: 11px; }
+
+        /* Filter tabs */
+        #filtro-container {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 14px !important;
+            padding: 4px !important;
+        }
+        .filtro-btn {
+            border-radius: 10px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            color: rgba(148,163,184,0.5) !important;
+            transition: all 0.25s !important;
+            border: 1px solid transparent !important;
+        }
+        .filtro-btn:hover { color: var(--emerald) !important; }
+        .filtro-btn.filtro-ativo,
+        .filtro-btn[class*="bg-white"],
+        .filtro-btn[class*="bg-gray-700"] {
+            background: linear-gradient(135deg, rgba(8,145,178,0.3), rgba(5,150,105,0.25)) !important;
+            border-color: rgba(52,211,153,0.4) !important;
+            color: var(--emerald) !important;
+            box-shadow: 0 0 12px rgba(52,211,153,0.2) !important;
+        }
+
+        /* Print button */
+        .btn-print {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--border) !important;
+            color: rgba(148,163,184,0.7) !important;
+            border-radius: 12px !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            transition: all 0.25s !important;
+        }
+        .btn-print:hover { border-color: var(--border-cyan) !important; color: var(--cyan) !important; }
+
+        /* Table */
+        .data-table-wrap {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(52,211,153,0.1);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .data-table-wrap table { width: 100%; border-collapse: collapse; }
+        .data-table-wrap thead tr {
+            background: rgba(52,211,153,0.06);
+            border-bottom: 1px solid var(--border);
+        }
+        .data-table-wrap thead th {
+            padding: 14px 20px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(52,211,153,0.6);
+        }
+        .data-table-wrap tbody tr {
+            border-bottom: 1px solid rgba(52,211,153,0.06);
+            transition: all 0.2s;
+        }
+        .data-table-wrap tbody tr:last-child { border-bottom: none; }
+        .data-table-wrap tbody tr:hover { background: rgba(52,211,153,0.04); }
+        .data-table-wrap tbody td { padding: 14px 20px; font-size: 13px; }
+
+        .patient-name { color: #e2e8f0; font-weight: 700; font-size: 13px; transition: color 0.2s; }
+        tr:hover .patient-name { color: var(--emerald); }
+        .patient-phone { color: rgba(148,163,184,0.5); font-size: 11px; }
+        .patient-phone .fab { color: var(--emerald); }
+
+        .date-val { color: #e2e8f0; font-weight: 700; font-size: 13px; font-family: 'Space Grotesk', sans-serif; }
+        .time-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: rgba(8,145,178,0.15);
+            border: 1px solid rgba(8,145,178,0.25);
+            color: var(--cyan);
+            padding: 3px 9px;
+            border-radius: 8px;
+            font-size: 11px; font-weight: 800;
+        }
+        .time-badge i { color: var(--cyan); animation: pulse 2s infinite; }
+
+        .therapy-badge {
+            display: inline-flex; align-items: center;
+            background: rgba(34,211,238,0.08);
+            border: 1px solid rgba(34,211,238,0.2);
+            color: var(--cyan);
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 11px; font-weight: 600;
+        }
+
+        /* Status badges */
+        .status-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 4px 10px; border-radius: 8px;
+            font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.08em;
+        }
+        .status-confirmado { background: rgba(52,211,153,0.10); border: 1px solid rgba(52,211,153,0.25); color: var(--emerald); }
+        .status-pendente   { background: rgba(251,191,36,0.10);  border: 1px solid rgba(251,191,36,0.25);  color: var(--amber); }
+        .status-cancelado  { background: rgba(248,113,113,0.10); border: 1px solid rgba(248,113,113,0.25); color: #f87171; }
+        .status-default    { background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.2);  color: #94a3b8; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
+
+        /* Action button in table */
+        .btn-prontuario {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: rgba(148,163,184,0.7);
+            font-size: 11px; font-weight: 700;
+            padding: 6px 12px; border-radius: 10px;
+            transition: all 0.25s; cursor: pointer;
+        }
+        .btn-prontuario:hover {
+            background: rgba(52,211,153,0.1);
+            border-color: rgba(52,211,153,0.35);
+            color: var(--emerald);
+            box-shadow: 0 0 12px rgba(52,211,153,0.15);
+        }
+
+        /* Empty state */
+        .empty-icon-wrap {
+            width: 48px; height: 48px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(148,163,184,0.4);
+            margin: 0 auto 12px;
+        }
+
+        /* ─── Calendar Panel ─── */
+        .calendar-panel {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            border-radius: 24px;
+        }
+        .calendar-panel .panel-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+
+        #calendario-mes-ano { color: rgba(52,211,153,0.6); font-size: 11px; font-weight: 600; }
+
+        /* Cal view toggle */
+        .cal-toggle-wrap {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 3px;
+        }
+        #btn-semana, #btn-mes {
+            border-radius: 9px; font-size: 11px; font-weight: 700;
+            padding: 6px 14px; transition: all 0.25s;
+            color: rgba(148,163,184,0.5); border: 1px solid transparent;
+        }
+        #btn-semana.cal-active, #btn-mes.cal-active,
+        #btn-semana[class*="bg-white"], #btn-mes[class*="bg-white"],
+        #btn-semana[class*="bg-gray-700"], #btn-mes[class*="bg-gray-700"] {
+            background: linear-gradient(135deg, rgba(8,145,178,0.3), rgba(5,150,105,0.25));
+            border-color: rgba(52,211,153,0.4);
+            color: var(--emerald);
+            box-shadow: 0 0 10px rgba(52,211,153,0.15);
+        }
+
+        .cal-day-label {
+            text-align: center; font-size: 10px; font-weight: 800;
+            color: rgba(52,211,153,0.4); text-transform: uppercase; letter-spacing: 0.1em;
+        }
+
+        /* ─── Aside Patient Card ─── */
+        #asidePaciente {
+            background: rgba(2,12,18,0.8) !important;
+            border: 1px solid rgba(52,211,153,0.2) !important;
+            border-radius: 22px !important;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+        #asidePaciente::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+            opacity: 0.6;
+        }
+        #asidePaciente .glow-circle-blue {
+            position: absolute; right: -40px; top: -40px;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, #0891b2, transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+        #asidePaciente .glow-circle-green {
+            position: absolute; left: -40px; bottom: -40px;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, #059669, transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        /* Counter badge */
+        #infoContadorAside {
+            background: rgba(52,211,153,0.10) !important;
+            border: 1px solid rgba(52,211,153,0.25) !important;
+            color: var(--emerald) !important;
+            font-size: 9px !important;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 0.12em;
+            border-radius: 99px !important;
+            padding: 4px 12px !important;
+        }
+
+        /* Nav arrows */
+        .aside-nav-btn {
+            width: 30px; height: 30px; border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: rgba(148,163,184,0.6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; cursor: pointer; transition: all 0.2s;
+        }
+        .aside-nav-btn:hover { color: var(--emerald); border-color: rgba(52,211,153,0.35); }
+
+        /* Avatar initials */
+        #infoIniciaisAside {
+            background: linear-gradient(135deg, #0891b2, #059669) !important;
+            box-shadow: 0 0 30px rgba(8,145,178,0.4), 0 0 60px rgba(5,150,105,0.2) !important;
+            border-radius: 16px !important;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        #infoNomeAside { color: #f1f5f9; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 800; }
+        #infoTerapiaAside { color: var(--cyan); font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(34,211,238,0.4); }
+
+        /* Info rows */
+        .aside-info-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .aside-info-label { color: rgba(148,163,184,0.5); font-weight: 500; }
+        #infoTelefoneAside, #infoStatusAside { color: #e2e8f0; font-weight: 700; font-size: 12px; }
+
+        /* Access button */
+        #btnLinkProntuario {
+            background: linear-gradient(135deg, rgba(8,145,178,0.2), rgba(5,150,105,0.15)) !important;
+            border: 1px solid rgba(52,211,153,0.3) !important;
+            color: var(--emerald) !important;
+            font-family: 'Space Grotesk', sans-serif;
+            border-radius: 14px !important;
+            padding: 12px 16px !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
+            transition: all 0.3s !important;
+            text-decoration: none;
+        }
+        #btnLinkProntuario:hover {
+            background: linear-gradient(135deg, rgba(8,145,178,0.35), rgba(5,150,105,0.25)) !important;
+            box-shadow: 0 0 20px rgba(52,211,153,0.2) !important;
+        }
+
+        /* ─── Admin card ─── */
+        .admin-card {
+            background: linear-gradient(135deg, rgba(8,145,178,0.3) 0%, rgba(5,150,105,0.25) 50%, rgba(251,191,36,0.08) 100%);
+            border: 1px solid rgba(52,211,153,0.25);
+            border-radius: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+            display: block;
+            text-decoration: none;
+        }
+        .admin-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--cyan), var(--emerald), transparent);
+            opacity: 0.7;
+        }
+        .admin-card:hover { transform: translateY(-3px); box-shadow: 0 16px 50px rgba(8,145,178,0.25); border-color: rgba(52,211,153,0.4); }
+        .admin-card .shine {
+            position: absolute; top: 0; left: -100%; width: 60%;
+            height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
+            transform: skewX(-20deg); transition: left 0.8s ease;
+        }
+        .admin-card:hover .shine { left: 150%; }
+        .admin-card-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; font-size: 18px; font-weight: 700; }
+        .admin-card-sub { color: rgba(148,163,184,0.6); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; }
+        .admin-card-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
+            color: var(--emerald); border-radius: 99px;
+            font-size: 9px; font-weight: 800; letter-spacing: 0.12em;
+            padding: 6px 14px; text-transform: uppercase;
+            transition: all 0.25s;
+        }
+        .admin-card:hover .admin-card-btn { background: rgba(52,211,153,0.2); box-shadow: 0 0 12px rgba(52,211,153,0.2); }
+        .admin-logo-wrap {
+            width: 72px; height: 72px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(52,211,153,0.2);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 14px;
+            position: relative;
+            transition: transform 0.4s;
+        }
+        .admin-card:hover .admin-logo-wrap { transform: rotate(3deg); }
+        .admin-logo-wrap img { width: 56px; height: 56px; object-fit: contain; }
+        .admin-online-dot {
+            position: absolute; top: 6px; right: 6px;
+            width: 10px; height: 10px;
+            background: var(--emerald);
+            border-radius: 50%;
+            border: 2px solid rgba(2,12,18,0.9);
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulse 2s infinite;
+        }
+
+        /* ─── Charts Section ─── */
+        .charts-section { border-top: 1px solid var(--border); }
+        .charts-section-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+        .charts-section-sub { color: rgba(148,163,184,0.5); font-size: 11px; }
+
+        .chart-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s;
+        }
+        .chart-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(34,211,238,0.4), transparent);
+        }
+        .chart-card:hover { box-shadow: 0 8px 40px rgba(34,211,238,0.08); border-color: rgba(34,211,238,0.2); }
+        .chart-card-title { font-family: 'Space Grotesk', sans-serif; color: #e2e8f0; font-size: 14px; font-weight: 700; }
+        .chart-card-sub { color: rgba(148,163,184,0.4); font-size: 11px; }
+
+        /* ─── Gaveta (Drawer) ─── */
+        #gaveta-painel {
+            background: rgba(2,12,18,0.96) !important;
+            border-right: 1px solid var(--border) !important;
+            backdrop-filter: blur(30px);
+        }
+        .gaveta-header {
+            border-bottom: 1px solid var(--border) !important;
+            background: transparent !important;
+        }
+        .gaveta-tag {
+            background: rgba(52,211,153,0.1);
+            border: 1px solid rgba(52,211,153,0.25);
+            color: var(--emerald);
+            font-size: 9px; font-weight: 800;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            padding: 3px 10px; border-radius: 99px;
+        }
+        #gaveta-paciente-nome { color: #f1f5f9; font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 800; }
+        .gaveta-close-btn {
+            width: 32px; height: 32px; border-radius: 10px;
+            background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2);
+            color: #f87171; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .gaveta-close-btn:hover { background: rgba(248,113,113,0.15); box-shadow: 0 0 12px rgba(248,113,113,0.2); }
+
+        .gaveta-info-grid {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+        }
+        .gaveta-info-label { font-size: 11px; color: rgba(148,163,184,0.5); font-weight: 600; display: block; margin-bottom: 3px; }
+        .gaveta-info-val { color: #e2e8f0; font-weight: 700; font-size: 13px; }
+        .gaveta-info-val-accent { color: var(--cyan); }
+
+        .gaveta-stat-box {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(52,211,153,0.1);
+            border-radius: 12px; padding: 10px;
+            text-align: center;
+        }
+        .gaveta-stat-label { color: rgba(148,163,184,0.4); font-size: 10px; display: block; margin-bottom: 4px; }
+        .gaveta-stat-val { color: #e2e8f0; font-weight: 800; font-size: 14px; font-family: 'Space Grotesk', sans-serif; }
+
+        .gaveta-section-label {
+            font-size: 10px; font-weight: 800; color: rgba(148,163,184,0.4);
+            text-transform: uppercase; letter-spacing: 0.12em;
+        }
+        .gaveta-text-block {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(52,211,153,0.08);
+            border-radius: 14px; padding: 14px;
+            color: rgba(148,163,184,0.7); font-size: 13px;
+            line-height: 1.6; min-height: 56px;
+        }
+
+        .gaveta-textarea {
             width: 100%;
-            height: 100%;
-            background: linear-gradient(
-                to right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.3) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: skewX(-25deg);
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            color: #e2e8f0;
+            border-radius: 14px; padding: 14px;
+            font-size: 13px; font-family: 'Inter', sans-serif;
+            min-height: 120px; resize: vertical;
+            transition: border-color 0.25s;
+            outline: none;
         }
-        .h-24:hover div.bg-gradient-to-br::after {
-            left: 100%;
-            transition: all 0.6s ease;
-        }
+        .gaveta-textarea:focus { border-color: rgba(52,211,153,0.4); box-shadow: 0 0 0 3px rgba(52,211,153,0.08); }
+        .gaveta-textarea::placeholder { color: rgba(148,163,184,0.3); }
 
-        /* ---- Background Mesh Gradient ---- */
-        .bg-mesh-gradient {
-            background-size: 400% 400% !important;
-            background-color: #70c2f9;
-            background-image:
-                radial-gradient(at 10% 10%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 10%, rgba(16, 185, 129, 0.1) 0px, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(240, 249, 255, 0.5) 0px, transparent 50%),
-                radial-gradient(at 10% 90%, rgba(110, 231, 183, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(14, 165, 233, 0.1) 0px, transparent 50%);
+        .gaveta-footer {
+            border-top: 1px solid var(--border) !important;
+            background: transparent !important;
         }
-        .dark .bg-mesh-gradient {
-            background-size: 400% 400%;
-            background-color: #030712;
-            background-image:
-                radial-gradient(at 10% 10%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 10%, rgba(5, 150, 105, 0.1) 0px, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(3, 7, 18, 0.5) 0px, transparent 50%),
-                radial-gradient(at 10% 90%, rgba(16, 185, 129, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 90%, rgba(56, 189, 248, 0.1) 0px, transparent 50%);
+        .btn-salvar {
+            background: linear-gradient(135deg, #0891b2, #059669);
+            color: #fff; font-weight: 800; font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px; padding: 12px 20px; border-radius: 12px;
+            border: none; cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(8,145,178,0.3);
         }
+        .btn-salvar:hover { box-shadow: 0 0 30px rgba(8,145,178,0.5); transform: translateY(-1px); }
 
-        /* ---- Smooth Card Hover ---- */
+        /* ─── ApexCharts dark overrides ─── */
+        .apexcharts-canvas { background: transparent !important; }
+        .apexcharts-tooltip { background: rgba(2,12,18,0.95) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; color: #e2e8f0 !important; }
+        .apexcharts-tooltip-title { background: rgba(52,211,153,0.08) !important; border-bottom: 1px solid var(--border) !important; color: var(--emerald) !important; }
+
+        /* ─── Misc helpers ─── */
         .card-hover-effect {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             cursor: pointer;
         }
-        .card-hover-effect:hover {
-            transform: translateY(-6px);
+        .card-hover-effect:hover { transform: translateY(-4px); }
+
+        /* Override any Tailwind white/gray backgrounds inside the dark theme */
+        .bg-white { background: rgba(255,255,255,0.03) !important; }
+        .bg-gray-50 { background: rgba(255,255,255,0.025) !important; }
+        .bg-gray-100 { background: rgba(255,255,255,0.04) !important; }
+        .dark\:bg-gray-900 { background: rgba(2,12,18,0.6) !important; }
+
+        /* Override table row & text colors for dark theme */
+        .text-gray-900, .text-gray-800, .dark\:text-white { color: #e2e8f0 !important; }
+        .text-gray-500, .text-gray-400 { color: rgba(148,163,184,0.55) !important; }
+        .text-gray-700 { color: #94a3b8 !important; }
+        .dark\:text-gray-100 { color: #cbd5e1 !important; }
+
+        /* ID-specific overrides for text */
+        #boasVindas, #usuarioNome, .text-gray-950 { color: #f1f5f9 !important; }
+
+        /* Force borders to dark theme */
+        .border-gray-100, .border-gray-200 { border-color: rgba(52,211,153,0.1) !important; }
+        .divide-gray-200\/60 > tr { border-color: rgba(52,211,153,0.06) !important; }
+
+        /* Stat card badge overrides */
+        .text-green-600 { color: var(--emerald) !important; }
+        .text-red-500 { color: #f87171 !important; }
+        .text-orange-600 { color: var(--amber) !important; }
+
+        /* Gradient text for revenue card */
+        .bg-gradient-to-r.from-blue-600.to-emerald-500.bg-clip-text { 
+            background: linear-gradient(90deg, var(--cyan), var(--emerald)) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
         }
     </style>
 
@@ -116,220 +729,208 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
 </head>
-<body class="bg-mesh-gradient animate-gradient-xy text-gray-800 dark:text-gray-100 min-h-screen font-sans antialiased">
+
+<body class="text-gray-300 min-h-screen font-sans antialiased">
     <div class="flex h-screen overflow-hidden">
 
-        <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800 overflow-hidden group shadow-sm flex flex-col justify-between">
+        <!-- ─── Sidebar ─── -->
+        <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
             <div class="flex flex-col">
-                <div class="h-24 flex items-center px-6 border-b dark:border-gray-800 overflow-hidden">
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-emerald-400 rounded-xl flex-shrink-0 shadow-lg flex items-center justify-center text-white font-bold text-lg">
+                <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
+                    <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">
                         M
                     </div>
-                    <span class="ml-4 font-bold text-xl text-gray-800 dark:text-white opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap tracking-tight">
-                        Med<span class="text-emerald-500 font-extrabold">LM</span>
+                    <span class="logo-text-brand ml-4 font-bold text-xl opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap tracking-tight">
+                        Med<span class="logo-text-accent font-extrabold">LM</span>
                     </span>
                 </div>
 
-                <nav class="px-3 pt-6 space-y-2">
-                    <a href="/dashboard" class="flex items-center p-3.5 rounded-2xl bg-gradient-to-r from-blue-500 to-emerald-400 text-white shadow-lg">
+                <nav class="px-3 pt-6 space-y-1.5">
+                    <a href="/dashboard" class="nav-link nav-link-active flex items-center p-3.5">
                         <i class="fas fa-chart-line w-6 text-lg"></i>
                         <span class="ml-4 font-semibold opacity-0 group-hover:opacity-100 whitespace-nowrap">Dashboard</span>
                     </a>
-                    <a href="/pacientes" class="flex items-center p-3.5 rounded-2xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 transition group/item">
-                        <i class="fas fa-user-injured w-6 group-hover/item:text-blue-500"></i>
+                    <a href="/pacientes" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-user-injured w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Pacientes</span>
                     </a>
-                    <a href="/financeiro" class="flex items-center p-3.5 rounded-2xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-emerald-600 transition group/item">
-                        <i class="fas fa-hand-holding-usd w-6 group-hover/item:text-emerald-500"></i>
+                    <a href="/financeiro" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-hand-holding-usd w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Financeiro</span>
                     </a>
-                    <a href="/agendamento" class="flex items-center p-3.5 rounded-2xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-emerald-600 transition group/item">
-                        <i class="fas fa-calendar-check w-6 group-hover/item:text-emerald-500"></i>
+                    <a href="/agendamento" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-calendar-check w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Agendamento</span>
                     </a>
-
-                    <a href="/atendimento" class="flex items-center p-3.5 rounded-2xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-blue-600 transition group/item">
-                        <i class="fas fa-user-md w-6 group-hover/item:text-blue-500"></i>
+                    <a href="/atendimento" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-user-md w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Atendimento</span>
                     </a>
-
-                    <a href="/equipe" class="flex items-center p-3.5 rounded-2xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-emerald-600 transition group/item">
-                        <i class="fas fa-users-cog w-6 group-hover/item:text-emerald-500"></i>
+                    <a href="/equipe" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-users-cog w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Minha Equipe</span>
                     </a>
-                    <a href="/dashboard/configuracoes" class="flex items-center p-3.5 rounded-2xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-emerald-600 transition group/item">
-                        <i class="fas fa-cogs w-6 group-hover/item:text-emerald-500"></i>
+                    <a href="/dashboard/configuracoes" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-cogs w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Configurações</span>
                     </a>
-                    <a href="#" onclick="handleLogout()" class="flex items-center p-3.5 rounded-2xl text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 transition group/item">
-                        <i class="fas fa-sign-out-alt w-6 group-hover/item:text-red-500"></i>
+                    <a href="#" onclick="handleLogout()" class="nav-link flex items-center p-3.5" style="color:rgba(248,113,113,0.6)!important">
+                        <i class="fas fa-sign-out-alt w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Sair</span>
                     </a>
                 </nav>
             </div>
 
-            <div class="p-4 border-t dark:border-gray-800">
-                <button id="theme-toggle-btn" class="flex items-center w-full p-3 rounded-2xl text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+            <div class="p-4" style="border-top:1px solid var(--border)">
+                <button id="theme-toggle-btn" class="flex items-center w-full p-3 transition">
                     <i class="fas fa-moon w-6"></i>
-                    <span class="ml-4 opacity-0 group-hover:opacity-100 font-medium">Tema</span>
+                    <span class="ml-4 opacity-0 group-hover:opacity-100 font-medium text-sm">Tema</span>
                 </button>
             </div>
         </aside>
 
-        <main class="flex-1 ml-20 p-6 xl:p-10 overflow-y-auto h-screen">
+        <!-- ─── Main ─── -->
+        <main class="flex-1 ml-20 p-6 xl:p-10 overflow-y-auto h-screen" style="position:relative;z-index:1;">
 
-            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 border-b border-gray-100 dark:border-gray-800 gap-4">
+            <!-- Header -->
+            <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 gap-4" style="border-bottom:1px solid var(--border)">
                 <div>
-                    <h1 id="boasVindas" class="text-3xl xl:text-4xl font-extrabold text-gray-950 dark:text-white tracking-tighter">
+                    <h1 id="boasVindas" class="text-3xl xl:text-4xl font-extrabold tracking-tighter">
                         Olá, <span id="usuarioNome">Professor</span>
-                        <span class="text-xl font-normal text-gray-400 dark:text-gray-500 mx-2">|</span>
-                        <span id="clinicaNome" class="text-xl xl:text-2xl font-bold bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">Espaço Saúde</span>
+                        <span class="text-xl font-normal mx-2 separator" style="color:rgba(52,211,153,0.3)">|</span>
+                        <span id="clinicaNome" class="text-xl xl:text-2xl font-bold">Espaço Saúde</span>
                     </h1>
-                    <p class="text-gray-500 mt-1 text-sm xl:text-base">Resumo estratégico e métricas do seu consultório.</p>
+                    <p class="mt-1 text-sm xl:text-base" style="color:rgba(148,163,184,0.5)">Resumo estratégico e métricas do seu consultório.</p>
                 </div>
 
                 <div class="flex items-center flex-wrap gap-4">
-                    <div id="data-hora-container-tailwind" class="hidden md:flex bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800 px-5 py-2.5 rounded-full text-xs xl:text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        <i class="fas fa-calendar-alt mr-3 text-emerald-500"></i>
+                    <div id="data-hora-container-tailwind" class="hidden md:flex items-center px-5 py-2.5 text-xs xl:text-sm font-semibold" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:99px;color:#94a3b8;backdrop-filter:blur(10px)">
+                        <i class="fas fa-calendar-alt mr-3" style="color:var(--emerald)"></i>
                         <span id="data-hora"></span>
                     </div>
 
-                    <a href="/agendamento" class="flex items-center bg-gradient-to-r from-orange-400 to-amber-400 text-white font-bold px-5 py-2.5 rounded-full shadow-lg shadow-orange-100 dark:shadow-none hover:scale-105 transition-transform text-xs xl:text-sm">
+                    <a href="/agendamento" class="btn-new-appt flex items-center px-5 py-2.5 rounded-full font-bold text-xs xl:text-sm">
                         <i class="fas fa-plus mr-2"></i> Novo Agendamento
                     </a>
 
-                    <div class="w-12 h-12 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 font-black shadow-md border border-gray-100 dark:border-gray-700 text-xs tracking-tighter">
+                    <div class="header-avatar w-12 h-12 rounded-full flex items-center justify-center font-black shadow-md">
                         MedLM
                     </div>
                 </div>
             </header>
 
+            <!-- Stat Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <div class="bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-900 p-6 rounded-[2rem] shadow-sm border border-blue-100 dark:border-gray-800/80 card-hover-effect">
+                <!-- Atendimentos -->
+                <div class="stat-card stat-card-cyan p-6 card-hover-effect">
                     <div class="flex justify-between items-center">
-                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Atendimentos Dia</p>
-                        <i class="fas fa-user-check text-blue-400 text-base"></i>
+                        <p class="card-label">Atendimentos Dia</p>
+                        <i class="fas fa-user-check text-base" style="color:var(--cyan)"></i>
                     </div>
-                    <h3 class="text-4xl font-extrabold mt-2 dark:text-white tracking-tight">12</h3>
-                    <div class="mt-2 text-green-600 text-xs font-bold flex items-center gap-1"><i class="fas fa-arrow-up"></i> +20%</div>
+                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight">12</h3>
+                    <div class="mt-2 text-xs font-bold flex items-center gap-1" style="color:var(--emerald)"><i class="fas fa-arrow-up"></i> +20%</div>
                 </div>
-                <div class="bg-gradient-to-br from-red-50 to-white dark:from-gray-900 dark:to-gray-900 p-6 rounded-[2rem] shadow-sm border border-red-100 dark:border-gray-800/80 card-hover-effect">
+                <!-- Cancelamentos -->
+                <div class="stat-card stat-card-red p-6 card-hover-effect">
                     <div class="flex justify-between items-center">
-                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Cancelamentos</p>
-                        <i class="fas fa-user-times text-red-400 text-base"></i>
+                        <p class="card-label">Cancelamentos</p>
+                        <i class="fas fa-user-times text-base" style="color:#f87171"></i>
                     </div>
-                    <h3 class="text-4xl font-extrabold mt-2 dark:text-white tracking-tight">2</h3>
-                    <span class="text-red-500 text-xs font-bold block mt-1">Taxa de 4.1%</span>
+                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight">2</h3>
+                    <span class="text-xs font-bold block mt-1" style="color:#f87171">Taxa de 4.1%</span>
                 </div>
-                <div class="bg-gradient-to-br from-orange-50 to-white dark:from-gray-900 dark:to-gray-900 p-6 rounded-[2rem] shadow-sm border border-orange-100 dark:border-gray-800/80 card-hover-effect">
+                <!-- No-show -->
+                <div class="stat-card stat-card-amber p-6 card-hover-effect">
                     <div class="flex justify-between items-center">
-                        <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Faltas (No-Show)</p>
-                        <i class="fas fa-user-clock text-orange-400 text-base"></i>
+                        <p class="card-label">Faltas (No-Show)</p>
+                        <i class="fas fa-user-clock text-base" style="color:var(--amber)"></i>
                     </div>
-                    <h3 class="text-4xl font-extrabold mt-2 dark:text-white tracking-tight">4</h3>
-                    <p class="text-gray-400 text-[11px] mt-1"><span class="text-orange-600 font-bold">R$ 640</span> não realizados</p>
+                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight">4</h3>
+                    <p class="text-xs mt-1" style="color:rgba(148,163,184,0.5)"><span style="color:var(--amber);font-weight:700">R$ 640</span> não realizados</p>
                 </div>
-                <div class="bg-white dark:bg-gray-900 p-6 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-800 card-hover-effect">
-                    <p class="text-gray-500 text-xs font-semibold uppercase tracking-wider">Faturamento</p>
+                <!-- Faturamento -->
+                <div class="stat-card p-6 card-hover-effect">
+                    <p class="card-label">Faturamento</p>
                     <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">R$ 1.250</h3>
-                    <span class="text-gray-400 text-[11px] font-medium block mt-1">8 sessões liquidadas</span>
+                    <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">8 sessões liquidadas</span>
                 </div>
             </div>
-<!-- inicio da listagem de pacientes -->
+
+            <!-- ─── Patient list + aside ─── -->
             <div class="grid grid-cols-12 gap-8 items-start mb-12">
 
                 <div class="col-span-12 xl:col-span-9 space-y-8">
 
-                    <div class="bg-gradient-to-br from-emerald-50/30 via-white to-blue-50/30 dark:from-gray-900 dark:to-slate-950 rounded-[2.5rem] p-6 xl:p-8 shadow-md border border-gray-200/60 dark:border-gray-800/80 backdrop-blur-sm">
+                    <!-- Flow panel -->
+                    <div class="flow-panel p-6 xl:p-8">
 
                         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
                             <div>
-                                <h2 class="text-xl xl:text-2xl font-extrabold text-gray-950 dark:text-white tracking-tight">Fluxo de Atendimento</h2>
-                                <p class="text-gray-500 text-xs mt-0.5">Gerenciamento em tempo real dos prontuários e pacientes ativos.</p>
+                                <h2 class="panel-title text-xl xl:text-2xl font-extrabold tracking-tight">Fluxo de Atendimento</h2>
+                                <p class="panel-subtitle mt-0.5">Gerenciamento em tempo real dos prontuários e pacientes ativos.</p>
                             </div>
 
-                            <div class="flex bg-gray-100/80 dark:bg-gray-800/80 p-1 rounded-2xl border border-gray-200/50 dark:border-gray-700 shadow-inner" id="filtro-container">
-                                <button onclick="filtrarTabelaTerapeutica('dia')" data-filtro="dia"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'dia' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
-                                    Hoje
-                                </button>
-                                <button onclick="filtrarTabelaTerapeutica('semana')" data-filtro="semana"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'semana' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
-                                    Semana
-                                </button>
-                                <button onclick="filtrarTabelaTerapeutica('mes')" data-filtro="mes"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'mes' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
-                                    Mês
-                                </button>
-                                <button onclick="filtrarTabelaTerapeutica('ano')" data-filtro="ano"
-                                   class="filtro-btn px-4 py-2 rounded-xl text-xs font-bold transition-all <%= locals.filtroAtivo === 'ano' ? 'bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white border border-gray-100 dark:border-transparent' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300' %>">
-                                    Ano
-                                </button>
+                            <div class="flex p-1" id="filtro-container" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px">
+                                <button onclick="filtrarTabelaTerapeutica('dia')" data-filtro="dia" class="filtro-btn px-4 py-2">Hoje</button>
+                                <button onclick="filtrarTabelaTerapeutica('semana')" data-filtro="semana" class="filtro-btn px-4 py-2">Semana</button>
+                                <button onclick="filtrarTabelaTerapeutica('mes')" data-filtro="mes" class="filtro-btn px-4 py-2">Mês</button>
+                                <button onclick="filtrarTabelaTerapeutica('ano')" data-filtro="ano" class="filtro-btn px-4 py-2">Ano</button>
                             </div>
 
-                            <button onclick="window.print()" class="flex items-center gap-2 bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 text-xs font-bold px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 transition-all shadow-sm">
-                                <i class="fas fa-print text-blue-500"></i> Imprimir Lista
+                            <button onclick="window.print()" class="btn-print flex items-center gap-2 px-4 py-2.5">
+                                <i class="fas fa-print" style="color:var(--cyan)"></i> Imprimir Lista
                             </button>
                         </div>
 
-                        <div class="overflow-x-auto rounded-2xl border border-gray-200/70 dark:border-gray-800/80 bg-white/60 dark:bg-gray-900/40 shadow-inner">
+                        <!-- Table -->
+                        <div class="data-table-wrap overflow-x-auto">
                             <table class="w-full text-left border-collapse table-fixed">
                                 <thead>
-                                    <tr class="bg-gray-100/70 dark:bg-gray-800/60 border-b border-gray-200 dark:border-gray-800">
-                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[60px]">ID</th>
-                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 min-w-[200px]">Paciente</th>
-                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[170px]">Data e Hora</th>
-                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[140px]">Terapia</th>
-                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[130px]">Status</th>
-                                        <th class="px-6 py-4 text-xs font-extrabold uppercase tracking-wider text-gray-500 dark:text-gray-400 w-[140px] text-right">Ações</th>
+                                    <tr>
+                                        <th class="px-6 py-4 w-[60px]">ID</th>
+                                        <th class="px-6 py-4 min-w-[200px]">Paciente</th>
+                                        <th class="px-6 py-4 w-[170px]">Data e Hora</th>
+                                        <th class="px-6 py-4 w-[140px]">Terapia</th>
+                                        <th class="px-6 py-4 w-[130px]">Status</th>
+                                        <th class="px-6 py-4 w-[140px] text-right">Ações</th>
                                     </tr>
                                 </thead>
-                                <tbody class="divide-y divide-gray-200/60 dark:divide-gray-800/60" id="tabela-pacientes-body">
+                                <tbody id="tabela-pacientes-body">
+                                    <!-- EJS template preserved – example static row below for preview: -->
                                     <% if (locals.agendamentos && agendamentos.length > 0) { %>
                                         <% agendamentos.forEach(agendamento => { %>
-                                            <tr class="hover:bg-white/80 dark:hover:bg-gray-800/40 transition-all group">
-                                                <td class="px-6 py-4 text-sm font-semibold text-gray-400 dark:text-gray-600 truncate">#<%= agendamento.id %></td>
+                                            <tr>
+                                                <td class="px-6 py-4 text-xs font-semibold" style="color:rgba(52,211,153,0.4)">#<%= agendamento.id %></td>
                                                 <td class="px-6 py-4">
-                                                    <div class="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate text-sm"><%= agendamento.nome %></div>
-                                                    <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1 truncate">
-                                                        <i class="fab fa-whatsapp text-emerald-500"></i> <%= agendamento.telefone %>
+                                                    <div class="patient-name"><%= agendamento.nome %></div>
+                                                    <div class="patient-phone mt-0.5 flex items-center gap-1">
+                                                        <i class="fab fa-whatsapp"></i> <%= agendamento.telefone %>
                                                     </div>
                                                 </td>
-
-                                                <td class="px-6 py-4 text-sm font-medium">
-                                                    <div class="font-bold text-gray-900 dark:text-gray-100 tracking-tight text-[14px]">
-                                                        <%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %>
-                                                    </div>
-
-                                                    <div class="mt-1.5 inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg text-xs font-black border border-blue-100/70 dark:border-blue-900/40 shadow-sm">
-                                                        <i class="far fa-clock text-blue-500 text-xs animate-pulse"></i>
+                                                <td class="px-6 py-4">
+                                                    <div class="date-val"><%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %></div>
+                                                    <div class="time-badge mt-1.5">
+                                                        <i class="far fa-clock text-xs"></i>
                                                         <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %> hs
                                                     </div>
                                                 </td>
-
-                                                <td class="px-6 py-4 truncate">
-                                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 max-w-full truncate">
-                                                        <%= agendamento.tipo_terapia %>
-                                                    </span>
+                                                <td class="px-6 py-4">
+                                                    <span class="therapy-badge"><%= agendamento.tipo_terapia %></span>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
+                                                <td class="px-6 py-4">
                                                     <%
-                                                        let badgeClasses = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200';
-                                                        if(agendamento.status_agendamento === 'confirmado') {
-                                                            badgeClasses = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
-                                                        } else if(agendamento.status_agendamento === 'pendente') {
-                                                            badgeClasses = 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/30';
-                                                        } else if(agendamento.status_agendamento === 'cancelado') {
-                                                            badgeClasses = 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/30';
-                                                        }
+                                                        let badgeClass = 'status-default';
+                                                        if(agendamento.status_agendamento === 'confirmado') badgeClass = 'status-confirmado';
+                                                        else if(agendamento.status_agendamento === 'pendente') badgeClass = 'status-pendente';
+                                                        else if(agendamento.status_agendamento === 'cancelado') badgeClass = 'status-cancelado';
                                                     %>
-                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border <%= badgeClasses %>">
-                                                        <span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-current animate-pulse"></span>
+                                                    <span class="status-badge <%= badgeClass %>">
+                                                        <span class="status-dot"></span>
                                                         <%= agendamento.status_agendamento %>
                                                     </span>
                                                 </td>
-                                                <td class="px-6 py-4 text-right whitespace-nowrap">
-                                                    <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow shadow-sm transition-all">
+                                                <td class="px-6 py-4 text-right">
+                                                    <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="btn-prontuario">
                                                         Ver Prontuário
                                                     </button>
                                                 </td>
@@ -339,11 +940,11 @@
                                         <tr>
                                             <td colspan="6" class="px-6 py-12 text-center">
                                                 <div class="flex flex-col items-center justify-center">
-                                                    <div class="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-3 border border-gray-100 dark:border-gray-700">
+                                                    <div class="empty-icon-wrap">
                                                         <i class="fas fa-calendar-times text-lg"></i>
                                                     </div>
-                                                    <p class="text-gray-900 dark:text-white font-semibold text-sm">Nenhum atendimento cadastrado</p>
-                                                    <p class="text-gray-400 dark:text-gray-500 text-xs mt-0.5">Sua agenda está livre para este período.</p>
+                                                    <p class="font-semibold text-sm" style="color:#e2e8f0">Nenhum atendimento cadastrado</p>
+                                                    <p class="text-xs mt-0.5" style="color:rgba(148,163,184,0.4)">Sua agenda está livre para este período.</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -353,31 +954,28 @@
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 xl:p-8 shadow-sm border border-gray-100 dark:border-gray-800">
+                    <!-- Calendar panel -->
+                    <div class="calendar-panel p-6 xl:p-8">
                         <div class="flex flex-col sm:flex-row items-center justify-between mb-6 gap-4">
                             <div>
-                                <h3 class="text-xl font-bold dark:text-white tracking-tight">Disponibilidade e Janelas</h3>
-                                <p id="calendario-mes-ano" class="text-xs text-gray-400 font-medium mt-0.5">Mês de Análise</p>
+                                <h3 class="panel-title text-xl font-bold tracking-tight">Disponibilidade e Janelas</h3>
+                                <p id="calendario-mes-ano" class="text-xs font-medium mt-0.5">Mês de Análise</p>
                             </div>
-                            <div class="flex bg-gray-50 dark:bg-gray-800 p-1 rounded-2xl border border-gray-100 dark:border-gray-700">
-                                <button onclick="alternarCalendario('semana')" id="btn-semana" class="px-4 py-2 rounded-xl text-xs font-bold transition-all bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white">
-                                    Semana
-                                </button>
-                                <button onclick="alternarCalendario('mes')" id="btn-mes" class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
-                                    Mês Inteiro
-                                </button>
+                            <div class="cal-toggle-wrap flex">
+                                <button onclick="alternarCalendario('semana')" id="btn-semana" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">Semana</button>
+                                <button onclick="alternarCalendario('mes')" id="btn-mes" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">Mês Inteiro</button>
                             </div>
                         </div>
 
                         <div id="view-calendario">
                             <div class="grid grid-cols-7 gap-2 mb-3">
-                                <div class="text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Dom</div>
-                                <div class="text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Seg</div>
-                                <div class="text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Ter</div>
-                                <div class="text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Qua</div>
-                                <div class="text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Qui</div>
-                                <div class="text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Sex</div>
-                                <div class="text-center text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase">Sáb</div>
+                                <div class="cal-day-label">Dom</div>
+                                <div class="cal-day-label">Seg</div>
+                                <div class="cal-day-label">Ter</div>
+                                <div class="cal-day-label">Qua</div>
+                                <div class="cal-day-label">Qui</div>
+                                <div class="cal-day-label">Sex</div>
+                                <div class="cal-day-label">Sáb</div>
                             </div>
                             <div id="grid-dias" class="grid grid-cols-7 gap-2"></div>
                         </div>
@@ -385,66 +983,60 @@
 
                 </div>
 
+                <!-- ─── Right Aside ─── -->
                 <div class="col-span-12 xl:col-span-3 space-y-6">
 
-                    <div id="asidePaciente" class="bg-gradient-to-br from-gray-900 to-slate-950 dark:from-gray-900 dark:to-slate-950 p-6 rounded-[2.5rem] text-white shadow-xl border border-gray-800 transition-all duration-300 relative overflow-hidden">
+                    <!-- Patient card -->
+                    <div id="asidePaciente" class="p-6 transition-all duration-300" style="position:relative">
+                        <div class="glow-circle-blue"></div>
+                        <div class="glow-circle-green"></div>
 
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
-                        <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
-
-                        <div class="flex justify-between items-center mb-6 relative z-10">
-                            <span id="infoContadorAside" class="bg-white/10 text-white text-[10px] uppercase tracking-widest font-black px-3 py-1.5 rounded-full border border-white/10">
-                                0 de 0 Pacientes
-                            </span>
+                        <div class="flex justify-between items-center mb-6" style="position:relative;z-index:10">
+                            <span id="infoContadorAside">0 de 0 Pacientes</span>
                             <div class="flex gap-1.5">
-                                <button onclick="navegarPaciente('anterior')" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-xs transition-colors">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button onclick="navegarPaciente('proximo')" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-xs transition-colors">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
+                                <button onclick="navegarPaciente('anterior')" class="aside-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                                <button onclick="navegarPaciente('proximo')" class="aside-nav-btn"><i class="fas fa-chevron-right"></i></button>
                             </div>
                         </div>
 
-                        <div class="text-center py-4 relative z-10">
-                            <div id="infoIniciaisAside" class="w-16 h-16 bg-gradient-to-tr from-blue-500 to-emerald-400 text-white font-black text-xl rounded-2xl flex items-center justify-center mx-auto shadow-lg tracking-tight mb-4">
-                                --
-                            </div>
-                            <h4 id="infoNomeAside" class="text-lg font-black tracking-tight line-clamp-1">Carregando Paciente...</h4>
-                            <p id="infoTerapiaAside" class="text-blue-400 text-xs font-bold uppercase mt-1 tracking-wider">Aguardando Conexão</p>
+                        <div class="text-center py-4" style="position:relative;z-index:10">
+                            <div id="infoIniciaisAside" class="w-16 h-16 text-white font-black text-xl flex items-center justify-center mx-auto mb-4 tracking-tight">--</div>
+                            <h4 id="infoNomeAside">Carregando Paciente...</h4>
+                            <p id="infoTerapiaAside" class="mt-1">Aguardando Conexão</p>
                         </div>
 
-                        <div class="space-y-3 my-4 pt-4 border-t border-white/5 text-xs text-gray-400 relative z-10">
-                            <div class="flex justify-between items-center">
-                                <span class="font-medium">Telefone:</span>
-                                <span id="infoTelefoneAside" class="text-white font-bold">(00) 00000-0000</span>
+                        <div class="space-y-3 my-4 pt-4" style="border-top:1px solid rgba(52,211,153,0.1);position:relative;z-index:10">
+                            <div class="aside-info-row">
+                                <span class="aside-info-label">Telefone:</span>
+                                <span id="infoTelefoneAside">(00) 00000-0000</span>
                             </div>
-                            <div class="flex justify-between items-center">
-                                <span class="font-medium">Status da Sessão:</span>
+                            <div class="aside-info-row">
+                                <span class="aside-info-label">Status da Sessão:</span>
                                 <div class="flex items-center gap-1.5">
-                                    <i id="infoStatusIconAside" class="fas fa-circle-notch animate-spin text-blue-400 text-xs"></i>
-                                    <span id="infoStatusAside" class="text-white font-bold uppercase tracking-wider text-[10px]">Pendente</span>
+                                    <i id="infoStatusIconAside" class="fas fa-circle-notch animate-spin text-xs" style="color:var(--cyan)"></i>
+                                    <span id="infoStatusAside">Pendente</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="pt-2 relative z-10">
-                            <a id="btnLinkProntuario" href="#" class="flex items-center justify-center gap-2 bg-white text-gray-950 font-black text-xs py-3.5 px-4 rounded-2xl shadow-lg hover:bg-gray-100 transition-all text-center">
+                        <div class="pt-2" style="position:relative;z-index:10">
+                            <a id="btnLinkProntuario" href="#" class="flex items-center justify-center gap-2 text-center">
                                 <i class="fas fa-folder-open"></i> Acessar Prontuário Completo
                             </a>
                         </div>
                     </div>
 
-                    <a href="/configuracoes" class="bg-gradient-to-br from-blue-600 to-emerald-500 p-6 rounded-[2.5rem] shadow-xl shadow-blue-100 dark:shadow-none group hover:scale-[1.02] active:scale-95 transition-all duration-500 flex flex-col justify-center items-center text-center relative overflow-hidden cursor-pointer block">
-                        <div class="absolute top-0 -left-full w-full h-full bg-white/20 skew-x-[-25deg] group-hover:left-[150%] transition-all duration-1000 ease-in-out"></div>
-                        <div class="relative z-10 flex flex-col items-center">
-                            <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl relative overflow-hidden group-hover:rotate-3 transition-transform duration-500">
-                                <img src="/logo/LogoTop2.png" alt="Logo MedLM" class="w-16 h-16 object-contain p-1">
-                                <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></span>
+                    <!-- Admin card -->
+                    <a href="/configuracoes" class="admin-card p-6 flex flex-col justify-center items-center text-center">
+                        <div class="shine"></div>
+                        <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center">
+                            <div class="admin-logo-wrap">
+                                <img src="/logo/LogoTop2.png" alt="Logo MedLM">
+                                <span class="admin-online-dot"></span>
                             </div>
-                            <h3 class="text-white text-xl font-bold tracking-tight">Med<span class="opacity-75">LM</span></h3>
-                            <p class="text-white/80 text-[10px] mt-1 uppercase tracking-[0.15em] font-medium">Painel de Administração</p>
-                            <div class="mt-4 flex items-center justify-center gap-1.5 text-[9px] text-white font-bold uppercase py-2 px-4 bg-white/10 rounded-full border border-white/25 hover:bg-white/20 transition">
+                            <h3 class="admin-card-title">Med<span style="opacity:0.6">LM</span></h3>
+                            <p class="admin-card-sub mt-1">Painel de Administração</p>
+                            <div class="admin-card-btn mt-4">
                                 <i class="fas fa-sliders-h"></i> Configurações
                             </div>
                         </div>
@@ -452,49 +1044,50 @@
 
                 </div>
             </div>
-<!-- fim da listagem de pacientes -->
-            <div class="border-t border-gray-200/50 dark:border-gray-800/60 pt-8 mt-12">
+
+            <!-- ─── Charts Section ─── -->
+            <div class="charts-section pt-8 mt-12">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-extrabold text-gray-950 dark:text-white tracking-tight">Análise Comparativa Mensal</h2>
-                    <p class="text-gray-500 text-xs mt-0.5">Visão isolada do comportamento e volume de consultas divididas por semanas cheias.</p>
+                    <h2 class="charts-section-title text-2xl font-extrabold tracking-tight">Análise Comparativa Mensal</h2>
+                    <p class="charts-section-sub mt-0.5">Visão isolada do comportamento e volume de consultas divididas por semanas cheias.</p>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800 transition hover:shadow-lg duration-500">
+                    <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
                             <div>
-                                <h3 class="text-base font-bold dark:text-white tracking-tight text-gray-900">Volume de Atendimentos - Semana 1</h3>
-                                <p class="text-gray-400 text-[11px]">Dias 01 a 07 do mês corrente</p>
+                                <h3 class="chart-card-title">Volume de Atendimentos — Semana 1</h3>
+                                <p class="chart-card-sub">Dias 01 a 07 do mês corrente</p>
                             </div>
                         </div>
                         <div id="chart-semana-1" class="min-h-[280px]"></div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800 transition hover:shadow-lg duration-500">
+                    <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
                             <div>
-                                <h3 class="text-base font-bold dark:text-white tracking-tight text-gray-900">Volume de Atendimentos - Semana 2</h3>
-                                <p class="text-gray-400 text-[11px]">Dias 08 a 14 do mês corrente</p>
+                                <h3 class="chart-card-title">Volume de Atendimentos — Semana 2</h3>
+                                <p class="chart-card-sub">Dias 08 a 14 do mês corrente</p>
                             </div>
                         </div>
                         <div id="chart-semana-2" class="min-h-[280px]"></div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800 transition hover:shadow-lg duration-500">
+                    <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
                             <div>
-                                <h3 class="text-base font-bold dark:text-white tracking-tight text-gray-900">Volume de Atendimentos - Semana 3</h3>
-                                <p class="text-gray-400 text-[11px]">Dias 15 a 21 do mês corrente</p>
+                                <h3 class="chart-card-title">Volume de Atendimentos — Semana 3</h3>
+                                <p class="chart-card-sub">Dias 15 a 21 do mês corrente</p>
                             </div>
                         </div>
                         <div id="chart-semana-3" class="min-h-[280px]"></div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-900 rounded-[2.5rem] p-6 shadow-sm border border-gray-100 dark:border-gray-800 transition hover:shadow-lg duration-500">
+                    <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
                             <div>
-                                <h3 class="text-base font-bold dark:text-white tracking-tight text-gray-900">Volume de Atendimentos - Semana 4</h3>
-                                <p class="text-gray-400 text-[11px]">Dias 22 ao fim do mês corrente</p>
+                                <h3 class="chart-card-title">Volume de Atendimentos — Semana 4</h3>
+                                <p class="chart-card-sub">Dias 22 ao fim do mês corrente</p>
                             </div>
                         </div>
                         <div id="chart-semana-4" class="min-h-[280px]"></div>
@@ -505,84 +1098,82 @@
         </main>
     </div>
 
-    <!-- Slide para ver prontuario -->
+    <!-- ─── Drawer / Gaveta ─── -->
     <div id="gaveta-prontuario" class="fixed inset-0 z-50 invisible transition-all duration-300">
-        <div id="gaveta-backdrop" class="absolute inset-0 bg-gray-900/40 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+        <div id="gaveta-backdrop" class="absolute inset-0 opacity-0 transition-opacity duration-300" style="background:rgba(2,12,18,0.7);backdrop-filter:blur(6px)"></div>
 
-        <div id="gaveta-painel" class="absolute inset-y-0 left-0 w-full max-w-lg bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-slate-950 shadow-2xl border-r border-gray-200 dark:border-gray-800 transform -translate-x-full transition-transform duration-300 flex flex-col">
+        <div id="gaveta-painel" class="absolute inset-y-0 left-0 w-full max-w-lg shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
 
-            <div class="p-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-white dark:bg-gray-900/50">
+            <div class="gaveta-header p-6 flex justify-between items-center">
                 <div>
-                    <span class="text-[10px] uppercase font-black tracking-widest text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded">Ficha Clínica</span>
-                    <h3 id="gaveta-paciente-nome" class="text-lg font-black text-gray-900 dark:text-white mt-1">Carregando...</h3>
+                    <span class="gaveta-tag">Ficha Clínica</span>
+                    <h3 id="gaveta-paciente-nome" class="mt-1">Carregando...</h3>
                 </div>
-                <button onclick="fecharGavetaProntuario()" class="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-red-500 transition-colors">
+                <button onclick="fecharGavetaProntuario()" class="gaveta-close-btn">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
-            <div class="p-6 overflow-y-auto flex-1 space-y-6 text-sm text-gray-600 dark:text-gray-400">
-                <div class="grid grid-cols-2 gap-4 bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-800/80 shadow-sm">
+            <div class="p-6 overflow-y-auto flex-1 space-y-5">
+                <div class="gaveta-info-grid grid grid-cols-2 gap-4">
                     <div>
-                        <span class="text-xs text-gray-400 font-semibold block">Data e Hora</span>
-                        <span id="gaveta-paciente-data" class="font-bold text-gray-800 dark:text-gray-200">-</span>
+                        <span class="gaveta-info-label">Data e Hora</span>
+                        <span id="gaveta-paciente-data" class="gaveta-info-val">-</span>
                     </div>
                     <div>
-                        <span class="text-xs text-gray-400 font-semibold block">Terapia</span>
-                        <span id="gaveta-paciente-terapia" class="font-bold text-blue-600 dark:text-blue-400">-</span>
+                        <span class="gaveta-info-label">Terapia</span>
+                        <span id="gaveta-paciente-terapia" class="gaveta-info-val gaveta-info-val-accent">-</span>
                     </div>
                     <div>
-                        <span class="text-xs text-gray-400 font-semibold block">WhatsApp</span>
-                        <span id="gaveta-paciente-whats" class="font-bold text-gray-800 dark:text-gray-200">-</span>
+                        <span class="gaveta-info-label">WhatsApp</span>
+                        <span id="gaveta-paciente-whats" class="gaveta-info-val">-</span>
                     </div>
                     <div>
-                        <span class="text-xs text-gray-400 font-semibold block">CPF</span>
-                        <span id="gaveta-paciente-cpf" class="font-bold text-gray-800 dark:text-gray-200">-</span>
+                        <span class="gaveta-info-label">CPF</span>
+                        <span id="gaveta-paciente-cpf" class="gaveta-info-val">-</span>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-3 gap-2 text-center text-xs">
-                    <div class="bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <span class="text-gray-400 block mb-0.5">Idade</span>
-                        <strong id="gaveta-paciente-idade" class="text-gray-800 dark:text-gray-200 text-sm">-</strong>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="gaveta-stat-box">
+                        <span class="gaveta-stat-label">Idade</span>
+                        <strong id="gaveta-paciente-idade" class="gaveta-stat-val">-</strong>
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <span class="text-gray-400 block mb-0.5">Peso</span>
-                        <strong id="gaveta-paciente-peso" class="text-gray-800 dark:text-gray-200 text-sm">-</strong>
+                    <div class="gaveta-stat-box">
+                        <span class="gaveta-stat-label">Peso</span>
+                        <strong id="gaveta-paciente-peso" class="gaveta-stat-val">-</strong>
                     </div>
-                    <div class="bg-gray-50 dark:bg-gray-800/30 p-2.5 rounded-xl border border-gray-100 dark:border-gray-800">
-                        <span class="text-gray-400 block mb-0.5">Altura</span>
-                        <strong id="gaveta-paciente-altura" class="text-gray-800 dark:text-gray-200 text-sm">-</strong>
+                    <div class="gaveta-stat-box">
+                        <span class="gaveta-stat-label">Altura</span>
+                        <strong id="gaveta-paciente-altura" class="gaveta-stat-val">-</strong>
                     </div>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Queixa Principal / Motivo</label>
-                    <div id="gaveta-paciente-motivo" class="p-4 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800/60 leading-relaxed min-h-[60px] italic"></div>
                 </div>
 
                 <div class="space-y-1.5">
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider">Condições Pré-existentes</label>
-                    <div id="gaveta-paciente-condicoes" class="p-4 bg-white dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-800/60 leading-relaxed"></div>
+                    <label class="gaveta-section-label">Queixa Principal / Motivo</label>
+                    <div id="gaveta-paciente-motivo" class="gaveta-text-block italic"></div>
                 </div>
 
-                <div class="space-y-1.5 pt-2">
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1">
-                        <i class="fas fa-pen text-blue-500"></i> Observações / Evolução do Atendimento
+                <div class="space-y-1.5">
+                    <label class="gaveta-section-label">Condições Pré-existentes</label>
+                    <div id="gaveta-paciente-condicoes" class="gaveta-text-block"></div>
+                </div>
+
+                <div class="space-y-1.5 pt-1">
+                    <label class="gaveta-section-label flex items-center gap-1.5">
+                        <i class="fas fa-pen" style="color:var(--cyan)"></i> Observações / Evolução do Atendimento
                     </label>
-                    <textarea id="gaveta-paciente-obs" class="w-full p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-h-[120px] shadow-inner" placeholder="Digite as anotações desta sessão clínica..."></textarea>
+                    <textarea id="gaveta-paciente-obs" class="gaveta-textarea" placeholder="Digite as anotações desta sessão clínica..."></textarea>
                 </div>
             </div>
 
-            <div class="p-4 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex gap-3">
-                <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition-colors shadow-sm">
-                    Salvar Evolução
-                </button>
+            <div class="gaveta-footer p-4 flex gap-3">
+                <button class="btn-salvar flex-1">Salvar Evolução</button>
             </div>
         </div>
     </div>
-    <!-- fim do slide ver prontuario -->
 
+    <!-- Data bridges preserved exactly -->
     <script>
         window.listaAgendamentosReais = <%- locals.agendamentos ? JSON.stringify(agendamentos) : '[]' %>;
         window.dadosAgendamentosReais = <%- locals.resumoMensal ? JSON.stringify(resumoMensal) : '{}' %>;

@@ -7,178 +7,382 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css' rel='stylesheet'>
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/animacaoBack.css">
 
   <style>
-    /* Aplica a fonte Poppins a todo o corpo do documento */
+    :root {
+      --emerald:   #34d399;
+      --emerald-d: #059669;
+      --cyan:      #22d3ee;
+      --teal:      #0f766e;
+      --amber:     #fbbf24;
+      --slate-bg:  #020c12;
+      --border:    rgba(52,211,153,0.15);
+      --border-cy: rgba(34,211,238,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-        font-family: 'Poppins', sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        /* Fundo animado (backup caso o container-fluid falhe) */
-        background: linear-gradient(45deg, #c1d6ec, #a2c9f2, #2252b9);
-        background-size: 400% 400%;
-        animation: gradientFlow 15s ease infinite;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--slate-bg);
+      background-image:
+        radial-gradient(ellipse 70% 60% at 20% 0%,   rgba(8,145,178,0.22) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 55% at 80% 100%, rgba(5,150,105,0.20) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 50% 50%,  rgba(251,191,36,0.04) 0%, transparent 70%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #cbd5e1;
+      overflow: hidden;
     }
 
-    @keyframes gradientFlow {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none; z-index: 0;
     }
 
-    .conteinerpai {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        padding: 20px;
+    /* ─── Orbs ─── */
+    .orb {
+      position: fixed; border-radius: 50%;
+      pointer-events: none; filter: blur(80px); z-index: 0;
+    }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(8,145,178,0.18), transparent 70%);
+      top: -15%; left: -10%;
+      animation: orbFloat1 14s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(5,150,105,0.15), transparent 70%);
+      bottom: -10%; right: -8%;
+      animation: orbFloat2 18s ease-in-out infinite;
+    }
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(30px, 25px); }
+    }
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-25px, -30px); }
     }
 
-    /* Estilo do container com transparência (Glassmorphism) */
+    /* Grid lines */
+    .hero-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(52,211,153,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(52,211,153,0.035) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    /* ─── Card ─── */
+    .login-wrap {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 440px;
+      padding: 20px;
+    }
+
     .login-container {
-      background-color: rgba(255, 255, 255, 0.15); /* Mais transparente */
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 44px 40px;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow:
+        0 0 0 1px rgba(52,211,153,0.05),
+        0 32px 80px rgba(0,0,0,0.5),
+        0 0 60px rgba(8,145,178,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top glow line */
+    .login-container::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+      opacity: 0.6;
+    }
+
+    /* Corner accent */
+    .login-container::after {
+      content: '';
+      position: absolute; bottom: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(5,150,105,0.12), transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ─── Logo area ─── */
+    .logo-wrapper {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-icon-wrap {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 64px; height: 64px;
+      background: linear-gradient(135deg, #0891b2, #059669);
       border-radius: 20px;
-      padding: 3rem;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(12px); /* Efeito de vidro mais intenso */
-      -webkit-backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      width: 100%;
-      max-width: 450px;
-      color: #000;
+      box-shadow: 0 0 30px rgba(8,145,178,0.5), 0 0 60px rgba(5,150,105,0.2);
+      margin-bottom: 14px;
+      position: relative;
+    }
+    .logo-icon-wrap::after {
+      content: '';
+      position: absolute; top: 4px; right: 4px;
+      width: 10px; height: 10px;
+      background: var(--emerald);
+      border-radius: 50%;
+      border: 2px solid rgba(2,12,18,0.8);
+      box-shadow: 0 0 8px var(--emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    .logo-icon-wrap i { color: #fff; font-size: 26px; }
+
+    /* If using image logo instead */
+    span.logo-img {
+      height: 64px;
+      width: 180px;
+      background-image: url('../logo/LogoTop.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: inline-block;
+      transition: transform 0.3s ease;
+    }
+    span.logo-img:hover { transform: scale(1.05); }
+
+    .logo-brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(90deg, var(--cyan), var(--emerald));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 10px rgba(34,211,238,0.3));
+      display: block; margin-bottom: 4px;
+    }
+    .logo-tagline {
+      font-size: 11px; font-weight: 600;
+      color: rgba(148,163,184,0.4);
+      text-transform: uppercase; letter-spacing: 0.18em;
+    }
+
+    /* ─── Heading ─── */
+    .login-heading {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px; font-weight: 800;
+      color: #f1f5f9;
+      margin-bottom: 28px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .login-heading::after {
+      content: '';
+      flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    /* ─── Error message ─── */
+    #error-message {
+      display: none;
+      background: rgba(248,113,113,0.10);
+      border: 1px solid rgba(248,113,113,0.25);
+      color: #fca5a5;
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* ─── Form ─── */
+    .field-wrap {
+      margin-bottom: 18px;
     }
 
     .form-label {
-      font-weight: 500;
-      color: #000;
+      display: block;
+      font-size: 11px; font-weight: 700;
+      color: rgba(148,163,184,0.5);
+      text-transform: uppercase; letter-spacing: 0.12em;
+      margin-bottom: 7px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+    .input-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: rgba(52,211,153,0.4); font-size: 14px;
+      pointer-events: none;
+      transition: color 0.25s;
     }
 
     .form-control {
-        background-color: rgba(255, 255, 255, 0.5);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        color: #000;
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 500;
+      padding: 13px 14px 13px 42px;
+      outline: none;
+      transition: all 0.25s;
     }
-
+    .form-control::placeholder { color: rgba(148,163,184,0.25); }
     .form-control:focus {
-        background-color: rgba(255, 255, 255, 0.8);
-        box-shadow: 0 0 0 0.25rem rgba(34, 82, 185, 0.25);
-        border-color: #2252b9;
+      border-color: rgba(52,211,153,0.4);
+      background: rgba(52,211,153,0.04);
+      box-shadow: 0 0 0 3px rgba(52,211,153,0.08), 0 0 20px rgba(52,211,153,0.06);
     }
+    .form-control:focus + .input-focus-ring { opacity: 1; }
+    .input-wrap:focus-within .input-icon { color: var(--emerald); }
 
-    h2 {
-        font-weight: 600;
-        margin-bottom: 2rem;
-        color: #000;
-    }
-
+    /* ─── Submit button ─── */
     .btn-primary {
-        background-color: #2252b9;
-        border: none;
-        padding: 10px;
-        font-weight: 600;
-        transition: background-color 0.3s ease;
+      width: 100%;
+      background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+      border: 1px solid rgba(52,211,153,0.3);
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 800;
+      padding: 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 0 24px rgba(8,145,178,0.35), 0 0 48px rgba(5,150,105,0.12);
+      position: relative; overflow: hidden;
+      margin-top: 8px;
+      letter-spacing: 0.02em;
     }
-
+    .btn-primary::before {
+      content: '';
+      position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+      transform: skewX(-20deg);
+      transition: left 0.6s ease;
+    }
     .btn-primary:hover {
-        background-color: #1a3f8f;
+      transform: translateY(-1px);
+      box-shadow: 0 0 36px rgba(8,145,178,0.55), 0 0 72px rgba(5,150,105,0.2);
+    }
+    .btn-primary:hover::before { left: 150%; }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* Loading state */
+    .btn-primary.loading {
+      pointer-events: none; opacity: 0.8;
     }
 
-    /*========== Estilização logo MedLM ============ */
-    /* Mantendo e aprimorando seu efeito de Gradient Flow */
-    .gradient-bg {
-    background: linear-gradient(45deg,
-        #5a92d6, #60c6cb, #a2c9f2, #5a92d6, #60c6cb
-    );
-    background-size: 400% 400%;
-    animation: gradientFlow 15s ease-in-out infinite;
-
-    /* --- AS LINHAS QUE FAZEM A MÁGICA --- */
-    -webkit-background-clip: text; /* Recorta o fundo no formato das letras */
-    background-clip: text;         /* Versão padrão */
-    -webkit-text-fill-color: transparent; /* Torna a letra transparente para o fundo aparecer */
-    color: transparent;            /* Fallback */
-    /* ------------------------------------ */
-}
-
-@keyframes gradientFlow {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-    /* ================================== */
-    .logo-wrapper {
-        text-align: center;
-        margin-bottom: 0.5rem;
+    /* ─── Footer link ─── */
+    .login-footer {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 12px;
+      color: rgba(148,163,184,0.35);
     }
-
-    span.logo-img {
-        height: 120px; /* Ajustado para um tamanho mais comercial */
-        width: 100%;
-        max-width: 320px;
-        /* Aponta para o novo logo que vamos criar */
-        background-image: url('../logo/LogoTop.png');
-        background-size: 100%;
-        background-repeat: no-repeat;
-        background-position: center;
-        display: inline-block;
-        cursor: pointer;
-        margin: 0 auto 10px auto;
-
-        transition: transform 0.3s ease-in-out;
+    .login-footer a {
+      color: rgba(52,211,153,0.6);
+      text-decoration: none; font-weight: 600;
+      transition: color 0.2s;
     }
+    .login-footer a:hover { color: var(--emerald); }
 
-    span.logo-img:hover {
-        transform: scale(1.05);
-    }
-
-    /* Mensagem de erro estilizada */
-    #error-message {
-        color: #ffd7d7;
-        background-color: rgba(255, 0, 0, 0.3);
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 1rem;
-        display: none; /* Escondido por padrão */
-        text-align: center;
-        font-size: 0.9rem;
-    }
+    /* ─── Scrollbar ─── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
   </style>
 </head>
+
 <body>
 
-  <div class="conteinerpai">
-    <div class='login-container'>
-        <div class="logo-wrapper">
-            <span class="logo-img"></span>
-        </div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="hero-grid"></div>
 
-        <!-- <h2 class='text-center'>Login</h2> -->
-        <h2 class="text-xl font-bold gradient-bg">
-          Login do Sistema
+  <div class="login-wrap">
+    <div class="login-container">
+
+      <!-- Logo -->
+      <div class="logo-wrapper">
+        <!-- Troca para logo-icon-wrap caso não tenha imagem -->
+        <span class="logo-img"></span>
+        <span class="logo-brand">MedLM</span>
+        <span class="logo-tagline">Sistema Terapêutico</span>
+      </div>
+
+      <!-- Heading -->
+      <h2 class="login-heading">
+        <i class="fas fa-lock" style="color:var(--emerald);font-size:14px"></i>
+        Login do Sistema
       </h2>
 
+      <!-- Error -->
+      <div id="error-message"></div>
 
-        <div id="error-message"></div>
+      <!-- Form -->
+      <form id="loginForm">
 
-        <form id="loginForm">
-          <div class='mb-3'>
-            <label for='email' class='form-label'>E-mail Profissional</label>
-            <input type='email' class='form-control' id='email' placeholder="seu@email.com" required>
+        <div class="field-wrap">
+          <label for="email" class="form-label">E-mail Profissional</label>
+          <div class="input-wrap">
+            <i class="fas fa-envelope input-icon"></i>
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              placeholder="seu@email.com"
+              required
+              autocomplete="email"
+            >
           </div>
-          <div class='mb-3'>
-            <label for='senha' class='form-label'>Senha</label>
-            <input type='password' class='form-control' id='senha' placeholder="******" required>
+        </div>
+
+        <div class="field-wrap">
+          <label for="senha" class="form-label">Senha</label>
+          <div class="input-wrap">
+            <i class="fas fa-key input-icon"></i>
+            <input
+              type="password"
+              class="form-control"
+              id="senha"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            >
           </div>
-          <button type='submit' class='btn btn-primary w-100'>Entrar</button>
-        </form>
+        </div>
+
+        <button type="submit" class="btn-primary" id="loginBtn">
+          <i class="fas fa-sign-in-alt" style="margin-right:8px"></i> Entrar no Sistema
+        </button>
+      </form>
+
+      <div class="login-footer">
+        Ainda não tem acesso?
+        <a href="/pages/Cadastro_Clinica.html">Criar minha clínica</a>
+      </div>
+
     </div>
   </div>
 
@@ -186,53 +390,55 @@
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      const email = document.getElementById('email').value;
-      const senha = document.getElementById('senha').value;
-      const errorMessage = document.getElementById('error-message');
+      const email     = document.getElementById('email').value;
+      const senha     = document.getElementById('senha').value;
+      const errorMsg  = document.getElementById('error-message');
+      const btn       = document.getElementById('loginBtn');
 
+      errorMsg.style.display = 'none';
+      errorMsg.textContent   = '';
+      btn.classList.add('loading');
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="margin-right:8px"></i> Autenticando...';
 
-
-      // Limpa mensagem de erro anterior
-      errorMessage.style.display = 'none';
-      errorMessage.textContent = '';
       try {
-    const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, senha })
-    });
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, senha })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (response.ok) {
-        // 1. Salva o token no localStorage e nos Cookies
-        localStorage.setItem('token', data.token);
-        document.cookie = `token=${data.token}; path=/; max-age=${8 * 60 * 60}; SameSite=Lax`;
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          document.cookie = `token=${data.token}; path=/; max-age=${8 * 60 * 60}; SameSite=Lax`;
 
-        // 2. GUARDA OS DADOS DINÂMICOS DO TENANT (MUDANÇA AQUI)
-        // O seu backend deve retornar esses campos (ex: data.usuarioNome e data.clinicaNome)
-        if (data.usuarioNome) localStorage.setItem('medlm_user_name', data.usuarioNome);
-        if (data.clinicaNome) localStorage.setItem('medlm_clinic_name', data.clinicaNome);
+          if (data.usuarioNome) localStorage.setItem('medlm_user_name', data.usuarioNome);
+          if (data.clinicaNome) localStorage.setItem('medlm_clinic_name', data.clinicaNome);
 
-        // 3. Redirecionamento inteligente baseado no perfil do usuário
-        if (data.redirectUrl) {
+          btn.innerHTML = '<i class="fas fa-check" style="margin-right:8px"></i> Acesso liberado!';
+
+          if (data.redirectUrl) {
             window.location.href = data.redirectUrl;
+          } else {
+            window.location.href = '/dashboard';
+          }
         } else {
-            window.location.href = '/dashboard'; // Fallback de segurança
+          btn.classList.remove('loading');
+          btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:8px"></i> Entrar no Sistema';
+          errorMsg.textContent   = data.error || 'Erro ao realizar login.';
+          errorMsg.style.display = 'block';
         }
-    } else {
-        errorMessage.textContent = data.error || 'Erro ao realizar login.';
-        errorMessage.style.display = 'block';
-    }
-} catch (error) {
-    console.error('Erro no login:', error);
-    errorMessage.textContent = 'Erro de conexão com o servidor.';
-    errorMessage.style.display = 'block';
-}
+      } catch (error) {
+        console.error('Erro no login:', error);
+        btn.classList.remove('loading');
+        btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:8px"></i> Entrar no Sistema';
+        errorMsg.textContent   = 'Erro de conexão com o servidor.';
+        errorMsg.style.display = 'block';
+      }
     });
   </script>
 
- <script src="../ScriptGlobal/logout.js"></script>
-  <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js'></script>
+  <script src="../ScriptGlobal/logout.js"></script>
 </body>
 </html>
