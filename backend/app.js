@@ -12,6 +12,8 @@ const authRoutes = require('./routes/authRoutes');
 const cadastroClinicaRoutes = require('./routes/cadastro_clinicaRoutes');
 const equipeRoutes = require('./routes/equipeRoutes');
 const financeiroRoutes = require('./routes/financeiroRoutes');
+const financeiroLogger = require('./middleware/financeiroLogger');
+
 const pacienteRoutes = require('./routes/pacienteRoutes');
 const prontuarioRoutes = require('./routes/prontuarioRoutes'); // 🌟 1. Importa as rotas de prontuário
 const usuarioRoutes = require('./routes/usuarioRoutes');
@@ -72,7 +74,8 @@ app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api/equipe', equipeRoutes);
 app.use('/api/usuarios', usuarioRoutes);
 app.use('/api/openai', openAiRoutes);
-app.use('/api/financeiro', financeiroRoutes);
+// app.use('/api/financeiro', financeiroRoutes);
+app.use('/api/financeiro', financeiroLogger, financeiroRoutes);
 app.use('/api/config', configuracaoRoutes);
 app.use('/agendar', portalRoutes);
 app.use('/portal_paciente', portalPacientelroutes); // Aqui mapeamos o prefixo
@@ -148,6 +151,11 @@ app.get('/dashboard/configuracoes', authMiddleware, (req, res) => {
 
 // --- ROTA DO PAINEL ADMIN (MASTER) ---
 // Protegida: Só entra se for o admin@medlm.com
+
+// app.get('/admin', (req, res) => {
+//   res.sendFile(path.join(frontendPath, 'pages', 'admin.html'));
+// });
+
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'admin.html'));
 });
