@@ -31,4 +31,7 @@ router.put('/completo/:id', authMiddleware, uploadFields, agendamentoController.
 // O Express já vai entender que é /agendamento/detalhes/:id
 router.get('/detalhes/:id', authMiddleware, agendamentoController.obterDetalhesAgendamento);
 
+// Adicione esta linha no seu agendamentoRoutes.js
+router.get('/hoje', authMiddleware, agendamentoController.listarAgendamentosHoje);
+
 module.exports = router;

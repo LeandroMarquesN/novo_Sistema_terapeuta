@@ -2,7 +2,7 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8">
-    <title>Terapeuta Pro - Dashboard</title>
+    <title>MedLM - sistema Clinico inteligente Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -46,7 +46,68 @@
           }
       }
     </script>
+    
+    <!-- botao da openAi para falar a agenda -->
+    <style>
+        .neon-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: rgba(2, 12, 18, 0.4); /* Fundo sutil */
+    border: 1px solid var(--border-cyan);
+    color: var(--cyan);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(4px);
+}
 
+.wave-icon { width: 18px; height: 18px; transition: stroke 0.3s; }
+
+.neon-btn:hover {
+    border-color: var(--emerald);
+    color: var(--emerald);
+    box-shadow: 0 0 15px var(--glow-em);
+}
+
+/* Animação: Ondas de áudio ativas */
+.falando {
+    border-color: var(--emerald);
+    color: var(--emerald);
+    box-shadow: 0 0 20px var(--glow-em);
+}
+
+.falando::before, .falando::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 1px solid var(--emerald);
+    border-radius: 6px;
+    animation: ripple 1.5s infinite;
+}
+
+.falando::after { animation-delay: 0.5s; }
+
+@keyframes ripple {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.2); opacity: 0; }
+}
+
+/* Ajuste do ícone vibrando */
+.falando .wave-icon { stroke: var(--emerald); animation: pulse-icon 0.5s infinite; }
+
+@keyframes pulse-icon {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.5); }
+}
+    </style>
+<!-- ----- fimdo botao fala  openAi -->
     <style>
         /* ─── Design Tokens ─── */
         :root {
@@ -805,13 +866,23 @@
                 </div>
 
                 <div class="flex items-center flex-wrap gap-4">
+                    <button id="btnFalarAgenda" class="neon-btn">
+                        <svg class="wave-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 6C12 6 13 8 13 12C13 16 12 18 12 18" stroke-linecap="round"/>
+                            <path d="M9 8C9 8 10 9 10 12C10 15 9 16 9 16" stroke-linecap="round"/>
+                            <path d="M15 8C15 8 14 9 14 12C14 15 15 16 15 16" stroke-linecap="round"/>
+                            <path d="M6 10C6 10 7 11 7 12C7 13 6 14 6 14" stroke-linecap="round"/>
+                        </svg>
+                        <span class="btn-text">Ouvir Agenda</span>
+                    </button>
+
                     <div id="data-hora-container-tailwind" class="hidden md:flex items-center px-5 py-2.5 text-xs xl:text-sm font-semibold" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:99px;color:#94a3b8;backdrop-filter:blur(10px)">
                         <i class="fas fa-calendar-alt mr-3" style="color:var(--emerald)"></i>
                         <span id="data-hora"></span>
                     </div>
 
                     <a href="/agendamento" class="btn-new-appt flex items-center px-5 py-2.5 rounded-full font-bold text-xs xl:text-sm">
-                        <i class="fas fa-plus mr-2"></i> Novo Agendamento
+                        <i class="fas fa-plus mr-2"></i> Novo Agendamento 
                     </a>
 
                     <div class="header-avatar w-12 h-12 rounded-full flex items-center justify-center font-black shadow-md">
@@ -1183,5 +1254,6 @@
     <script src="../ScriptGlobal/dashboardScript.js" defer></script>
     <script src="../ScriptGlobal/logout.js"></script>
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+    <script src="../ScriptGlobal/BotaoFalarAgenda.Script_.js"></script>
 </body>
 </html>

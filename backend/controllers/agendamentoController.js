@@ -237,6 +237,36 @@ exports.listarAgendamentos = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao listar agendamentos', detalhes: err.message });
   }
 };
+// ============================================================================
+// 2.1 lista agendamento de hoje
+// ============================================================================
+exports.listarAgendamentosHoje = async (req, res) => {
+  const clinicaId = req.usuario.clinica_id;
+  // Pega a data de hoje no formato YYYY-MM-DD
+  const hoje = new Date().toISOString().split('T')[0];
+
+  try {
+    const sqlAgendamentosHoje = `
+      SELECT
+        a.*,
+        f.status_pagamento AS financeiro_status
+      FROM agendamentos a
+      LEFT JOIN financeiro f ON a.id = f.agendamento_id
+      WHERE a.clinica_id = ? 
+      AND DATE(a.data_agendamento) = ?
+      ORDER BY a.data_agendamento ASC
+    `;
+
+    const [agendamentos] = await db.query(sqlAgendamentosHoje, [clinicaId, hoje]);
+
+    // Retorna a lista simples para o seu botão de voz
+    res.json(agendamentos);
+
+  } catch (err) {
+    console.error("Erro ao listar agenda de hoje:", err);
+    res.status(500).json({ erro: 'Erro ao buscar agenda do dia' });
+  }
+};
 
 // =============================================================================
 // 3. DELETAR AGENDAMENTO
