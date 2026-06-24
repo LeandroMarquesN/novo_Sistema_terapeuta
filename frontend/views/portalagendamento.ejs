@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamento | <%= clinica.nome %></title>
+    <title>Agendamento | <%= clinica.nome_clinica %></title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Importação da Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
+    <link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
     <style>
         body {
             /* Degradê suave Azul para Verde */
@@ -58,6 +59,7 @@
     </style>
 </head>
 <body class="p-4">
+   
 
     <!-- Banner de Boas-Vindas -->
     <!-- Banner de Boas-Vindas Premium -->
@@ -79,8 +81,9 @@
 
             <!-- Nome da Clínica com Efeito de Brilho -->
             <h2 class="text-4xl md:text-5xl font-extrabold text-glow leading-tight drop-shadow-lg">
-                <%= clinica.nome %>
+                <%= clinica.nome_clinica %>
             </h2>
+            
 
             <div class="mt-4 flex justify-center items-center gap-2 text-white/70 text-xs">
                 <i class="fas fa-shield-check"></i>
@@ -209,10 +212,10 @@
                 </div>
 
                 <div class="space-y-3">
-                    <button type="button" onclick="abrirModalPagamento()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3">
-                        <i class="fab fa-pix text-emerald-400"></i> Pagar Sinal (PIX)
+                    <button type="button" onclick="abrirModalLembrete()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3">
+                        <i class="fab fa-pix text-emerald-400"></i> Pagar Sinal
                     </button>
-                    <button type="button" onclick="finalizarAgendamentoCompleto('aguardando_sinal')" class="w-full bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 rounded-2xl">
+                    <button type="button" onclick="finalizarAgendamentoCompleto('aguardando_sinal',event)" class="w-full bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 rounded-2xl">
                         Confirmar sem pagar agora
                     </button>
                 </div>
@@ -239,8 +242,98 @@
             </button>
         </div>
     </div>
+    <!-- modal pagamento lembrete -->
+    <div id="modalPagamentoLembrete" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div class="text-amber-500 text-4xl mb-4"><i class="fas fa-clock"></i></div>
+            
+            <h2 class="text-2xl font-bold mb-2">Reserva Realizada!</h2>
+            <p class="text-slate-600 mb-4">Seu horário foi reservado com sucesso.</p>
+            
+            <div class="bg-slate-50 p-3 rounded-lg mb-4 text-sm text-slate-700">
+                <p>Data: <span id="resumoData" class="font-bold"></span></p>
+                <p>Horário: <span id="resumoHora" class="font-bold"></span></p>
+            </div>
+    
+            <p class="text-slate-600 mb-6">
+                Para garantir sua vaga, precisamos que você finalize o pagamento.
+            </p>
+    
+            <button onclick="prosseguirPagamento()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all shadow-md">
+                Ir para Pagamento Seguro
+            </button>
+            <button onclick="fecharLembrete()" class="mt-4 text-slate-400 text-sm hover:underline">
+                Pagar depois
+            </button>
+        </div>
+    </div>
 
     <script>
+        // funcao do modal lembrete pagametno
+        function abrirModalLembrete() {
+            // 1. Busca os elementos uma única vez para performance
+            const inputData = document.getElementById('data_escolhida');
+            const displayData = document.getElementById('resumoData');
+            const displayHora = document.getElementById('resumoHora');
+            const modal = document.getElementById('modalPagamentoLembrete');
+
+            // 2. Validação simples: se não houver dados, não abre o modal (evita erros)
+            if (!inputData.value || !dados.horario) {
+                console.warn("Tentativa de abrir modal sem dados de agendamento.");
+                return; 
+            }
+
+            // 3. Formatação amigável da data (opcional, mas profissional)
+            // Converte '2026-06-25' para '25/06/2026'
+            const [ano, mes, dia] = inputData.value.split('-');
+            displayData.innerText = `${dia}/${mes}/${ano}`;
+            
+            // 4. Exibe o horário
+            displayHora.innerText = dados.horario;
+
+            // 5. Abre o modal
+            modal.classList.remove('hidden');
+        }
+
+        function fecharLembrete() {
+                const modal = document.getElementById('modalPagamentoLembrete');
+                modal.classList.add('hidden');
+            }
+
+            async function prosseguirPagamento() {
+                // 1. Feedback visual imediato: evita cliques duplos
+                const btn = event.currentTarget;
+                const originalText = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparando pagamento...';
+
+                try {
+                    // 2. Simulação da chamada de API para o Gateway
+                    // No futuro: const response = await fetch(`/agendar/${slug}/pagar`, { method: 'POST' });
+                    // const { url } = await response.json();
+                    
+                    console.log("Iniciando fluxo de pagamento...");
+                    
+                    // Simulação de tempo de rede
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+
+                    // 3. Redirecionamento (isso será substituído pela URL do Gateway)
+                    alert("Redirecionando para o ambiente seguro do Mercado Pago/Stripe...");
+                    // window.location.href = url; 
+
+                } catch (error) {
+                    console.error("Erro ao preparar pagamento:", error);
+                    alert("Ops! Houve um problema ao conectar com o sistema de pagamento.");
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            }
+
+
+        // ----- fim ------
+
+
+
         // validacao de dados
         function validateStep1() {
             const campos = ['nome', 'email', 'telefone', 'cpf', 'data_nascimento'];
@@ -262,64 +355,89 @@
                 alert("Por favor, preencha todos os campos obrigatórios para prosseguir.");
             }
         }
+
+
         let dados = { clinica_id: "<%= clinica.id %>", horario: "" };
 
         function goToStep(step) {
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + step).classList.add('active');
-            if(step >= 2) document.getElementById('dot-2').classList.replace('bg-slate-300', 'bg-blue-600');
-            if(step >= 3) document.getElementById('dot-3').classList.replace('bg-slate-300', 'bg-blue-600');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+                    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+                    document.getElementById('step' + step).classList.add('active');
+                    if(step >= 2) document.getElementById('dot-2').classList.replace('bg-slate-300', 'bg-blue-600');
+                    if(step >= 3) document.getElementById('dot-3').classList.replace('bg-slate-300', 'bg-blue-600');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
 
         async function carregarHorarios() {
-            const dataInput = document.getElementById('data_escolhida').value;
-            const container = document.getElementById('container_horarios');
-            container.innerHTML = '<div class="col-span-3 text-center py-4"><i class="fas fa-spinner fa-spin text-blue-500"></i> Buscando horários...</div>';
+                // 1. LIMPEZA DE SEGURANÇA: Remove qualquer lixo extra da string da data
+                let dataInput = document.getElementById('data_escolhida').value;
+                
+                // Se por acaso vier algo como "2026-06-25:1", isso vai limpar para "2026-06-25"
+                if (dataInput.includes(':')) {
+                    dataInput = dataInput.split(':')[0];
+                }
 
-            const resp = await fetch(`/agendar/api/horarios?clinica_id=${dados.clinica_id}&data=${dataInput}`);
-            const json = await resp.json();
+                const container = document.getElementById('container_horarios');
+                container.innerHTML = '<div class="col-span-3 text-center py-4"><i class="fas fa-spinner fa-spin text-blue-500"></i> Buscando horários...</div>';
 
-            // LÓGICA DE FILTRO DE HORÁRIO PASSADO
-            const agora = new Date();
-            const hojeDataISO = agora.toISOString().split('T')[0];
+                try {
+                   // 1. Captura o slug da URL atual (ex: 'clinica-solar-2')
+                    const pathParts = window.location.pathname.split('/');
+                    const slug = pathParts[2]; // O índice 2 será o slug em '/agendar/slug'
 
-            container.innerHTML = '';
+                    // 2. Monta a URL seguindo a estrutura do seu portal-agendamento-routes.js
+                    const url = `/agendar/${slug}/api/horarios?clinica_id=${dados.clinica_id}&data=${dataInput}`;
+                    
+                    const resp = await fetch(url);
+                    
+                    if (!resp.ok) throw new Error('Erro na comunicação com o servidor');
+                    
+                    const json = await resp.json();
 
-            const horariosFiltrados = json.horarios.filter(h => {
-                if (dataInput !== hojeDataISO) return true; // Se for outro dia, mostra tudo
+                    const agora = new Date();
+                    // Ajuste manual: garantindo o formato YYYY-MM-DD para comparar com o input
+                    const hojeDataISO = agora.toISOString().split('T')[0];
 
-                const [hora, min] = h.split(':').map(Number);
-                const dataSlot = new Date();
-                dataSlot.setHours(hora, min, 0, 0);
+                    container.innerHTML = '';
 
-                return dataSlot > agora; // Só retorna horários maiores que o momento atual
-            });
+                    const horariosFiltrados = json.horarios.filter(h => {
 
-            if (horariosFiltrados.length === 0) {
-                container.innerHTML = '<div class="col-span-3 text-center text-red-500 text-sm font-bold p-4">Ops! Não há mais horários disponíveis para hoje.</div>';
-                return;
-            }
+                    if (dataInput !== hojeDataISO) return true;
 
-            horariosFiltrados.forEach(h => {
-                const btn = document.createElement('button');
-                btn.type = "button";
-                btn.innerText = h;
-                btn.className = "p-3 rounded-xl border-2 border-white bg-white/50 shadow-sm font-bold text-slate-700 transition-all active:scale-90";
-                btn.onclick = () => {
-                    document.querySelectorAll('#container_horarios button').forEach(b => b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'));
-                    btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
-                    dados.horario = h;
-                    document.getElementById('btn-next-3').disabled = false;
-                    document.getElementById('btn-next-3').classList.replace('bg-slate-300', 'bg-emerald-500');
-                };
-                container.appendChild(btn);
-            });
+                        const [hora, min] = h.split(':').map(Number);
+                        const dataSlot = new Date();
+                        dataSlot.setHours(hora, min, 0, 0);
+
+                            return dataSlot > agora;
+                    });
+
+                    if (horariosFiltrados.length === 0) {
+                            container.innerHTML = '<div class="col-span-3 text-center text-red-500 text-sm font-bold p-4">Ops! Não há mais horários disponíveis para hoje.</div>';
+                            return;
+                     }
+
+                        horariosFiltrados.forEach(h => {
+                            const btn = document.createElement('button');
+                            btn.type = "button";
+                            btn.innerText = h;
+                            btn.className = "p-3 rounded-xl border-2 border-white bg-white/50 shadow-sm font-bold text-slate-700 transition-all active:scale-90";
+                            btn.onclick = () => {
+                                document.querySelectorAll('#container_horarios button').forEach(b => b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'));
+                                btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                                dados.horario = h;
+                                document.getElementById('btn-next-3').disabled = false;
+                                document.getElementById('btn-next-3').classList.replace('bg-slate-300', 'bg-emerald-500');
+                            };
+                            container.appendChild(btn);
+                        });
+                    } catch (err) {
+                        console.error("Erro:", err);
+                        container.innerHTML = '<div class="col-span-3 text-center text-red-500">Erro ao carregar horários.</div>';
+                    }
         }
 
-         async function finalizarAgendamentoCompleto(status) {
-                // Bloqueia cliques duplos durante o processamento
-                const btnConfirmar = event.target;
+        async function finalizarAgendamentoCompleto(status, event) {
+
+                const btnConfirmar = event.currentTarget; // Usar currentTarget garante que sempre pegue o botão
                 btnConfirmar.disabled = true;
                 btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
 
@@ -328,36 +446,44 @@
 
                 payload.clinica_id = dados.clinica_id;
                 payload.horario = dados.horario;
-                payload.data = document.getElementById('data_escolhida').value;
+                payload.data = document.getElementById('data_escolhida').value.substring(0, 10);
                 payload.status_agendamento = status;
 
+                // Captura o slug da URL atual para bater com a sua rota definida no routes.js
+                const slug = window.location.pathname.split('/')[2]; 
+
                 try {
-                // Usamos o caminho completo para garantir que bata na rota certa
-                const resp = await fetch('/agendar/finalizar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+                    const resp = await fetch(`/agendar/${slug}/finalizar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
 
                     const res = await resp.json();
 
-                    if(res.success) {
-                        // Se o modal de pagamento estiver aberto, fechamos ele antes
-                        if(typeof fecharModal === "function") fecharModal();
+                    if (res.success) {
+    // 1. Fecha qualquer modal de processo
+    if (typeof fecharModal === "function") fecharModal();
 
-                        // Chama o novo modal de sucesso
-                        abrirModalSucesso();
-                    } else {
+    // 2. Abre APENAS o modal de sucesso original
+    const modalSucesso = document.getElementById('modalSucesso');
+    if (modalSucesso) {
+        modalSucesso.classList.remove('hidden');
+    } else {
+        // Fallback caso o ID do modal tenha mudado
+        alert("Agendamento realizado com sucesso!");
+    }
+}else {
                         alert("Erro: " + res.message);
                         btnConfirmar.disabled = false;
                         btnConfirmar.innerText = "Confirmar Agendamento";
                     }
-                } catch (e) {
-                    console.error(e);
-                    alert("Erro crítico ao salvar agendamento.");
-                    btnConfirmar.disabled = false;
+                    } catch (e) {
+                        console.error(e);
+                        alert("Erro crítico ao salvar agendamento.");
+                        btnConfirmar.disabled = false;
+                    }
                 }
-            }
 
             // Funções auxiliares para o Modal de Sucesso
             function abrirModalSucesso() {

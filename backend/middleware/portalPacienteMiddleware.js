@@ -1,26 +1,29 @@
-const db = require('../config/db'); // Certifique-se que o caminho está correto
+// middlewares/portalMiddleware.js
+const db = require('../config/db');
 
-exports.verificarAcessoPortal = async (req, res, next) => {
-    // 1. Verifica se a sessão do paciente existe
-    if (req.session && req.session.pacienteId) {
+module.exports = async (req, res, next) => {
+    // 1. TENTATIVA DE ACESSO POR SLUG (Portal de Agendamento)
+    // Verifica se existe um parâmetro slug na URL (ex: /agendar/:slug)
+    const slug = req.params.slug;
+
+    if (slug) {
         try {
-            // 2. Busca os dados básicos do paciente no banco para confirmar que ele ainda existe
-            const [pacientes] = await db.query(
-                'SELECT id, nome, clinica_id FROM pacientes WHERE id = ?',
-                [req.session.pacienteId]
-            );
-
-            if (pacientes.length > 0) {
-                // 3. Injeta os dados do paciente no objeto req para usar no controller do dashboard
-                req.paciente = pacientes[0];
-                return next(); // Acesso liberado!
+            const [clinicas] = await db.execute('SELECT id FROM clinicas WHERE slug = ?', [slug]);
+            if (clinicas.length > 0) {
+                // Se achou a clínica, injetamos o ID no objeto request para o controller usar
+                req.clinicaId = clinicas[0].id;
+                return next(); // Permite o acesso sem estar logado
             }
-        } catch (error) {
-            console.error("Erro ao verificar sessão do portal:", error);
-            return res.status(500).send("Erro interno ao validar sessão.");
+        } catch (err) {
+            console.error("Erro ao validar slug:", err);
         }
     }
 
-    // 4. Se não estiver logado ou o token/sessão for inválido, bloqueia
-    return res.status(401).send("Acesso negado. Por favor, utilize o link enviado ao seu e-mail.");
+    // 2. TENTATIVA DE ACESSO POR SESSÃO (Portal do Paciente Logado)
+    if (req.session && req.session.pacienteId) {
+        return next(); // Permite o acesso pois está logado
+    }
+
+    // 3. SE NEM UM, NEM OUTRO: Bloqueia
+    return res.status(401).json({ error: "Portal não identificado. Sessão inválida." });
 };

@@ -10,9 +10,10 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../css/darkModeFinanceiro.css">
     <link rel="stylesheet" href="../css/acessoNegado.css">
-    <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
+    <link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+    
 
     <style>
         /* ─── Tokens ─── */
@@ -387,7 +388,7 @@
                 <button onclick="filtrarPeriodo('semana')" class="filter-btn">Esta Semana</button>
                 <button onclick="filtrarPeriodo('mes')" class="filter-btn active">Este Mês</button>
             </div>
-            <select id="filtroStatus" class="outline-none">
+            <select id="filtroStatus" class="outline-none" onchange="carregarFinanceiro()">
                 <option value="todos">Todos Status</option>
                 <option value="aberto">Abertos</option>
                 <option value="pago">Pagos</option>
@@ -1029,7 +1030,7 @@ async function salvarDespesa(event) {
 
           // ATUALIZA OS CARDS (CHAMA A FUNÇÃO QUE JÁ EXISTE NO SEU CÓDIGO)
           if (typeof carregarDadosEstrategicos === 'function') {
-              carregarDadosEstrategicos();
+              carregarFinanceiro();
           }
       } else {
           alert("Erro ao salvar: " + (resultado.error || "Verifique os dados"));
@@ -1039,13 +1040,59 @@ async function salvarDespesa(event) {
       alert("Erro de conexão com o servidor.");
   }
 }
+// funcao filtra periodo
+// Substitua sua função antiga por esta, garantindo que ela não dependa de variáveis globais duplicadas
+window.filtrarPeriodo = async function(periodo) {
+    // 1. Atualiza visual dos botões
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // O 'event' pode falhar se não for passado, então usamos o target do evento atual
+    const btnClicado = event ? event.target : null;
+    if (btnClicado) btnClicado.classList.add('active');
+
+    // 2. Atualiza a variável global de controle
+    filtroAtual = periodo;
+    
+    // 3. Chama a função que busca na API (que já corrigimos antes)
+    await carregarFinanceiro();
+};
+
+/**
+ * FUNÇÃO MESTRA: Carrega lista e resumos com base nos filtros ativos
+ */
+ async function carregarFinanceiro() {
+    // 1. Captura os estados atuais
+    const status = document.getElementById('filtroStatus')?.value || 'todos';
+    const periodo = window.filtroAtual || 'semana'; // Garante que usa a variável global
+
+    // 2. Busca os dados da tabela principal com os dois filtros
+    const dados = await apiFetch(`/api/financeiro/lista?status=${status}&periodo=${periodo}`);
+    
+    
+    if (dados) {
+        lancamentos = dados; // Atualiza a variável global
+        renderizar(dados);   // Renderiza a tabela
+    }
+
+    // 3. Atualiza os cards (Resumo)
+    const resumoBasico = await apiFetch('/api/financeiro/resumo');
+    const resumoAvancado = await apiFetch('/api/financeiro/resumo-estrategico');
+    
+    if (resumoBasico && resumoAvancado) {
+        // Unifica os dados para a função de atualizar os cards
+        const resumoCompleto = Object.assign({}, resumoBasico, resumoAvancado);
+        atualizarCards(resumoCompleto);
+    }
+}
+
 
 
   // CHAMADA MESTRE: Inicia o sistema
-  document.addEventListener('DOMContentLoaded', carregarDadosEstrategicos);
+  document.addEventListener('DOMContentLoaded', carregarFinanceiro);
 </script>
 <script src="../ScriptGlobal/logout.js"></script>
 <script src="../ScriptGlobal/verifiLog.js"></script>
 <script src="../ScriptGlobal/darkMOdeFinanceiro.js"></script>
+
 </body>
 </html>

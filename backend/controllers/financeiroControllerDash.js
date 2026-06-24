@@ -1,7 +1,8 @@
 const db = require('../config/db');
 
-
-
+// =============================================================================
+// 1. GET DASHBOARD AVANÇADO (LTV, Conversão, CAC, Lucro Acumulado)
+// =============================================================================
 exports.getDashboardAvancado = async (req, res) => {
   try {
     const { clinica_id } = req.usuario;
@@ -30,7 +31,7 @@ exports.getDashboardAvancado = async (req, res) => {
                     WHERE clinica_id = ? AND categoria = 'marketing'
                 ) as cac,
 
-                /* 4. LUCRO REAL (Total Pago - Despesas Pagas) */
+                /* 4. LUCRO REAL ACUMULADO (Total Pago - Despesas Pagas) */
                 ((SELECT COALESCE(SUM(valor), 0) FROM financeiro WHERE clinica_id = ? AND status_pagamento = 'pago') -
                  (SELECT COALESCE(SUM(valor), 0) FROM financeiro_despesas WHERE clinica_id = ? AND status_pagamento = 'pago')
                 ) as lucro_real
@@ -44,32 +45,43 @@ exports.getDashboardAvancado = async (req, res) => {
 
     res.json(rows[0]);
   } catch (error) {
-    console.error("Erro no Dashboard:", error);
+    console.error("Erro no Dashboard Avançado:", error);
     res.status(500).json({ error: 'Erro ao processar métricas' });
   }
 };
 
-// Dentro do seu financeiroControllerDash
+// =============================================================================
+// 2. GET LUCRO REAL MENSAL (Com fuso horário corrigido)
+// =============================================================================
 exports.getLucroReal = async (req, res) => {
   try {
     const { clinica_id } = req.usuario;
 
+    // 🌟 CORREÇÃO DO FUSO MENSAL: Pegamos ano e mês locais estáveis do servidor de SP
+    const dataLocal = new Date();
+    const anoAtual = dataLocal.getFullYear();
+    const mesAtual = dataLocal.getMonth() + 1; // Retorna o mês real de 1 a 12
+
     const query = `
           SELECT
-              /* Soma tudo que foi PAGO pelos pacientes */
+              /* Soma tudo que foi PAGO pelos pacientes no mês/ano correntes */
               (SELECT COALESCE(SUM(valor), 0) FROM financeiro
                WHERE clinica_id = ? AND status_pagamento = 'pago'
-               AND MONTH(data_pagamento) = MONTH(CURDATE())) as total_receita,
+               AND YEAR(data_pagamento) = ? AND MONTH(data_pagamento) = ?) as total_receita,
 
-              /* Soma todas as despesas PAGAS pela clínica */
+              /* Soma todas as despesas PAGAS pela clínica no mês/ano correntes */
               (SELECT COALESCE(SUM(valor), 0) FROM financeiro_despesas
                WHERE clinica_id = ? AND status_pagamento = 'pago'
-               AND MONTH(data_vencimento) = MONTH(CURDATE())) as total_despesa
+               AND YEAR(data_vencimento) = ? AND MONTH(data_vencimento) = ?) as total_despesa
       `;
 
-    const [rows] = await db.execute(query, [clinica_id, clinica_id]);
-    const { total_receita, total_despesa } = rows[0];
+    // Injetamos clinica_id, ano e mês para cada uma das subqueries de forma isolada
+    const [rows] = await db.execute(query, [
+      clinica_id, anoAtual, mesAtual,
+      clinica_id, anoAtual, mesAtual
+    ]);
 
+    const { total_receita, total_despesa } = rows[0];
     const lucro_real = total_receita - total_despesa;
 
     res.json({
@@ -79,6 +91,7 @@ exports.getLucroReal = async (req, res) => {
       margem: total_receita > 0 ? (lucro_real / total_receita) * 100 : 0
     });
   } catch (error) {
+    console.error("Erro ao calcular lucro real no Dashboard:", error);
     res.status(500).json({ error: 'Erro ao calcular lucro real' });
   }
-}
+};

@@ -22,8 +22,55 @@ const gerarSlug = (texto) => {
 // ===========================================
 // FUNCAO PARA DAR BOAS VINDAS A NOVA CLINICA
 // ===========================================
+
 exports.sendWelcomeEmail = async (clinica) => {
-    // ... (Mantenha sua função de e-mail como está, ela está correta)
+    console.log(`[MED-LM] 📩 Iniciando e-mail de boas vindas para: ${clinica.email_master}`);
+
+    // DEBUG CRÍTICO: Veja o que está vindo do banco
+    console.log("[DEBUG] Dados recebidos:", {
+        email: clinica.email_master,
+        senha: clinica.senha_master
+    });
+
+    try {
+        const templatePath = path.join(__dirname, '..', 'templates', 'boas_vindas.html');
+        const htmlTemplateOriginal = await fs.readFile(templatePath, 'utf-8');
+
+        const planos = { 1: 'Trial', 2: 'Premium', 3: 'Enterprise' };
+
+        // Mapeamento correto para o que você usa no HTML
+        const templateData = {
+            dono_nome: clinica.dono_nome,
+            nome_clinica: clinica.nome_clinica,
+            email: clinica.email_master, // <--- Esta chave tem que ser {{email}} no HTML
+            senha: clinica.senha_master, // <--- Esta chave tem que ser {{senha}} no HTML
+            plano_nome: planos[clinica.plano_id] || 'Plano Personalizado',
+            url_portal: `https://localhost:3000/agendar/${clinica.slug}`,
+            qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://localhost:3000/agendar/${clinica.slug}`)}`,
+            data_expiracao: clinica.data_expiracao,
+            ano_atual: new Date().getFullYear()
+        };
+
+        // Substituição
+        const htmlFinal = replacePlaceholders(htmlTemplateOriginal, templateData);
+
+        console.log("--- TESTE DE SUBSTITUIÇÃO ---");
+        console.log("Template antes:", htmlTemplateOriginal.substring(0, 100)); // Para ver se o template carregou
+        console.log("Dados:", templateData);
+        console.log("HTML Final:", htmlFinal.substring(0, 500)); // Veja se o email e a senha aparecem aqui!
+        console.log("-----------------------------");
+
+        await transporter.sendMail({
+            from: `"MedLM - Sistema Inteligente" <${process.env.EMAIL_USER}>`,
+            to: clinica.email_master,
+            subject: 'Bem-vindo ao MedLM',
+            html: htmlFinal
+        });
+
+        console.log("[MED-LM] ✅ E-mail de boas vindas enviado!");
+    } catch (error) {
+        console.error(`[MED-LM] ❌ ERRO NO ENVIO:`, error.message);
+    }
 };
 
 // ============================================================
@@ -35,10 +82,26 @@ exports.registerClinica = async (req, res) => {
         telefone_clinica, telefone_dono, plano_id
     } = req.body;
 
+    const EMAIL_TESTE = 'leandrommarquess.n@gmail.com';
     const conn = await db.getConnection();
-    await conn.beginTransaction();
 
     try {
+        // --- LÓGICA DE TESTE (Autolimpeza) ---
+        if (email_master.toLowerCase() === EMAIL_TESTE) {
+            console.log("--- 🧪 MODO TESTE ATIVADO PARA: " + email_master + " ---");
+            // Remove registros antigos deste e-mail para não travar no duplicado
+            await conn.execute('DELETE u FROM usuarios u JOIN clinicas c ON u.clinica_id = c.id WHERE c.email_master = ?', [EMAIL_TESTE]);
+            await conn.execute('DELETE FROM clinicas WHERE email_master = ?', [EMAIL_TESTE]);
+        } else {
+            // --- LÓGICA DE PRODUÇÃO (Bloqueio de duplicados) ---
+            const [existe] = await conn.execute('SELECT id FROM clinicas WHERE email_master = ?', [email_master.toLowerCase()]);
+            if (existe.length > 0) {
+                return res.status(409).json({ error: "Este e-mail já possui uma clínica cadastrada." });
+            }
+        }
+
+        await conn.beginTransaction();
+
         // 1. Buscar valores do plano escolhido
         const [planos] = await conn.execute('SELECT valor_base, valor_promocional FROM planos WHERE id = ?', [plano_id]);
         if (planos.length === 0) throw new Error("Plano não encontrado");
@@ -58,18 +121,15 @@ exports.registerClinica = async (req, res) => {
         if (isFundador) {
             data_fim_gratuidade.setDate(hoje.getDate() + 90);
         } else {
-            // Se não é fundador, gratuidade acaba hoje (o trial vira promocional direto)
             data_fim_gratuidade = new Date(hoje);
         }
 
         let data_fim_promocao = new Date(data_fim_gratuidade);
         data_fim_promocao.setDate(data_fim_promocao.getDate() + 60);
 
-        // 4. Definição do valor inicial
-        // Se isFundador, começa com 0 (grátis). Se não, começa com o valor_promocional do plano.
         const valor_inicial = isFundador ? 0 : plano.valor_promocional;
 
-        // 5. Inserção
+        // 4. Inserção Clínica
         const [resultClinica] = await conn.execute(
             `INSERT INTO clinicas
             (nome_clinica, slug, dono_nome, email_master, senha_master, telefone_clinica, telefone_dono, 
@@ -79,31 +139,36 @@ exports.registerClinica = async (req, res) => {
             [
                 nome_clinica, gerarSlug(nome_clinica), dono_nome, email_master, senha_master,
                 telefone_clinica, telefone_dono, plano_id,
-
                 (isFundador ? 'FUNDADOR' : 'PADRAO'),
                 hoje.toISOString().split('T')[0],
                 data_fim_gratuidade.toISOString().split('T')[0],
                 data_fim_gratuidade.toISOString().split('T')[0],
                 data_fim_promocao.toISOString().split('T')[0],
-                valor_inicial, // Valor dinâmico conforme o plano e perfil
+                valor_inicial,
                 'trial'
             ]
         );
 
-        // ... resto da criação do usuário e commit
         const novaClinicaId = resultClinica.insertId;
+
+        // 5. Inserção Usuário
         await conn.execute(
             `INSERT INTO usuarios (clinica_id, nome, email, senha, cargo) VALUES (?, ?, ?, ?, ?)`,
             [novaClinicaId, dono_nome, email_master, senha_master, 'dono']
         );
 
         await conn.commit();
+
+        // 6. Envio de E-mail (agora vai rodar porque não houve erro de duplicidade!)
+        const [clinicaRecemCriada] = await conn.execute('SELECT * FROM clinicas WHERE id = ?', [novaClinicaId]);
+        await notificacaoService.sendWelcomeEmail(clinicaRecemCriada[0]);
+
         res.status(201).json({ message: "Clínica criada!", portalUrl: `/agendar/${gerarSlug(nome_clinica)}` });
 
     } catch (error) {
         await conn.rollback();
-        console.error("Erro:", error);
-        res.status(500).json({ error: "Erro interno." });
+        console.error("Erro no cadastro:", error);
+        res.status(500).json({ error: "Erro interno: " + error.message });
     } finally {
         conn.release();
     }

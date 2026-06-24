@@ -50,7 +50,8 @@ const replacePlaceholders = (template, data) => {
   let newTemplate = template;
   for (const key in data) {
     if (data[key] !== null && data[key] !== undefined) {
-      newTemplate = newTemplate.replace(new RegExp(`{{${key}}}`, 'g'), data[key]);
+      // Método robusto: corta o template onde encontra {{chave}} e insere o valor
+      newTemplate = newTemplate.split(`{{${key}}}`).join(data[key]);
     }
   }
   return newTemplate;

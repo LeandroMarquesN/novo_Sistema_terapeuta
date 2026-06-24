@@ -17,9 +17,9 @@ document.getElementById('btnFalarAgenda').addEventListener('click', async () => 
 
         let texto = "";
         if (agenda && agenda.length > 0) {
-            texto = `Bom dia. Hoje você tem ${agenda.length} agendamentos. O próximo paciente é ${agenda[0].nome}.`;
+            texto = `Olá. você tem ${agenda.length} agendamentos. O próximo paciente é ${agenda[0].nome}.`;
         } else {
-            texto = "Bom dia. Você não possui agendamentos marcados para hoje.";
+            texto = "Olá. Você não possui agendamentos marcados para hoje.";
         }
 
         // --- LOG 3: O texto que será "falado" ---

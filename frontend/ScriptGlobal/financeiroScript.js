@@ -1,7 +1,7 @@
 // ScriptGlobal/financeiroScript.js
 
 // --- ESTADO GLOBAL DO SISTEMA ---
-let lancamentos = [];
+window.lancamentos = [];
 let meuGrafico = null;
 let itemParaBaixar = null; // Usado para a tabela principal
 let metodoSelecionado = 'pix'; // Padrão inicial unificado
@@ -47,31 +47,50 @@ async function apiFetch(endpoint, options = {}) {
   }
 }
 
+
 /**
- * 2. CARREGAR DADOS ESTRATÉGICOS
+ * 2. CARREGAR DADOS ESTRATÉGICOS (Agora aceitando o filtro de período)
  */
-async function carregarDadosEstrategicos() {
-  const dados = await apiFetch('/api/financeiro/lista');
-  if (dados) {
-    lancamentos = dados;
-    renderizar();
-  }
+// async function carregarDadosEstrategicos(periodo = 'mes') {
+//   // Passamos o período como parâmetro na URL
+//   // O seu Backend (Controller) usará esse parâmetro para filtrar o SQL
+//   const dados = await apiFetch(`/api/financeiro/lista?periodo=${periodo}`);
 
-  const resumoBasico = await apiFetch('/api/financeiro/resumo');
-  const resumoAvancado = await apiFetch('/api/financeiro/resumo-estrategico');
+//   if (dados) {
+//     lancamentos = dados;
+//     renderizar(); // Renderiza apenas o que o servidor devolveu
+//   }
 
-  if (resumoBasico && resumoAvancado) {
-    const resumoCompleto = Object.assign({}, resumoBasico, resumoAvancado);
-    atualizarCards(resumoCompleto);
-  }
-}
+//   // O resumo (cards) geralmente queremos que seja mensal/geral, 
+//   // mas se quiser filtrar os cards também, você pode passar o período aqui.
+//   const resumoBasico = await apiFetch('/api/financeiro/resumo');
+//   const resumoAvancado = await apiFetch('/api/financeiro/resumo-estrategico');
+
+//   if (resumoBasico && resumoAvancado) {
+//     const resumoCompleto = Object.assign({}, resumoBasico, resumoAvancado);
+//     atualizarCards(resumoCompleto);
+//   }
+// }
 
 /**
  * 3. RENDERIZAR TABELA PRINCIPAL
  */
 function renderizar(dadosParaExibir = lancamentos) {
+
+  console.log("DEBUG RENDER: Valor de lancamentos global:", window.lancamentos);
+  console.log("DEBUG RENDER: Dados recebidos na função:", dadosParaExibir);
+
   const tbody = document.getElementById('listaFinanceira');
-  if (!tbody) return;
+  if (!tbody) {
+    console.error("ERRO: Elemento 'listaFinanceira' não encontrado no HTML!");
+    return;
+  }
+
+  if (!dadosParaExibir || dadosParaExibir.length === 0) {
+    console.warn("RENDER: Recebi um array vazio. Limpando a tabela.");
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-gray-500">Nenhum registro encontrado.</td></tr>';
+    return;
+  }
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -94,78 +113,116 @@ function renderizar(dadosParaExibir = lancamentos) {
     const telefoneLimpo = item.paciente_tel ? String(item.paciente_tel).replace(/\D/g, '') : '';
 
     return `
-          <tr class="hover:bg-gray-50 transition ${isInadimplente ? 'bg-red-50/30' : ''} ${isCancelado ? 'opacity-60 bg-gray-50' : ''}">
-              <td class="px-8 py-6 text-sm font-medium ${classeData}">
-                  ${dataVencimento.toLocaleDateString('pt-BR')}
-                  ${isInadimplente ? '<br><span class="text-[10px] uppercase">Vencido</span>' : ''}
-                  ${isCancelado ? '<br><span class="text-[10px] uppercase font-black text-orange-600">Cancelado</span>' : ''}
-              </td>
-              <td class="px-8 py-6">
-                  <div class="flex flex-col">
-                      <span class="text-sm font-bold text-gray-900">${item.paciente_nome}</span>
-                      ${telefoneLimpo ? `
-                        <a href="https://wa.me/55${telefoneLimpo}" target="_blank" class="text-[10px] text-emerald-500 font-bold hover:underline">
-                            <i class="fab fa-whatsapp"></i> Contato Direto
-                        </a>
-                      ` : '<span class="text-[10px] text-gray-400">Sem telefone</span>'}
-                  </div>
-              </td>
+    <tr id="lancamento-${item.id}" class="hover:bg-gray-50 transition ${isInadimplente ? 'bg-red-50/30' : ''} ${isCancelado ? 'opacity-60 bg-gray-50' : ''}">
+        <td class="px-8 py-6 text-sm font-medium ${classeData}">
+            ${dataVencimento.toLocaleDateString('pt-BR')}
+            ${isInadimplente ? '<br><span class="text-[10px] uppercase">Vencido</span>' : ''}
+            ${isCancelado ? '<br><span class="text-[10px] uppercase font-black text-orange-600">Cancelado</span>' : ''}
+        </td>
+        <td class="px-8 py-6">
+            <div class="flex flex-col">
+                <span class="text-sm font-bold text-gray-900">${item.paciente_nome}</span>
+                ${telefoneLimpo ? `
+                  <a href="https://wa.me/55${telefoneLimpo}" target="_blank" class="text-[10px] text-emerald-500 font-bold hover:underline">
+                      <i class="fab fa-whatsapp"></i> Contato Direto
+                  </a>
+                ` : '<span class="text-[10px] text-gray-400">Sem telefone</span>'}
+            </div>
+        </td>
 
-              <td class="px-8 py-6">
-                  <div class="flex flex-col">
-                      <span class="text-xs text-gray-700 font-bold">${item.descricao || 'Sinal de Consulta'}</span>
-                      ${item.categoria ? `<span class="text-[9px] text-indigo-500 uppercase font-black tracking-wider mt-0.5">${item.categoria}</span>` : ''}
-                  </div>
-              </td>
-              <td class="px-8 py-6 text-center">
-                  <button onclick="irParaReagendamento(${item.paciente_id}, '${item.paciente_nome}', '${item.paciente_cpf || ''}', '${item.paciente_email || ''}', '${item.paciente_tel || ''}')"
-                          class="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-bold hover:bg-indigo-600 hover:text-white transition border border-indigo-100">
-                      <i class="fas fa-calendar-plus"></i> Novo Horário
-                  </button>
-              </td>
+        <td class="px-8 py-6">
+            <div class="flex flex-col">
+                <span class="text-xs text-gray-700 font-bold">${item.descricao || 'Sinal de Consulta'}</span>
+                ${item.categoria ? `<span class="text-[9px] text-indigo-500 uppercase font-black tracking-wider mt-0.5">${item.categoria}</span>` : ''}
+            </div>
+        </td>
+        <td class="px-8 py-6 text-center">
+        <button onclick="irParaReagendamento(${item.id}, ${item.paciente_id}, '${item.paciente_nome}', '${item.paciente_cpf || ''}', '${item.paciente_email || ''}', '${item.paciente_tel || ''}')"
+        class="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-bold hover:bg-indigo-600 hover:text-white transition border border-indigo-100">
+    <i class="fas fa-calendar-plus"></i> Novo Horário
+</button>
+        </td>
 
-              <td class="px-8 py-6 text-right">
-                  <span class="text-sm font-black ${item.status_pagamento === 'pago' ? 'text-emerald-500' : (isCancelado || isInadimplente ? 'text-red-600' : 'text-gray-900')}">
-                      R$ ${parseFloat(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                  </span>
-              </td>
+        <td class="px-8 py-6 text-right">
+            <span class="text-sm font-black ${item.status_pagamento === 'pago' ? 'text-emerald-500' : (isCancelado || isInadimplente ? 'text-red-600' : 'text-gray-900')}">
+                R$ ${parseFloat(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+        </td>
 
-              <td class="px-8 py-6 text-center">
-                  <div class="flex justify-center gap-2">
-                      ${item.status_pagamento === 'aberto' ? `
-                          <button onclick="abrirModal(${item.id})" class="w-8 h-8 rounded-full ${isInadimplente ? 'bg-red-100 text-red-600' : 'bg-emerald-50 text-emerald-600'} hover:bg-emerald-500 hover:text-white transition shadow-sm" title="Baixar Pagamento">
-                              <i class="fas fa-check text-[10px]"></i>
-                          </button>
-                          <button onclick="cancelarLancamento(${item.id})" class="w-8 h-8 rounded-full bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition shadow-sm" title="Paciente Desistiu/Cancelou">
-                              <i class="fas fa-user-slash text-[10px]"></i>
-                          </button>
-                      ` : (isCancelado ? '<span class="text-orange-600 text-[10px] font-bold uppercase">Sem Visita</span>' : '<i class="fas fa-check-double text-emerald-500" title="Pago"></i>')}
-
-                      <button onclick="abrirExtratoPaciente(${item.paciente_id}, '${item.paciente_nome}')"
-                            class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition shadow-sm"
-                            title="Ver Extrato de Gastos">
-                        <i class="fas fa-file-invoice-dollar text-[11px]"></i>
+        <td class="px-8 py-6 text-center">
+            <div class="flex justify-center gap-2">
+                ${item.status_pagamento === 'aberto' ? `
+                    <button onclick="abrirModal(${item.id})" class="w-8 h-8 rounded-full ${isInadimplente ? 'bg-red-100 text-red-600' : 'bg-emerald-50 text-emerald-600'} hover:bg-emerald-500 hover:text-white transition shadow-sm" title="Baixar Pagamento">
+                        <i class="fas fa-check text-[10px]"></i>
                     </button>
-                  </div>
-              </td>
-          </tr>
-      `;
+                    <button onclick="cancelar(${item.id})" class="w-8 h-8 rounded-full bg-red-50 text-red-600 hover:bg-red-500 hover:text-white transition shadow-sm" title="Paciente Desistiu/Cancelou">
+                        <i class="fas fa-user-slash text-[10px]"></i>
+                    </button>
+                ` : (isCancelado ? '<span class="text-orange-600 text-[10px] font-bold uppercase">Sem Visita</span>' : '<i class="fas fa-check-double text-emerald-500" title="Pago"></i>')}
+
+                <button onclick="abrirExtratoPaciente(${item.paciente_id}, '${item.paciente_nome}')"
+                      class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition shadow-sm"
+                      title="Ver Extrato de Gastos">
+                  <i class="fas fa-file-invoice-dollar text-[11px]"></i>
+              </button>
+            </div>
+        </td>
+    </tr>
+`;
   }).join('');
 }
-
-function irParaReagendamento(id, nome, cpf, email, tel) {
+// 1. Captura o agendamentoId no clique
+function irParaReagendamento(agendamentoId, pacienteId, nome, cpf, email, tel) {
   const params = new URLSearchParams();
+
   params.append('reagendamento', 'true');
-  params.append('paciente_id', id);
+  params.append('agendamento_id', agendamentoId); // 🌟 LEVA O ID DO AGENDAMENTO PARA ATUALIZAR
+  params.append('paciente_id', pacienteId);       // Mantém o ID do paciente
   params.append('nome', nome);
+
   if (cpf) params.append('cpf', cpf);
   if (email) params.append('email', email);
   if (tel) params.append('telefone', tel);
 
+  // Redireciona com todos os parâmetros na URL
   window.location.href = `/agendamento?${params.toString()}`;
 }
 
-async function cancelarLancamento(id) {
+// 2. Na função que envia o formulário (o 'Submit' ou clique do Salvar do Modal)
+async function salvarFormulario() {
+  const agendamentoId = document.getElementById('modalAgendamentoId').value;
+
+  const dadosForm = {
+    nome: document.getElementById('inputNome').value,
+    data_agendamento: document.getElementById('inputData').value,
+    // ... seus outros campos ...
+  };
+
+  let url = '/api/agendamentos';
+  let metodo = 'POST';
+
+  // 🌟 SE EXISTE AGENDAMENTO ID, NÓS ATUALIZAMOS A MESMA LINHA EM VEZ DE CRIAR OUTRA!
+  if (agendamentoId) {
+    url = `/api/agendamentos/atualizar/${agendamentoId}`;
+    metodo = 'PUT'; // ou POST dependendo de como definiu sua rota de atualização completa
+  }
+
+  const response = await fetch(url, {
+    method: metodo,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dadosForm)
+  });
+
+  if (response.ok) {
+    alert("Agenda atualizada com sucesso!");
+    // recarrega a tabela...
+  }
+}
+
+
+
+// Altere o nome de 'cancelarLancamento' para apenas 'cancelar'
+async function cancelar(id) {
   if (!confirm("Confirmar cancelamento? O status mudará para 'cancelado' no banco.")) return;
 
   const resultado = await apiFetch(`/api/financeiro/cancelar/${id}`, {
@@ -173,8 +230,28 @@ async function cancelarLancamento(id) {
   });
 
   if (resultado) {
-    await carregarDadosEstrategicos();
-    alert("Agendamento cancelado!");
+    const linhaTabela = document.getElementById(`lancamento-${id}`);
+    if (linhaTabela) {
+      linhaTabela.style.transition = 'all 0.3s ease';
+      linhaTabela.style.opacity = '0';
+      linhaTabela.style.transform = 'translateX(-20px)';
+
+      setTimeout(() => {
+        linhaTabela.remove();
+      }, 300);
+    }
+
+    lancamentos = lancamentos.filter(item => item.id !== id);
+
+    const resumoBasico = await apiFetch('/api/financeiro/resumo');
+    const resumoAvancado = await apiFetch('/api/financeiro/resumo-estrategico');
+
+    if (resumoBasico && resumoAvancado) {
+      const resumoCompleto = Object.assign({}, resumoBasico, resumoAvancado);
+      atualizarCards(resumoCompleto);
+    }
+
+    alert("Agendamento cancelado com sucesso!");
   }
 }
 
@@ -313,7 +390,7 @@ async function processarBaixa() {
 
     if (itemParaBaixar) {
       // Se veio da tabela principal, atualiza a tela de fora
-      carregarDadosEstrategicos();
+      carregarFinanceiro();
       alert("Pagamento registrado com sucesso!");
     } else {
       // Se veio da gaveta de extrato, recarrega a gaveta de forma cirúrgica
@@ -321,7 +398,7 @@ async function processarBaixa() {
       const pacienteNome = textoNome.replace(/paciente:\s*/i, '').trim();
       await abrirExtratoPaciente(pacienteIdParaBaixaExtrato, pacienteNome);
       // Atualiza os cards de fora também para o saldo não ficar desatualizado
-      await carregarDadosEstrategicos();
+      await carregarFinanceiro();
     }
   }
 }
@@ -555,7 +632,7 @@ async function salvarGastoAvulso(event) {
     const textoNome = document.getElementById('extratoPacienteNome').innerText;
     const pacienteNome = textoNome.replace(/paciente:\s*/i, '').trim();
     await abrirExtratoPaciente(pacienteId, pacienteNome);
-    await carregarDadosEstrategicos(); // Garante os cards atualizados lá atrás
+    await carregarFinanceiro(); // Garante os cards atualizados lá atrás
 
   } catch (error) {
     console.error("Erro ao salvar lançamento avulso:", error);

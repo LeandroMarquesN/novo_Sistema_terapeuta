@@ -11,75 +11,499 @@
 
     <!-- Tailwind e Fontes -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
+    <link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
 
-    <!-- CSS Dark Mode (Seu arquivo novo) -->
+    <!-- CSS Dark Mode original (mantido, agora redundante visualmente mas preservado) -->
     <link rel="stylesheet" href="../css/darkModeConfiguracao.css">
 
-
     <style>
+        /* ─── Design Tokens ─── */
         :root {
-            --primary: #1A5FA1;
-            --secondary: #34d399;
-            --gradient: linear-gradient(135deg, #1A5FA1 0%, #34d399 100%);
+            --emerald:   #34d399;
+            --emerald-d: #059669;
+            --cyan:      #22d3ee;
+            --amber:     #fbbf24;
+            --red:       #f87171;
+            --slate-bg:  #020c12;
+            --border:    rgba(52,211,153,0.15);
+            --border-cy: rgba(34,211,238,0.18);
+            --card:      rgba(255,255,255,0.028);
         }
-        body { font-family: 'Inter', sans-serif; transition: background 0.3s ease; }
-        .text-gradient { background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05); }
-        .input-premium { background: rgba(255, 255, 255, 0.5); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
-        .input-premium:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(26, 95, 161, 0.1); outline: none; }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--slate-bg);
+            background-image:
+                radial-gradient(ellipse 75% 60% at 10% 0%,   rgba(8,145,178,0.22) 0%, transparent 65%),
+                radial-gradient(ellipse 60% 55% at 90% 100%, rgba(5,150,105,0.20) 0%, transparent 65%),
+                radial-gradient(ellipse 45% 40% at 50% 45%,  rgba(251,191,36,0.04) 0%, transparent 70%);
+            color: #cbd5e1;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.3s ease;
+        }
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+            );
+            pointer-events: none; z-index: 0;
+        }
+
+        /* Orbs */
+        .orb {
+            position: fixed; border-radius: 50%;
+            pointer-events: none; filter: blur(80px); z-index: 0;
+        }
+        .orb-1 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(8,145,178,0.18), transparent 70%);
+            top: -14%; left: -10%;
+            animation: orbFloat1 14s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 420px; height: 420px;
+            background: radial-gradient(circle, rgba(5,150,105,0.15), transparent 70%);
+            bottom: -10%; right: -8%;
+            animation: orbFloat2 18s ease-in-out infinite;
+        }
+        .orb-3 {
+            width: 260px; height: 260px;
+            background: radial-gradient(circle, rgba(251,191,36,0.05), transparent 70%);
+            top: 45%; left: 45%;
+            animation: orbFloat1 22s ease-in-out infinite reverse;
+        }
+        @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(28px,20px)} }
+        @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-28px)} }
+
+        /* Grid lines */
+        .hero-grid {
+            position: fixed; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(52,211,153,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52,211,153,0.035) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 20%, transparent 100%);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+        main { position: relative; z-index: 1; }
+
+        /* ─── Header ─── */
+        .page-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 30px; font-weight: 800;
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(34,211,238,0.25));
+        }
+        .page-sub { color: rgba(148,163,184,0.5); font-size: 13px; margin-top: 6px; }
+
+        /* Header buttons */
+        .icon-btn {
+            width: 48px; height: 48px; border-radius: 16px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+            display: flex; align-items: center; justify-content: center;
+            color: rgba(148,163,184,0.6);
+            transition: all 0.25s; text-decoration: none; cursor: pointer;
+        }
+        .icon-btn:hover {
+            transform: scale(1.08);
+            color: var(--emerald);
+            border-color: rgba(52,211,153,0.3);
+            box-shadow: 0 0 16px rgba(52,211,153,0.15);
+        }
+        #darkModeToggle:hover { color: var(--amber); border-color: rgba(251,191,36,0.3); box-shadow: 0 0 16px rgba(251,191,36,0.15); }
+
+        /* ─── Glass card ─── */
+        .glass-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+            opacity: 0.4;
+        }
+
+        /* Card header icon */
+        .card-icon-wrap {
+            width: 42px; height: 42px; border-radius: 13px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .card-icon-cyan { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.25); }
+        .card-icon-cyan i { color: var(--cyan); }
+        .card-icon-emerald { background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25); }
+        .card-icon-emerald i { color: var(--emerald); }
+        .card-icon-amber { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); }
+        .card-icon-amber i { color: var(--amber); }
+
+        .card-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 19px; font-weight: 800; color: #f1f5f9;
+        }
+
+        /* ─── Inputs ─── */
+        .form-label {
+            display: block;
+            font-size: 10px; font-weight: 800;
+            color: rgba(148,163,184,0.45);
+            text-transform: uppercase; letter-spacing: 0.12em;
+            margin-bottom: 8px;
+        }
+        .input-premium {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--border) !important;
+            border-radius: 16px !important;
+            color: #e2e8f0 !important;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.25s;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        .input-premium:focus {
+            border-color: rgba(52,211,153,0.4) !important;
+            box-shadow: 0 0 0 4px rgba(52,211,153,0.08) !important;
+        }
+        .input-premium::placeholder { color: rgba(148,163,184,0.22) !important; }
+        select.input-premium option { background: #0d1f2d; color: #e2e8f0; }
+
+        /* color-scheme so native time/date pickers render light icons on dark bg */
+        input[type="time"], input[type="date"] { color-scheme: dark; }
+
+        /* ─── Weekday selector (NEW) ─── */
+        .weekday-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+        @media (max-width: 640px) {
+            .weekday-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .weekday-pill {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            gap: 4px;
+            padding: 14px 4px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.25s;
+            user-select: none;
+            position: relative;
+        }
+        .weekday-pill:hover { border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.05); transform: translateY(-2px); }
+
+        .weekday-pill input[type="checkbox"] {
+            position: absolute; opacity: 0; width: 0; height: 0;
+        }
+
+        .weekday-pill .wd-letter {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px; font-weight: 800;
+            color: rgba(148,163,184,0.6);
+            transition: color 0.25s;
+        }
+        .weekday-pill .wd-label {
+            font-size: 9px; font-weight: 700;
+            color: rgba(148,163,184,0.35);
+            text-transform: uppercase; letter-spacing: 0.06em;
+        }
+
+        .weekday-pill.active {
+            background: linear-gradient(135deg, rgba(8,145,178,0.28), rgba(5,150,105,0.22));
+            border-color: rgba(52,211,153,0.45);
+            box-shadow: 0 0 16px rgba(52,211,153,0.18);
+        }
+        .weekday-pill.active .wd-letter { color: var(--emerald); text-shadow: 0 0 10px rgba(52,211,153,0.5); }
+        .weekday-pill.active .wd-label  { color: rgba(52,211,153,0.7); }
+
+        .weekday-hint {
+            font-size: 11px; color: rgba(148,163,184,0.4);
+            margin-top: 16px; display: flex; align-items: center; justify-content: center; gap: 6px;
+            text-align: center;
+        }
+        .weekday-hint i { color: var(--cyan); font-size: 10px; }
+
+        /* ─── Centering helpers for cards ─── */
+        .card-center-head {
+            display: flex; flex-direction: column; align-items: center;
+            text-align: center; margin-bottom: 28px;
+        }
+        .card-center-head .card-icon-wrap { margin-bottom: 10px; }
+        .card-desc { font-size: 12px; color: rgba(148,163,184,0.4); margin-top: 4px; max-width: 420px; }
+
+        /* ─── Recesso / Feriados Section (NEW) ─── */
+        .recesso-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr) repeat(2, 1fr) auto;
+            gap: 14px;
+            align-items: end;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            .recesso-form-grid { grid-template-columns: 1fr 1fr; }
+            .recesso-form-grid .recesso-span-full { grid-column: span 2; }
+        }
+        @media (max-width: 560px) {
+            .recesso-form-grid { grid-template-columns: 1fr; }
+            .recesso-form-grid .recesso-span-full { grid-column: span 1; }
+        }
+
+        .btn-add-recesso {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(251,191,36,0.22), rgba(217,119,6,0.18));
+            border: 1px solid rgba(251,191,36,0.35);
+            color: var(--amber);
+            font-weight: 800; font-size: 13px;
+            padding: 13px 20px; border-radius: 14px;
+            cursor: pointer; transition: all 0.25s;
+            font-family: 'Space Grotesk', sans-serif;
+            white-space: nowrap;
+            height: 52px;
+        }
+        .btn-add-recesso:hover {
+            background: linear-gradient(135deg, rgba(251,191,36,0.32), rgba(217,119,6,0.26));
+            box-shadow: 0 0 18px rgba(251,191,36,0.25);
+            transform: translateY(-2px);
+        }
+        .btn-add-recesso:active { transform: translateY(0) scale(0.97); }
+
+        /* Recesso list */
+        .recesso-list {
+            margin-top: 26px;
+            display: flex; flex-direction: column; gap: 10px;
+            max-width: 760px;
+            margin-left: auto; margin-right: auto;
+        }
+
+        .recesso-empty {
+            text-align: center;
+            padding: 28px 16px;
+            color: rgba(148,163,184,0.35);
+            font-size: 13px;
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            background: rgba(255,255,255,0.015);
+        }
+        .recesso-empty i { display: block; font-size: 22px; margin-bottom: 8px; color: rgba(251,191,36,0.3); }
+
+        .recesso-item {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(251,191,36,0.18);
+            border-radius: 16px;
+            padding: 14px 18px;
+            position: relative;
+            overflow: hidden;
+            animation: slideInFade 0.4s cubic-bezier(0.4,0,0.2,1);
+            transition: all 0.25s;
+        }
+        .recesso-item::before {
+            content: '';
+            position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+            background: linear-gradient(180deg, var(--amber), #d97706);
+        }
+        .recesso-item:hover {
+            border-color: rgba(251,191,36,0.35);
+            box-shadow: 0 4px 20px rgba(251,191,36,0.08);
+            transform: translateX(2px);
+        }
+        .recesso-item.removing {
+            animation: slideOutFade 0.3s ease forwards;
+        }
+
+        @keyframes slideInFade {
+            from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes slideOutFade {
+            to { opacity: 0; transform: translateX(30px) scale(0.95); height: 0; padding: 0; margin: 0; border: none; }
+        }
+
+        .recesso-icon {
+            width: 38px; height: 38px; border-radius: 11px;
+            background: rgba(251,191,36,0.12);
+            border: 1px solid rgba(251,191,36,0.25);
+            color: var(--amber);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 14px;
+        }
+
+        .recesso-info { flex: 1; min-width: 0; }
+        .recesso-titulo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px; font-weight: 700; color: #f1f5f9;
+            margin-bottom: 2px;
+        }
+        .recesso-periodo {
+            font-size: 11px; color: rgba(251,191,36,0.65);
+            font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .recesso-periodo i { font-size: 9px; }
+        .recesso-dias-badge {
+            font-size: 9px; font-weight: 800;
+            background: rgba(251,191,36,0.1);
+            border: 1px solid rgba(251,191,36,0.22);
+            color: var(--amber);
+            padding: 2px 8px; border-radius: 99px;
+            white-space: nowrap;
+        }
+
+        .btn-remove-recesso {
+            width: 34px; height: 34px; border-radius: 10px;
+            background: rgba(248,113,113,0.08);
+            border: 1px solid rgba(248,113,113,0.2);
+            color: var(--red);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.22s;
+            flex-shrink: 0; font-size: 12px;
+        }
+        .btn-remove-recesso:hover {
+            background: rgba(248,113,113,0.18);
+            box-shadow: 0 0 12px rgba(248,113,113,0.2);
+            transform: scale(1.08);
+        }
+
+        /* Pulsing badge for active/upcoming recess */
+        .recesso-status-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--amber);
+            box-shadow: 0 0 6px var(--amber);
+            animation: pulse 2s infinite;
+            display: inline-block;
+        }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+        /* ─── Submit button ─── */
+        .btn-save {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+            color: #fff; font-weight: 800; font-size: 15px;
+            padding: 17px 40px; border-radius: 18px;
+            border: 1px solid rgba(52,211,153,0.3);
+            cursor: pointer; transition: all 0.3s;
+            font-family: 'Space Grotesk', sans-serif;
+            box-shadow: 0 0 28px rgba(8,145,178,0.35);
+            position: relative; overflow: hidden;
+        }
+        .btn-save::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            transform: skewX(-20deg); transition: left 0.6s ease;
+        }
+        .btn-save:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(8,145,178,0.55); }
+        .btn-save:hover::before { left: 150%; }
+
+        /* ─── Modal sucesso ─── */
+        #modalSucesso .glass-card {
+            background: rgba(2,12,18,0.97);
+            border: 1px solid rgba(52,211,153,0.25);
+            box-shadow: 0 0 60px rgba(52,211,153,0.1);
+        }
+        .modal-success-icon {
+            width: 76px; height: 76px;
+            background: rgba(52,211,153,0.1);
+            border: 1px solid rgba(52,211,153,0.3);
+            color: var(--emerald);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 22px; font-size: 30px;
+            box-shadow: 0 0 24px rgba(52,211,153,0.2);
+        }
+        .modal-success-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px; font-weight: 800; color: #f1f5f9;
+        }
+        .modal-success-text { color: rgba(148,163,184,0.55); font-size: 13px; }
+        .btn-modal-ok {
+            width: 100%;
+            background: linear-gradient(135deg, #059669, #34d399);
+            color: #020c12; font-weight: 800;
+            padding: 15px; border-radius: 16px;
+            border: none; cursor: pointer; transition: all 0.25s;
+            font-family: 'Space Grotesk', sans-serif;
+            box-shadow: 0 0 20px rgba(52,211,153,0.25);
+        }
+        .btn-modal-ok:hover { box-shadow: 0 0 30px rgba(52,211,153,0.4); transform: translateY(-1px); }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen">
+
+    <!-- Atmosphere -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="hero-grid"></div>
 
     <main class="flex-1 p-6 md:p-10">
-        <!-- Header com Ações Rápidas -->
-        <div class="mb-10 flex justify-between items-center">
-          <div>
-              <h1 class="text-3xl font-bold tracking-tight">
-                  <span class="text-gradient font-['Poppins']">Configurações</span>
-              </h1>
-              <p class="text-slate-500 mt-2">Personalize seu portal.</p>
-          </div>
 
-          <!-- Container de Botões (Voltar + Dark Mode) -->
-          <div class="flex items-center gap-3">
-              <!-- Botão Voltar para o Dashboard -->
-              <a href="/dashboard" class="w-12 h-12 rounded-2xl glass-card flex items-center justify-center hover:scale-110 transition-transform text-slate-500 hover:text-emerald-600" title="Voltar ao Painel">
-                  <i class="fas fa-arrow-left"></i>
-              </a>
+        <!-- Header -->
+        <div class="mb-10 flex justify-between items-center flex-wrap gap-4 max-w-4xl mx-auto">
+            <div>
+                <h1 class="page-title">Configurações</h1>
+                <p class="page-sub">Personalize seu portal.</p>
+            </div>
 
-              <!-- Botão de Toggle Dark Mode -->
-              <button id="darkModeToggle" class="w-12 h-12 rounded-2xl glass-card flex items-center justify-center hover:scale-110 transition-transform text-blue-600">
-                  <i class="fas fa-moon"></i>
-              </button>
-          </div>
+            <div class="flex items-center gap-3">
+                <a href="/dashboard" class="icon-btn" title="Voltar ao Painel">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <button id="darkModeToggle" class="icon-btn">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
         </div>
 
-
-
-        <div class="max-w-4xl">
+        <div class="max-w-4xl mx-auto">
             <form id="formConfig" class="space-y-8">
-                <!-- Card de Horários -->
-                <div class="glass-card rounded-[2.5rem] p-8">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center"><i class="fas fa-clock"></i></div>
-                        <h2 class="text-xl font-bold">Expediente</h2>
+
+                <!-- ─── Card de Horários ─── -->
+                <div class="glass-card p-8">
+                    <div class="card-center-head">
+                        <div class="card-icon-wrap card-icon-cyan"><i class="fas fa-clock"></i></div>
+                        <h2 class="card-title">Expediente</h2>
+                        <p class="card-desc">Configure o horário padrão de funcionamento e a duração de cada atendimento.</p>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Abertura</label>
-                            <input type="time" name="horario_abertura" id="horario_abertura" class="input-premium w-full p-4 rounded-2xl font-semibold">
+                            <label class="form-label">Abertura</label>
+                            <input type="time" name="horario_abertura" id="horario_abertura" class="input-premium w-full p-4 font-semibold">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Fechamento</label>
-                            <input type="time" name="horario_fechamento" id="horario_fechamento" class="input-premium w-full p-4 rounded-2xl font-semibold">
+                            <label class="form-label">Fechamento</label>
+                            <input type="time" name="horario_fechamento" id="horario_fechamento" class="input-premium w-full p-4 font-semibold">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Duração (min)</label>
-                            <select name="duracao_atendimento" id="duracao_atendimento" class="input-premium w-full p-4 rounded-2xl font-semibold">
+                            <label class="form-label">Duração (min)</label>
+                            <select name="duracao_atendimento" id="duracao_atendimento" class="input-premium w-full p-4 font-semibold">
                                 <option value="30">30 min</option>
                                 <option value="60">1 hora</option>
                             </select>
@@ -87,125 +511,423 @@
                     </div>
                 </div>
 
-                <!-- Card de Pagamento -->
-                <div class="glass-card rounded-[2.5rem] p-8">
-                    <div class="flex items-center gap-3 mb-8">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center"><i class="fas fa-wallet"></i></div>
-                        <h2 class="text-xl font-bold">Taxa de Sinal</h2>
+                <!-- ─── Card de Dias da Semana (NOVO) ─── -->
+                <div class="glass-card p-8">
+                    <div class="card-center-head">
+                        <div class="card-icon-wrap card-icon-emerald"><i class="fas fa-calendar-week"></i></div>
+                        <h2 class="card-title">Dias de Atendimento</h2>
+                        <p class="card-desc">Defina os dias fixos da semana em que sua clínica recebe pacientes.</p>
                     </div>
-                    <div class="max-w-xs">
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-2">Valor PIX (R$)</label>
-                        <input type="number" step="0.01" name="valor_sinal" id="valor_sinal" class="input-premium w-full p-4 rounded-2xl font-bold text-xl">
+
+                    <div class="weekday-grid" id="weekdayGrid">
+                        <label class="weekday-pill" data-day="0">
+                            <input type="checkbox" name="dias_semana_check" value="0">
+                            <span class="wd-letter">D</span>
+                            <span class="wd-label">Dom</span>
+                        </label>
+                        <label class="weekday-pill" data-day="1">
+                            <input type="checkbox" name="dias_semana_check" value="1">
+                            <span class="wd-letter">S</span>
+                            <span class="wd-label">Seg</span>
+                        </label>
+                        <label class="weekday-pill" data-day="2">
+                            <input type="checkbox" name="dias_semana_check" value="2">
+                            <span class="wd-letter">T</span>
+                            <span class="wd-label">Ter</span>
+                        </label>
+                        <label class="weekday-pill" data-day="3">
+                            <input type="checkbox" name="dias_semana_check" value="3">
+                            <span class="wd-letter">Q</span>
+                            <span class="wd-label">Qua</span>
+                        </label>
+                        <label class="weekday-pill" data-day="4">
+                            <input type="checkbox" name="dias_semana_check" value="4">
+                            <span class="wd-letter">Q</span>
+                            <span class="wd-label">Qui</span>
+                        </label>
+                        <label class="weekday-pill" data-day="5">
+                            <input type="checkbox" name="dias_semana_check" value="5">
+                            <span class="wd-letter">S</span>
+                            <span class="wd-label">Sex</span>
+                        </label>
+                        <label class="weekday-pill" data-day="6">
+                            <input type="checkbox" name="dias_semana_check" value="6">
+                            <span class="wd-letter">S</span>
+                            <span class="wd-label">Sáb</span>
+                        </label>
+                    </div>
+
+                    <p class="weekday-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Selecione os dias em que sua clínica realiza atendimentos. Padrão: Segunda a Sexta.
+                    </p>
+
+                    <!-- Campo oculto que o submit original já espera e envia ao backend -->
+                    <input type="hidden" id="dias_semana" name="dias_semana" value="1,2,3,4,5">
+                </div>
+
+                <!-- ─── Card de Recessos / Feriados Prolongados (NOVO) ─── -->
+                <div class="glass-card p-8">
+                    <div class="card-center-head">
+                        <div class="card-icon-wrap" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25)">
+                            <i class="fas fa-umbrella-beach" style="color:var(--amber)"></i>
+                        </div>
+                        <h2 class="card-title">Recessos &amp; Feriados Prolongados</h2>
+                        <p class="card-desc">Cadastre períodos específicos em que a clínica ficará fechada — recesso de fim de ano, feriados prolongados ou férias coletivas. Esses intervalos bloqueiam novos agendamentos automaticamente.</p>
+                    </div>
+
+                    <!-- Formulário de novo recesso -->
+                    <div class="recesso-form-grid">
+                        <div class="recesso-span-full">
+                            <label class="form-label">Motivo / Descrição</label>
+                            <input type="text" id="recesso_titulo" class="input-premium w-full p-4 font-medium" placeholder="Ex: Recesso de Fim de Ano">
+                        </div>
+                        <div>
+                            <label class="form-label">Início</label>
+                            <input type="date" id="recesso_inicio" class="input-premium w-full p-4 font-semibold">
+                        </div>
+                        <div>
+                            <label class="form-label">Fim</label>
+                            <input type="date" id="recesso_fim" class="input-premium w-full p-4 font-semibold">
+                        </div>
+                        <button type="button" id="btnAddRecesso" class="btn-add-recesso">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+
+                    <p id="recessoErrorMsg" class="weekday-hint" style="display:none;color:#f87171">
+                        <i class="fas fa-exclamation-circle" style="color:#f87171"></i>
+                        <span></span>
+                    </p>
+
+                    <!-- Lista dinâmica de recessos cadastrados -->
+                    <div class="recesso-list" id="recessoList">
+                        <div class="recesso-empty" id="recessoEmptyState">
+                            <i class="fas fa-calendar-check"></i>
+                            Nenhum período de fechamento cadastrado.<br>Adicione acima um recesso ou feriado prolongado.
+                        </div>
+                    </div>
+
+                    <!-- Campo oculto enviado junto ao formulário principal -->
+                    <input type="hidden" id="periodos_fechados" name="periodos_fechados" value="[]">
+                </div>
+
+                <!-- ─── Card de Pagamento ─── -->
+                <div class="glass-card p-8">
+                    <div class="card-center-head">
+                        <div class="card-icon-wrap card-icon-amber"><i class="fas fa-wallet"></i></div>
+                        <h2 class="card-title">Taxa de Sinal</h2>
+                        <p class="card-desc">Valor cobrado como confirmação antecipada do agendamento.</p>
+                    </div>
+                    <div class="max-w-xs mx-auto">
+                        <label class="form-label text-center" style="text-align:center">Valor PIX (R$)</label>
+                        <input type="number" step="0.01" name="valor_sinal" id="valor_sinal" class="input-premium w-full p-4 font-bold text-xl text-center">
                     </div>
                 </div>
 
                 <div class="flex justify-end pt-4">
-                    <button type="submit" class="bg-[#1A5FA1] text-white px-12 py-5 rounded-[2rem] font-bold shadow-xl hover:scale-105 transition-all">
-                        Salvar Alterações
+                    <button type="submit" class="btn-save">
+                        <i class="fas fa-save"></i> Salvar Alterações
                     </button>
                 </div>
             </form>
         </div>
     </main>
 
-    <!-- Modal de Sucesso Customizado -->
+    <!-- ─── Modal de Sucesso ─── -->
     <div id="modalSucesso" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
-      <!-- Overlay Escuro com Desfoque -->
-      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"></div>
+        <div class="absolute inset-0" style="background:rgba(2,12,18,0.7);backdrop-filter:blur(8px)"></div>
 
-      <!-- Card do Modal -->
-      <div class="glass-card relative w-full max-w-sm p-8 rounded-[2.5rem] text-center scale-90 opacity-0 transition-all duration-300 ease-out" id="modalCard">
-          <div class="w-20 h-20 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
-              <i class="fas fa-check-circle"></i>
-          </div>
-          <h3 class="text-2xl font-bold mb-2 font-['Poppins'] dark:text-white">Sucesso!</h3>
-          <p class="text-slate-500 dark:text-slate-400 mb-8 text-sm">Suas configurações de expediente e sinal foram atualizadas com êxito.</p>
+        <div class="glass-card relative w-full max-w-sm p-8 text-center scale-90 opacity-0 transition-all duration-300 ease-out" id="modalCard">
+            <div class="modal-success-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="modal-success-title mb-2">Sucesso!</h3>
+            <p class="modal-success-text mb-8">Suas configurações de expediente e sinal foram atualizadas com êxito.</p>
 
-          <button onclick="fecharModal()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl shadow-lg shadow-emerald-200 dark:shadow-none transition-all active:scale-95">
-              Entendido
-          </button>
-      </div>
+            <button onclick="fecharModal()" class="btn-modal-ok">
+                Entendido
+            </button>
+        </div>
     </div>
 
-    <!-- JS Dark Mode (Seu arquivo novo) -->
+    <!-- JS Dark Mode original (preservado) -->
     <script src="../ScriptGlobal/darkModeConfiguracao.js"></script>
     <script src="../ScriptGlobal/logout.js"></script>
 
     <script>
-        // Lógica de envio e carregamento igual à anterior...
+        // ─── Modal de sucesso (lógica original preservada) ───
+        const modal = document.getElementById('modalSucesso');
+        const modalCard = document.getElementById('modalCard');
 
-    const modal = document.getElementById('modalSucesso');
-    const modalCard = document.getElementById('modalCard');
-
-    function abrirModal() {
-        modal.classList.remove('hidden');
-        // Pequeno delay para a animação de escala funcionar
-        setTimeout(() => {
-            modalCard.classList.remove('scale-90', 'opacity-0');
-            modalCard.classList.add('scale-100', 'opacity-100');
-        }, 10);
-    }
-
-    function fecharModal() {
-        modalCard.classList.remove('scale-100', 'opacity-100');
-        modalCard.classList.add('scale-90', 'opacity-0');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
-
-    async function carregarConfiguracoes() {
-        try {
-            const response = await fetch('/api/config/minha-configuracao', {
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-            });
-            if (response.ok) {
-                const data = await response.json();
-                if (data && !data.useDefault) {
-                    document.getElementById('horario_abertura').value = data.horario_abertura || '';
-                    document.getElementById('horario_fechamento').value = data.horario_fechamento || '';
-                    document.getElementById('duracao_atendimento').value = data.duracao_atendimento || '30';
-                    document.getElementById('valor_sinal').value = data.valor_sinal || '';
-                }
-            }
-        } catch (error) { console.error('Erro ao carregar:', error); }
-    }
-
-    document.getElementById('formConfig').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        const formData = {
-            horario_abertura: document.getElementById('horario_abertura').value,
-            horario_fechamento: document.getElementById('horario_fechamento').value,
-            duracao_atendimento: document.getElementById('duracao_atendimento').value,
-            valor_sinal: document.getElementById('valor_sinal').value,
-            dias_semana: '1,2,3,4,5'
-        };
-
-        try {
-            const response = await fetch('/api/config/salvar-configuracao', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('token')}`
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-
-            if (response.ok && result.success) {
-                abrirModal(); // <--- O SEU NOVO MODAL MODERNO CHAMADO AQUI
-            } else {
-                alert('Erro ao salvar: ' + (result.message || 'Erro no servidor'));
-            }
-        } catch (error) {
-            console.error('Erro:', error);
+        function abrirModal() {
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalCard.classList.remove('scale-90', 'opacity-0');
+                modalCard.classList.add('scale-100', 'opacity-100');
+            }, 10);
         }
-    });
 
-    window.onload = carregarConfiguracoes;
+        function fecharModal() {
+            modalCard.classList.remove('scale-100', 'opacity-100');
+            modalCard.classList.add('scale-90', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
 
+        // ─── NOVO: Lógica do seletor de dias da semana ───
+        const diasSemanaInput = document.getElementById('dias_semana');
+        const weekdayPills = document.querySelectorAll('.weekday-pill');
+
+        function atualizarDiasSemanaHidden() {
+            const selecionados = Array.from(weekdayPills)
+                .filter(pill => pill.querySelector('input[type="checkbox"]').checked)
+                .map(pill => pill.dataset.day);
+            diasSemanaInput.value = selecionados.join(',');
+        }
+
+        function marcarDiasSemana(diasString) {
+            const dias = (diasString || '1,2,3,4,5').split(',').map(d => d.trim()).filter(Boolean);
+            weekdayPills.forEach(pill => {
+                const checkbox = pill.querySelector('input[type="checkbox"]');
+                const ativo = dias.includes(pill.dataset.day);
+                checkbox.checked = ativo;
+                pill.classList.toggle('active', ativo);
+            });
+            diasSemanaInput.value = dias.join(',');
+        }
+
+        weekdayPills.forEach(pill => {
+            const checkbox = pill.querySelector('input[type="checkbox"]');
+            pill.addEventListener('click', (e) => {
+                e.preventDefault();
+                checkbox.checked = !checkbox.checked;
+                pill.classList.toggle('active', checkbox.checked);
+                atualizarDiasSemanaHidden();
+            });
+        });
+
+        // Estado padrão inicial: Segunda a Sexta (igual ao valor original do form)
+        marcarDiasSemana('1,2,3,4,5');
+
+        // ─── NOVO: Lógica de Recessos / Feriados Prolongados ───
+        const periodosFechadosInput = document.getElementById('periodos_fechados');
+        const recessoList = document.getElementById('recessoList');
+        const recessoEmptyState = document.getElementById('recessoEmptyState');
+        const recessoErrorMsg = document.getElementById('recessoErrorMsg');
+        const btnAddRecesso = document.getElementById('btnAddRecesso');
+        const inputRecessoTitulo = document.getElementById('recesso_titulo');
+        const inputRecessoInicio = document.getElementById('recesso_inicio');
+        const inputRecessoFim = document.getElementById('recesso_fim');
+
+        let periodosFechados = []; // [{ id, titulo, inicio, fim }]
+
+        function gerarIdRecesso() {
+            return 'r_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        }
+
+        function formatarDataBR(isoStr) {
+            if (!isoStr) return '—';
+            const [ano, mes, dia] = isoStr.split('-');
+            return `${dia}/${mes}/${ano}`;
+        }
+
+        function calcularDias(inicioStr, fimStr) {
+            const inicio = new Date(inicioStr + 'T00:00:00');
+            const fim = new Date(fimStr + 'T00:00:00');
+            const diff = Math.round((fim - inicio) / (1000 * 60 * 60 * 24)) + 1;
+            return diff > 0 ? diff : 0;
+        }
+
+        function mostrarErroRecesso(msg) {
+            recessoErrorMsg.querySelector('span').textContent = msg;
+            recessoErrorMsg.style.display = 'flex';
+            setTimeout(() => { recessoErrorMsg.style.display = 'none'; }, 4000);
+        }
+
+        function sincronizarPeriodosHidden() {
+            periodosFechadosInput.value = JSON.stringify(periodosFechados);
+        }
+
+        function renderizarRecessos() {
+            // Limpa lista atual (preservando o empty state como referência)
+            recessoList.innerHTML = '';
+
+            if (periodosFechados.length === 0) {
+                recessoList.appendChild(recessoEmptyState);
+                recessoEmptyState.style.display = 'block';
+                return;
+            }
+
+            // Ordena por data de início
+            const ordenados = [...periodosFechados].sort((a, b) => new Date(a.inicio) - new Date(b.inicio));
+
+            ordenados.forEach(periodo => {
+                const dias = calcularDias(periodo.inicio, periodo.fim);
+                const item = document.createElement('div');
+                item.className = 'recesso-item';
+                item.dataset.id = periodo.id;
+                item.innerHTML = `
+                    <div class="recesso-icon"><i class="fas fa-umbrella-beach"></i></div>
+                    <div class="recesso-info">
+                        <div class="recesso-titulo">${periodo.titulo}</div>
+                        <div class="recesso-periodo">
+                            <span class="recesso-status-dot"></span>
+                            ${formatarDataBR(periodo.inicio)} <i class="fas fa-arrow-right"></i> ${formatarDataBR(periodo.fim)}
+                        </div>
+                    </div>
+                    <span class="recesso-dias-badge">${dias} ${dias === 1 ? 'dia' : 'dias'}</span>
+                    <button type="button" class="btn-remove-recesso" data-id="${periodo.id}" title="Remover período">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                recessoList.appendChild(item);
+            });
+
+            // Liga os botões de remover recém-criados
+            recessoList.querySelectorAll('.btn-remove-recesso').forEach(btn => {
+                btn.addEventListener('click', () => removerRecesso(btn.dataset.id));
+            });
+        }
+
+        function adicionarRecesso() {
+            const titulo = inputRecessoTitulo.value.trim();
+            const inicio = inputRecessoInicio.value;
+            const fim = inputRecessoFim.value;
+
+            if (!titulo) { mostrarErroRecesso('Informe um motivo ou descrição para o período.'); return; }
+            if (!inicio || !fim) { mostrarErroRecesso('Selecione as datas de início e fim do período.'); return; }
+            if (new Date(fim) < new Date(inicio)) { mostrarErroRecesso('A data de fim não pode ser anterior à data de início.'); return; }
+
+            periodosFechados.push({
+                id: gerarIdRecesso(),
+                titulo,
+                inicio,
+                fim
+            });
+
+            sincronizarPeriodosHidden();
+            renderizarRecessos();
+
+            // Limpa o formulário de adição
+            inputRecessoTitulo.value = '';
+            inputRecessoInicio.value = '';
+            inputRecessoFim.value = '';
+            inputRecessoTitulo.focus();
+        }
+
+        function removerRecesso(id) {
+            const item = recessoList.querySelector(`.recesso-item[data-id="${id}"]`);
+            if (item) {
+                item.classList.add('removing');
+                setTimeout(() => {
+                    periodosFechados = periodosFechados.filter(p => p.id !== id);
+                    sincronizarPeriodosHidden();
+                    renderizarRecessos();
+                }, 280);
+            } else {
+                periodosFechados = periodosFechados.filter(p => p.id !== id);
+                sincronizarPeriodosHidden();
+                renderizarRecessos();
+            }
+        }
+
+        function carregarPeriodosFechados(periodosString) {
+            try {
+                const dados = typeof periodosString === 'string' ? JSON.parse(periodosString) : periodosString;
+                if (Array.isArray(dados)) {
+                    periodosFechados = dados.map(p => ({
+                        id: p.id || gerarIdRecesso(),
+                        titulo: p.titulo || p.descricao || 'Período de Fechamento',
+                        inicio: p.inicio || p.data_inicio,
+                        fim: p.fim || p.data_fim
+                    })).filter(p => p.inicio && p.fim);
+                    sincronizarPeriodosHidden();
+                    renderizarRecessos();
+                }
+            } catch (e) {
+                console.error('Erro ao carregar períodos fechados:', e);
+            }
+        }
+
+        btnAddRecesso.addEventListener('click', adicionarRecesso);
+
+        // Permite adicionar pressionando Enter nos campos do recesso
+        [inputRecessoTitulo, inputRecessoInicio, inputRecessoFim].forEach(input => {
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); adicionarRecesso(); }
+            });
+        });
+
+        // Render inicial (estado vazio)
+        renderizarRecessos();
+
+        // ─── Carregar configurações (lógica original preservada + dias_semana + recessos) ───
+        async function carregarConfiguracoes() {
+            try {
+                const response = await fetch('/api/config/minha-configuracao', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data && !data.useDefault) {
+                        document.getElementById('horario_abertura').value = data.horario_abertura || '';
+                        document.getElementById('horario_fechamento').value = data.horario_fechamento || '';
+                        document.getElementById('duracao_atendimento').value = data.duracao_atendimento || '30';
+                        document.getElementById('valor_sinal').value = data.valor_sinal || '';
+                        // NOVO: aplica os dias da semana retornados pelo backend, se existirem
+                        if (data.dias_semana) {
+                            marcarDiasSemana(data.dias_semana);
+                        }
+                        // NOVO: aplica os períodos de fechamento (recessos/feriados) retornados pelo backend
+                        if (data.periodos_fechados) {
+                            carregarPeriodosFechados(data.periodos_fechados);
+                        }
+                    }
+                }
+            } catch (error) { console.error('Erro ao carregar:', error); }
+        }
+
+        // ─── Submit (lógica original preservada, dias_semana e periodos_fechados agora dinâmicos) ───
+        document.getElementById('formConfig').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            atualizarDiasSemanaHidden();
+            sincronizarPeriodosHidden();
+
+            const formData = {
+                horario_abertura: document.getElementById('horario_abertura').value,
+                horario_fechamento: document.getElementById('horario_fechamento').value,
+                duracao_atendimento: document.getElementById('duracao_atendimento').value,
+                valor_sinal: document.getElementById('valor_sinal').value,
+                dias_semana: document.getElementById('dias_semana').value || '1,2,3,4,5',
+                periodos_fechados: document.getElementById('periodos_fechados').value || '[]'
+            };
+
+            try {
+                const response = await fetch('/api/config/salvar-configuracao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    abrirModal();
+                } else {
+                    alert('Erro ao salvar: ' + (result.message || 'Erro no servidor'));
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+            }
+        });
+
+        window.onload = carregarConfiguracoes;
     </script>
 </body>
 </html>

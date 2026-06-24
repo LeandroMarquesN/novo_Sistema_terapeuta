@@ -5,6 +5,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
+    <title>MED-LM | Portal do Paciente</title>
     <style>
         body { font-family: 'Poppins', sans-serif; background: #f8fafc; }
     </style>
@@ -108,6 +110,9 @@
                     document.getElementById('idade').innerText = (data.paciente.idade || '--') + ' anos';
                     document.getElementById('sangue').innerText = data.paciente.tipo_sanguineo || 'N/A';
 
+                    // mudando o title par ao nome da clinica
+                    // Dentro do seu script, logo após receber os dados:
+                    document.title = `${data.paciente.nome_clinica} | Portal do Paciente`;
                     // Injeta o slug no link do botão de agendamento
                         const btnAgendar = document.getElementById('btnAgendar');
                         if (btnAgendar && data.paciente.slug) {

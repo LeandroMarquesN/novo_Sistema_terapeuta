@@ -9,10 +9,20 @@ exports.adicionarMinutos = (horario, minutos) => {
   return `${String(novasH).padStart(2, '0')}:${String(novosM).padStart(2, '0')}`;
 };
 
+
 /**
-* Formata data do banco para HH:mm
-*/
+ * Formata data do banco para HH:mm respeitando o fuso local de São Paulo
+ */
 exports.formatarHora = (dataString) => {
+  // Criamos o objeto date. Se for uma string do banco, 
+  // ele interpreta corretamente no fuso local.
   const d = new Date(dataString);
-  return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
+
+  // Garantimos que o retorno seja sempre no padrão HH:mm
+  return d.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false, // Força formato 24h
+    timeZone: 'America/Sao_Paulo'
+  });
 };
