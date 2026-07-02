@@ -6,4 +6,5 @@ const authMiddleware = require('../middleware/authMiddleware'); // Ajustado para
 // Rota protegida: primeiro verifica o token, depois carrega o controller
 router.get('/dashboard', authMiddleware, dashboardController.index);
 
+
 module.exports = router;

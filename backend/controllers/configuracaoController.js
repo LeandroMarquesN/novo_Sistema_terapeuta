@@ -1,10 +1,15 @@
-const db = require('../config/db'); // Sua conexão com o banco
+
+//
+//   // 1. Pegar do lugar certo (req.user que vem do seu token JWT)
+//   const clinicaId = req.usuario?.clinica_id;
+
+const db = require('../config/db');
 
 exports.getConfiguracoes = async (req, res) => {
-  // DEBUG: Veja se o ID da clínica está vindo da sessão
+
   console.log("Sessão da Clínica:", req.session);
   console.log("Usuário (Auth):", req.user);
-  // 1. Pegar do lugar certo (req.user que vem do seu token JWT)
+
   const clinicaId = req.usuario?.clinica_id;
 
   if (!clinicaId) {
@@ -12,10 +17,9 @@ exports.getConfiguracoes = async (req, res) => {
     return res.status(401).json({ success: false, message: "Usuário não autenticado." });
   }
 
-
   try {
     const [rows] = await db.execute(
-      'SELECT horario_abertura, horario_fechamento, duracao_atendimento, valor_sinal, dias_semana FROM clinica_configuracoes WHERE clinica_id = ?',
+      'SELECT horario_abertura, horario_fechamento, duracao_atendimento, valor_sinal, dias_semana, periodos_fechados FROM clinica_configuracoes WHERE clinica_id = ?',
       [clinicaId]
     );
 
@@ -23,22 +27,23 @@ exports.getConfiguracoes = async (req, res) => {
       return res.status(200).json({ message: "Nenhuma configuração encontrada. Use os padrões.", useDefault: true });
     }
 
-    console.log("Dados recebidos:", req.body); // DEBUG
+    const config = rows[0];
 
+    // Se a coluna for JSON, o mysql2 já devolve objeto/array. Se for TEXT, vem string.
+    // O front trata os dois casos, mas normalizamos aqui pra sempre mandar string.
+    if (config.periodos_fechados && typeof config.periodos_fechados !== 'string') {
+      config.periodos_fechados = JSON.stringify(config.periodos_fechados);
+    }
 
-    res.json(rows[0]);
+    res.json(config);
   } catch (error) {
-    // ESSE LOG AQUI VAI TE DIZER O ERRO REAL NO TERMINAL
     console.error("ERRO CRÍTICO NO BANCO:", error.message);
-    res.status(500).json({ success: false, message: "Erro ao salvar no banco", details: error.message });
+    res.status(500).json({ success: false, message: "Erro ao carregar configurações", details: error.message });
   }
 };
 
 exports.updateConfiguracoes = async (req, res) => {
-  // 1. Tentar pegar o clinica_id de onde quer que ele esteja
   const clinicaId = req.usuario?.clinica_id || req.body?.clinica_id;
-
-  console.log("DEBUG CONTROLLER - ClinicaID encontrado:", clinicaId);
 
   if (!clinicaId) {
     return res.status(401).json({
@@ -47,36 +52,48 @@ exports.updateConfiguracoes = async (req, res) => {
     });
   }
 
-  // 2. Garantir que NENHUM valor seja undefined (usar null ou valor padrão)
   const {
     horario_abertura = null,
     horario_fechamento = null,
     duracao_atendimento = 30,
     valor_sinal = 0,
-    dias_semana = '1,2,3,4,5'
+    dias_semana = '1,2,3,4,5',
+    periodos_fechados = '[]'
   } = req.body;
+
+  // Valida que periodos_fechados é um JSON válido antes de gravar
+  let periodosParaSalvar = '[]';
+  try {
+    const parsed = typeof periodos_fechados === 'string'
+      ? JSON.parse(periodos_fechados)
+      : periodos_fechados;
+    periodosParaSalvar = JSON.stringify(Array.isArray(parsed) ? parsed : []);
+  } catch (e) {
+    console.warn("periodos_fechados inválido, salvando array vazio:", e.message);
+  }
 
   try {
     const query = `
           INSERT INTO clinica_configuracoes
-              (clinica_id, horario_abertura, horario_fechamento, duracao_atendimento, valor_sinal, dias_semana)
-          VALUES (?, ?, ?, ?, ?, ?)
+              (clinica_id, horario_abertura, horario_fechamento, duracao_atendimento, valor_sinal, dias_semana, periodos_fechados)
+          VALUES (?, ?, ?, ?, ?, ?, ?)
           ON DUPLICATE KEY UPDATE
               horario_abertura = VALUES(horario_abertura),
               horario_fechamento = VALUES(horario_fechamento),
               duracao_atendimento = VALUES(duracao_atendimento),
               valor_sinal = VALUES(valor_sinal),
-              dias_semana = VALUES(dias_semana)
+              dias_semana = VALUES(dias_semana),
+              periodos_fechados = VALUES(periodos_fechados)
       `;
 
-    // Execução com valores sanitizados
     await db.execute(query, [
       clinicaId,
       horario_abertura || null,
       horario_fechamento || null,
       duracao_atendimento || 30,
       valor_sinal || 0,
-      dias_semana || '1,2,3,4,5'
+      dias_semana || '1,2,3,4,5',
+      periodosParaSalvar
     ]);
 
     res.json({ success: true, message: "Configurações salvas!" });
@@ -85,3 +102,4 @@ exports.updateConfiguracoes = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+

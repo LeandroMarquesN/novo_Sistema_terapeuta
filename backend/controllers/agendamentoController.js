@@ -184,6 +184,13 @@ exports.criarAgendamento = async (req, res) => {
 
   } catch (err) {
     if (connection) await connection.rollback();
+
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        erro: 'Este horário já está ocupado por outro agendamento. Escolha outro horário.'
+      });
+    }
+
     res.status(500).json({ erro: 'Erro ao criar agendamento', detalhes: err.message });
   } finally {
     if (connection) connection.release();
@@ -382,7 +389,15 @@ exports.reagendarAgendamento = async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    // 1. Update do status do agendamento
+    // 1. SELECT FOR UPDATE: Bloqueia a linha para garantir que ninguém mais mexa nela
+    const [rows] = await connection.query(
+      'SELECT id FROM agendamentos WHERE id = ? AND clinica_id = ? FOR UPDATE',
+      [agendamentoId, clinicaId]
+    );
+
+    if (rows.length === 0) {
+      throw new Error('Agendamento não encontrado ou não pertence a esta clínica.');
+    }
     const [updateResult] = await connection.query(
       `UPDATE agendamentos 
        SET data_agendamento = ?, 

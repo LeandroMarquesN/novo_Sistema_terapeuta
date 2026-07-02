@@ -586,5 +586,60 @@ function fecharGavetaProntuario() {
     }, 300);
 }
 
+
+
+// funcao nova para os cards do topo do dashbord
+async function carregarEstatisticasDashboard() {
+    try {
+        const response = await fetch('/api/dashboard/estatisticas-hoje', {
+            headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+
+        if (!response.ok) throw new Error('Erro ao buscar estatísticas');
+
+        const data = await response.json();
+        if (!data.success) throw new Error(data.message || 'Erro desconhecido');
+
+        // ── Atendimentos ──
+        document.getElementById('statAtendimentos').innerText = data.atendimentos.total;
+
+        const variacao = data.atendimentos.variacao_percentual;
+        const variacaoDiv = document.getElementById('statAtendimentosVariacao');
+        const variacaoIcon = variacaoDiv.querySelector('i');
+        const variacaoTexto = document.getElementById('statAtendimentosVariacaoTexto');
+
+        if (variacao >= 0) {
+            variacaoIcon.className = 'fas fa-arrow-up';
+            variacaoDiv.style.color = 'var(--emerald)';
+            variacaoTexto.innerText = `+${variacao}%`;
+        } else {
+            variacaoIcon.className = 'fas fa-arrow-down';
+            variacaoDiv.style.color = '#f87171';
+            variacaoTexto.innerText = `${variacao}%`;
+        }
+
+        // ── Cancelamentos ──
+        document.getElementById('statCancelamentos').innerText = data.cancelamentos.total;
+        document.getElementById('statCancelamentosTaxa').innerText = data.cancelamentos.taxa_percentual.toFixed(1);
+
+        // ── Faturamento ──
+        document.getElementById('statFaturamento').innerText = `R$ ${data.faturamento.total.toFixed(2).replace('.', ',')}`;
+        document.getElementById('statFaturamentoSessoes').innerText = data.faturamento.sessoes_liquidadas;
+
+        // ── Próximos 7 dias ──
+        document.getElementById('statProximaSemana').innerText = data.proxima_semana.total;
+
+    } catch (error) {
+        console.error('Erro ao carregar estatísticas do dashboard:', error);
+        ['statAtendimentos', 'statCancelamentos', 'statFaturamento', 'statProximaSemana'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = '—';
+        });
+    }
+}
+
+window.addEventListener('DOMContentLoaded', carregarEstatisticasDashboard);
+setInterval(carregarEstatisticasDashboard, 2 * 60 * 1000);
+
 // Fecha a gaveta se clicar fora (no escuro)
 document.getElementById('gaveta-backdrop').addEventListener('click', fecharGavetaProntuario);

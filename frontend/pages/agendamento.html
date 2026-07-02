@@ -1247,9 +1247,11 @@ document.querySelector('form').addEventListener('submit', function(e) {
               body: finalFormData
             });
 
+            // 1. Tratamento específico para o erro 409
             if (resposta.status === 409) {
                 const errorData = await resposta.json();
-                showClinicalAlert('Conflito de Agendamento', errorData.message, 'warning');
+                // Ajustado para acessar 'erro' (como definimos no controller)
+                showClinicalAlert('Atenção', errorData.erro || 'Horário já ocupado.', 'warning');
                 return;
             }
 

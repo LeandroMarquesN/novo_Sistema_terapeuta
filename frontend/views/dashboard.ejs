@@ -892,41 +892,48 @@
             </header>
 
             <!-- Stat Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <!-- Atendimentos -->
-                <div class="stat-card stat-card-cyan p-6 card-hover-effect">
-                    <div class="flex justify-between items-center">
-                        <p class="card-label">Atendimentos Dia</p>
-                        <i class="fas fa-user-check text-base" style="color:var(--cyan)"></i>
-                    </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight">12</h3>
-                    <div class="mt-2 text-xs font-bold flex items-center gap-1" style="color:var(--emerald)"><i class="fas fa-arrow-up"></i> +20%</div>
-                </div>
-                <!-- Cancelamentos -->
-                <div class="stat-card stat-card-red p-6 card-hover-effect">
-                    <div class="flex justify-between items-center">
-                        <p class="card-label">Cancelamentos</p>
-                        <i class="fas fa-user-times text-base" style="color:#f87171"></i>
-                    </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight">2</h3>
-                    <span class="text-xs font-bold block mt-1" style="color:#f87171">Taxa de 4.1%</span>
-                </div>
-                <!-- No-show -->
-                <div class="stat-card stat-card-amber p-6 card-hover-effect">
-                    <div class="flex justify-between items-center">
-                        <p class="card-label">Faltas (No-Show)</p>
-                        <i class="fas fa-user-clock text-base" style="color:var(--amber)"></i>
-                    </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight">4</h3>
-                    <p class="text-xs mt-1" style="color:rgba(148,163,184,0.5)"><span style="color:var(--amber);font-weight:700">R$ 640</span> não realizados</p>
-                </div>
-                <!-- Faturamento -->
-                <div class="stat-card p-6 card-hover-effect">
-                    <p class="card-label">Faturamento</p>
-                    <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent">R$ 1.250</h3>
-                    <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">8 sessões liquidadas</span>
-                </div>
-            </div>
+           <!-- Stat Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <!-- Atendimentos -->
+    <div class="stat-card stat-card-cyan p-6 card-hover-effect">
+        <div class="flex justify-between items-center">
+            <p class="card-label">Atendimentos Dia</p>
+            <i class="fas fa-user-check text-base" style="color:var(--cyan)"></i>
+        </div>
+        <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statAtendimentos">–</h3>
+        <div class="mt-2 text-xs font-bold flex items-center gap-1" id="statAtendimentosVariacao" style="color:var(--emerald)">
+            <i class="fas fa-arrow-up"></i> <span id="statAtendimentosVariacaoTexto">--</span>
+        </div>
+    </div>
+    <!-- Cancelamentos -->
+    <div class="stat-card stat-card-red p-6 card-hover-effect">
+        <div class="flex justify-between items-center">
+            <p class="card-label">Cancelamentos de Hoje</p>
+            <i class="fas fa-user-times text-base" style="color:#f87171"></i>
+        </div>
+        <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statCancelamentos">–</h3>
+        <span class="text-xs font-bold block mt-1" style="color:#f87171">Taxa de <span id="statCancelamentosTaxa">--</span>%</span>
+    </div>
+    <!-- Faturamento -->
+    <div class="stat-card p-6 card-hover-effect">
+        <p class="card-label">Faturamento</p>
+        <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent" id="statFaturamento">R$ –</h3>
+        <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
+            <span id="statFaturamentoSessoes">0</span> sessões liquidadas
+        </span>
+    </div>
+    <!-- Sessões Próximos 7 Dias -->
+    <div class="stat-card p-6 card-hover-effect">
+        <div class="flex justify-between items-center">
+            <p class="card-label">Próximos 7 Dias</p>
+            <i class="fas fa-calendar-week text-base" style="color:#818cf8"></i>
+        </div>
+        <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statProximaSemana">–</h3>
+        <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
+            sessões agendadas
+        </span>
+    </div>
+</div>
 
             <!-- ─── Patient list + aside ─── -->
             <div class="grid grid-cols-12 gap-8 items-start mb-12">

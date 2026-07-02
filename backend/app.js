@@ -19,6 +19,8 @@ const prontuarioRoutes = require('./routes/prontuarioRoutes'); // 🌟 1. Import
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const dashboardApiRoutes = require('./routes/dashboardapiroutes'); // NOVO
+
 const configuracaoRoutes = require('./routes/configuracaoRoutes');
 const portalRoutes = require('./routes/portal-agendamento-routes');
 const portalPacientelroutes = require('./routes/portalPacienteroutes');
@@ -89,6 +91,7 @@ app.use('/api/admin', authAdmin, adminRoutes);
 
 // --- MAPEAMENTO DAS VIEWS (Dashboard EJS) ---
 app.use('/', dashboardRoutes);
+app.use('/api/dashboard', dashboardApiRoutes); // NOVO — agrupa com as outras rotas /api
 
 
 // --- CONFIGURAÇÃO DE ARQUIVOS ESTÁTICOS ---

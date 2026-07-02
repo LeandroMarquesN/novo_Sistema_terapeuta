@@ -4,6 +4,10 @@
 exports.adicionarMinutos = (horario, minutos) => {
   let [h, m] = horario.split(':').map(Number);
   let totalMinutos = h * 60 + m + parseInt(minutos);
+
+  // Normaliza para dentro de 24h (0–1439), tratando também minutos negativos
+  totalMinutos = ((totalMinutos % 1440) + 1440) % 1440;
+
   let novasH = Math.floor(totalMinutos / 60);
   let novosM = totalMinutos % 60;
   return `${String(novasH).padStart(2, '0')}:${String(novosM).padStart(2, '0')}`;

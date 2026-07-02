@@ -118,6 +118,8 @@ CREATE TABLE IF NOT EXISTS pacientes (
   CONSTRAINT fk_paciente_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
+
+
 -- 6. AGENDAMENTOS
 CREATE TABLE IF NOT EXISTS agendamentos (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -125,7 +127,7 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   paciente_id INT NOT NULL,
   usuario_id INT NOT NULL,
   data_agendamento DATETIME NOT NULL,
-  status_agendamento ENUM('aguardando_sinal', 'confirmado', 'cancelado', 'finalizado') DEFAULT 'aguardando_sinal',
+  status_agendamento ENUM('aguardando_sinal', 'confirmado', 'cancelado', 'finalizado','nao_compareceu') DEFAULT 'aguardando_sinal',
   nome VARCHAR(100),
   email VARCHAR(100),
   telefone VARCHAR(20),
@@ -140,9 +142,19 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   idade INT,
   tipo_sanguineo VARCHAR(5),
   condicoes TEXT,
+
+  -- Coluna gerada: só tem valor se o agendamento estiver ATIVO (não cancelado)
+  -- Cancelados viram NULL e não contam pra unicidade (NULL != NULL no MySQL)
+  slot_ativo DATETIME GENERATED ALWAYS AS (
+    CASE WHEN status_agendamento <> 'cancelado' THEN data_agendamento ELSE NULL END
+  ) STORED,
+
   CONSTRAINT fk_agend_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_agend_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_agend_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+  CONSTRAINT fk_agend_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+  -- A trava real: impossível existir 2 registros ativos na mesma clínica + horário
+  UNIQUE KEY uq_agend_clinica_horario_ativo (clinica_id, slot_ativo)
 ) ENGINE=InnoDB;
 
 -- CONFIGURAÇÕES (Corrigida a vírgula do valor_sinal)
@@ -154,6 +166,7 @@ CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   duracao_atendimento INT DEFAULT 30,
   valor_sinal DECIMAL(10,2) DEFAULT 0.00,
   dias_semana VARCHAR(50) DEFAULT '1,2,3,4,5',
+  periodos_fechados JSON DEFAULT NULL,
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 

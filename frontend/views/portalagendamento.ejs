@@ -168,7 +168,13 @@
 
                 <div class="mb-6">
                     <label class="text-xs font-bold text-slate-500 ml-1">SELECIONE A DATA</label>
-                    <input type="date" id="data_escolhida" onchange="carregarHorarios()" class="ios-input border-2 border-emerald-100">
+                    <input type="date" id="data_escolhida" onchange="handleDataChange()" class="ios-input border-2 border-emerald-100">
+                </div>
+
+                <!-- NOVO: aviso de data indisponível (dia fechado / recesso) -->
+                <div id="avisoDataIndisponivel" class="hidden mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="avisoDataTexto"></span>
                 </div>
 
                 <div id="container_horarios" class="grid grid-cols-3 gap-2 min-h-[100px]">
@@ -269,6 +275,92 @@
     </div>
 
     <script>
+        // ═══════════════════════════════════════════════════════════════
+        // ESTADO GLOBAL
+        // ═══════════════════════════════════════════════════════════════
+        let dados = { clinica_id: "<%= clinica.id %>", horario: "" };
+
+        // Config da clínica injetada direto do servidor — evita nova chamada à API
+        // dias_semana: string tipo "1,2,3,4,5" (0=Dom ... 6=Sáb)
+        // periodos_fechados: array de { titulo, inicio, fim } (recessos/feriados)
+        const configClinica = {
+            dias_semana: "<%= config.dias_semana || '1,2,3,4,5' %>",
+            periodos_fechados: <%- JSON.stringify(config.periodos_fechados || []) %>
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // UTILITÁRIO: data local (CORRIGIDO — sem bug de fuso do toISOString)
+        // toISOString() sempre usa UTC; como Brasília é UTC-3, a partir das
+        // 21h locais o UTC já virou o dia seguinte, o que bugava o "hoje".
+        // ═══════════════════════════════════════════════════════════════
+        function getDataLocalISO(data = new Date()) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // NOVO: verifica se a data é dia de atendimento e não está em recesso
+        // Retorna null se a data está livre, ou uma mensagem de erro se não.
+        // ═══════════════════════════════════════════════════════════════
+        function verificarDataFechada(dataStr) {
+            const diasPermitidos = (configClinica.dias_semana || '1,2,3,4,5')
+                .split(',')
+                .map(d => d.trim());
+
+            const diaSemana = new Date(dataStr + 'T12:00:00').getDay().toString();
+
+            if (!diasPermitidos.includes(diaSemana)) {
+                return 'A clínica não atende neste dia da semana. Por favor, escolha outra data.';
+            }
+
+            const dataAlvo = new Date(dataStr + 'T00:00:00');
+            const periodos = configClinica.periodos_fechados || [];
+            const recesso = periodos.find(p => {
+                const inicio = new Date(p.inicio + 'T00:00:00');
+                const fim = new Date(p.fim + 'T00:00:00');
+                return dataAlvo >= inicio && dataAlvo <= fim;
+            });
+
+            if (recesso) {
+                return `A clínica estará fechada nesta data (${recesso.titulo || 'recesso/feriado'}). Escolha outra data.`;
+            }
+
+            return null; // data livre
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // NOVO: dispara ao trocar a data — valida ANTES de buscar horários
+        // ═══════════════════════════════════════════════════════════════
+        function handleDataChange() {
+            const dataInput = document.getElementById('data_escolhida').value;
+            const avisoDiv = document.getElementById('avisoDataIndisponivel');
+            const avisoTexto = document.getElementById('avisoDataTexto');
+            const container = document.getElementById('container_horarios');
+            const btnNext = document.getElementById('btn-next-3');
+
+            if (!dataInput) return;
+
+            // Reseta seleção de horário anterior sempre que a data muda
+            dados.horario = '';
+            btnNext.disabled = true;
+            btnNext.classList.remove('bg-emerald-500');
+            btnNext.classList.add('bg-slate-300');
+
+            const motivoFechado = verificarDataFechada(dataInput);
+
+            if (motivoFechado) {
+                avisoTexto.innerText = motivoFechado;
+                avisoDiv.classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            avisoDiv.classList.add('hidden');
+            carregarHorarios();
+        }
+
         // funcao do modal lembrete pagametno
         function abrirModalLembrete() {
             // 1. Busca os elementos uma única vez para performance
@@ -356,9 +448,6 @@
             }
         }
 
-
-        let dados = { clinica_id: "<%= clinica.id %>", horario: "" };
-
         function goToStep(step) {
                     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
                     document.getElementById('step' + step).classList.add('active');
@@ -367,6 +456,10 @@
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
 
+        // ═══════════════════════════════════════════════════════════════
+        // Busca os horários livres no servidor (dias/recessos já filtrados
+        // no front por handleDataChange antes de chegar aqui)
+        // ═══════════════════════════════════════════════════════════════
         async function carregarHorarios() {
                 // 1. LIMPEZA DE SEGURANÇA: Remove qualquer lixo extra da string da data
                 let dataInput = document.getElementById('data_escolhida').value;
@@ -394,8 +487,8 @@
                     const json = await resp.json();
 
                     const agora = new Date();
-                    // Ajuste manual: garantindo o formato YYYY-MM-DD para comparar com o input
-                    const hojeDataISO = agora.toISOString().split('T')[0];
+                    // CORRIGIDO: usa data local em vez de toISOString() (que usa UTC e quebra à noite)
+                    const hojeDataISO = getDataLocalISO(agora);
 
                     container.innerHTML = '';
 
@@ -411,7 +504,7 @@
                     });
 
                     if (horariosFiltrados.length === 0) {
-                            container.innerHTML = '<div class="col-span-3 text-center text-red-500 text-sm font-bold p-4">Ops! Não há mais horários disponíveis para hoje.</div>';
+                            container.innerHTML = '<div class="col-span-3 text-center text-red-500 text-sm font-bold p-4">Ops! Não há mais horários disponíveis para esta data.</div>';
                             return;
                      }
 
@@ -435,6 +528,10 @@
                     }
         }
 
+        // ═══════════════════════════════════════════════════════════════
+        // Finaliza o agendamento. AJUSTADO para tratar o erro 409
+        // (conflito de horário — alguém já pegou aquele horário antes)
+        // ═══════════════════════════════════════════════════════════════
         async function finalizarAgendamentoCompleto(status, event) {
 
                 const btnConfirmar = event.currentTarget; // Usar currentTarget garante que sempre pegue o botão
@@ -462,19 +559,30 @@
                     const res = await resp.json();
 
                     if (res.success) {
-    // 1. Fecha qualquer modal de processo
-    if (typeof fecharModal === "function") fecharModal();
+                        // 1. Fecha qualquer modal de processo
+                        if (typeof fecharModal === "function") fecharModal();
 
-    // 2. Abre APENAS o modal de sucesso original
-    const modalSucesso = document.getElementById('modalSucesso');
-    if (modalSucesso) {
-        modalSucesso.classList.remove('hidden');
-    } else {
-        // Fallback caso o ID do modal tenha mudado
-        alert("Agendamento realizado com sucesso!");
-    }
-}else {
-                        alert("Erro: " + res.message);
+                        // 2. Abre APENAS o modal de sucesso original
+                        const modalSucesso = document.getElementById('modalSucesso');
+                        if (modalSucesso) {
+                            modalSucesso.classList.remove('hidden');
+                        } else {
+                            // Fallback caso o ID do modal tenha mudado
+                            alert("Agendamento realizado com sucesso!");
+                        }
+                    } else if (resp.status === 409) {
+                        // NOVO: conflito de horário — outra pessoa pegou esse horário primeiro.
+                        // Reseta a seleção e manda o paciente escolher outro horário.
+                        alert(res.message || "Esse horário acabou de ser reservado por outra pessoa. Por favor, escolha outro horário.");
+                        dados.horario = '';
+                        goToStep(2);
+                        // Recarrega os horários da data já escolhida para refletir a ocupação real
+                        const motivoFechado = verificarDataFechada(document.getElementById('data_escolhida').value);
+                        if (!motivoFechado) carregarHorarios();
+                        btnConfirmar.disabled = false;
+                        btnConfirmar.innerText = "Confirmar sem pagar agora";
+                    } else {
+                        alert("Erro: " + (res.message || "Não foi possível concluir o agendamento."));
                         btnConfirmar.disabled = false;
                         btnConfirmar.innerText = "Confirmar Agendamento";
                     }
@@ -496,8 +604,8 @@
                 window.location.reload();
             }
 
-        // Definir data mínima como HOJE para o input date
-        document.getElementById('data_escolhida').min = new Date().toISOString().split('T')[0];
+        // Definir data mínima como HOJE para o input date (CORRIGIDO: fuso local, não UTC)
+        document.getElementById('data_escolhida').min = getDataLocalISO();
     </script>
 </body>
 </html>

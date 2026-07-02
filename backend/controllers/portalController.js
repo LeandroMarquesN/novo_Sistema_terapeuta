@@ -67,8 +67,6 @@ exports.getHorariosLivres = async (req, res) => {
       return res.status(404).json({ success: false, message: "Configurações da clínica não encontradas." });
     }
 
-    // Comparamos a data convertendo o timestamp do banco para o fuso de SP
-    // Isso evita problemas se o servidor estiver em UTC
     const [ocupados] = await connection.execute(
       `SELECT data_agendamento 
        FROM agendamentos
@@ -78,7 +76,8 @@ exports.getHorariosLivres = async (req, res) => {
       [clinica_id, data]
     );
 
-    const disponiveis = agendaService.gerarSlotsDisponiveis(config[0], ocupados);
+    // Agora passamos "data" como terceiro argumento
+    const disponiveis = agendaService.gerarSlotsDisponiveis(config[0], ocupados, data);
     res.json({ success: true, horarios: disponiveis });
 
   } catch (error) {
@@ -88,7 +87,6 @@ exports.getHorariosLivres = async (req, res) => {
     connection.release();
   }
 };
-
 // =============================================================================
 // 3. CRIAR AGENDAMENTO (A Mágica do Portal)
 // =============================================================================
@@ -110,12 +108,49 @@ exports.criarAgendamento = async (req, res) => {
     await connection.beginTransaction();
 
     const [configuracoes] = await connection.execute(
-      'SELECT valor_sinal FROM clinica_configuracoes WHERE clinica_id = ?',
+      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ?',
       [clinica_id]
     );
 
+    if (configuracoes.length === 0) {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: "Configurações da clínica não encontradas." });
+    }
+
+    const config = configuracoes[0];
+
+    // ── Validação: dia da semana permitido ──
+    const diasPermitidos = (config.dias_semana || '1,2,3,4,5').split(',').map(d => d.trim());
+    const diaSemana = new Date(data + 'T12:00:00').getDay().toString();
+    if (!diasPermitidos.includes(diaSemana)) {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: "A clínica não atende neste dia da semana." });
+    }
+
+    // ── Validação: não está dentro de um recesso/feriado ──
+    let periodosFechados = [];
+    try {
+      periodosFechados = typeof config.periodos_fechados === 'string'
+        ? JSON.parse(config.periodos_fechados || '[]')
+        : (config.periodos_fechados || []);
+    } catch (e) {
+      periodosFechados = [];
+    }
+
+    const dataAlvo = new Date(data + 'T00:00:00');
+    const emRecesso = periodosFechados.some(p => {
+      const inicio = new Date(p.inicio + 'T00:00:00');
+      const fim = new Date(p.fim + 'T00:00:00');
+      return dataAlvo >= inicio && dataAlvo <= fim;
+    });
+
+    if (emRecesso) {
+      await connection.rollback();
+      return res.status(400).json({ success: false, message: "A clínica está fechada nesta data (recesso/feriado)." });
+    }
+
     // Converte para float para garantir cálculos matemáticos corretos
-    const valorSinalDinamico = parseFloat(configuracoes.length > 0 && configuracoes[0].valor_sinal ? configuracoes[0].valor_sinal : 0.00);
+    const valorSinalDinamico = parseFloat(config.valor_sinal ? config.valor_sinal : 0.00);
 
     // BUSCAR OU CRIAR O PACIENTE
     let pacienteId;
@@ -152,8 +187,7 @@ exports.criarAgendamento = async (req, res) => {
       [clinica_id, pacienteId, adminId, dataAgendamentoCompleta, motivo_consulta, nome, email, telefone, cpf, tipo_terapia]
     );
 
-    // REGISTRO NO FINANCEIRO (IMPLEMENTAÇÃO ROBUSTA)
-    // Agora o registro acontece sempre, com descrição inteligente baseada no valor
+    // REGISTRO NO FINANCEIRO
     const descricaoFinanceira = valorSinalDinamico > 0 ? `Sinal - ${nome}` : `Consulta Agendada - ${nome}`;
 
     await connection.execute(
@@ -185,6 +219,13 @@ exports.criarAgendamento = async (req, res) => {
   } catch (error) {
     if (connection) await connection.rollback();
     console.error("Erro ao criar agendamento via portal:", error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        success: false,
+        message: 'Esse horário acabou de ser reservado por outra pessoa. Por favor, escolha outro horário.'
+      });
+    }
+
     res.status(500).json({ success: false, message: "Erro ao processar o agendamento." });
   } finally {
     if (connection) connection.release();
