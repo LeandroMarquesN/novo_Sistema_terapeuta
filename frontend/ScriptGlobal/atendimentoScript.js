@@ -90,7 +90,7 @@ async function carregarFichaPaciente(pacienteId) {
     // Telefone via Join
     if (elementosFicha.whatsapp) {
       elementosFicha.whatsapp.innerHTML = p.telefone ?
-        `<i class="fab fa-whatsapp text-emerald-500"></i> ${formatarTelefone(p.telefone)}` : 'Não informado';
+        `<i class="fab fa-whatsapp" style="color:var(--emerald)"></i> ${formatarTelefone(p.telefone)}` : 'Não informado';
     }
 
     if (elementosFicha.origem) elementosFicha.origem.innerText = p.origem || 'Manual';
@@ -109,11 +109,19 @@ async function carregarFichaPaciente(pacienteId) {
     if (elementosFicha.motivo) elementosFicha.motivo.innerText = p.motivo_consulta || 'Nenhum motivo registrado.';
 
     // Condições vindas do Join (p.condicoes_saude mapeado do campo 'condicoes' da tabela agendamentos)
+    // CORRIGIDO: cores fixas para tema escuro, sem depender do prefixo "dark:" (que só ativa com o toggle)
     if (elementosFicha.condicoes) {
       elementosFicha.condicoes.innerText = p.condicoes_saude || 'Sem condições preexistentes.';
-      elementosFicha.condicoes.className = p.condicoes_saude
-        ? "bg-red-500/10 border border-red-500/20 p-3 rounded-xl text-red-700 dark:text-red-300 font-bold leading-relaxed"
-        : "bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-xl text-emerald-700 dark:text-emerald-300 font-bold leading-relaxed";
+      elementosFicha.condicoes.className = "p-3 rounded-xl font-bold leading-relaxed";
+      if (p.condicoes_saude) {
+        elementosFicha.condicoes.style.background = 'rgba(248,113,113,0.1)';
+        elementosFicha.condicoes.style.border = '1px solid rgba(248,113,113,0.25)';
+        elementosFicha.condicoes.style.color = '#f87171';
+      } else {
+        elementosFicha.condicoes.style.background = 'rgba(52,211,153,0.1)';
+        elementosFicha.condicoes.style.border = '1px solid rgba(52,211,153,0.25)';
+        elementosFicha.condicoes.style.color = '#34d399';
+      }
     }
 
   } catch (error) {
@@ -133,17 +141,17 @@ async function carregarTimelineProntuarios(pacienteId) {
     if (!elementosFicha.timeline) return;
 
     if (historico.length === 0) {
-      elementosFicha.timeline.innerHTML = `<div class="text-center text-slate-400 text-xs py-8">Nenhum histórico encontrado.</div>`;
+      elementosFicha.timeline.innerHTML = `<div class="text-center text-xs py-8" style="color: rgba(148,163,184,0.4)">Nenhum histórico encontrado.</div>`;
       return;
     }
 
     elementosFicha.timeline.innerHTML = historico.map(evo => `
-      <div class="glass-card p-3 rounded-xl text-left cursor-pointer hover:border-emerald-400 transition" onclick="visualizarEvolucaoAntiga(${evo.id})">
-        <div class="flex justify-between border-b border-white/10 pb-1 mb-1">
-          <span class="font-black">${new Date(evo.data_registro).toLocaleDateString('pt-BR')}</span>
-          <span class="bg-blue-500/20 text-blue-300 px-1.5 rounded text-[9px] uppercase">${evo.codigo_cid || '---'}</span>
+      <div class="glass-card p-3 rounded-xl text-left cursor-pointer transition" style="cursor:pointer" onclick="visualizarEvolucaoAntiga(${evo.id})">
+        <div class="flex justify-between pb-1 mb-1" style="border-bottom: 1px solid var(--border)">
+          <span class="font-black" style="color:#e2e8f0">${new Date(evo.data_registro).toLocaleDateString('pt-BR')}</span>
+          <span class="px-1.5 rounded text-[9px] uppercase font-black" style="background: rgba(96,165,250,0.15); color: var(--blue)">${evo.codigo_cid || '---'}</span>
         </div>
-        <p class="text-slate-400 text-xs truncate">${extrairTextoLimpo(evo.relato_clinico)}</p>
+        <p class="text-xs truncate" style="color: rgba(148,163,184,0.7)">${extrairTextoLimpo(evo.relato_clinico)}</p>
       </div>
     `).join('');
   } catch (err) {
@@ -267,13 +275,15 @@ async function abrirModalAuditoria() {
   const logs = await response.json();
 
   const lista = document.getElementById('listaLogs');
+  // CORRIGIDO: reaproveita a classe .audit-item (definida no CSS do atendimento.html)
+  // em vez de bg-white/30 + dark:*, que ficava ilegível sem o toggle de dark mode ativo
   lista.innerHTML = logs.map(log => `
-      <div class="flex justify-between items-center bg-white/30 dark:bg-slate-700/30 p-3 rounded-xl border border-white/10">
+      <div class="flex justify-between items-center audit-item">
           <div>
-              <p class="text-[11px] font-black text-slate-700 dark:text-slate-200">${log.acao}</p>
-              <p class="text-[9px] text-slate-500 dark:text-slate-400">Por: ${log.usuario_nome}</p>
+              <p class="text-[11px] font-black" style="color:#e2e8f0">${log.acao}</p>
+              <p class="text-[9px]" style="color: rgba(148,163,184,0.6)">Por: ${log.usuario_nome}</p>
           </div>
-          <span class="text-[10px] font-bold text-slate-400">${new Date(log.data_acesso).toLocaleString('pt-BR')}</span>
+          <span class="text-[10px] font-bold" style="color: rgba(148,163,184,0.5)">${new Date(log.data_acesso).toLocaleString('pt-BR')}</span>
       </div>
   `).join('');
 }
