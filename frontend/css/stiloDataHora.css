@@ -1,17 +1,46 @@
- /* Estilização para a data e hora */
- #data-hora-container {
-  font-size: 0.9rem;
-  color: #fff;
-  background-color: rgba(10, 73, 140, 0.7);
-  padding: 8px 12px;
-  border-radius: 20px;
+/* Estilização Premium para a data e hora - Efeito Ultrapassar */
+#data-hora-container {
+  font-size: 0.75rem; /* Ajustado para bater com o padrão compacto high-tech */
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #f1f5f9;
+  
+  /* Mudança para uma cor de fundo sólida da paleta principal com alta opacidade */
+  background: #081924; 
+  
+  /* Borda de luz acesa que dá a sensação de que o elemento está saltando para fora */
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  padding: 10px 16px;
+  border-radius: 14px; /* Casando com os novos botões arredondados do sistema */
+  
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   white-space: nowrap;
-  margin-right: 15px; /* Espaço entre a data/hora e os botões */
+  
+  /* Margem e espaçamento */
+  margin-right: 15px;
+  margin-left: 8px;
+  margin-bottom: 4px;
+
+  /* Sombra com efeito Glow Real (Faz o componente saltar da barra de fundo) */
+  box-shadow: 0 8px 20px -6px rgba(2, 12, 18, 0.9), 
+              0 0 15px -3px rgba(34, 211, 238, 0.15);
+              
+  transition: all 0.3s ease;
+}
+
+/* Efeito ao passar o mouse para dar feedback ultra-moderno */
+#data-hora-container:hover {
+  border-color: rgba(52, 211, 153, 0.4); /* Muda sutilmente para o Emerald */
+  box-shadow: 0 8px 20px -4px rgba(2, 12, 18, 0.9), 
+              0 0 18px -2px rgba(52, 211, 153, 0.25);
+  transform: translateY(-1px);
 }
 
 #data-hora-container i {
-  font-size: 1rem;
+  font-size: 0.9rem;
+  color: #22d3ee; /* Fixa o ícone no Cyan neon aceso */
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.5));
 }
