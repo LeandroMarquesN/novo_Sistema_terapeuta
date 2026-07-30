@@ -45,8 +45,8 @@ exports.sendWelcomeEmail = async (clinica) => {
             email: clinica.email_master, // <--- Esta chave tem que ser {{email}} no HTML
             senha: clinica.senha_master, // <--- Esta chave tem que ser {{senha}} no HTML
             plano_nome: planos[clinica.plano_id] || 'Plano Personalizado',
-            url_portal: `https://localhost:3000/agendar/${clinica.slug}`,
-            qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://localhost:3000/agendar/${clinica.slug}`)}`,
+            url_portal: `${process.env.APP_BASE_URL_ENV}/agendar/${clinica.slug}`,
+            qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${process.env.APP_BASE_URL_ENV}/agendar/${clinica.slug}`)}`,
             data_expiracao: clinica.data_expiracao,
             ano_atual: new Date().getFullYear()
         };
