@@ -185,8 +185,8 @@ exports.sendWelcomeEmail = async (clinica) => {
       email: clinica.email_master,
       senha: clinica.senha_master,
       plano_nome: planos[clinica.plano_id] || 'Plano Personalizado',
-      url_portal: urlPortal,
-      qr_code_url: qrCodeUrl,
+      url_portal: `${APP_BASE_URL}/agendar/${clinica.slug}`,
+      qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`https://localhost:3000/agendar/${clinica.slug}`)}`,
       data_expiracao: clinica.data_expiracao, // <--- ADICIONE ESTA LINHA
       ano_atual: new Date().getFullYear()
     };
@@ -285,7 +285,7 @@ exports.sendProgramaFundadoresEmail = async (dados) => {
     const htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 
     // 1. Criamos a URL com os parâmetros dinâmicos
-    const baseUrl = `${APP_BASE_URL}/pages/Cadastro_Clinica.html`;
+    const baseUrl = `${process.env.APP_BASE_URL}/pages/Cadastro_Clinica.html`;
     const linkCadastro = `${baseUrl}?origem=fundador&email=${encodeURIComponent(dados.email)}`;
 
     // 2. Adicionamos o link no objeto de dados para o template
