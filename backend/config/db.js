@@ -9,6 +9,9 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
+    // --- ADICIONE ESTA LINHA PARA O AIVEN ACEITAR A CONEXÃO ---
+    ssl: { rejectUnauthorized: false },
+    // --- FUSO HORÁRIO ---
     // Configurações de fuso horário
     timezone: '-03:00',
     dateStrings: true,
