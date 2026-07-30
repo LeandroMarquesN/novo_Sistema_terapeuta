@@ -1,6 +1,14 @@
+# Pastas de dependências em qualquer nível do projeto
 node_modules
-npm - debug.log
+  ** /node_modules
+
+# Arquivos de log do NPM
+npm - debug.log *
+
+# Controle de versão e variáveis de ambiente sensíveis
   .git
+  .gitignore
   .env
+
+# Arquivos de upload do backend(evita copiar arquivos locais / de teste)
 backend / uploads
-backend / node_modules
