@@ -50,5 +50,18 @@ services:
     depends_on:
       - db
 
+  phpmyadmin-aiven:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    ports:
+      - "${PMA_AIVEN_PORT}:80"
+    environment:
+      PMA_HOST: mysql-c6f9684-leandrommarquess-1808.d.aivencloud.com
+      PMA_PORT: 13641
+      PMA_USER: avnadmin
+      PMA_PASSWORD: ${DB_AIVEN_PASSWORD}
+    volumes:
+      - ./backend/docker/phpmyadmin-aiven/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+
 volumes:
   db_data:
