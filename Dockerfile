@@ -1,5 +1,5 @@
 # Usa imagem oficial do Node
-FROM node:18
+FROM node:18-alpine
 
 # Cria o diretório de trabalho dentro do container
 WORKDIR /app
