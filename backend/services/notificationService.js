@@ -3,15 +3,13 @@ require('dotenv').config();
 const nodemailer = require('nodemailer');
 const fs = require('fs').promises;
 const path = require('path');
-const {
-  default: makeWASocket,
-  useMultiFileAuthState,
-  DisconnectReason
-} = require('@whiskeysockets/baileys');
+
+
+// NOTIFICATIONsERVICE QUE VOU USAR.   ESE ESTOU MECHENDOOOO
 
 // url do endereco em producao no render 
 const APP_BASE_URL = process.env.APP_BASE_URL_ENV || "http://localhost:3000";
-// Configuração da URL base do seu Portal
+// Configuração da URL base do seu Portal (Ajuste para o seu domínio real)
 const URL_PORTAL_BASE = process.env.URL_PORTAL_BASE || `${APP_BASE_URL}/portal_paciente/login?token=`;
 
 // Configuração do Nodemailer
@@ -23,67 +21,21 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// =========================================================================
-// GERENCIAMENTO DE SESSÃO WHATSAPP (BAILEYS)
-// =========================================================================
-let waSock = null;
 
-/**
- * Inicializa a conexão via Baileys com reconexão automática.
- */
-async function initWhatsApp() {
-  // Salva os tokens de autenticação em uma pasta local (ou volume persistente)
-  const authPath = path.join(__dirname, '..', 'baileys_auth_info');
-  const { state, saveCreds } = await useMultiFileAuthState(authPath);
 
-  waSock = makeWASocket({
-    auth: state,
-    printQRInTerminal: true, // Gera o QR Code no log do terminal (Render)
-    browser: ['MedLM System', 'Chrome', '1.0.0']
-  });
-
-  // Atualização das credenciais
-  waSock.ev.on('creds.update', saveCreds);
-
-  // Monitoramento de conexão
-  waSock.ev.on('connection.update', (update) => {
-    const { connection, lastDisconnect, qr } = update;
-
-    if (qr) {
-      console.log('[MED-LM WhatsApp] Novo QR Code gerado! Verifique os logs do servidor.');
-    }
-
-    if (connection === 'close') {
-      const statusCode = lastDisconnect?.error?.output?.statusCode;
-      const shouldReconnect = statusCode !== DisconnectReason.loggedOut;
-
-      console.log(`[MED-LM WhatsApp] Conexão fechada devido ao erro: ${statusCode}. Reconectando: ${shouldReconnect}`);
-
-      if (shouldReconnect) {
-        initWhatsApp(); // Tenta reconectar automaticamente
-      } else {
-        console.log('[MED-LM WhatsApp] Sessão encerrada/desconectada. Será necessário escaneamento manual.');
-      }
-    } else if (connection === 'open') {
-      console.log('[MED-LM WhatsApp] ✅ Cliente WhatsApp conectado e pronto com Baileys!');
-    }
-  });
-
-  return waSock;
-}
-
-// Descomente esta linha se quiser que o WhatsApp conecte automaticamente ao iniciar a aplicação:
-initWhatsApp();
-
-exports.initWhatsApp = initWhatsApp;
 
 /**
  * Funcao para substituir os placeholders em um template.
+ * @param {string} template - O conteúdo do template em string.
+ * @param {object} data - Um objeto com os dados para substituicao.
+ * @returns {string} O template com os dados substituidos.
  */
+
 const replacePlaceholders = (template, data) => {
   let newTemplate = template;
   for (const key in data) {
     if (data[key] !== null && data[key] !== undefined) {
+      // Método robusto: corta o template onde encontra {{chave}} e insere o valor
       newTemplate = newTemplate.split(`{{${key}}}`).join(data[key]);
     }
   }
@@ -112,6 +64,7 @@ exports.sendEmailNotification = async (clinica, agendamento, isReagendamento = f
     const templatePath = path.join(__dirname, '..', 'templates', templateName);
     let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 
+    // Link gerado com o token recebido no objeto agendamento
     const linkPortal = agendamento.token_acesso ? `${URL_PORTAL_BASE}${agendamento.token_acesso}` : '#';
 
     const templateData = {
@@ -126,9 +79,11 @@ exports.sendEmailNotification = async (clinica, agendamento, isReagendamento = f
       ano_atual: new Date().getFullYear(),
       url_portal: `${APP_BASE_URL}/agendar/${clinica.slug}`,
       qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${APP_BASE_URL}/agendar/${clinica.slug}`)}`,
+
     };
 
     htmlTemplate = replacePlaceholders(htmlTemplate, templateData);
+    // DEBUG para você ver no terminal se o e-mail chegou aqui
     console.log(`[MED-LM] Tentando enviar para: ${agendamento.email}`);
 
     const mailOptions = {
@@ -147,74 +102,30 @@ exports.sendEmailNotification = async (clinica, agendamento, isReagendamento = f
   }
 };
 
-// =========================================================================
-// 2. WHATSAPP (MIGRADO PARA BAILEYS)
-// =========================================================================
-exports.sendWhatsAppNotification = async (clinica, agendamento, isReagendamento = false) => {
-  // Verifica se a conexão com o WhatsApp está estabelecida
-  if (!waSock || !waSock.user) {
-    console.log('[MED-LM WhatsApp] Cliente não está conectado/pronto. Ignorando notificação.');
-    return;
-  }
 
-  try {
-    const templateName = isReagendamento ? 'reagendamento_whatsapp.txt' : 'agendamento_whatsapp.txt';
-    const templatePath = path.join(__dirname, '..', 'templates', templateName);
-    let textTemplate = await fs.readFile(templatePath, 'utf-8');
-
-    const dataAgendamento = new Date(agendamento.data_agendamento);
-
-    const templateData = {
-      nome_paciente: agendamento.nome,
-      tipo_terapia: agendamento.tipo_terapia,
-      data_agendamento: dataAgendamento.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }),
-      hora_agendamento: dataAgendamento.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' }),
-      telefone_clinica: clinica.telefone_clinica,
-      nome_clinica: clinica.nome_clinica,
-      ano_atual: new Date().getFullYear(),
-    };
-
-    textTemplate = replacePlaceholders(textTemplate, templateData);
-
-    // Sanitiza e formata o telefone para o padrão do WhatsApp do Brasil (DDI 55)
-    let cleanPhone = String(agendamento.telefone).replace(/\D/g, '');
-
-    if (!cleanPhone) {
-      console.error('[MED-LM WhatsApp] Telefone do agendamento é inválido ou vazio:', agendamento.telefone);
-      return;
-    }
-
-    if (!cleanPhone.startsWith('55')) {
-      cleanPhone = `55${cleanPhone}`;
-    }
-
-    // Sufixo obrigatório para números no Baileys (@s.whatsapp.net)
-    const jid = `${cleanPhone}@s.whatsapp.net`;
-
-    // Envio da mensagem via Baileys
-    await waSock.sendMessage(jid, { text: textTemplate });
-
-    const action = isReagendamento ? 'reagendamento' : 'confirmação';
-    console.log(`[MED-LM WhatsApp] Notificação de ${action} enviada com sucesso para:`, cleanPhone);
-
-  } catch (error) {
-    console.error('[MED-LM WhatsApp] Erro ao enviar notificação:', error);
-  }
-};
 
 // =========================================================================
 // 3. BOAS VINDAS (MANTIDO)
 // =========================================================================
 exports.sendWelcomeEmail = async (clinica) => {
   console.log(`[MED-LM] 📩 Iniciando processo de e-mail para: ${clinica.email_master}`);
+  // ADICIONE ISSO PARA TESTAR:
   console.log("[DEBUG] Objeto recebido para e-mail:", JSON.stringify(clinica, null, 2));
   try {
+    const assunto = 'Bem-vindo ao MedLM - Sua Clínica está Ativa!';
     const templatePath = path.join(__dirname, '..', 'templates', 'boas_vindas.html');
     const htmlTemplateOriginal = await fs.readFile(templatePath, 'utf-8');
+    // Lógica para nome do plano amigável
     const planos = { 1: 'Trial (Até 3 membros)', 2: 'Premium (Até 10 membros)', 3: 'Enterprise (Ilimitado)' };
+    const nomePlano = planos[clinica.plano_id] || 'Plano Personalizado';
 
+    // URL do Portal e QR Code
     const urlPortal = `${APP_BASE_URL}/agendar/${clinica.slug}`;
+
+
+    // No seu notificationService.js, altere a linha da qrCodeUrl para esta:
     const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(urlPortal)}`;
+
 
     const templateData = {
       dono_nome: clinica.dono_nome,
@@ -224,7 +135,7 @@ exports.sendWelcomeEmail = async (clinica) => {
       plano_nome: planos[clinica.plano_id] || 'Plano Personalizado',
       url_portal: urlPortal,
       qr_code_url: qrCodeUrl,
-      data_expiracao: clinica.data_expiracao,
+      data_expiracao: clinica.data_expiracao, // <--- ADICIONE ESTA LINHA
       ano_atual: new Date().getFullYear()
     };
 
@@ -261,6 +172,8 @@ exports.sendReciboEmailNotification = async (clinica, dadosEmail) => {
       url_portal: dadosEmail.urlPortal,
       ano_atual: new Date().getFullYear()
     });
+
+
 
     await transporter.sendMail({
       from: `"MedLM - ${clinica.nome_clinica}" <${process.env.EMAIL_USER}>`,
@@ -311,6 +224,7 @@ exports.sendProntuarioEmailNotification = async (dadosProntuario) => {
 // =========================================================================
 // 6. E-MAIL PROGRAMA FUNDADORES (Landing Page)
 // =========================================================================
+
 exports.sendProgramaFundadoresEmail = async (dados) => {
   console.log(`[MED-LM] 📩 Enviando confirmação de interesse para: ${dados.email}`);
 
@@ -318,16 +232,20 @@ exports.sendProgramaFundadoresEmail = async (dados) => {
     const templatePath = path.join(__dirname, '..', 'templates', 'lading_pageTemplate.html');
     const htmlTemplate = await fs.readFile(templatePath, 'utf-8');
 
+    // 1. Criamos a URL com os parâmetros dinâmicos
     const baseUrl = `${APP_BASE_URL}/pages/Cadastro_Clinica.html`;
     const linkCadastro = `${baseUrl}?origem=fundador&email=${encodeURIComponent(dados.email)}`;
 
+    // 2. Adicionamos o link no objeto de dados para o template
     const templateData = {
       dono_nome: dados.responsavel,
       nome_clinica: dados.nome_clinica,
       ano_atual: new Date().getFullYear(),
-      link_cadastro: linkCadastro
+      link_cadastro: linkCadastro // <--- Nova variável para o template
     };
 
+    // 3. Supondo que sua função replacePlaceholders faça substituições chave-valor:
+    // Certifique-se de que ela suporte a substituição de '{{link_cadastro}}'
     await transporter.sendMail({
       from: `"Equipe MedLM" <${process.env.EMAIL_USER}>`,
       to: dados.email,
