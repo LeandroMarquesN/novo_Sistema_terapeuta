@@ -73,7 +73,7 @@ async function initWhatsApp() {
 }
 
 // Descomente esta linha se quiser que o WhatsApp conecte automaticamente ao iniciar a aplicação:
-// initWhatsApp();
+initWhatsApp();
 
 exports.initWhatsApp = initWhatsApp;
 
