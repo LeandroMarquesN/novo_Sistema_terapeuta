@@ -698,10 +698,10 @@ async function prepararImpressaoExtrato() {
     // 🌍 CONFIGURAÇÃO DE AMBIENTE (LOCAL VS PRODUÇÃO)
     // =============================================================================
     // 🛑 EM DESENVOLVIMENTO (LOCAL): Usando localhost com a porta do seu Node
-    const urlPortal = `http://localhost:3000/portal/${pacienteId}`;
+    // const urlPortal = `http://localhost:3000/portal/${pacienteId}`;
 
     // 🚀 EM PRODUÇÃO (SERVIDOR): Descomente a linha abaixo e comente a de cima quando subir o sistema!
-    // const urlPortal = `https://medlm.com.br/portal/${pacienteId}`;
+    const urlPortal = `https://medlm.com.br/portal/${pacienteId}`;
     // =============================================================================
 
     // Gera a URL do QR Code apontando para o ambiente configurado acima

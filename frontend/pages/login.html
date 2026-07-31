@@ -402,7 +402,7 @@
       btn.innerHTML = '<i class="fas fa-circle-notch fa-spin" style="margin-right:8px"></i> Autenticando...';
 
       try {
-        const response = await fetch('http://localhost:3000/api/auth/login', {
+        const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, senha })
