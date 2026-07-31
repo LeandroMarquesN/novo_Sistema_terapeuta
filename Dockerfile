@@ -1,5 +1,5 @@
 # Usa imagem oficial do Node
-FROM node:18-alpine
+FROM node:20-alpine
 
 # Cria o diretório de trabalho dentro do container
 WORKDIR /app/backend
