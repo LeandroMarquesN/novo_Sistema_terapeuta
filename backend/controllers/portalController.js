@@ -98,12 +98,20 @@ exports.getHorariosLivres = async (req, res) => {
 //
 // PREVISTO PARA O FUTURO:
 //   Quando `forma_pagamento === 'plataforma'` chegar do front-end, o fluxo vai
-//   criar o agendamento com status 'aguardando_pagamento', gerar um link na
-//   plataforma de pagamento segura (gateway) e devolver `redirectUrl` para o
-//   front-end redirecionar o paciente. Isso está deixado como placeholder
-//   (`gerarLinkPagamentoPlataforma`) para quando o gateway for integrado —
-//   por enquanto essa função nunca é chamada porque `PAGAMENTO_PLATAFORMA_ATIVO`
-//   está `false`.
+//   criar o agendamento com status 'aguardando_sinal' (já existe no ENUM do
+//   banco — reaproveitado aqui com o sentido de "aguardando confirmação do
+//   pagamento"), gerar um link na plataforma de pagamento segura (gateway) e
+//   devolver `redirectUrl` para o front-end redirecionar o paciente. Isso está
+//   deixado como placeholder (`gerarLinkPagamentoPlataforma`) para quando o
+//   gateway for integrado — por enquanto essa função nunca é chamada porque
+//   `PAGAMENTO_PLATAFORMA_ATIVO` está `false`.
+//
+// IMPORTANTE: o ENUM `status_agendamento` no init.sql só aceita
+//   'aguardando_sinal' | 'confirmado' | 'cancelado' | 'finalizado' | 'nao_compareceu'
+//   Não existe 'pendente' nem 'aguardando_pagamento' nesse ENUM — por isso o
+//   código abaixo usa exclusivamente esses 5 valores. Se um dia você quiser um
+//   status dedicado tipo 'pendente', precisa rodar um ALTER TABLE no banco
+//   antes de usar essa string aqui.
 // =============================================================================
 
 const PAGAMENTO_PLATAFORMA_ATIVO = false; // TODO: ligar quando o gateway estiver configurado
@@ -211,11 +219,12 @@ exports.criarAgendamento = async (req, res) => {
     if (!adminId) throw new Error("Clínica sem usuário administrador configurado.");
 
     // ── Define o status inicial do agendamento ──
-    // Sem sinal (fluxo atual): o agendamento já nasce como 'pendente', aguardando
-    // apenas a confirmação da clínica — nenhum pagamento é exigido do paciente.
-    // Com plataforma (fluxo futuro): nasce como 'aguardando_pagamento' até o
-    // gateway confirmar a cobrança via webhook.
-    const statusInicial = pagamentoViaPlataforma ? 'aguardando_pagamento' : 'pendente';
+    // Sem sinal (fluxo atual): o agendamento já nasce 'confirmado' — o horário é
+    // reservado direto, sem nenhuma cobrança pendente, já que não há sinal a
+    // aguardar.
+    // Com plataforma (fluxo futuro): nasce 'aguardando_sinal' até o gateway
+    // confirmar o pagamento via webhook (esse valor já existe no ENUM do banco).
+    const statusInicial = pagamentoViaPlataforma ? 'aguardando_sinal' : 'confirmado';
 
     // CRIAR O AGENDAMENTO
     const dataAgendamentoCompleta = `${data} ${horario}`;
