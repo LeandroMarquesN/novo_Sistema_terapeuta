@@ -962,16 +962,16 @@
                         </div>
 
                         <!-- Table -->
-                        <div class="data-table-wrap overflow-x-auto">
-                            <table class="w-full text-left border-collapse table-fixed">
+                        <div class="data-table-wrap overflow-x-auto w-full">
+                            <table class="w-full text-left border-collapse min-w-[750px]">
                                 <thead>
-                                    <tr>
-                                        <th class="px-6 py-4 w-[60px]">ID</th>
-                                        <th class="px-6 py-4 min-w-[200px]">Paciente</th>
-                                        <th class="px-6 py-4 w-[170px]">Data e Hora</th>
-                                        <th class="px-6 py-4 w-[140px]">Terapia</th>
-                                        <th class="px-6 py-4 w-[130px]">Status</th>
-                                        <th class="px-6 py-4 w-[140px] text-right">Ações</th>
+                                    <tr class="border-b border-slate-800 text-xs text-slate-400">
+                                        <th class="px-4 py-3 w-[50px]">ID</th>
+                                        <th class="px-4 py-3 min-w-[180px]">Paciente</th>
+                                        <th class="px-4 py-3 min-w-[150px]">Data e Hora</th>
+                                        <th class="px-4 py-3 min-w-[120px]">Terapia</th>
+                                        <th class="px-4 py-3 min-w-[120px]">Status</th>
+                                        <th class="px-4 py-3 w-[120px] text-right">Ações</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabela-pacientes-body">
@@ -981,16 +981,16 @@
                                                 <!-- ID -->
                                                 <td class="px-4 py-4 text-xs font-semibold whitespace-nowrap" style="color:rgba(52,211,153,0.4)">#<%= agendamento.id %></td>
                                                 
-                                                <!-- Paciente (Com largura e quebra controlada para não invadir o lado) -->
-                                                <td class="px-4 py-4 min-w-[160px]">
+                                                <!-- Paciente -->
+                                                <td class="px-4 py-4">
                                                     <div class="patient-name font-bold text-white text-xs truncate max-w-[180px]" title="<%= agendamento.nome %>"><%= agendamento.nome %></div>
                                                     <div class="patient-phone mt-0.5 flex items-center gap-1 text-[11px] text-slate-400 whitespace-nowrap">
                                                         <i class="fab fa-whatsapp text-teal-400"></i> <%= agendamento.telefone %>
                                                     </div>
                                                 </td>
                                 
-                                                <!-- Data e Hora (Em linhas separadas mas seguras, sem espremer) -->
-                                                <td class="px-4 py-4 min-w-[130px] whitespace-nowrap">
+                                                <!-- Data e Hora -->
+                                                <td class="px-4 py-4 whitespace-nowrap">
                                                     <div class="date-val text-xs text-slate-200"><%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %></div>
                                                     <div class="time-badge mt-1 inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/40 px-2 py-0.5 rounded-md">
                                                         <i class="far fa-clock text-[9px]"></i>
