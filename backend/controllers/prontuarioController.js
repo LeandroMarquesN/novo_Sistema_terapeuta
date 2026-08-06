@@ -89,35 +89,43 @@ exports.obterDetalheProntuario = async (req, res) => {
   }
 };
 
-// 4. ENVIO DE EMAIL (BLINDADO)
+// 4. ENVIO DE EMAIL (CORRIGIDO - COM TOKEN)
 exports.enviarProntuarioEmail = async (req, res) => {
   const { prontuarioId } = req.body;
   const clinicaId = req.usuario.clinica_id;
 
   try {
     const [rows] = await db.query(`
-          SELECT p.*, u.nome as nome_profissional, pac.nome as nome_paciente, pac.email as email_paciente
-          FROM prontuarios p
-          JOIN usuarios u ON p.usuario_id = u.id
-          JOIN pacientes pac ON p.paciente_id = pac.id
-          WHERE p.id = ? AND p.clinica_id = ?`, [prontuarioId, clinicaId]);
+      SELECT 
+        p.*, 
+        u.nome as nome_profissional, 
+        pac.nome as nome_paciente, 
+        pac.email as email_paciente,
+        pac.token_acesso          -- ← ADICIONADO
+      FROM prontuarios p
+      JOIN usuarios u ON p.usuario_id = u.id
+      JOIN pacientes pac ON p.paciente_id = pac.id
+      WHERE p.id = ? AND p.clinica_id = ?
+    `, [prontuarioId, clinicaId]);
 
-    if (rows.length === 0) return res.status(404).json({ erro: "Prontuário não encontrado." });
+    if (rows.length === 0) {
+      return res.status(404).json({ erro: "Prontuário não encontrado." });
+    }
 
     const dados = rows[0];
 
-    // --- REGISTRO DE AUDITORIA ---
+    // Auditoria
     await auditService.registrarLog(req.usuario.id, prontuarioId, 'ENVIOU_EMAIL');
 
     const dadosEnvio = {
-      // ... (seu objeto dadosEnvio permanece igual)
       nome_paciente: dados.nome_paciente,
       email_paciente: dados.email_paciente,
       nome_profissional: dados.nome_profissional,
       data_atendimento: new Date(dados.data_atendimento).toLocaleDateString('pt-BR'),
       codigo_cid: dados.diagnostico_cid ? dados.diagnostico_cid : 'Não informado!',
       texto_evolucao: dados.texto_evolucao,
-      qr_code_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://medlm.com.br/validar/" + dados.id
+      qr_code_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://medlm.com.br/validar/" + dados.id,
+      token_acesso: dados.token_acesso   // ← ADICIONADO (obrigatório)
     };
 
     await notificationService.sendProntuarioEmailNotification(dadosEnvio);
