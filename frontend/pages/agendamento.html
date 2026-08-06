@@ -471,15 +471,27 @@
         <button id="darkModeToggle" class="icon-btn">
             <i class="fas fa-moon"></i>
         </button>
-    </di
+    </di>
 
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm mb-4">
-    <div class="container">
-      <a class="navbar-brand fw-bold text-primary" href="www.medlm.com.br/agendar/slug">
-        <h2 class="fas fa-notes-medical me-2"></h2>Aqui você pode agendar os seus pacientes!
-      </a>
+  </div> 
+
+  <nav class="w-full bg-[#0b131a] border border-slate-800/80 p-4 rounded-2xl shadow-lg mb-6 flex items-center justify-between">
+    <div class="container mx-auto px-2 flex items-center justify-between">
+        
+        <!-- Link Dinâmico usando o slug da clínica -->
+        <a class="flex items-center gap-2 text-white font-bold text-xs md:text-sm hover:text-teal-400 transition-colors" href="/agendar/<%= clinica.slug %>" target="_blank" title="Abrir portal de agendamento da clínica">
+            <i class="fas fa-notes-medical text-teal-400 text-base me-1"></i>
+            <span>Aqui você pode agendar os seus pacientes!</span>
+        </a>
+
+        <!-- Badge indicativo opcional -->
+        <span class="text-[10px] uppercase font-bold px-2.5 py-1 rounded-lg bg-teal-950/60 text-teal-300 border border-teal-800/50 hidden sm:inline-block">
+            Portal da Clínica
+        </span>
+
     </div>
-  </nav>
+</nav>
+  
 
   <div class="agendamento-container mt-5">
 
