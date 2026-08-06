@@ -974,42 +974,62 @@
                                         <th class="px-6 py-4 w-[140px] text-right">Ações</th>
                                     </tr>
                                 </thead>
+                                
                                 <tbody id="tabela-pacientes-body">
-                                    <!-- EJS template preserved – example static row below for preview: -->
                                     <% if (locals.agendamentos && agendamentos.length > 0) { %>
                                         <% agendamentos.forEach(agendamento => { %>
-                                            <tr>
-                                                <td class="px-6 py-4 text-xs font-semibold" style="color:rgba(52,211,153,0.4)">#<%= agendamento.id %></td>
-                                                <td class="px-6 py-4">
-                                                    <div class="patient-name"><%= agendamento.nome %></div>
-                                                    <div class="patient-phone mt-0.5 flex items-center gap-1">
-                                                        <i class="fab fa-whatsapp"></i> <%= agendamento.telefone %>
+                                            <!-- Linha da tabela adaptável: vira bloco no mobile e linha tradicional em md+ -->
+                                            <tr class="border-b border-slate-800/60 flex flex-col md:table-row p-4 md:p-0 bg-[#121c24] md:bg-transparent rounded-2xl md:rounded-none mb-4 md:mb-0 shadow-sm md:shadow-none">
+                                                
+                                                <!-- ID -->
+                                                <td class="px-2 md:px-6 py-2 md:py-4 text-xs font-semibold flex justify-between md:table-cell" style="color:rgba(52,211,153,0.4)">
+                                                    <span class="md:hidden text-slate-500 font-bold">ID:</span>
+                                                    <span>#<%= agendamento.id %></span>
+                                                </td>
+                                
+                                                <!-- Paciente e Telefone -->
+                                                <td class="px-2 md:px-6 py-2 md:py-4 flex flex-col md:table-cell">
+                                                    <span class="md:hidden text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Paciente</span>
+                                                    <div class="patient-name font-bold text-white text-sm md:text-xs"><%= agendamento.nome %></div>
+                                                    <div class="patient-phone mt-0.5 flex items-center gap-1 text-xs text-slate-400">
+                                                        <i class="fab fa-whatsapp text-teal-400"></i> <%= agendamento.telefone %>
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4">
-                                                    <div class="date-val"><%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %></div>
-                                                    <div class="time-badge mt-1.5">
-                                                        <i class="far fa-clock text-xs"></i>
+                                
+                                                <!-- Data e Hora (Separadas de forma segura para não sobrepor) -->
+                                                <td class="px-2 md:px-6 py-2 md:py-4 flex flex-col md:table-cell">
+                                                    <span class="md:hidden text-[10px] text-slate-500 uppercase font-bold tracking-wider mb-0.5">Data e Hora</span>
+                                                    <div class="date-val text-xs text-slate-200"><%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %></div>
+                                                    <div class="time-badge mt-1 inline-flex items-center gap-1 text-xs text-teal-300 bg-teal-950/40 px-2 py-0.5 rounded-md w-fit">
+                                                        <i class="far fa-clock text-[10px]"></i>
                                                         <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %> hs
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4">
-                                                    <span class="therapy-badge"><%= agendamento.tipo_terapia %></span>
+                                
+                                                <!-- Terapia -->
+                                                <td class="px-2 md:px-6 py-2 md:py-4 flex items-center justify-between md:table-cell">
+                                                    <span class="md:hidden text-[10px] text-slate-500 uppercase font-bold tracking-wider">Terapia</span>
+                                                    <span class="therapy-badge text-xs"><%= agendamento.tipo_terapia %></span>
                                                 </td>
-                                                <td class="px-6 py-4">
+                                
+                                                <!-- Status -->
+                                                <td class="px-2 md:px-6 py-2 md:py-4 flex items-center justify-between md:table-cell">
+                                                    <span class="md:hidden text-[10px] text-slate-500 uppercase font-bold tracking-wider">Status</span>
                                                     <%
                                                         let badgeClass = 'status-default';
                                                         if(agendamento.status_agendamento === 'confirmado') badgeClass = 'status-confirmado';
                                                         else if(agendamento.status_agendamento === 'pendente') badgeClass = 'status-pendente';
                                                         else if(agendamento.status_agendamento === 'cancelado') badgeClass = 'status-cancelado';
                                                     %>
-                                                    <span class="status-badge <%= badgeClass %>">
-                                                        <span class="status-dot"></span>
+                                                    <span class="status-badge <%= badgeClass %> inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium">
+                                                        <span class="status-dot w-1.5 h-1.5 rounded-full bg-current"></span>
                                                         <%= agendamento.status_agendamento %>
                                                     </span>
                                                 </td>
-                                                <td class="px-6 py-4 text-right">
-                                                    <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="btn-prontuario">
+                                
+                                                <!-- Ações -->
+                                                <td class="px-2 md:px-6 py-3 md:py-4 text-left md:text-right flex justify-end md:table-cell border-t border-slate-800/40 md:border-t-0 mt-2 md:mt-0 pt-3 md:pt-4">
+                                                    <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="btn-prontuario text-xs bg-teal-950/60 hover:bg-teal-900/80 text-teal-300 border border-teal-800/50 px-3 py-1.5 rounded-xl transition-all font-bold">
                                                         Ver Prontuário
                                                     </button>
                                                 </td>
@@ -1019,11 +1039,11 @@
                                         <tr>
                                             <td colspan="6" class="px-6 py-12 text-center">
                                                 <div class="flex flex-col items-center justify-center">
-                                                    <div class="empty-icon-wrap">
+                                                    <div class="empty-icon-wrap mb-2 text-slate-500">
                                                         <i class="fas fa-calendar-times text-lg"></i>
                                                     </div>
-                                                    <p class="font-semibold text-sm" style="color:#e2e8f0">Nenhum atendimento cadastrado</p>
-                                                    <p class="text-xs mt-0.5" style="color:rgba(148,163,184,0.4)">Sua agenda está livre para este período.</p>
+                                                    <p class="font-semibold text-sm text-slate-200">Nenhum atendimento cadastrado</p>
+                                                    <p class="text-xs mt-0.5 text-slate-500">Sua agenda está livre para este período.</p>
                                                 </div>
                                             </td>
                                         </tr>
