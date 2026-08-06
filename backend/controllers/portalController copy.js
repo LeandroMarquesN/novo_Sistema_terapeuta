@@ -87,40 +87,13 @@ exports.getHorariosLivres = async (req, res) => {
     connection.release();
   }
 };
-
 // =============================================================================
 // 3. CRIAR AGENDAMENTO (A Mágica do Portal)
 // =============================================================================
-//
-// REGRA DE NEGÓCIO ATUAL (temporária):
-//   O sinal/pagamento antecipado está DESATIVADO. O paciente consegue concluir
-//   o agendamento pelo portal sem precisar pagar nada no momento da marcação.
-//
-// PREVISTO PARA O FUTURO:
-//   Quando `forma_pagamento === 'plataforma'` chegar do front-end, o fluxo vai
-//   criar o agendamento com status 'aguardando_pagamento', gerar um link na
-//   plataforma de pagamento segura (gateway) e devolver `redirectUrl` para o
-//   front-end redirecionar o paciente. Isso está deixado como placeholder
-//   (`gerarLinkPagamentoPlataforma`) para quando o gateway for integrado —
-//   por enquanto essa função nunca é chamada porque `PAGAMENTO_PLATAFORMA_ATIVO`
-//   está `false`.
-// =============================================================================
-
-const PAGAMENTO_PLATAFORMA_ATIVO = false; // TODO: ligar quando o gateway estiver configurado
-
-// Placeholder para a futura integração com o gateway de pagamento.
-// Quando implementado, deve criar a cobrança e retornar a URL de checkout.
-async function gerarLinkPagamentoPlataforma({ agendamentoId, valor, nome, email }) {
-  // TODO: integrar com o gateway (ex: Mercado Pago, Stripe, PagSeguro...)
-  // Deve retornar algo como: { url: 'https://checkout.gateway.com/xyz' }
-  throw new Error("Integração com a plataforma de pagamento ainda não configurada.");
-}
-
 exports.criarAgendamento = async (req, res) => {
   const {
     clinica_id, nome, email, telefone, cpf, data, horario,
-    genero, data_nascimento, tipo_terapia, motivo_consulta,
-    forma_pagamento // 'plataforma' (futuro) — qualquer outro valor/ausente = sem sinal
+    genero, data_nascimento, tipo_terapia, motivo_consulta
   } = req.body;
 
   const connection = await db.getConnection();
@@ -129,10 +102,6 @@ exports.criarAgendamento = async (req, res) => {
   const novoToken = crypto.randomBytes(32).toString('hex');
   const novaExpiracao = new Date();
   novaExpiracao.setDate(novaExpiracao.getDate() + 30); // Token válido por 30 dias
-
-  // Enquanto o gateway não estiver ligado, ignoramos o que vier em forma_pagamento
-  // e sempre seguimos pelo fluxo sem sinal.
-  const pagamentoViaPlataforma = PAGAMENTO_PLATAFORMA_ATIVO && forma_pagamento === 'plataforma';
 
   try {
     await connection.query("SET time_zone = '-03:00'");
@@ -210,56 +179,23 @@ exports.criarAgendamento = async (req, res) => {
     const adminId = usuarios.length > 0 ? usuarios[0].id : null;
     if (!adminId) throw new Error("Clínica sem usuário administrador configurado.");
 
-    // ── Define o status inicial do agendamento ──
-    // Sem sinal (fluxo atual): o agendamento já nasce como 'pendente', aguardando
-    // apenas a confirmação da clínica — nenhum pagamento é exigido do paciente.
-    // Com plataforma (fluxo futuro): nasce como 'aguardando_pagamento' até o
-    // gateway confirmar a cobrança via webhook.
-    const statusInicial = pagamentoViaPlataforma ? 'aguardando_pagamento' : 'pendente';
-
     // CRIAR O AGENDAMENTO
     const dataAgendamentoCompleta = `${data} ${horario}`;
     const [resAgendamento] = await connection.execute(
       `INSERT INTO agendamentos (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, motivo_consulta, nome, email, telefone, cpf, tipo_terapia) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [clinica_id, pacienteId, adminId, dataAgendamentoCompleta, statusInicial, motivo_consulta, nome, email, telefone, cpf, tipo_terapia]
+       VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?, ?)`,
+      [clinica_id, pacienteId, adminId, dataAgendamentoCompleta, motivo_consulta, nome, email, telefone, cpf, tipo_terapia]
     );
-    const agendamentoId = resAgendamento.insertId;
 
     // REGISTRO NO FINANCEIRO
-    // Só criamos o lançamento financeiro do sinal se de fato houver um valor de
-    // sinal configurado. Sem sinal (valor 0 e fluxo sem plataforma), não faz
-    // sentido abrir uma cobrança em aberto.
-    if (valorSinalDinamico > 0) {
-      const descricaoFinanceira = pagamentoViaPlataforma
-        ? `Sinal (plataforma) - ${nome}`
-        : `Sinal - ${nome}`;
+    const descricaoFinanceira = valorSinalDinamico > 0 ? `Sinal - ${nome}` : `Consulta Agendada - ${nome}`;
 
-      await connection.execute(
-        `INSERT INTO financeiro 
-         (clinica_id, paciente_id, agendamento_id, tipo, valor, data_vencimento, status_pagamento, descricao) 
-         VALUES (?, ?, ?, "receita", ?, ?, "aberto", ?)`,
-        [clinica_id, pacienteId, agendamentoId, valorSinalDinamico, data, descricaoFinanceira]
-      );
-    }
-
-    // ── (Futuro) Geração do link de pagamento na plataforma ──
-    let redirectUrl = null;
-    if (pagamentoViaPlataforma) {
-      try {
-        const linkPagamento = await gerarLinkPagamentoPlataforma({
-          agendamentoId,
-          valor: valorSinalDinamico,
-          nome,
-          email
-        });
-        redirectUrl = linkPagamento.url;
-      } catch (gatewayError) {
-        // Se o gateway falhar, não travamos o agendamento: ele já foi criado
-        // como 'aguardando_pagamento' e pode ser tratado manualmente pela clínica.
-        console.error("Erro ao gerar link de pagamento na plataforma:", gatewayError);
-      }
-    }
+    await connection.execute(
+      `INSERT INTO financeiro 
+       (clinica_id, paciente_id, agendamento_id, tipo, valor, data_vencimento, status_pagamento, descricao) 
+       VALUES (?, ?, ?, "receita", ?, ?, "aberto", ?)`,
+      [clinica_id, pacienteId, resAgendamento.insertId, valorSinalDinamico, data, descricaoFinanceira]
+    );
 
     await connection.commit();
 
@@ -278,24 +214,7 @@ exports.criarAgendamento = async (req, res) => {
     notificationService.sendEmailNotification(clinicaResult[0], dadosParaEmail)
       .catch(err => console.error("Erro ao enviar email:", err));
 
-    // ── Resposta ──
-    // requiresPayment indica ao front-end se ele deve redirecionar o paciente
-    // para a plataforma de pagamento. Hoje sempre volta `false` porque o
-    // gateway está desligado (PAGAMENTO_PLATAFORMA_ATIVO = false).
-    if (pagamentoViaPlataforma && redirectUrl) {
-      return res.json({
-        success: true,
-        requiresPayment: true,
-        redirectUrl,
-        message: "Agendamento criado. Redirecionando para o pagamento."
-      });
-    }
-
-    return res.json({
-      success: true,
-      requiresPayment: false,
-      message: "Agendamento realizado com sucesso!"
-    });
+    return res.json({ success: true, message: "Agendamento realizado!" });
 
   } catch (error) {
     if (connection) await connection.rollback();
