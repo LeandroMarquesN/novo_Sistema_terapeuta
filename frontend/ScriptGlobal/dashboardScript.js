@@ -640,73 +640,61 @@ async function carregarEstatisticasDashboard() {
 // painel de agendamentos
 async function carregarPainelAgendamentosCard() {
     try {
-        // Busca os dados na mesma rota
         const response = await fetch('/dashboard?filtro=todos', {
             headers: { 'Accept': 'application/json' }
         });
         const dados = await response.json();
 
-        // Mapeia os containers de cada coluna
         const colunas = {
             'confirmado': document.getElementById('coluna-confirmados'),
             'aguardando_sinal': document.getElementById('coluna-aguardando'),
             'finalizado': document.getElementById('coluna-finalizados'),
             'cancelado': document.getElementById('coluna-outros'),
-            'nao_compareceu': document.getElementById('coluna-outros') // Agrupa 'não compareceu' com 'outros'
+            'nao_compareceu': document.getElementById('coluna-outros')
         };
 
-        // Limpa todas as colunas antes de renderizar
         Object.values(colunas).forEach(col => {
             if (col) col.innerHTML = '';
         });
 
-        // Validação de dados
         if (!dados.agendamentos || dados.agendamentos.length === 0) {
-            // Se não houver dados, mostra uma mensagem centralizada na primeira coluna
             const primeiraColuna = document.getElementById('coluna-confirmados');
-            if (primeiraColuna) primeiraColuna.innerHTML = '<p class="text-xs text-slate-400 font-medium p-2">Nenhum agendamento encontrado.</p>';
+            if (primeiraColuna) primeiraColuna.innerHTML = '<p class="text-xs text-slate-500 font-medium p-2">Nenhum agendamento encontrado.</p>';
             return;
         }
 
-        // Loop para distribuir os agendamentos nas colunas corretas
         dados.agendamentos.forEach(item => {
-            // Define o container destino baseado no status
-            const targetColuna = colunas[item.status_agendamento] || colunas['cancelado']; // Se o status não estiver mapeado, joga para 'outros'
+            const targetColuna = colunas[item.status_agendamento] || colunas['cancelado'];
+            if (!targetColuna) return;
 
-            if (!targetColuna) return; // Se não encontrar a coluna, pula
-
-            // Cores dinâmicas (mantendo o estilo elegante)
-            let badgeColor = 'bg-slate-100 text-slate-600';
-            let cardBg = 'bg-white dark:bg-slate-800';
-
+            // Cores e badges baseados no padrão escuro da sua interface (tons de verde água e cinza escuro)
+            let badgeStyle = 'bg-slate-800 text-slate-300 border border-slate-700';
             if (item.status_agendamento === 'confirmado') {
-                badgeColor = 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400';
-                cardBg = 'bg-emerald-50/70 dark:bg-emerald-950/20';
+                badgeStyle = 'bg-teal-950/60 text-teal-300 border border-teal-800/50';
             } else if (item.status_agendamento === 'aguardando_sinal') {
-                badgeColor = 'bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400';
-                cardBg = 'bg-amber-50/70 dark:bg-amber-950/20';
+                badgeStyle = 'bg-amber-950/60 text-amber-300 border border-amber-800/50';
             } else if (item.status_agendamento === 'finalizado') {
-                badgeColor = 'bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400';
+                badgeStyle = 'bg-cyan-950/60 text-cyan-300 border border-cyan-800/50';
             }
 
             const dataFormatada = item.data_agendamento ? new Date(item.data_agendamento).toLocaleString('pt-BR', {
                 day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
             }) : 'Hora não definida';
 
-            // Template do Card (mesmo estilo compacto e informativo)
+            // Template do card com fundo escuro idêntico ao resto da página
             const cardHTML = `
-                <div class="${cardBg} border border-slate-100 dark:border-slate-700/50 p-4 rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col justify-between gap-2">
+                <div class="bg-[#121c24] border border-slate-800/90 p-4 rounded-2xl shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between gap-3">
                     <div>
-                        <div class="flex justify-between items-start mb-1.5">
-                            <h4 class="font-bold text-sm text-slate-900 dark:text-slate-50 truncate max-w-[100px]" title="${item.nome || ''}">${item.nome || 'Paciente'}</h4>
-                            <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeColor}">${item.status_agendamento.replace('_', ' ')}</span>
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-bold text-sm text-white truncate max-w-[110px]" title="${item.nome || ''}">${item.nome || 'Paciente'}</h4>
+                            <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeStyle}">${item.status_agendamento.replace('_', ' ')}</span>
                         </div>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 mb-1">Terapia: <span class="font-medium text-slate-800 dark:text-slate-100">${item.tipo_terapia || 'Geral'}</span></p>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Horário: <span class="font-medium text-slate-700 dark:text-slate-200">${dataFormatada}</span></p>
+                        <p class="text-xs text-slate-400 mb-1">Terapia: <span class="font-medium text-slate-200">${item.tipo_terapia || 'Geral'}</span></p>
+                        <p class="text-xs text-slate-500">Horário: <span class="font-medium text-slate-300">${dataFormatada}</span></p>
                     </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700/20 text-xs">
+                    <div class="flex justify-between items-center pt-2.5 border-t border-slate-800/60 text-xs">
                         <span class="text-slate-400 font-medium">${item.telefone || 'Sem tel'}</span>
-                        <button class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Detalhes</button>
+                        <button class="text-teal-400 hover:text-teal-300 font-bold transition-colors">Detalhes</button>
                     </div>
                 </div>
             `;
@@ -714,7 +702,7 @@ async function carregarPainelAgendamentosCard() {
         });
 
     } catch (error) {
-        console.error('Erro ao renderizar painel de agendamentos por coluna:', error);
+        console.error('Erro ao renderizar painel de agendamentos escuro:', error);
     }
 }
 
