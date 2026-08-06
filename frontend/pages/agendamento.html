@@ -462,7 +462,16 @@
         filter: invert(1) grayscale(1) brightness(2);
     }
      /* navegador menu  */
-  
+    /* Torna os risquinhos do menu hamburguer do Bootstrap brancos */
+.navbar-toggler-icon {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Faz o ícone sumir completamente quando o menu for aberto/clicado */
+.navbar-toggler:not(.collapsed) .navbar-toggler-icon {
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
        
   </style>
 </head>
