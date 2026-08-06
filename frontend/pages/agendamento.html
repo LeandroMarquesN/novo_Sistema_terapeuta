@@ -462,118 +462,40 @@
         filter: invert(1) grayscale(1) brightness(2);
     }
      /* navegador menu  */
-     /* ==========================================
-   SIDEBAR EXPANSÍVEL (MEDLM)
-   ================================---------- */
-
-/* Estilo base da Sidebar fixa */
-aside {
-    background-color: #0b131a;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
-    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Links de Navegação da Sidebar */
-aside .nav-link {
-    color: #94a3b8;
-    border-radius: 0.85rem;
-    transition: all 0.2s ease-in-out;
-    text-decoration: none;
-}
-
-aside .nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.04);
-    color: #34d399; /* Verde água do sistema */
-}
-
-/* Link Ativo */
-aside .nav-link.nav-link-active {
-    background: rgba(52, 211, 153, 0.1);
-    color: #34d399;
-    border: 1px solid rgba(52, 211, 153, 0.2);
-}
-
-/* Ícones centralizados quando fechado */
-aside .nav-link i,
-aside button i {
-    font-size: 1.1rem;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-/* Botão de Tema na base */
-aside #theme-toggle-btn {
-    color: #94a3b8;
-    border-radius: 0.85rem;
-}
-
-aside #theme-toggle-btn:hover {
-    background-color: rgba(255, 255, 255, 0.04);
-    color: #ffffff;
-}
-
-/* ==========================================
-   IMPORTANTE: Ajuste do Conteúdo Principal
-   ================================---------- */
-/* Como a sidebar é fixed com w-20, o corpo/container 
-   principal da sua página precisa ter uma margem 
-   à esquerda para o menu não ficar em cima do conteúdo */
-@media (min-width: 768px) {
-    main, .main-content, .dashboard-container {
-        margin-left: 5rem; /* Equivalente a w-20 (80px) */
-        padding-left: 1.5rem;
-        padding-right: 1.5rem;
-    }
-}
+  
        
   </style>
 </head>
 <body class="menosClaro">
   <!-- menu navegadro sistema -->
-     <!-- ─── Sidebar ─── -->
-     <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
-      <div class="flex flex-col">
-          <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
-              <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">
-                  M
-              </div>
-              <span class="logo-text-brand ml-4 font-bold text-xl opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap tracking-tight">
-                  Med<span class="logo-text-accent font-extrabold">LM</span>
-              </span>
-          </div>
+  <nav class="navbar navbar-expand-lg bg-transparente fade-in-element">
+    <div class="container-fluid">
+          <a class="navbar-brand" href="/dashboard">
+            <span class="logo-img">Sistema Terapeuta</span>
+          </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-          <nav class="px-3 pt-6 space-y-1.5">
-              <a href="/dashboard" class="nav-link nav-link-active flex items-center p-3.5">
-                  <i class="fas fa-chart-line w-6 text-lg"></i>
-                  <span class="ml-4 font-semibold opacity-0 group-hover:opacity-100 whitespace-nowrap">Dashboard</span>
-              </a>
-              <a href="/pacientes" class="nav-link flex items-center p-3.5">
-                  <i class="fas fa-user-injured w-6"></i>
-                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Pacientes</span>
-              </a>
-              <a href="/financeiro" class="nav-link flex items-center p-3.5">
-                  <i class="fas fa-hand-holding-usd w-6"></i>
-                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Financeiro</span>
-              </a>
-             
-              <a href="/dashboard/configuracoes" class="nav-link flex items-center p-3.5">
-                  <i class="fas fa-cogs w-6"></i>
-                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Configurações</span>
-              </a>
-              <a href="#" onclick="handleLogout()" class="nav-link flex items-center p-3.5" style="color:rgba(248,113,113,0.6)!important">
-                  <i class="fas fa-sign-out-alt w-6"></i>
-                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Sair</span>
-              </a>
-          </nav>
-      </div>
-
-      <div class="p-4" style="border-top:1px solid var(--border)">
-          <button id="theme-toggle-btn" class="flex items-center w-full p-3 transition">
-              <i class="fas fa-moon w-6"></i>
-              <span class="ml-4 opacity-0 group-hover:opacity-100 font-medium text-sm">Tema</span>
-          </button>
-      </div>
-  </aside>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="ms-auto d-flex align-items-center">
+                    <div id="data-hora-container">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span id="data-hora"></span>
+                    </div>
+                    <a href="/dashboard" class="btn btn-outline-primary me-2">dashboard</a>
+                   
+                     <a href="javascript:void(0)" onclick="handleLogout(event)" class="btn btn-outline-danger">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                    <button id="theme-toggle-btn" class="btn btn-outline-dark ms-2">
+                        <i class="fas fa-moon"></i>
+                    </button>
+            </div>
+        </div>
+    </div>
+  </nav>
+ 
 
   <!-- fim do menu -->
 
