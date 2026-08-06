@@ -14,6 +14,12 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/animacaoBack.css">
   <link rel="stylesheet" href="/css/transicaoTela.css">
+  <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
+
+   <script>
+   const APP_BASE_URL = process.env.APP_BASE_URL_ENV || "http://localhost:3000";
+   url_portal: `${APP_BASE_URL}/agendar/${clinica.slug}`,
+  </Script>
 
   <style>
     /* ==========================================================================
@@ -456,107 +462,69 @@
         filter: invert(1) grayscale(1) brightness(2);
     }
      /* navegador menu  */
-      /* ─── Scrollbar ─── */
-      ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+     /* ==========================================
+   SIDEBAR EXPANSÍVEL (MEDLM)
+   ================================---------- */
 
-        /* ─── Sidebar ─── */
-        aside {
-            background: rgba(2,12,18,0.92) !important;
-            border-right: 1px solid var(--border) !important;
-            backdrop-filter: blur(20px);
-        }
+/* Estilo base da Sidebar fixa */
+aside {
+    background-color: #0b131a;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-        /* Logo block */
-        .logo-block {
-            border-bottom: 1px solid var(--border);
-        }
-        .logo-icon {
-            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
-            box-shadow: 0 0 20px rgba(8,145,178,0.5), 0 0 40px rgba(5,150,105,0.2);
-        }
-        .logo-text-brand { color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; }
-        .logo-text-accent { color: var(--emerald); text-shadow: 0 0 12px rgba(52,211,153,0.6); }
+/* Links de Navegação da Sidebar */
+aside .nav-link {
+    color: #94a3b8;
+    border-radius: 0.85rem;
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+}
 
-        /* Nav links */
-        .nav-link {
-            color: rgba(148,163,184,0.7);
-            border-radius: 14px;
-            transition: all 0.25s ease;
-            border: 1px solid transparent;
-            position: relative;
-            overflow: hidden;
-        }
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            background: linear-gradient(90deg, rgba(52,211,153,0.08), transparent);
-            transition: opacity 0.3s;
-        }
-        .nav-link:hover { color: var(--emerald); border-color: var(--border); }
-        .nav-link:hover::before { opacity: 1; }
-        .nav-link:hover i { text-shadow: 0 0 10px rgba(52,211,153,0.7); }
+aside .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #34d399; /* Verde água do sistema */
+}
 
-        .nav-link-active {
-            background: linear-gradient(135deg, rgba(8,145,178,0.25) 0%, rgba(5,150,105,0.20) 100%);
-            border: 1px solid rgba(52,211,153,0.35);
-            color: var(--emerald) !important;
-            box-shadow: 0 0 20px rgba(52,211,153,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
-        }
-        .nav-link-active i { text-shadow: 0 0 12px rgba(52,211,153,0.8); }
+/* Link Ativo */
+aside .nav-link.nav-link-active {
+    background: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.2);
+}
 
-        /* Theme toggle */
-        #theme-toggle-btn {
-            color: rgba(148,163,184,0.6);
-            border-radius: 14px;
-            border: 1px solid transparent;
-            transition: all 0.25s;
-        }
-        #theme-toggle-btn:hover { color: var(--cyan); border-color: var(--border-cyan); }
+/* Ícones centralizados quando fechado */
+aside .nav-link i,
+aside button i {
+    font-size: 1.1rem;
+    text-align: center;
+    flex-shrink: 0;
+}
 
-        /* ─── Header ─── */
-        header {
-            border-bottom: 1px solid var(--border) !important;
-        }
+/* Botão de Tema na base */
+aside #theme-toggle-btn {
+    color: #94a3b8;
+    border-radius: 0.85rem;
+}
 
-        #boasVindas { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
-        #boasVindas .separator { color: rgba(52,211,153,0.3); }
+aside #theme-toggle-btn:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+    color: #ffffff;
+}
 
-        #clinicaNome {
-            background: linear-gradient(90deg, var(--cyan), var(--emerald));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            filter: drop-shadow(0 0 8px rgba(34,211,238,0.3));
-        }
-
-        /* Date pill */
-        #data-hora-container-tailwind {
-            background: rgba(255,255,255,0.04) !important;
-            border: 1px solid var(--border) !important;
-            color: #94a3b8 !important;
-            backdrop-filter: blur(10px);
-            border-radius: 99px;
-        }
-
-        /* New appointment button */
-        .btn-new-appt {
-            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
-            border: none;
-            box-shadow: 0 0 20px rgba(8,145,178,0.4), 0 0 40px rgba(5,150,105,0.15);
-            color: #fff;
-            font-family: 'Space Grotesk', sans-serif;
-            letter-spacing: 0.02em;
-            transition: all 0.3s;
-        }
-        .btn-new-appt:hover {
-            box-shadow: 0 0 30px rgba(8,145,178,0.6), 0 0 60px rgba(5,150,105,0.25);
-            transform: translateY(-1px);
-        }
-
+/* ==========================================
+   IMPORTANTE: Ajuste do Conteúdo Principal
+   ================================---------- */
+/* Como a sidebar é fixed com w-20, o corpo/container 
+   principal da sua página precisa ter uma margem 
+   à esquerda para o menu não ficar em cima do conteúdo */
+@media (min-width: 768px) {
+    main, .main-content, .dashboard-container {
+        margin-left: 5rem; /* Equivalente a w-20 (80px) */
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+}
        
   </style>
 </head>
