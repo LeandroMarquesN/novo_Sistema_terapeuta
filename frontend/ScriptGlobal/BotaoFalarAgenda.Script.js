@@ -1,25 +1,29 @@
 document.getElementById('btnFalarAgenda').addEventListener('click', async () => {
     const btn = document.getElementById('btnFalarAgenda');
 
-    // Evita cliques múltiplos
-    if (btn.classList.contains('falando') || btn.disabled) return;
+    // Evita cliques enquanto está falando
+    if (btn.classList.contains('falando') || btn.disabled) {
+        // Se já estiver falando, cancela
+        window.speechSynthesis.cancel();
+        resetarBotao(btn);
+        return;
+    }
 
     try {
         console.log("[VoiceSystem] Iniciando busca pela agenda do dia...");
         btn.disabled = true;
         btn.innerText = "Carregando...";
 
-        // 1. Busca os dados
         const response = await fetch('/api/agendamentos/hoje');
         if (!response.ok) throw new Error(`Status HTTP: ${response.status}`);
 
         const agendaCrua = await response.json();
         console.log("[VoiceSystem] Dados brutos recebidos da API:", agendaCrua);
 
-        // Filtro de cancelados
+        // Filtra cancelados
         const agenda = agendaCrua.filter(item => item.status_agendamento !== 'cancelado');
 
-        // 2. Monta o texto (mesma lógica que você já tinha)
+        // ========== MONTAGEM DO TEXTO ==========
         let texto = "";
 
         if (agenda && agenda.length > 0) {
@@ -83,10 +87,10 @@ document.getElementById('btnFalarAgenda').addEventListener('click', async () => 
             texto = "Olá! Você não possui agendamentos ativos marcados para o dia de hoje. Aproveite o seu tempo livre!";
         }
 
-        console.log("[VoiceSystem] Texto pronto para síntese:", texto);
+        console.log("[VoiceSystem] Texto completo:", texto);
 
-        // 3. Função de fala mais robusta (funciona melhor em mobile)
-        await falarTexto(texto, btn);
+        // ========== FALA COM DIVISÃO EM PARTES ==========
+        await falarTextoEmPartes(texto, btn);
 
     } catch (error) {
         console.error("[VoiceSystem] ERRO CRÍTICO:", error);
@@ -96,77 +100,74 @@ document.getElementById('btnFalarAgenda').addEventListener('click', async () => 
 });
 
 /**
- * Função de fala otimizada para Desktop + Android + iOS
+ * Divide o texto em partes menores e fala em sequência
+ * Mais estável em iOS e Android
  */
-function falarTexto(texto, btn) {
+function falarTextoEmPartes(textoCompleto, btn) {
     return new Promise((resolve) => {
-        // Cancela qualquer fala anterior
         window.speechSynthesis.cancel();
 
-        const utterance = new SpeechSynthesisUtterance(texto);
-        utterance.lang = 'pt-BR';
-        utterance.rate = 0.95;   // um pouco mais lento ajuda no mobile
-        utterance.pitch = 1.0;
-        utterance.volume = 1.0;
+        // 1. Divide o texto em frases (melhor que cortar no meio da palavra)
+        const partes = dividirTextoEmPartes(textoCompleto, 200); // ~200 caracteres por parte
+        console.log(`[VoiceSystem] Texto dividido em ${partes.length} partes`);
 
-        // Tenta selecionar voz em português
-        const aplicarVoz = () => {
-            const vozes = window.speechSynthesis.getVoices();
-            const vozPT = vozes.find(v =>
-                v.lang === 'pt-BR' ||
-                v.lang === 'pt_BR' ||
-                v.lang.startsWith('pt')
-            );
-            if (vozPT) {
-                utterance.voice = vozPT;
-                console.log("[VoiceSystem] Voz selecionada:", vozPT.name);
+        let indiceAtual = 0;
+
+        const falarProximaParte = () => {
+            if (indiceAtual >= partes.length) {
+                // Terminou todas as partes
+                console.log("[VoiceSystem] Todas as partes foram faladas");
+                resetarBotao(btn);
+                resolve();
+                return;
             }
-        };
 
-        // Em muitos mobiles as vozes carregam assincronamente
-        if (window.speechSynthesis.getVoices().length > 0) {
-            aplicarVoz();
-        } else {
-            window.speechSynthesis.onvoiceschanged = () => {
-                aplicarVoz();
+            const parte = partes[indiceAtual];
+            console.log(`[VoiceSystem] Falando parte ${indiceAtual + 1}/${partes.length}:`, parte);
+
+            const utterance = new SpeechSynthesisUtterance(parte);
+            utterance.lang = 'pt-BR';
+            utterance.rate = 0.95;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
+            // Tenta aplicar voz em português
+            const vozes = window.speechSynthesis.getVoices();
+            const vozPT = vozes.find(v => v.lang === 'pt-BR' || v.lang.startsWith('pt'));
+            if (vozPT) utterance.voice = vozPT;
+
+            utterance.onend = () => {
+                indiceAtual++;
+                // Pequena pausa entre as partes (fica mais natural)
+                setTimeout(falarProximaParte, 280);
             };
-        }
+
+            utterance.onerror = (e) => {
+                console.error("[VoiceSystem] Erro na parte:", e.error);
+                indiceAtual++;
+                setTimeout(falarProximaParte, 200);
+            };
+
+            window.speechSynthesis.speak(utterance);
+
+            // Truque para alguns mobiles
+            setTimeout(() => {
+                if (window.speechSynthesis.paused) {
+                    window.speechSynthesis.resume();
+                }
+            }, 80);
+        };
 
         // Atualiza o botão
         btn.classList.add('falando');
         btn.innerText = "🔊 Ouvindo Agenda...";
         btn.disabled = true;
 
-        // Eventos
-        utterance.onstart = () => {
-            console.log("[VoiceSystem] Fala iniciada");
-        };
+        // Começa a falar a primeira parte
+        falarProximaParte();
 
-        utterance.onend = () => {
-            console.log("[VoiceSystem] Fala finalizada");
-            resetarBotao(btn);
-            resolve();
-        };
-
-        utterance.onerror = (event) => {
-            console.error("[VoiceSystem] Erro na fala:", event.error);
-            resetarBotao(btn);
-            resolve(); // resolve mesmo com erro para não travar
-        };
-
-        // Fala
-        window.speechSynthesis.speak(utterance);
-
-        // Truque importante para iOS e alguns Androids
-        // (força o motor de voz a "acordar")
-        setTimeout(() => {
-            if (window.speechSynthesis.paused) {
-                window.speechSynthesis.resume();
-            }
-        }, 100);
-
-        // Timeout de segurança (caso o onend nunca dispare em algum aparelho)
-        const tempoEstimado = Math.max(10000, texto.length * 70);
+        // Timeout de segurança geral
+        const tempoEstimado = Math.max(12000, textoCompleto.length * 75);
         setTimeout(() => {
             if (btn.classList.contains('falando')) {
                 console.warn("[VoiceSystem] Timeout de segurança ativado");
@@ -174,8 +175,45 @@ function falarTexto(texto, btn) {
                 resetarBotao(btn);
                 resolve();
             }
-        }, tempoEstimado + 3000);
+        }, tempoEstimado + 4000);
     });
+}
+
+/**
+ * Divide o texto de forma inteligente (tenta quebrar em frases)
+ */
+function dividirTextoEmPartes(texto, tamanhoMaximo = 200) {
+    // Primeiro tenta dividir por pontuação
+    const frases = texto.match(/[^.!?]+[.!?]+[\s]*/g) || [texto];
+
+    const partes = [];
+    let atual = "";
+
+    frases.forEach(frase => {
+        if ((atual + frase).length <= tamanhoMaximo) {
+            atual += frase;
+        } else {
+            if (atual) partes.push(atual.trim());
+            atual = frase;
+        }
+    });
+
+    if (atual) partes.push(atual.trim());
+
+    // Se ainda ficou alguma parte muito grande, força a divisão
+    const resultadoFinal = [];
+    partes.forEach(parte => {
+        if (parte.length <= tamanhoMaximo) {
+            resultadoFinal.push(parte);
+        } else {
+            // Quebra forçada
+            for (let i = 0; i < parte.length; i += tamanhoMaximo) {
+                resultadoFinal.push(parte.substring(i, i + tamanhoMaximo).trim());
+            }
+        }
+    });
+
+    return resultadoFinal.filter(p => p.length > 0);
 }
 
 function resetarBotao(btn) {
