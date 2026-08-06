@@ -1061,7 +1061,50 @@
                     </div>
 
                 </div>
+                <!-- ====== painel de agendamentos ====== -->
 
+                <!-- Moldura principal que se encaixa perfeitamente no seu grid de 12 colunas -->
+                <div class="col-span-12 xl:col-span-8 bg-white/70 dark:bg-slate-900/75 backdrop-blur-md p-6 xl:p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                    
+                    <!-- Cabeçalho do Painel -->
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                        <div>
+                            <h3 class="text-xl font-bold tracking-tight text-slate-800 dark:text-white">Painel de Agendamentos (Visão Geral)</h3>
+                            <p class="text-xs font-medium text-slate-500 mt-0.5">Status e Horários</p>
+                        </div>
+                    </div>
+
+                    <!-- Grid Responsivo de 4 Colunas para separar os status -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+                        
+                        <!-- Coluna 1: Confirmados -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-100 dark:border-slate-800 pb-2">Confirmados</div>
+                            <div id="coluna-confirmados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                        </div>
+
+                        <!-- Coluna 2: Aguardando Sinal -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-100 dark:border-slate-800 pb-2">Aguardando Sinal</div>
+                            <div id="coluna-aguardando" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                        </div>
+
+                        <!-- Coluna 3: Finalizados -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-100 dark:border-slate-800 pb-2">Finalizados</div>
+                            <div id="coluna-finalizados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                        </div>
+
+                        <!-- Coluna 4: Outros / Cancelados -->
+                        <div class="flex flex-col gap-4">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-100 dark:border-slate-800 pb-2">Outros / Cancel.</div>
+                            <div id="coluna-outros" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ====== fim do painel de agendamentos -->
                 <!-- ─── Right Aside ─── -->
                 <div class="col-span-12 xl:col-span-3 space-y-6">
 
