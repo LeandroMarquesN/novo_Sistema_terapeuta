@@ -455,10 +455,159 @@
     .btn-close {
         filter: invert(1) grayscale(1) brightness(2);
     }
+     /* navegador menu  */
+      /* ─── Scrollbar ─── */
+      ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+        /* ─── Sidebar ─── */
+        aside {
+            background: rgba(2,12,18,0.92) !important;
+            border-right: 1px solid var(--border) !important;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Logo block */
+        .logo-block {
+            border-bottom: 1px solid var(--border);
+        }
+        .logo-icon {
+            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+            box-shadow: 0 0 20px rgba(8,145,178,0.5), 0 0 40px rgba(5,150,105,0.2);
+        }
+        .logo-text-brand { color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; }
+        .logo-text-accent { color: var(--emerald); text-shadow: 0 0 12px rgba(52,211,153,0.6); }
+
+        /* Nav links */
+        .nav-link {
+            color: rgba(148,163,184,0.7);
+            border-radius: 14px;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            background: linear-gradient(90deg, rgba(52,211,153,0.08), transparent);
+            transition: opacity 0.3s;
+        }
+        .nav-link:hover { color: var(--emerald); border-color: var(--border); }
+        .nav-link:hover::before { opacity: 1; }
+        .nav-link:hover i { text-shadow: 0 0 10px rgba(52,211,153,0.7); }
+
+        .nav-link-active {
+            background: linear-gradient(135deg, rgba(8,145,178,0.25) 0%, rgba(5,150,105,0.20) 100%);
+            border: 1px solid rgba(52,211,153,0.35);
+            color: var(--emerald) !important;
+            box-shadow: 0 0 20px rgba(52,211,153,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .nav-link-active i { text-shadow: 0 0 12px rgba(52,211,153,0.8); }
+
+        /* Theme toggle */
+        #theme-toggle-btn {
+            color: rgba(148,163,184,0.6);
+            border-radius: 14px;
+            border: 1px solid transparent;
+            transition: all 0.25s;
+        }
+        #theme-toggle-btn:hover { color: var(--cyan); border-color: var(--border-cyan); }
+
+        /* ─── Header ─── */
+        header {
+            border-bottom: 1px solid var(--border) !important;
+        }
+
+        #boasVindas { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+        #boasVindas .separator { color: rgba(52,211,153,0.3); }
+
+        #clinicaNome {
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(34,211,238,0.3));
+        }
+
+        /* Date pill */
+        #data-hora-container-tailwind {
+            background: rgba(255,255,255,0.04) !important;
+            border: 1px solid var(--border) !important;
+            color: #94a3b8 !important;
+            backdrop-filter: blur(10px);
+            border-radius: 99px;
+        }
+
+        /* New appointment button */
+        .btn-new-appt {
+            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+            border: none;
+            box-shadow: 0 0 20px rgba(8,145,178,0.4), 0 0 40px rgba(5,150,105,0.15);
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 0.02em;
+            transition: all 0.3s;
+        }
+        .btn-new-appt:hover {
+            box-shadow: 0 0 30px rgba(8,145,178,0.6), 0 0 60px rgba(5,150,105,0.25);
+            transform: translateY(-1px);
+        }
+
+       
   </style>
 </head>
 <body class="menosClaro">
-  
+  <!-- menu navegadro sistema -->
+     <!-- ─── Sidebar ─── -->
+     <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
+      <div class="flex flex-col">
+          <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
+              <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">
+                  M
+              </div>
+              <span class="logo-text-brand ml-4 font-bold text-xl opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap tracking-tight">
+                  Med<span class="logo-text-accent font-extrabold">LM</span>
+              </span>
+          </div>
+
+          <nav class="px-3 pt-6 space-y-1.5">
+              <a href="/dashboard" class="nav-link nav-link-active flex items-center p-3.5">
+                  <i class="fas fa-chart-line w-6 text-lg"></i>
+                  <span class="ml-4 font-semibold opacity-0 group-hover:opacity-100 whitespace-nowrap">Dashboard</span>
+              </a>
+              <a href="/pacientes" class="nav-link flex items-center p-3.5">
+                  <i class="fas fa-user-injured w-6"></i>
+                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Pacientes</span>
+              </a>
+              <a href="/financeiro" class="nav-link flex items-center p-3.5">
+                  <i class="fas fa-hand-holding-usd w-6"></i>
+                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Financeiro</span>
+              </a>
+             
+              <a href="/dashboard/configuracoes" class="nav-link flex items-center p-3.5">
+                  <i class="fas fa-cogs w-6"></i>
+                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Configurações</span>
+              </a>
+              <a href="#" onclick="handleLogout()" class="nav-link flex items-center p-3.5" style="color:rgba(248,113,113,0.6)!important">
+                  <i class="fas fa-sign-out-alt w-6"></i>
+                  <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Sair</span>
+              </a>
+          </nav>
+      </div>
+
+      <div class="p-4" style="border-top:1px solid var(--border)">
+          <button id="theme-toggle-btn" class="flex items-center w-full p-3 transition">
+              <i class="fas fa-moon w-6"></i>
+              <span class="ml-4 opacity-0 group-hover:opacity-100 font-medium text-sm">Tema</span>
+          </button>
+      </div>
+  </aside>
+
+  <!-- fim do menu -->
 
  
 
