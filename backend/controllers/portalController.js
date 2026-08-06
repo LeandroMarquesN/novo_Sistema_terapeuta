@@ -93,8 +93,14 @@ exports.getHorariosLivres = async (req, res) => {
 // =============================================================================
 //
 // REGRA DE NEGÓCIO ATUAL (temporária):
-//   O sinal/pagamento antecipado está DESATIVADO. O paciente consegue concluir
-//   o agendamento pelo portal sem precisar pagar nada no momento da marcação.
+//   O sinal/pagamento antecipado está DESATIVADO como trava de agendamento —
+//   o paciente consegue concluir o agendamento pelo portal sem precisar pagar
+//   nada no momento da marcação (o agendamento já nasce 'confirmado').
+//   Mesmo assim, o financeiro da clínica sempre recebe um lançamento com o
+//   valor do sinal configurado e status_pagamento = 'aberto' (não pago), para
+//   a clínica ter visibilidade e decidir se vai cobrar o paciente depois ou
+//   simplesmente ignorar essa cobrança. O portal não bloqueia nada por causa
+//   disso — é só um registro informativo.
 //
 // PREVISTO PARA O FUTURO:
 //   Quando `forma_pagamento === 'plataforma'` chegar do front-end, o fluxo vai
@@ -236,21 +242,29 @@ exports.criarAgendamento = async (req, res) => {
     const agendamentoId = resAgendamento.insertId;
 
     // REGISTRO NO FINANCEIRO
-    // Só criamos o lançamento financeiro do sinal se de fato houver um valor de
-    // sinal configurado. Sem sinal (valor 0 e fluxo sem plataforma), não faz
-    // sentido abrir uma cobrança em aberto.
-    if (valorSinalDinamico > 0) {
-      const descricaoFinanceira = pagamentoViaPlataforma
-        ? `Sinal (plataforma) - ${nome}`
-        : `Sinal - ${nome}`;
+    // O agendamento é criado independente do sinal ser pago ou não. Mas o
+    // financeiro da clínica precisa refletir isso: sempre criamos o lançamento
+    // com status_pagamento = 'aberto' (não pago), para a clínica ter o dado
+    // visível no dashboard e decidir se vai cobrar o paciente depois ou não —
+    // essa decisão fica de fora do fluxo do portal.
+    const descricaoFinanceira = pagamentoViaPlataforma
+      ? `Sinal (plataforma) - ${nome}`
+      : `Sinal - ${nome}`;
 
-      await connection.execute(
-        `INSERT INTO financeiro 
-         (clinica_id, paciente_id, agendamento_id, tipo, valor, data_vencimento, status_pagamento, descricao) 
-         VALUES (?, ?, ?, "receita", ?, ?, "aberto", ?)`,
-        [clinica_id, pacienteId, agendamentoId, valorSinalDinamico, data, descricaoFinanceira]
-      );
-    }
+    await connection.execute(
+      `INSERT INTO financeiro 
+       (clinica_id, paciente_id, agendamento_id, tipo, categoria, valor, data_vencimento, status_pagamento, descricao, observacoes) 
+       VALUES (?, ?, ?, "receita", "Consulta", ?, ?, "aberto", ?, ?)`,
+      [
+        clinica_id,
+        pacienteId,
+        agendamentoId,
+        valorSinalDinamico,
+        data,
+        descricaoFinanceira,
+        'Sinal não pago no momento do agendamento online. Cobrança fica a critério da clínica.'
+      ]
+    );
 
     // ── (Futuro) Geração do link de pagamento na plataforma ──
     let redirectUrl = null;
