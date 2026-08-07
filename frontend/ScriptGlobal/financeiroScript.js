@@ -121,7 +121,7 @@ function renderizar(dadosParaExibir = lancamentos) {
         </td>
         <td class="px-8 py-6">
             <div class="flex flex-col">
-                <span class="text-sm font-bold text-gray-900">${item.paciente_nome}</span>
+                <span class="text-sm font-bold text-white">${item.paciente_nome}</span>
                 ${telefoneLimpo ? `
                   <a href="https://wa.me/55${telefoneLimpo}" target="_blank" class="text-[10px] text-emerald-500 font-bold hover:underline">
                       <i class="fab fa-whatsapp"></i> Contato Direto
@@ -132,7 +132,7 @@ function renderizar(dadosParaExibir = lancamentos) {
 
         <td class="px-8 py-6">
             <div class="flex flex-col">
-                <span class="text-xs text-gray-700 font-bold">${item.descricao || 'Sinal de Consulta'}</span>
+                <span class="text-xs text-white font-bold">${item.descricao || 'Sinal de Consulta'}</span>
                 ${item.categoria ? `<span class="text-[9px] text-indigo-500 uppercase font-black tracking-wider mt-0.5">${item.categoria}</span>` : ''}
             </div>
         </td>
@@ -783,7 +783,7 @@ async function prepararImpressaoExtrato() {
                       <p style="font-size: 12px; margin: 0;">
                           <a href="${urlPortal}" target="_blank" style="color: #1A5FA1; font-weight: 600; text-decoration: none;">${urlPortal}</a>
                       </p>
-                  </div>
+                  </div> 
               </td>
           </tr>
 
