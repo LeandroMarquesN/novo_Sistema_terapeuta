@@ -265,13 +265,16 @@ exports.criarAgendamento = async (req, res) => {
     await connection.execute(
       `INSERT INTO financeiro 
        (clinica_id, paciente_id, agendamento_id, tipo, categoria, valor, data_vencimento, status_pagamento, descricao, observacoes) 
-       VALUES (?, ?, ?, "receita", "Consulta", ?, ?, "aberto", ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         clinica_id,
         pacienteId,
         agendamentoId,
+        'receita',
+        'Consulta',
         valorSinalDinamico,
         data,
+        'aberto',
         descricaoFinanceira,
         'Sinal não pago no momento do agendamento online. Cobrança fica a critério da clínica.'
       ]
