@@ -200,7 +200,7 @@
                 </button>
             </section>
 
-            <!-- PASSO 3: PAGAMENTO -->
+            <!-- PASSO 3: CONFIRMAÇÃO -->
             <section id="step3" class="step glass p-6 shadow-xl text-center">
                 <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <i class="fas fa-calendar-check text-3xl text-white"></i>
@@ -209,20 +209,22 @@
                 <p class="text-slate-500 text-sm mb-6">Confirme abaixo para garantir sua vaga.</p>
 
                 <div class="bg-gradient-to-br from-blue-600 to-emerald-500 rounded-3xl p-6 text-white mb-6 text-left shadow-xl">
-                    <p class="text-[10px] uppercase tracking-tighter opacity-80">Sinal Sugerido</p>
+                    <p class="text-[10px] uppercase tracking-tighter opacity-80">Sinal da Consulta</p>
                     <h4 class="text-4xl font-black">R$ <%= config.valor_sinal || '0,00' %></h4>
                     <hr class="my-4 opacity-20">
                     <p class="text-[11px] leading-relaxed italic">
-                        O pagamento do sinal não é obrigatório, mas garante sua <strong>preferência</strong> na agenda da clínica.
+                        O pagamento do sinal não é obrigatório para confirmar seu horário. No momento o pagamento
+                        online pela plataforma está passando por uma atualização — assim que seu agendamento for
+                        confirmado, o sinal poderá ser pago <strong>diretamente na clínica</strong>.
                     </p>
                 </div>
 
                 <div class="space-y-3">
-                    <button type="button" onclick="abrirModalLembrete()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl flex items-center justify-center gap-3">
-                        <i class="fab fa-pix text-emerald-400"></i> Pagar Sinal
+                    <button type="button" onclick="finalizarAgendamentoCompleto('confirmado', event)" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-check-circle"></i> Confirmar Agendamento
                     </button>
-                    <button type="button" onclick="finalizarAgendamentoCompleto('aguardando_sinal',event)" class="w-full bg-white border-2 border-slate-200 text-slate-600 font-bold py-3 rounded-2xl">
-                        Confirmar sem pagar agora
+                    <button type="button" onclick="abrirModalLembrete()" class="w-full bg-white border-2 border-slate-200 text-slate-500 font-bold py-3 rounded-2xl text-sm">
+                        Prefiro pagar o sinal agora
                     </button>
                 </div>
             </section>
@@ -248,28 +250,32 @@
             </button>
         </div>
     </div>
-    <!-- modal pagamento lembrete -->
+    <!-- modal: pagamento pela plataforma em atualização -->
     <div id="modalPagamentoLembrete" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
-            <div class="text-amber-500 text-4xl mb-4"><i class="fas fa-clock"></i></div>
-            
-            <h2 class="text-2xl font-bold mb-2">Reserva Realizada!</h2>
-            <p class="text-slate-600 mb-4">Seu horário foi reservado com sucesso.</p>
-            
+            <div class="text-amber-500 text-4xl mb-4"><i class="fas fa-tools"></i></div>
+
+            <h2 class="text-2xl font-bold mb-2">Pagamento em atualização</h2>
+            <p class="text-slate-600 mb-4">
+                O pagamento do sinal pela plataforma está passando por uma atualização e, no momento,
+                não está disponível para novos agendamentos.
+            </p>
+
             <div class="bg-slate-50 p-3 rounded-lg mb-4 text-sm text-slate-700">
                 <p>Data: <span id="resumoData" class="font-bold"></span></p>
                 <p>Horário: <span id="resumoHora" class="font-bold"></span></p>
             </div>
-    
+
             <p class="text-slate-600 mb-6">
-                Para garantir sua vaga, precisamos que você finalize o pagamento.
+                Você pode confirmar seu horário normalmente agora e realizar o pagamento do sinal
+                <strong>diretamente na clínica</strong>.
             </p>
-    
-            <button onclick="prosseguirPagamento()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all shadow-md">
-                Ir para Pagamento Seguro
+
+            <button onclick="fecharLembreteEConfirmar(event)" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all shadow-md">
+                Entendi, confirmar agendamento
             </button>
             <button onclick="fecharLembrete()" class="mt-4 text-slate-400 text-sm hover:underline">
-                Pagar depois
+                Voltar
             </button>
         </div>
     </div>
@@ -361,67 +367,42 @@
             carregarHorarios();
         }
 
-        // funcao do modal lembrete pagametno
+        // ═══════════════════════════════════════════════════════════════
+        // MODAL: "Prefiro pagar o sinal agora"
+        // Como o pagamento pela plataforma ainda não está configurado
+        // (ver PAGAMENTO_PLATAFORMA_ATIVO no backend), esse modal apenas
+        // avisa o paciente e o leva a confirmar o agendamento sem cobrança
+        // online — o sinal fica para ser pago na clínica.
+        // ═══════════════════════════════════════════════════════════════
         function abrirModalLembrete() {
-            // 1. Busca os elementos uma única vez para performance
             const inputData = document.getElementById('data_escolhida');
             const displayData = document.getElementById('resumoData');
             const displayHora = document.getElementById('resumoHora');
             const modal = document.getElementById('modalPagamentoLembrete');
 
-            // 2. Validação simples: se não houver dados, não abre o modal (evita erros)
             if (!inputData.value || !dados.horario) {
                 console.warn("Tentativa de abrir modal sem dados de agendamento.");
-                return; 
+                return;
             }
 
-            // 3. Formatação amigável da data (opcional, mas profissional)
-            // Converte '2026-06-25' para '25/06/2026'
+            // Formatação amigável da data: '2026-06-25' -> '25/06/2026'
             const [ano, mes, dia] = inputData.value.split('-');
             displayData.innerText = `${dia}/${mes}/${ano}`;
-            
-            // 4. Exibe o horário
             displayHora.innerText = dados.horario;
 
-            // 5. Abre o modal
             modal.classList.remove('hidden');
         }
 
         function fecharLembrete() {
-                const modal = document.getElementById('modalPagamentoLembrete');
-                modal.classList.add('hidden');
-            }
+            document.getElementById('modalPagamentoLembrete').classList.add('hidden');
+        }
 
-            async function prosseguirPagamento() {
-                // 1. Feedback visual imediato: evita cliques duplos
-                const btn = event.currentTarget;
-                const originalText = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparando pagamento...';
-
-                try {
-                    // 2. Simulação da chamada de API para o Gateway
-                    // No futuro: const response = await fetch(`/agendar/${slug}/pagar`, { method: 'POST' });
-                    // const { url } = await response.json();
-                    
-                    console.log("Iniciando fluxo de pagamento...");
-                    
-                    // Simulação de tempo de rede
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-
-                    // 3. Redirecionamento (isso será substituído pela URL do Gateway)
-                    alert("Redirecionando para o ambiente seguro do Mercado Pago/Stripe...");
-                    // window.location.href = url; 
-
-                } catch (error) {
-                    console.error("Erro ao preparar pagamento:", error);
-                    alert("Ops! Houve um problema ao conectar com o sistema de pagamento.");
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
-            }
-
-
+        // Fecha o modal de aviso e segue direto para a confirmação do
+        // agendamento (sem pagamento pela plataforma, que ainda não existe).
+        function fecharLembreteEConfirmar(event) {
+            fecharLembrete();
+            finalizarAgendamentoCompleto('confirmado', event);
+        }
         // ----- fim ------
 
 
@@ -531,6 +512,9 @@
         // ═══════════════════════════════════════════════════════════════
         // Finaliza o agendamento. AJUSTADO para tratar o erro 409
         // (conflito de horário — alguém já pegou aquele horário antes)
+        // Obs: o "status" enviado aqui é só informativo pro payload — o
+        // backend decide o status_agendamento real (sempre 'confirmado'
+        // enquanto o pagamento pela plataforma estiver desligado).
         // ═══════════════════════════════════════════════════════════════
         async function finalizarAgendamentoCompleto(status, event) {
 
@@ -580,7 +564,7 @@
                         const motivoFechado = verificarDataFechada(document.getElementById('data_escolhida').value);
                         if (!motivoFechado) carregarHorarios();
                         btnConfirmar.disabled = false;
-                        btnConfirmar.innerText = "Confirmar sem pagar agora";
+                        btnConfirmar.innerText = "Confirmar Agendamento";
                     } else {
                         alert("Erro: " + (res.message || "Não foi possível concluir o agendamento."));
                         btnConfirmar.disabled = false;

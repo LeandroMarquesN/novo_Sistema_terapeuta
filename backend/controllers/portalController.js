@@ -53,7 +53,10 @@ exports.renderPortal = async (req, res) => {
 // 2. BUSCAR HORÁRIOS DISPONÍVEIS (API)
 // =============================================================================
 exports.getHorariosLivres = async (req, res) => {
-  const { clinica_id, data } = req.query;
+  // O clinica_id NUNCA deve vir do que o paciente manda — vem do middleware
+  // (portalPacienteMiddleware), que já validou o slug contra o banco.
+  const clinica_id = req.clinicaId;
+  const { data } = req.query;
   if (!clinica_id || !data) return res.status(400).json({ success: false, message: "Parâmetros inválidos." });
 
   const connection = await db.getConnection();
@@ -131,11 +134,19 @@ async function gerarLinkPagamentoPlataforma({ agendamentoId, valor, nome, email 
 }
 
 exports.criarAgendamento = async (req, res) => {
+  // O clinica_id NUNCA deve vir do que o paciente manda no body — vem do
+  // middleware (portalPacienteMiddleware), que já validou o slug contra o
+  // banco. Se alguém adulterar o clinica_id no payload, é ignorado.
+  const clinica_id = req.clinicaId;
   const {
-    clinica_id, nome, email, telefone, cpf, data, horario,
+    nome, email, telefone, cpf, data, horario,
     genero, data_nascimento, tipo_terapia, motivo_consulta,
     forma_pagamento // 'plataforma' (futuro) — qualquer outro valor/ausente = sem sinal
   } = req.body;
+
+  if (!clinica_id) {
+    return res.status(401).json({ success: false, message: "Clínica não identificada." });
+  }
 
   const connection = await db.getConnection();
 
@@ -283,6 +294,10 @@ exports.criarAgendamento = async (req, res) => {
         console.error("Erro ao gerar link de pagamento na plataforma:", gatewayError);
       }
     }
+
+    // Mantém o paciente "logado" no portal via sessão, para que da próxima vez
+    // que ele voltar o formulário já venha pré-preenchido (ver renderPortal).
+    req.session.pacienteId = pacienteId;
 
     await connection.commit();
 
