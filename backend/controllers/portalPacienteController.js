@@ -17,17 +17,20 @@ exports.validarAcessoPortal = async (req, res) => {
 
         const paciente = pacientes[0];
 
-        // 1. Armazena na sessão
-        req.session.pacienteId = paciente.id;
-        req.session.clinicaId = paciente.clinica_id;
+        // Limpa qualquer sessão antiga de outro paciente
+        req.session.pacientePortal = null;
 
-        // 2. Salva a sessão explicitamente antes de redirecionar
+        // Grava SOMENTE dados deste token (chave isolada)
+        req.session.pacientePortal = {
+            id: paciente.id,
+            clinicaId: paciente.clinica_id
+        };
+
         req.session.save((err) => {
             if (err) {
                 console.error("Erro ao salvar sessão:", err);
                 return res.status(500).send("Erro na sessão.");
             }
-            // 3. Redirecionamento em vez de res.send
             res.redirect('/portal_paciente/dashboard');
         });
 
@@ -39,28 +42,51 @@ exports.validarAcessoPortal = async (req, res) => {
 
 exports.getDadosPortal = async (req, res) => {
     try {
-        const pId = req.session.pacienteId;
-        const cId = req.session.clinicaId; // Já carregamos isso na sessão no login
+        // Lê da chave isolada
+        const sessao = req.session.pacientePortal;
 
-        // 1. Dados do Paciente + Clínica
+        if (!sessao || !sessao.id) {
+            return res.status(401).json({ error: "Sessão inválida. Acesse pelo link do e-mail." });
+        }
+
+        const pId = sessao.id;
+        const cId = sessao.clinicaId;
+
         const [paciente] = await db.query(`
-        SELECT p.*, c.nome_clinica, c.slug 
-        FROM pacientes p 
-        JOIN clinicas c ON p.clinica_id = c.id 
-        WHERE p.id = ?`, [pId]);
+            SELECT p.*, c.nome_clinica, c.slug 
+            FROM pacientes p 
+            JOIN clinicas c ON p.clinica_id = c.id 
+            WHERE p.id = ? AND p.clinica_id = ?
+        `, [pId, cId]);
 
-        // 2. Configurações da Clínica
-        const [config] = await db.query('SELECT * FROM clinica_configuracoes WHERE clinica_id = ?', [cId]);
+        if (!paciente || paciente.length === 0) {
+            return res.status(401).json({ error: "Paciente não encontrado." });
+        }
 
-        // 3. Agendamentos e Prontuários
-        const [agendamentos] = await db.query('SELECT * FROM agendamentos WHERE paciente_id = ? ORDER BY data_agendamento DESC', [pId]);
-        const [prontuarios] = await db.query('SELECT * FROM prontuarios WHERE paciente_id = ? ORDER BY data_atendimento DESC', [pId]);
+        const [config] = await db.query(
+            'SELECT * FROM clinica_configuracoes WHERE clinica_id = ?',
+            [cId]
+        );
+
+        const [agendamentos] = await db.query(
+            'SELECT * FROM agendamentos WHERE paciente_id = ? ORDER BY data_agendamento DESC',
+            [pId]
+        );
+
+        const [prontuarios] = await db.query(
+            'SELECT * FROM prontuarios WHERE paciente_id = ? ORDER BY data_atendimento DESC',
+            [pId]
+        );
 
         res.json({
             paciente: paciente[0],
-            config: config[0],
+            config: config[0] || {},
             agendamentos,
             prontuarios
         });
-    } catch (e) { res.status(500).json({ error: "Erro ao buscar dados" }); }
+
+    } catch (e) {
+        console.error(e);
+        res.status(500).json({ error: "Erro ao buscar dados" });
+    }
 };

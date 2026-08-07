@@ -6,41 +6,68 @@ const crypto = require('crypto');
 // =============================================================================
 // 1. RENDERIZAR PORTAL PRINCIPAL
 // =============================================================================
+// exports.renderPortal = async (req, res) => {
+//   const { slug } = req.params;
+//   const pId = req.session.pacienteId;
+
+//   try {
+//     // 1. Busca a clínica pelo slug
+//     const [clinica] = await db.execute('SELECT * FROM clinicas WHERE slug = ?', [slug]);
+//     if (clinica.length === 0) return res.status(404).send("Clínica não encontrada");
+
+//     const clinicaAtual = clinica[0];
+
+//     // 2. Busca configurações
+//     const [config] = await db.execute('SELECT * FROM clinica_configuracoes WHERE clinica_id = ?', [clinicaAtual.id]);
+
+//     // 3. Validação do Paciente Logado na Sessão
+//     let pacienteLogado = null;
+//     if (pId) {
+//       // Adicionamos a verificação 'AND clinica_id = ?' para garantir que o paciente é desta clínica
+//       const [pacientes] = await db.execute(
+//         'SELECT nome, email, telefone, cpf, data_nascimento, genero FROM pacientes WHERE id = ? AND clinica_id = ?',
+//         [pId, clinicaAtual.id]
+//       );
+
+//       // Se não encontrou (ou pertence a outra clínica), limpamos a sessão para não exibir dados errados
+//       if (pacientes.length > 0) {
+//         pacienteLogado = pacientes[0];
+//       } else {
+//         req.session.pacienteId = null; // Limpa a sessão corrompida
+//       }
+//     }
+
+//     res.render('portalagendamento', {
+//       clinica: clinicaAtual,
+//       config: config[0] || {},
+//       pacienteLogado: pacienteLogado,
+//       layout: false
+//     });
+//   } catch (error) {
+//     console.error("Erro ao renderizar portal:", error);
+//     res.status(500).send("Erro interno ao carregar o portal.");
+//   }
+// };
+// novo render portal
 exports.renderPortal = async (req, res) => {
   const { slug } = req.params;
-  const pId = req.session.pacienteId;
 
   try {
-    // 1. Busca a clínica pelo slug
     const [clinica] = await db.execute('SELECT * FROM clinicas WHERE slug = ?', [slug]);
     if (clinica.length === 0) return res.status(404).send("Clínica não encontrada");
 
     const clinicaAtual = clinica[0];
 
-    // 2. Busca configurações
-    const [config] = await db.execute('SELECT * FROM clinica_configuracoes WHERE clinica_id = ?', [clinicaAtual.id]);
+    const [config] = await db.execute(
+      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ?',
+      [clinicaAtual.id]
+    );
 
-    // 3. Validação do Paciente Logado na Sessão
-    let pacienteLogado = null;
-    if (pId) {
-      // Adicionamos a verificação 'AND clinica_id = ?' para garantir que o paciente é desta clínica
-      const [pacientes] = await db.execute(
-        'SELECT nome, email, telefone, cpf, data_nascimento, genero FROM pacientes WHERE id = ? AND clinica_id = ?',
-        [pId, clinicaAtual.id]
-      );
-
-      // Se não encontrou (ou pertence a outra clínica), limpamos a sessão para não exibir dados errados
-      if (pacientes.length > 0) {
-        pacienteLogado = pacientes[0];
-      } else {
-        req.session.pacienteId = null; // Limpa a sessão corrompida
-      }
-    }
-
+    // Sempre null → paciente preenche manualmente
     res.render('portalagendamento', {
       clinica: clinicaAtual,
       config: config[0] || {},
-      pacienteLogado: pacienteLogado,
+      pacienteLogado: null,
       layout: false
     });
   } catch (error) {
