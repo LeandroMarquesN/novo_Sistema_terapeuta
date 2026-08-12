@@ -398,44 +398,65 @@
             return estilos[cargo] || 'bg-slate-700/20 text-slate-300';
         }
 
+        function getUsuarioIdToken() {
+            try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.id;
+            } catch (e) {
+                return null;
+            }
+        }
+
         function renderizarTabela(lista) {
             const tabela = document.getElementById('lista-equipe');
             tabela.innerHTML = '';
+            const meuId = getUsuarioIdToken();
 
-            if(lista.length === 0) {
+            if (lista.length === 0) {
                 tabela.innerHTML = `
                     <tr>
-                        <td colspan="3" class="text-center py-12 text-slate-600 font-bold uppercase tracking-wider">
+                        <td colspan="4" class="text-center py-12 text-slate-600 font-bold uppercase tracking-wider">
                             <i class="fas fa-user-slash text-3xl mb-3 block text-slate-700"></i>Nenhum profissional encontrado.
                         </td>
                     </tr>`;
                 return;
             }
 
-            lista.forEach(membro => {
-                tabela.innerHTML += `
-                    <tr class="hover:bg-white/[0.02] border-b border-white/5 transition duration-150">
-                        <td class="py-4 px-4 sm:px-6 text-slate-200 font-semibold">
-                            <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-white/[0.01] flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-black uppercase font-['Space_Grotesk'] shrink-0">
-                                    ${membro.nome.charAt(0)}
-                                </div>
-                                <div class="min-w-0">
-                                    <span class="block text-slate-200 text-xs font-bold truncate">${membro.nome}</span>
-                                    <span class="text-[10px] font-bold text-slate-600 uppercase font-['Space_Grotesk'] tracking-wider">ID: #${membro.id}</span>
-                                </div>
-                            </div>
-                        </td>
-                        <td class="py-4 px-4 sm:px-6 text-slate-400 font-mono text-xs font-semibold tracking-wide whitespace-nowrap">${membro.email}</td>
-                        <td class="py-4 px-4 sm:px-6">
-                            <span class="text-[10px] font-black px-2.5 py-1.5 rounded-xl uppercase tracking-widest font-['Space_Grotesk'] ${obterEstiloBadge(membro.cargo)} whitespace-nowrap">
-                                ${membro.cargo === 'admin' ? 'Administrador' : membro.cargo}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
+                    lista.forEach(membro => {
+                        const podeRemover = membro.cargo !== 'dono' && Number(membro.id) !== Number(meuId);
+
+                        tabela.innerHTML += `
+                            <tr class="hover:bg-white/[0.02] border-b border-white/5 transition duration-150">
+                                <td class="py-4 px-4 sm:px-6 text-slate-200 font-semibold">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-white/[0.01] flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-black uppercase font-['Space_Grotesk'] shrink-0">
+                                            ${membro.nome.charAt(0)}
+                                        </div>
+                                        <div class="min-w-0">
+                                            <span class="block text-slate-200 text-xs font-bold truncate">${membro.nome}</span>
+                                            <span class="text-[10px] font-bold text-slate-600 uppercase font-['Space_Grotesk'] tracking-wider">ID: #${membro.id}</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-4 sm:px-6 text-slate-400 font-mono text-xs font-semibold tracking-wide whitespace-nowrap">${membro.email}</td>
+                                <td class="py-4 px-4 sm:px-6">
+                                    <span class="text-[10px] font-black px-2.5 py-1.5 rounded-xl uppercase tracking-widest font-['Space_Grotesk'] ${obterEstiloBadge(membro.cargo)} whitespace-nowrap">
+                                        ${membro.cargo === 'admin' ? 'Administrador' : membro.cargo}
+                                    </span>
+                                </td>
+                                <td class="py-4 px-4 sm:px-6 text-center">
+                                    ${podeRemover
+                                        ? `<button onclick="removerMembro(${membro.id}, '${membro.nome.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 transition inline-flex items-center justify-center" title="Remover profissional">
+                                            <i class="fas fa-trash-alt text-xs"></i>
+                                        </button>`
+                                        : `<span class="text-slate-700 text-xs" title="Não é possível remover">—</span>`
+                                    }
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
 
         async function carregarEquipe() {
             try {
@@ -449,6 +470,29 @@
                 console.error("Erro ao indexar os dados da equipe:", error);
             }
         }
+
+        async function removerMembro(id, nome) {
+    const confirmar = confirm(`Tem certeza que deseja remover "${nome}" da equipe? Essa ação não pode ser desfeita.`);
+    if (!confirmar) return;
+
+    try {
+        const response = await fetch(`/api/equipe/remover/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            carregarEquipe();
+            carregarStatusPlano(); // atualiza o contador do plano e destrava o botão se preciso
+        } else {
+            alert('⚠️ ' + (result.error || 'Erro ao remover profissional.'));
+        }
+    } catch (error) {
+        alert('❌ Falha crítica de comunicação com o servidor.');
+    }
+}
 
         function filtrarEquipe() {
             const termo = document.getElementById('campo-busca').value.toLowerCase().trim();
