@@ -16,4 +16,6 @@ router.get('/listar', authMiddleware, equipeController.listarMembros);
 // Adicione esta linha:
 router.get('/status-plano', authMiddleware, equipeController.obterStatusPlano);
 
+router.delete('/remover/:id', authMiddleware, equipeController.removerMembro);
+
 module.exports = router;

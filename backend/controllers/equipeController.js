@@ -104,3 +104,44 @@ exports.obterStatusPlano = async (req, res) => {
         res.status(500).json({ error: "Erro interno ao buscar informações do plano." });
     }
 };
+
+// --- FUNÇÃO PARA REMOVER MEMBRO ---
+exports.removerMembro = async (req, res) => {
+    const { id } = req.params;
+    const clinicaId = req.usuario.clinica_id;
+    const usuarioLogadoId = req.usuario.id;
+
+    try {
+        // 1. Busca o membro garantindo que ele pertence à MESMA clínica de quem está pedindo
+        //    (evita que alguém, manipulando a URL, remova usuário de outra clínica)
+        const [membros] = await db.execute(
+            "SELECT id, cargo FROM usuarios WHERE id = ? AND clinica_id = ?",
+            [id, clinicaId]
+        );
+
+        if (membros.length === 0) {
+            return res.status(404).json({ error: "Profissional não encontrado nesta clínica." });
+        }
+
+        const membro = membros[0];
+
+        // 2. Ninguém pode remover a própria conta por essa tela
+        if (Number(id) === Number(usuarioLogadoId)) {
+            return res.status(400).json({ error: "Você não pode remover a si mesmo." });
+        }
+
+        // 3. Protege o dono da clínica contra remoção acidental
+        if (membro.cargo === 'dono') {
+            return res.status(403).json({ error: "Não é possível remover o dono da clínica." });
+        }
+
+        // 4. Remove
+        await db.execute("DELETE FROM usuarios WHERE id = ? AND clinica_id = ?", [id, clinicaId]);
+
+        res.json({ message: "Profissional removido com sucesso." });
+
+    } catch (err) {
+        console.error("Erro ao remover membro:", err);
+        res.status(500).json({ error: "Erro interno ao remover profissional." });
+    }
+};
