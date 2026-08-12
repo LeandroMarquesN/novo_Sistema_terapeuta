@@ -1,6 +1,6 @@
 const db = require('../config/db');
 const crypto = require('crypto');
-const bcrypt = require('bcrypt'); // 👈 Descomentado para garantir que a criptografia funcione
+const bcrypt = require('bcryptjs');
 const notificationService = require('../services/notificationService');
 
 // URL base vinda do ambiente ou padrão do render/localhost
