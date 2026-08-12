@@ -1,7 +1,7 @@
 const db = require('../config/db');
 const crypto = require('crypto');
-// const bcrypt = require('bcrypt');
-const notificationService = require('../services/notificationService'); // 👈 Importado
+const bcrypt = require('bcrypt'); // 👈 Descomentado para garantir que a criptografia funcione
+const notificationService = require('../services/notificationService');
 
 // URL base vinda do ambiente ou padrão do render/localhost
 const APP_BASE_URL = process.env.APP_BASE_URL_ENV || "http://localhost:3000";
@@ -27,14 +27,13 @@ exports.forgotPassword = async (req, res) => {
 
         const user = users[0];
 
-        // Gera o token seguro e expiração de 15 minutos
+        // Gera o token seguro (sem data de expiração)
         const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetExpires = new Date(Date.now() + 15 * 60 * 1000);
 
-        // Salva na tabela de usuários
+        // Salva na tabela de usuários limpando a data (NULL)
         await db.execute(
-            'UPDATE usuarios SET reset_token = ?, reset_expires = ? WHERE id = ?',
-            [resetToken, resetExpires, user.id]
+            'UPDATE usuarios SET reset_token = ?, reset_expires = NULL WHERE id = ?',
+            [resetToken, user.id]
         );
 
         // Monta o link apontando para a página de redefinição no front-end
@@ -58,19 +57,21 @@ exports.resetPassword = async (req, res) => {
     }
 
     try {
+        // Busca apenas pelo token, sem validar o tempo (NOW)
         const [users] = await db.execute(
-            'SELECT * FROM usuarios WHERE reset_token = ? AND reset_expires > NOW()',
+            'SELECT * FROM usuarios WHERE reset_token = ?',
             [token]
         );
 
         if (users.length === 0) {
-            return res.status(400).json({ error: 'Token inválido ou expirado.' });
+            return res.status(400).json({ error: 'Token inválido ou já utilizado.' });
         }
 
         const user = users[0];
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
+        // Atualiza a senha e limpa o token para que ele não possa ser reutilizado
         await db.execute(
             'UPDATE usuarios SET senha = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?',
             [hashedPassword, user.id]
