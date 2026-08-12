@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken');
+const db = require('../config/db');
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
     // Tenta pegar o token do Header OU do Cookie
     const authHeader = req.headers['authorization'];
     let token = authHeader && authHeader.split(' ')[1];
 
-    // Se não achou no header, busca no cookie
     if (!token && req.headers.cookie) {
         const cookies = req.headers.cookie.split(';').reduce((acc, cookie) => {
             const [key, value] = cookie.trim().split('=');
@@ -16,7 +16,6 @@ module.exports = (req, res, next) => {
     }
 
     if (!token) {
-        // Se for uma rota de API, manda JSON. Se for página, redireciona pro login.
         if (req.path.includes('/api/')) {
             return res.status(401).json({ error: "Acesso negado." });
         }
@@ -25,6 +24,24 @@ module.exports = (req, res, next) => {
 
     try {
         const verificado = jwt.verify(token, process.env.JWT_SECRET);
+
+        // Confere se esse token ainda é a sessão vigente do usuário.
+        // Se outro login sobrescreveu o current_session_token, essa sessão morre.
+        const [rows] = await db.execute(
+            'SELECT current_session_token FROM usuarios WHERE id = ?',
+            [verificado.id]
+        );
+
+        if (!rows.length || rows[0].current_session_token !== verificado.sid) {
+            if (req.path.includes('/api/')) {
+                return res.status(401).json({
+                    error: "Sua sessão foi encerrada porque este usuário entrou em outro dispositivo.",
+                    codigo: "SESSAO_SUBSTITUIDA"
+                });
+            }
+            return res.redirect('/login?motivo=sessao_substituida');
+        }
+
         req.usuario = verificado;
         next();
     } catch (err) {
