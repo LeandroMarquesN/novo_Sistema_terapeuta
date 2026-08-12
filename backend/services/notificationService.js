@@ -259,3 +259,43 @@ exports.sendProgramaFundadoresEmail = async (dados) => {
     console.error(`[MED-LM] ❌ ERRO:`, error.message);
   }
 };
+
+// =========================================================================
+// 7. RECUPERAÇÃO DE SENHA (MULTI-TENANT)
+// =========================================================================
+exports.sendPasswordResetEmail = async (usuario, resetUrl) => {
+  console.log(`[MED-LM] 📩 Enviando e-mail de recuperação de senha para: ${usuario.email}`);
+
+  try {
+    // Você pode criar um arquivo 'recuperar_senha.html' na pasta templates 
+    // ou usar um template em string direto se preferir praticidade.
+    let htmlContent = `
+      <div style="font-family: 'Inter', Arial, sans-serif; background-color: #020c12; color: #cbd5e1; padding: 40px; border-radius: 16px; max-width: 600px; margin: auto; border: 1px solid rgba(52,211,153,0.2);">
+        <h2 style="color: #34d399; font-family: 'Space Grotesk', sans-serif; margin-bottom: 20px;">🔒 Recuperação de Acesso</h2>
+        <p>Olá, <strong>${usuario.nome}</strong>,</p>
+        <p>Você solicitou a recuperação de senha para a conta vinculada à clínica <strong>${usuario.nome_clinica || 'Sistema MedLM'}</strong>.</p>
+        <p>Para definir uma nova senha, clique no botão abaixo. Este link é seguro e expira em <strong>15 minutos</strong>:</p>
+        
+        <div style="text-align: center; margin: 35px 0;">
+            <a href="${resetUrl}" style="background: linear-gradient(135deg, #0891b2, #059669); color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block; box-shadow: 0 0 20px rgba(8,145,178,0.4);">Redefinir Minha Senha</a>
+        </div>
+        
+        <p style="font-size: 13px; color: #94a3b8; border-top: 1px solid rgba(255,255,255,0.08); pt: 20px; margin-top: 30px;">Se você não solicitou esta alteração, ignore este e-mail. Nenhuma alteração foi feita em sua conta.</p>
+        <p style="font-size: 11px; color: rgba(148,163,184,0.4); text-align: center; margin-top: 20px;">© ${new Date().getFullYear()} MedLM - Sistema Terapêutico Inteligente</p>
+      </div>
+    `;
+
+    const mailOptions = {
+      from: `"MedLM - Segurança" <${process.env.EMAIL_USER}>`,
+      to: usuario.email,
+      subject: '🔒 Recuperação de Senha - MedLM',
+      html: htmlContent
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`[MED-LM] ✅ E-mail de recuperação enviado com sucesso para: ${usuario.email}`);
+  } catch (error) {
+    console.error(`[MED-LM] ❌ ERRO AO ENVIAR RECUPERAÇÃO:`, error.message);
+    throw new Error('Falha ao enviar e-mail de recuperação.');
+  }
+};

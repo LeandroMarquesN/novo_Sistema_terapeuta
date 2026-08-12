@@ -28,6 +28,8 @@ const openAiRoutes = require('./routes/openAiRoutes');
 const adminRoutes = require('./routes/adminRoutes'); // Rotas de API do Admin
 const landingPageRoutes = require('./routes/lading_pageRoutes');
 
+const recuperarSenhaRoutes = require('./routes/recuperarSenhaRoutes')
+
 // importação Middleware
 const authAdmin = require('./middleware/authAdmin'); // Middleware de proteção
 const authMiddleware = require('./middleware/authMiddleware')
@@ -79,6 +81,7 @@ app.use('/api/openai', openAiRoutes);
 // app.use('/api/financeiro', financeiroRoutes);
 app.use('/api/financeiro', financeiroLogger, financeiroRoutes);
 app.use('/api/config', configuracaoRoutes);
+app.use('/api/auth', recuperarSenhaRoutes);
 app.use('/agendar', portalRoutes);
 app.use('/portal_paciente', portalPacientelroutes); // Aqui mapeamos o prefixo
 app.use('/programa-fundadores', landingPageRoutes)
