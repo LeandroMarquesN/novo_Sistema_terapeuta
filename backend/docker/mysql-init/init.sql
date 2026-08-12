@@ -71,6 +71,11 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
+
+    -- 🔑 Novas colunas adicionadas para o "Esqueci minha senha"
+    reset_token VARCHAR(255) DEFAULT NULL,
+    reset_expires DATETIME DEFAULT NULL,
+    
     cargo ENUM(
         'dono',
         'admin',
