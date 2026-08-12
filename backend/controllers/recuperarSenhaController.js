@@ -1,6 +1,5 @@
 const db = require('../config/db');
 const crypto = require('crypto');
-const bcrypt = require('bcryptjs');
 const notificationService = require('../services/notificationService');
 
 // URL base vinda do ambiente ou padrão do render/localhost
@@ -27,10 +26,10 @@ exports.forgotPassword = async (req, res) => {
 
         const user = users[0];
 
-        // Gera o token seguro (sem data de expiração)
+        // Gera o token seguro
         const resetToken = crypto.randomBytes(32).toString('hex');
 
-        // Salva na tabela de usuários limpando a data (NULL)
+        // Salva na tabela de usuários limpando a expiração para evitar conflitos
         await db.execute(
             'UPDATE usuarios SET reset_token = ?, reset_expires = NULL WHERE id = ?',
             [resetToken, user.id]
@@ -57,7 +56,7 @@ exports.resetPassword = async (req, res) => {
     }
 
     try {
-        // Busca apenas pelo token, sem validar o tempo (NOW)
+        // Busca apenas pelo token
         const [users] = await db.execute(
             'SELECT * FROM usuarios WHERE reset_token = ?',
             [token]
@@ -68,13 +67,11 @@ exports.resetPassword = async (req, res) => {
         }
 
         const user = users[0];
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(newPassword, salt);
 
-        // Atualiza a senha e limpa o token para que ele não possa ser reutilizado
+        // Salva a nova senha em texto puro diretamente no banco e limpa o token
         await db.execute(
             'UPDATE usuarios SET senha = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?',
-            [hashedPassword, user.id]
+            [newPassword, user.id]
         );
 
         return res.json({ message: 'Senha redefinida com sucesso! Você já pode fazer login.' });
