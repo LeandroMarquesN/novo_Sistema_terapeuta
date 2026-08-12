@@ -323,104 +323,6 @@
             .orb, .hero-grid, body::before { display: none !important; }
             .prontuario-container { border: none !important; box-shadow: none !important; }
         }
-
-        /* ═══════════════════════════════════════════════════════════
-           RESPONSIVIDADE — trava o sidebar flyout em telas < 1024px
-           (mesmo padrão já usado em Minha Equipe)
-        ═══════════════════════════════════════════════════════════ */
-        @media (max-width: 1023px) {
-            .app-sidebar {
-                width: 5rem !important;
-            }
-        }
-
-        /* ═══════════════════════════════════════════════════════════
-           PROFUNDIDADE 3D — bordas deixam de parecer "chapadas"
-           Combina: brilho no topo (luz) + sombra interna embaixo (profundidade)
-           + sombra externa projetada (elevação)
-        ═══════════════════════════════════════════════════════════ */
-        .glass-panel {
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.05) inset,
-                0 -1px 0 rgba(0,0,0,0.4) inset,
-                0 24px 48px -20px rgba(0,0,0,0.55),
-                0 2px 8px rgba(0,0,0,0.3) !important;
-        }
-        .glass-panel:hover {
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.07) inset,
-                0 -1px 0 rgba(0,0,0,0.45) inset,
-                0 28px 56px -18px rgba(0,0,0,0.6),
-                0 0 0 1px rgba(52,211,153,0.1) !important;
-        }
-
-        .glass-card {
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.04) inset,
-                0 -1px 0 rgba(0,0,0,0.3) inset,
-                0 8px 16px -8px rgba(0,0,0,0.4);
-        }
-
-        .patient-chip {
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.05) inset,
-                0 -1px 0 rgba(0,0,0,0.35) inset,
-                0 12px 24px -10px rgba(0,0,0,0.5);
-        }
-
-        .input-premium {
-            box-shadow:
-                inset 0 2px 5px rgba(0,0,0,0.3),
-                inset 0 -1px 0 rgba(255,255,255,0.03) !important;
-        }
-        .input-premium:focus {
-            box-shadow:
-                inset 0 2px 5px rgba(0,0,0,0.25),
-                0 0 0 4px rgba(52,211,153,0.08) !important;
-        }
-
-        .btn-primary-gradient {
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.18) inset,
-                0 -2px 0 rgba(0,0,0,0.18) inset,
-                0 0 20px rgba(8,145,178,0.3);
-        }
-        .btn-secondary, .btn-print, .btn-email, .btn-audit {
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.05) inset,
-                0 -1px 0 rgba(0,0,0,0.25) inset;
-        }
-
-        .app-sidebar {
-            box-shadow:
-                4px 0 24px rgba(0,0,0,0.4),
-                1px 0 0 rgba(255,255,255,0.03) inset !important;
-        }
-
-        .modal-panel {
-            box-shadow:
-                0 1px 0 rgba(255,255,255,0.06) inset,
-                0 60px 100px rgba(0,0,0,0.6),
-                0 0 60px rgba(34,211,238,0.08) !important;
-        }
-
-        /* Editor Quill — altura mínima garantida mesmo quando a coluna
-           empilha em telas menores (sem isso ele pode colapsar) */
-        .ql-editor {
-            min-height: 220px !important;
-        }
-
-        /* ═══════════════════════════════════════════════════════════
-           BREAKPOINTS EXTRA — telas muito pequenas e super grandes
-        ═══════════════════════════════════════════════════════════ */
-        @media (max-width: 479px) {
-            .page-title { font-size: 1.25rem !important; }
-            .info-chip { font-size: 10px !important; padding: 5px 9px !important; }
-        }
-
-        @media (min-width: 1920px) {
-            .prontuario-container .ql-editor { font-size: 1.05rem !important; }
-        }
     </style>
 </head>
 
@@ -474,12 +376,12 @@
         </aside>
 
         <!-- 2. MAIN CONTAINER -->
-        <main class="flex-1 ml-20 p-4 sm:p-6 lg:p-8 flex flex-col h-screen overflow-y-auto lg:overflow-hidden">
+        <main class="flex-1 ml-20 p-6 lg:p-8 flex flex-col h-screen overflow-hidden">
 
             <!-- TOP BAR HEADER -->
             <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 flex-shrink-0">
                 <div>
-                    <h1 class="text-xl sm:text-2xl page-title tracking-tight">Módulo de Atendimento Clínico</h1>
+                    <h1 class="text-2xl page-title tracking-tight">Módulo de Atendimento Clínico</h1>
 
                     <!-- Dados Consolidados da Clínica e do Usuário Operador -->
                     <div class="flex flex-wrap items-center gap-3 mt-2 text-xs font-semibold">
@@ -494,7 +396,7 @@
                 </div>
 
                 <!-- Identificação Superior do Paciente Selecionado -->
-                <div class="patient-chip px-5 py-3 flex items-center gap-3 shadow-lg w-full md:w-auto">
+                <div class="patient-chip px-5 py-3 flex items-center gap-3 shadow-lg">
                     <div class="w-9 h-9 rounded-xl icon-emerald flex items-center justify-center text-sm">
                         <i class="fas fa-id-badge"></i>
                     </div>
@@ -507,16 +409,16 @@
             </header>
 
             <!-- 🔄 ÁREA OPERACIONAL DE FLUXO (TRÊS COLUNAS) -->
-            <div class="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-y-auto lg:overflow-hidden pb-4 lg:pb-2 max-w-[1900px] mx-auto w-full">
+            <div class="flex-1 flex gap-6 overflow-hidden pb-2">
 
                 <!-- COLUNA 1: FICHA CLÍNICA EXPRESSA -->
-                <section class="w-full lg:w-72 xl:w-80 glass-panel flex flex-col overflow-hidden flex-shrink-0">
+                <section class="w-80 glass-panel flex flex-col overflow-hidden flex-shrink-0">
                     <div class="p-5 glass-header flex items-center gap-2">
                         <i class="fas fa-file-medical" style="color:var(--emerald)"></i>
                         <h3 class="text-xs font-black uppercase tracking-wider text-white">Ficha Clínica Rápida</h3>
                     </div>
 
-                    <div class="max-h-[360px] lg:max-h-none lg:flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs">
+                    <div class="flex-1 overflow-y-auto p-5 space-y-4 text-xs">
 
                         <!-- Dados Cadastrais -->
                         <div class="glass-card p-4 space-y-3">
@@ -589,13 +491,13 @@
                 </section>
 
                 <!-- COLUNA 2: LINHA DO TEMPO -->
-                <section class="w-full lg:w-64 xl:w-72 glass-panel flex flex-col overflow-hidden flex-shrink-0">
+                <section class="w-72 glass-panel flex flex-col overflow-hidden flex-shrink-0">
                     <div class="p-5 glass-header flex items-center justify-between">
                         <h3 class="text-xs font-black uppercase tracking-wider text-white">Histórico de Evolução</h3>
                         <span class="badge-count" id="contadorEvolucoes">0</span>
                     </div>
 
-                    <div id="timelineProntuarios" class="max-h-[260px] lg:max-h-none lg:flex-1 overflow-y-auto p-4 space-y-3">
+                    <div id="timelineProntuarios" class="flex-1 overflow-y-auto p-4 space-y-3">
                         <div class="timeline-empty">
                             <i class="fas fa-history text-xl mb-2 block" style="color: rgba(148,163,184,0.25)"></i>
                             Aguardando carregamento da timeline...
@@ -604,7 +506,7 @@
                 </section>
 
                 <!-- COLUNA 3: PRONTUÁRIO INTEGRADO ATIVO -->
-                <section class="w-full flex-1 glass-panel flex flex-col overflow-hidden prontuario-container min-h-[560px] lg:min-h-0">
+                <section class="flex-1 glass-panel flex flex-col overflow-hidden prontuario-container">
                     <form id="formAtendimento" onsubmit="salvarEvolucao(event)" class="flex flex-col h-full">
 
                         <input type="hidden" id="atendimentoPacienteId" value="">
@@ -624,7 +526,7 @@
                         </div>
 
                         <!-- Editor de Texto -->
-                        <div class="flex-1 p-4 sm:p-5 overflow-hidden flex flex-col min-h-[300px]">
+                        <div class="flex-1 p-5 overflow-hidden flex flex-col">
                             <label class="form-label mb-2 flex items-center gap-1">
                                 <i class="fas fa-keyboard" style="color:var(--cyan)"></i> Relatório de Evolução Clínica do Paciente
                             </label>
@@ -634,28 +536,28 @@
                         </div>
 
                         <!-- Operações do Rodapé -->
-                        <div class="p-4 sm:p-5 glass-header flex flex-col sm:flex-row sm:flex-wrap justify-end gap-2 sm:gap-3">
-                            <button type="button" onclick="limparFormulario()" class="btn-secondary w-full sm:w-auto px-4 py-2.5 rounded-xl transition text-xs font-black uppercase tracking-wider">
+                        <div class="p-5 glass-header flex flex-wrap justify-end gap-3">
+                            <button type="button" onclick="limparFormulario()" class="btn-secondary px-4 py-2.5 rounded-xl transition text-xs font-black uppercase tracking-wider">
                                 Limpar
                             </button>
 
-                            <button type="submit" id="btnSalvarProntuario" class="btn-primary-gradient w-full sm:w-auto px-6 py-2.5 rounded-xl active:scale-95 transition-all duration-200 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                            <button type="submit" id="btnSalvarProntuario" class="btn-primary-gradient px-6 py-2.5 rounded-xl active:scale-95 transition-all duration-200 text-xs font-black uppercase tracking-wider flex items-center gap-2">
                                 <i class="fas fa-file-signature text-[11px]"></i> Finalizar e Assinar Atendimento
                             </button>
 
-                            <div class="flex gap-2 w-full sm:w-auto">
-                                <button type="button" onclick="window.print()" class="btn-print flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center">
+                            <div class="flex gap-2">
+                                <button type="button" onclick="window.print()" class="btn-print px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition">
                                     <i class="fas fa-print mr-2"></i> IMPRIMIR
                                 </button>
 
-                                <button type="button" onclick="enviarProntuarioEmail()" id="btnEnviarEmail" class="btn-email flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center">
+                                <button type="button" onclick="enviarProntuarioEmail()" id="btnEnviarEmail" class="btn-email px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition">
                                     <i class="fas fa-paper-plane mr-2"></i> ENVIAR EMAIL
                                 </button>
                                 <input type="hidden" id="idDoProntuarioAtual" value="">
                             </div>
                         </div>
 
-                        <div class="p-4 sm:p-5 glass-header flex flex-wrap items-center justify-end gap-3">
+                        <div class="p-5 glass-header flex flex-wrap items-center justify-end gap-3">
                             <button type="button" onclick="abrirModalAuditoria()" class="btn-audit text-xs font-black px-3 py-1.5 rounded-xl transition-all flex items-center gap-2">
                                 <i class="fas fa-shield-alt"></i> AUDITORIA
                             </button>
@@ -669,7 +571,7 @@
     </div>
 
     <!-- MODAL AUDITORIA -->
-    <div id="modalAuditoria" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div id="modalAuditoria" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm">
         <div class="modal-panel w-full max-w-lg rounded-[28px] p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-4 pb-4" style="border-bottom: 1px solid var(--border)">
                 <h3 class="text-lg font-black text-white flex items-center gap-2" style="font-family:'Space Grotesk',sans-serif">
