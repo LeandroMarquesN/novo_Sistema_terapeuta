@@ -16,7 +16,7 @@ services:
       - ./backend/uploads:/app/backend/uploads
     env_file:
       - .env
-    command: node backend/server.js
+    command: node server.js
     depends_on:
       db:
         condition: service_healthy
