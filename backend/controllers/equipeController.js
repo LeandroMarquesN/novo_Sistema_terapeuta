@@ -115,7 +115,7 @@ exports.removerMembro = async (req, res) => {
         // 1. Busca o membro garantindo que ele pertence à MESMA clínica de quem está pedindo
         //    (evita que alguém, manipulando a URL, remova usuário de outra clínica)
         const [membros] = await db.execute(
-            "SELECT id, cargo FROM usuarios WHERE id = ? AND clinica_id = ?",
+            "SELECT id, nome, cargo FROM usuarios WHERE id = ? AND clinica_id = ?",
             [id, clinicaId]
         );
 
@@ -137,6 +137,8 @@ exports.removerMembro = async (req, res) => {
 
         // 4. Remove
         await db.execute("DELETE FROM usuarios WHERE id = ? AND clinica_id = ?", [id, clinicaId]);
+
+        console.log(`Log: Usuário ${membro.nome} (ID: ${id}) foi removido da equipe da clínica ${clinicaId} por ${req.usuario.nome} (ID: ${usuarioLogadoId}).`);
 
         res.json({ message: "Profissional removido com sucesso." });
 
