@@ -75,7 +75,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     -- 🔑 Novas colunas adicionadas para o "Esqueci minha senha"
     reset_token VARCHAR(255) DEFAULT NULL,
     reset_expires DATETIME DEFAULT NULL,
-    
+    DATE_ADD(NOW(), INTERVAL 2 HOUR)
     cargo ENUM(
         'dono',
         'admin',
