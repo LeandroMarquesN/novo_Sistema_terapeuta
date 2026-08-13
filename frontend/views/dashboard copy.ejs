@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <title>MedLM - sistema Clinico inteligente Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,7 +55,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 16px;
-    background: rgba(2, 12, 18, 0.4);
+    background: rgba(2, 12, 18, 0.4); /* Fundo sutil */
     border: 1px solid var(--border-cyan);
     color: var(--cyan);
     border-radius: 6px;
@@ -76,6 +76,7 @@
     box-shadow: 0 0 15px var(--glow-em);
 }
 
+/* Animação: Ondas de áudio ativas */
 .falando {
     border-color: var(--emerald);
     color: var(--emerald);
@@ -98,6 +99,7 @@
     100% { transform: scale(1.2); opacity: 0; }
 }
 
+/* Ajuste do ícone vibrando */
 .falando .wave-icon { stroke: var(--emerald); animation: pulse-icon 0.5s infinite; }
 
 @keyframes pulse-icon {
@@ -136,6 +138,7 @@
             font-family: 'Inter', sans-serif;
         }
 
+        /* Subtle scan line atmosphere */
         body::before {
             content: '';
             position: fixed;
@@ -151,18 +154,22 @@
             z-index: 0;
         }
 
+        /* ─── Scrollbar ─── */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
 
-        /* ─── Sidebar (Desktop) ─── */
-        aside.sidebar-desktop {
+        /* ─── Sidebar ─── */
+        aside {
             background: rgba(2,12,18,0.92) !important;
             border-right: 1px solid var(--border) !important;
             backdrop-filter: blur(20px);
         }
 
-        .logo-block { border-bottom: 1px solid var(--border); }
+        /* Logo block */
+        .logo-block {
+            border-bottom: 1px solid var(--border);
+        }
         .logo-icon {
             background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
             box-shadow: 0 0 20px rgba(8,145,178,0.5), 0 0 40px rgba(5,150,105,0.2);
@@ -170,6 +177,7 @@
         .logo-text-brand { color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; }
         .logo-text-accent { color: var(--emerald); text-shadow: 0 0 12px rgba(52,211,153,0.6); }
 
+        /* Nav links */
         .nav-link {
             color: rgba(148,163,184,0.7);
             border-radius: 14px;
@@ -198,6 +206,7 @@
         }
         .nav-link-active i { text-shadow: 0 0 12px rgba(52,211,153,0.8); }
 
+        /* Theme toggle */
         #theme-toggle-btn {
             color: rgba(148,163,184,0.6);
             border-radius: 14px;
@@ -206,7 +215,10 @@
         }
         #theme-toggle-btn:hover { color: var(--cyan); border-color: var(--border-cyan); }
 
-        header { border-bottom: 1px solid var(--border) !important; }
+        /* ─── Header ─── */
+        header {
+            border-bottom: 1px solid var(--border) !important;
+        }
 
         #boasVindas { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
         #boasVindas .separator { color: rgba(52,211,153,0.3); }
@@ -219,6 +231,7 @@
             filter: drop-shadow(0 0 8px rgba(34,211,238,0.3));
         }
 
+        /* Date pill */
         #data-hora-container-tailwind {
             background: rgba(255,255,255,0.04) !important;
             border: 1px solid var(--border) !important;
@@ -227,6 +240,7 @@
             border-radius: 99px;
         }
 
+        /* New appointment button */
         .btn-new-appt {
             background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
             border: none;
@@ -241,6 +255,7 @@
             transform: translateY(-1px);
         }
 
+        /* Avatar badge */
         .header-avatar {
             background: rgba(255,255,255,0.04) !important;
             border: 1px solid var(--border) !important;
@@ -305,6 +320,7 @@
         .panel-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
         .panel-subtitle { color: rgba(148,163,184,0.5); font-size: 11px; }
 
+        /* Filter tabs */
         #filtro-container {
             background: rgba(255,255,255,0.04) !important;
             border: 1px solid var(--border) !important;
@@ -329,6 +345,7 @@
             box-shadow: 0 0 12px rgba(52,211,153,0.2) !important;
         }
 
+        /* Print button */
         .btn-print {
             background: rgba(255,255,255,0.04) !important;
             border: 1px solid var(--border) !important;
@@ -340,7 +357,7 @@
         }
         .btn-print:hover { border-color: var(--border-cyan) !important; color: var(--cyan) !important; }
 
-        /* Table (Desktop) */
+        /* Table */
         .data-table-wrap {
             background: rgba(0,0,0,0.2);
             border: 1px solid rgba(52,211,153,0.1);
@@ -395,6 +412,7 @@
             font-size: 11px; font-weight: 600;
         }
 
+        /* Status badges */
         .status-badge {
             display: inline-flex; align-items: center; gap: 5px;
             padding: 4px 10px; border-radius: 8px;
@@ -407,6 +425,7 @@
         .status-default    { background: rgba(148,163,184,0.08); border: 1px solid rgba(148,163,184,0.2);  color: #94a3b8; }
         .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: pulse 2s infinite; }
 
+        /* Action button in table */
         .btn-prontuario {
             background: rgba(255,255,255,0.04);
             border: 1px solid var(--border);
@@ -422,6 +441,7 @@
             box-shadow: 0 0 12px rgba(52,211,153,0.15);
         }
 
+        /* Empty state */
         .empty-icon-wrap {
             width: 48px; height: 48px;
             background: rgba(255,255,255,0.04);
@@ -432,7 +452,7 @@
             margin: 0 auto 12px;
         }
 
-        /* Calendar Panel */
+        /* ─── Calendar Panel ─── */
         .calendar-panel {
             background: rgba(255,255,255,0.025);
             border: 1px solid var(--border);
@@ -443,6 +463,7 @@
 
         #calendario-mes-ano { color: rgba(52,211,153,0.6); font-size: 11px; font-weight: 600; }
 
+        /* Cal view toggle */
         .cal-toggle-wrap {
             background: rgba(255,255,255,0.04);
             border: 1px solid var(--border);
@@ -468,7 +489,7 @@
             color: rgba(52,211,153,0.4); text-transform: uppercase; letter-spacing: 0.1em;
         }
 
-        /* Aside Patient Card */
+        /* ─── Aside Patient Card ─── */
         #asidePaciente {
             background: rgba(2,12,18,0.8) !important;
             border: 1px solid rgba(52,211,153,0.2) !important;
@@ -499,6 +520,7 @@
             pointer-events: none;
         }
 
+        /* Counter badge */
         #infoContadorAside {
             background: rgba(52,211,153,0.10) !important;
             border: 1px solid rgba(52,211,153,0.25) !important;
@@ -510,6 +532,7 @@
             padding: 4px 12px !important;
         }
 
+        /* Nav arrows */
         .aside-nav-btn {
             width: 30px; height: 30px; border-radius: 10px;
             background: rgba(255,255,255,0.05);
@@ -520,6 +543,7 @@
         }
         .aside-nav-btn:hover { color: var(--emerald); border-color: rgba(52,211,153,0.35); }
 
+        /* Avatar initials */
         #infoIniciaisAside {
             background: linear-gradient(135deg, #0891b2, #059669) !important;
             box-shadow: 0 0 30px rgba(8,145,178,0.4), 0 0 60px rgba(5,150,105,0.2) !important;
@@ -530,10 +554,12 @@
         #infoNomeAside { color: #f1f5f9; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 800; }
         #infoTerapiaAside { color: var(--cyan); font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-shadow: 0 0 10px rgba(34,211,238,0.4); }
 
+        /* Info rows */
         .aside-info-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
         .aside-info-label { color: rgba(148,163,184,0.5); font-weight: 500; }
         #infoTelefoneAside, #infoStatusAside { color: #e2e8f0; font-weight: 700; font-size: 12px; }
 
+        /* Access button */
         #btnLinkProntuario {
             background: linear-gradient(135deg, rgba(8,145,178,0.2), rgba(5,150,105,0.15)) !important;
             border: 1px solid rgba(52,211,153,0.3) !important;
@@ -551,7 +577,7 @@
             box-shadow: 0 0 20px rgba(52,211,153,0.2) !important;
         }
 
-        /* Admin card */
+        /* ─── Admin card ─── */
         .admin-card {
             background: linear-gradient(135deg, rgba(8,145,178,0.3) 0%, rgba(5,150,105,0.25) 50%, rgba(251,191,36,0.08) 100%);
             border: 1px solid rgba(52,211,153,0.25);
@@ -608,7 +634,7 @@
             animation: pulse 2s infinite;
         }
 
-        /* Charts */
+        /* ─── Charts Section ─── */
         .charts-section { border-top: 1px solid var(--border); }
         .charts-section-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
         .charts-section-sub { color: rgba(148,163,184,0.5); font-size: 11px; }
@@ -630,7 +656,7 @@
         .chart-card-title { font-family: 'Space Grotesk', sans-serif; color: #e2e8f0; font-size: 14px; font-weight: 700; }
         .chart-card-sub { color: rgba(148,163,184,0.4); font-size: 11px; }
 
-        /* Gaveta */
+        /* ─── Gaveta (Drawer) ─── */
         #gaveta-painel {
             background: rgba(2,12,18,0.96) !important;
             border-right: 1px solid var(--border) !important;
@@ -715,618 +741,47 @@
         }
         .btn-salvar:hover { box-shadow: 0 0 30px rgba(8,145,178,0.5); transform: translateY(-1px); }
 
+        /* ─── ApexCharts dark overrides ─── */
         .apexcharts-canvas { background: transparent !important; }
         .apexcharts-tooltip { background: rgba(2,12,18,0.95) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; color: #e2e8f0 !important; }
         .apexcharts-tooltip-title { background: rgba(52,211,153,0.08) !important; border-bottom: 1px solid var(--border) !important; color: var(--emerald) !important; }
 
+        /* ─── Misc helpers ─── */
         .card-hover-effect {
             transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
             cursor: pointer;
         }
         .card-hover-effect:hover { transform: translateY(-4px); }
 
+        /* Override any Tailwind white/gray backgrounds inside the dark theme */
         .bg-white { background: rgba(255,255,255,0.03) !important; }
         .bg-gray-50 { background: rgba(255,255,255,0.025) !important; }
         .bg-gray-100 { background: rgba(255,255,255,0.04) !important; }
         .dark\:bg-gray-900 { background: rgba(2,12,18,0.6) !important; }
 
+        /* Override table row & text colors for dark theme */
         .text-gray-900, .text-gray-800, .dark\:text-white { color: #e2e8f0 !important; }
         .text-gray-500, .text-gray-400 { color: rgba(148,163,184,0.55) !important; }
         .text-gray-700 { color: #94a3b8 !important; }
         .dark\:text-gray-100 { color: #cbd5e1 !important; }
 
+        /* ID-specific overrides for text */
         #boasVindas, #usuarioNome, .text-gray-950 { color: #f1f5f9 !important; }
 
+        /* Force borders to dark theme */
         .border-gray-100, .border-gray-200 { border-color: rgba(52,211,153,0.1) !important; }
         .divide-gray-200\/60 > tr { border-color: rgba(52,211,153,0.06) !important; }
 
+        /* Stat card badge overrides */
         .text-green-600 { color: var(--emerald) !important; }
         .text-red-500 { color: #f87171 !important; }
         .text-orange-600 { color: var(--amber) !important; }
 
+        /* Gradient text for revenue card */
         .bg-gradient-to-r.from-blue-600.to-emerald-500.bg-clip-text { 
             background: linear-gradient(90deg, var(--cyan), var(--emerald)) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
-        }
-
-        /* ============================================================
-           MOBILE FIRST – Telas pequenas e médias (≤ 1024px)
-           ============================================================ */
-
-        /* Elementos mobile (escondidos no desktop) */
-        .mobile-topbar,
-        .mobile-bottom-tabbar,
-        .mobile-drawer-overlay,
-        .mobile-drawer,
-        .mobile-patient-cards,
-        .mobile-only { display: none; }
-
-        /* Desktop only */
-        .desktop-only { display: block; }
-
-        @media (max-width: 1024px) {
-
-            /* Esconde sidebar desktop e elementos desktop */
-            aside.sidebar-desktop,
-            .desktop-only,
-            .data-table-wrap { display: none !important; }
-
-            /* Mostra elementos mobile */
-            .mobile-topbar,
-            .mobile-bottom-tabbar,
-            .mobile-patient-cards,
-            .mobile-only { display: flex !important; }
-
-            body {
-                padding-bottom: 88px; /* espaço para tab bar */
-            }
-
-            /* ─── TOP BAR FIXA ─── */
-            .mobile-topbar {
-                position: fixed;
-                top: 0; left: 0; right: 0;
-                z-index: 60;
-                height: 64px;
-                background: rgba(2, 12, 18, 0.95);
-                border-bottom: 1px solid var(--border);
-                backdrop-filter: blur(20px);
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 16px;
-            }
-
-            .mobile-topbar .logo-wrap {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .mobile-topbar .logo-icon {
-                width: 38px; height: 38px;
-                border-radius: 12px;
-                font-size: 16px;
-            }
-
-            .mobile-topbar .logo-text {
-                font-family: 'Space Grotesk', sans-serif;
-                font-size: 20px;
-                font-weight: 700;
-                color: #e2e8f0;
-            }
-            .mobile-topbar .logo-text span {
-                color: var(--emerald);
-                text-shadow: 0 0 10px rgba(52,211,153,0.5);
-            }
-
-            .mobile-topbar .actions {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .mobile-topbar .icon-btn {
-                width: 44px; height: 44px;
-                border-radius: 12px;
-                background: rgba(255,255,255,0.05);
-                border: 1px solid var(--border);
-                color: rgba(148,163,184,0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 18px;
-                transition: all 0.2s;
-            }
-            .mobile-topbar .icon-btn:active {
-                background: rgba(52,211,153,0.15);
-                color: var(--emerald);
-                border-color: rgba(52,211,153,0.35);
-            }
-
-            .mobile-topbar .avatar-btn {
-                width: 42px; height: 42px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #0891b2, #059669);
-                color: #fff;
-                font-family: 'Space Grotesk', sans-serif;
-                font-size: 13px;
-                font-weight: 800;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 2px solid rgba(52,211,153,0.4);
-                box-shadow: 0 0 12px rgba(8,145,178,0.35);
-            }
-
-            /* ─── DRAWER LATERAL (Menu hambúrguer) ─── */
-            .mobile-drawer-overlay {
-                position: fixed;
-                inset: 0;
-                background: rgba(2,12,18,0.75);
-                backdrop-filter: blur(6px);
-                z-index: 70;
-                opacity: 0;
-                pointer-events: none;
-                transition: opacity 0.3s ease;
-            }
-            .mobile-drawer-overlay.open {
-                opacity: 1;
-                pointer-events: auto;
-            }
-
-            .mobile-drawer {
-                position: fixed;
-                top: 0; left: 0; bottom: 0;
-                width: 82%;
-                max-width: 320px;
-                background: rgba(2,12,18,0.98);
-                border-right: 1px solid var(--border);
-                z-index: 80;
-                transform: translateX(-100%);
-                transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-                display: flex;
-                flex-direction: column;
-                padding: 24px 16px;
-            }
-            .mobile-drawer.open {
-                transform: translateX(0);
-            }
-
-            .mobile-drawer .drawer-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 28px;
-                padding-bottom: 16px;
-                border-bottom: 1px solid var(--border);
-            }
-
-            .mobile-drawer .drawer-logo {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-            .mobile-drawer .drawer-logo .logo-icon {
-                width: 44px; height: 44px;
-                border-radius: 14px;
-                font-size: 18px;
-            }
-            .mobile-drawer .drawer-logo span {
-                font-family: 'Space Grotesk', sans-serif;
-                font-size: 22px;
-                font-weight: 700;
-                color: #e2e8f0;
-            }
-            .mobile-drawer .drawer-logo span b {
-                color: var(--emerald);
-            }
-
-            .mobile-drawer .close-drawer {
-                width: 40px; height: 40px;
-                border-radius: 12px;
-                background: rgba(248,113,113,0.1);
-                border: 1px solid rgba(248,113,113,0.25);
-                color: #f87171;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 16px;
-            }
-
-            .mobile-drawer nav {
-                flex: 1;
-                display: flex;
-                flex-direction: column;
-                gap: 6px;
-            }
-
-            .mobile-drawer .nav-item {
-                display: flex;
-                align-items: center;
-                gap: 14px;
-                padding: 14px 16px;
-                border-radius: 14px;
-                color: rgba(148,163,184,0.75);
-                font-size: 16px;
-                font-weight: 600;
-                transition: all 0.2s;
-                border: 1px solid transparent;
-                text-decoration: none;
-            }
-            .mobile-drawer .nav-item i {
-                width: 28px;
-                font-size: 20px;
-                text-align: center;
-            }
-            .mobile-drawer .nav-item.active {
-                background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.2));
-                border-color: rgba(52,211,153,0.35);
-                color: var(--emerald);
-            }
-            .mobile-drawer .nav-item:active {
-                background: rgba(52,211,153,0.1);
-                color: var(--emerald);
-            }
-
-            .mobile-drawer .drawer-footer {
-                padding-top: 16px;
-                border-top: 1px solid var(--border);
-            }
-
-            /* ─── BOTTOM TAB BAR ─── */
-            .mobile-bottom-tabbar {
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                z-index: 60;
-                height: 76px;
-                background: rgba(2, 12, 18, 0.97);
-                border-top: 1px solid var(--border);
-                backdrop-filter: blur(20px);
-                display: flex;
-                align-items: center;
-                justify-content: space-around;
-                padding: 0 8px;
-                padding-bottom: env(safe-area-inset-bottom, 0);
-            }
-
-            .mobile-bottom-tabbar .tab-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 4px;
-                flex: 1;
-                height: 100%;
-                color: rgba(148,163,184,0.55);
-                font-size: 11px;
-                font-weight: 700;
-                text-decoration: none;
-                transition: all 0.2s;
-                position: relative;
-            }
-            .mobile-bottom-tabbar .tab-item i {
-                font-size: 22px;
-                margin-bottom: 2px;
-            }
-            .mobile-bottom-tabbar .tab-item.active {
-                color: var(--emerald);
-            }
-            .mobile-bottom-tabbar .tab-item.active::before {
-                content: '';
-                position: absolute;
-                top: 6px;
-                width: 28px;
-                height: 3px;
-                background: var(--emerald);
-                border-radius: 99px;
-                box-shadow: 0 0 10px var(--emerald);
-            }
-            .mobile-bottom-tabbar .tab-item:active {
-                color: var(--cyan);
-                transform: scale(0.95);
-            }
-
-            /* ─── MAIN CONTENT ─── */
-            main {
-                margin-left: 0 !important;
-                padding: 80px 14px 24px !important;
-                overflow-x: hidden;
-            }
-
-            /* Header mobile */
-            header {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 12px !important;
-                margin-bottom: 20px !important;
-                padding-bottom: 16px !important;
-            }
-
-            #boasVindas {
-                font-size: 22px !important;
-                line-height: 1.25 !important;
-            }
-            #boasVindas .separator { display: none; }
-            #clinicaNome {
-                display: block;
-                font-size: 16px !important;
-                margin-top: 4px;
-            }
-
-            header p {
-                font-size: 13px !important;
-            }
-
-            /* Esconde botões desktop no header */
-            header .flex.items-center.flex-wrap {
-                width: 100%;
-                justify-content: space-between;
-                gap: 10px;
-            }
-
-            #btnFalarAgenda {
-                padding: 10px 14px !important;
-                font-size: 12px !important;
-            }
-            #btnFalarAgenda .wave-icon { width: 16px; height: 16px; }
-
-            #data-hora-container-tailwind {
-                display: none !important;
-            }
-
-            .btn-new-appt {
-                padding: 10px 16px !important;
-                font-size: 13px !important;
-                border-radius: 14px !important;
-            }
-
-            .header-avatar { display: none !important; }
-
-            /* ─── STAT CARDS – 2 colunas, maiores e legíveis ─── */
-            .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 12px !important;
-                margin-bottom: 24px !important;
-            }
-
-            .stat-card {
-                padding: 18px 14px !important;
-                border-radius: 18px !important;
-            }
-            .stat-card .card-label {
-                font-size: 11px !important;
-                letter-spacing: 0.08em !important;
-            }
-            .stat-card .card-value,
-            .stat-card h3 {
-                font-size: 28px !important;
-                margin-top: 8px !important;
-            }
-            .stat-card .text-xs {
-                font-size: 12px !important;
-            }
-            .stat-card i {
-                font-size: 18px !important;
-            }
-
-            /* ─── FLOW PANEL ─── */
-            .flow-panel {
-                padding: 18px 14px !important;
-                border-radius: 20px !important;
-            }
-            .panel-title {
-                font-size: 20px !important;
-            }
-            .panel-subtitle {
-                font-size: 13px !important;
-            }
-
-            #filtro-container {
-                width: 100%;
-                margin-top: 12px;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            .filtro-btn {
-                font-size: 13px !important;
-                padding: 10px 14px !important;
-                white-space: nowrap;
-            }
-
-            .btn-print {
-                display: none !important; /* esconde no mobile */
-            }
-
-            /* ─── PATIENT CARDS (substitui tabela) ─── */
-            .mobile-patient-cards {
-                flex-direction: column;
-                gap: 14px;
-                width: 100%;
-            }
-
-            .patient-card-mobile {
-                background: rgba(255,255,255,0.03);
-                border: 1px solid var(--border);
-                border-radius: 18px;
-                padding: 16px;
-                position: relative;
-                overflow: hidden;
-                transition: all 0.2s;
-            }
-            .patient-card-mobile::before {
-                content: '';
-                position: absolute;
-                top: 0; left: 0; right: 0;
-                height: 1px;
-                background: linear-gradient(90deg, transparent, rgba(52,211,153,0.4), transparent);
-            }
-            .patient-card-mobile:active {
-                border-color: rgba(52,211,153,0.4);
-                background: rgba(52,211,153,0.05);
-            }
-
-            .patient-card-mobile .card-top {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                margin-bottom: 12px;
-            }
-
-            .patient-card-mobile .patient-id {
-                font-size: 12px;
-                font-weight: 700;
-                color: rgba(52,211,153,0.5);
-            }
-
-            .patient-card-mobile .patient-name {
-                font-size: 17px !important;
-                font-weight: 800;
-                color: #f1f5f9;
-                font-family: 'Space Grotesk', sans-serif;
-                margin-bottom: 4px;
-            }
-
-            .patient-card-mobile .patient-phone {
-                font-size: 13px !important;
-                color: rgba(148,163,184,0.7);
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-            .patient-card-mobile .patient-phone i {
-                color: var(--emerald);
-                font-size: 14px;
-            }
-
-            .patient-card-mobile .card-meta {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 8px;
-                margin: 12px 0;
-            }
-
-            .patient-card-mobile .meta-item {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: rgba(8,145,178,0.12);
-                border: 1px solid rgba(8,145,178,0.2);
-                color: var(--cyan);
-                padding: 6px 10px;
-                border-radius: 10px;
-                font-size: 13px;
-                font-weight: 700;
-            }
-
-            .patient-card-mobile .therapy-badge {
-                font-size: 13px !important;
-                padding: 6px 12px !important;
-            }
-
-            .patient-card-mobile .status-badge {
-                font-size: 12px !important;
-                padding: 6px 12px !important;
-            }
-
-            .patient-card-mobile .card-actions {
-                margin-top: 12px;
-                padding-top: 12px;
-                border-top: 1px solid rgba(52,211,153,0.1);
-            }
-
-            .patient-card-mobile .btn-prontuario {
-                width: 100%;
-                justify-content: center;
-                font-size: 14px !important;
-                padding: 12px 16px !important;
-                border-radius: 12px !important;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-
-            /* Empty state mobile */
-            .empty-state-mobile {
-                text-align: center;
-                padding: 40px 20px;
-            }
-            .empty-state-mobile .empty-icon-wrap {
-                width: 64px; height: 64px;
-                font-size: 24px;
-            }
-            .empty-state-mobile p {
-                font-size: 16px !important;
-            }
-
-            /* ─── CALENDAR + PAINEL AGENDAMENTOS ─── */
-            .calendar-panel,
-            .col-span-12.xl\:col-span-8 {
-                padding: 16px 14px !important;
-                border-radius: 20px !important;
-                margin-bottom: 16px;
-            }
-
-            .calendar-panel .panel-title,
-            .col-span-12.xl\:col-span-8 h3 {
-                font-size: 18px !important;
-            }
-
-            /* Painel de Agendamentos – vira 1 coluna no mobile */
-            .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
-                grid-template-columns: 1fr !important;
-            }
-
-            /* Aside patient – full width no mobile */
-            #asidePaciente {
-                margin-top: 16px;
-            }
-
-            /* Charts */
-            .charts-section {
-                margin-top: 24px !important;
-                padding-top: 20px !important;
-            }
-            .charts-section-title {
-                font-size: 20px !important;
-            }
-            .chart-card {
-                padding: 16px 12px !important;
-            }
-            .chart-card-title {
-                font-size: 15px !important;
-            }
-
-            /* Gaveta full width no mobile */
-            #gaveta-painel {
-                max-width: 100% !important;
-                width: 100% !important;
-            }
-
-            /* Grid principal vira 1 coluna */
-            .grid.grid-cols-12 {
-                grid-template-columns: 1fr !important;
-                gap: 16px !important;
-            }
-            .col-span-12.xl\:col-span-9,
-            .col-span-12.xl\:col-span-8,
-            .col-span-12.xl\:col-span-3 {
-                grid-column: span 12 / span 12 !important;
-            }
-        }
-
-        /* Extra small phones */
-        @media (max-width: 380px) {
-            .stat-card .card-value,
-            .stat-card h3 {
-                font-size: 24px !important;
-            }
-            .mobile-topbar .logo-text {
-                font-size: 17px;
-            }
-            .patient-card-mobile .patient-name {
-                font-size: 15px !important;
-            }
         }
     </style>
 
@@ -1338,102 +793,10 @@
 </head>
 
 <body class="text-gray-300 min-h-screen font-sans antialiased">
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         MOBILE TOP BAR (só aparece ≤ 1024px)
-         ═══════════════════════════════════════════════════════════════ -->
-    <div class="mobile-topbar">
-        <div class="logo-wrap">
-            <button class="icon-btn" id="btnOpenDrawer" aria-label="Abrir menu">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo-icon w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold">
-                M
-            </div>
-            <span class="logo-text">Med<span>LM</span></span>
-        </div>
-        <div class="actions">
-            <button class="icon-btn" aria-label="Notificações">
-                <i class="fas fa-bell"></i>
-            </button>
-            <div class="avatar-btn">ML</div>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         MOBILE DRAWER (menu lateral deslizante)
-         ═══════════════════════════════════════════════════════════════ -->
-    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
-    <div class="mobile-drawer" id="mobileDrawer">
-        <div class="drawer-header">
-            <div class="drawer-logo">
-                <div class="logo-icon w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-lg">M</div>
-                <span>Med<b>LM</b></span>
-            </div>
-            <button class="close-drawer" id="btnCloseDrawer" aria-label="Fechar menu">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <nav>
-            <a href="/dashboard" class="nav-item active">
-                <i class="fas fa-chart-line"></i> Dashboard
-            </a>
-            <a href="/pacientes" class="nav-item">
-                <i class="fas fa-user-injured"></i> Pacientes
-            </a>
-            <a href="/financeiro" class="nav-item">
-                <i class="fas fa-hand-holding-usd"></i> Financeiro
-            </a>
-            <a href="/agendamento" class="nav-item">
-                <i class="fas fa-calendar-check"></i> Agendamento
-            </a>
-            <a href="/equipe" class="nav-item">
-                <i class="fas fa-users-cog"></i> Minha Equipe
-            </a>
-            <a href="/dashboard/configuracoes" class="nav-item">
-                <i class="fas fa-cogs"></i> Configurações
-            </a>
-            <a href="#" onclick="handleLogout()" class="nav-item" style="color:rgba(248,113,113,0.7)">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
-        </nav>
-        <div class="drawer-footer">
-            <button id="theme-toggle-btn-mobile" class="nav-item" style="width:100%">
-                <i class="fas fa-moon"></i> Tema
-            </button>
-        </div>
-    </div>
-
-    <!-- ═══════════════════════════════════════════════════════════════
-         MOBILE BOTTOM TAB BAR
-         ═══════════════════════════════════════════════════════════════ -->
-    <nav class="mobile-bottom-tabbar">
-        <a href="/dashboard" class="tab-item active">
-            <i class="fas fa-home"></i>
-            <span>Início</span>
-        </a>
-        <a href="/pacientes" class="tab-item">
-            <i class="fas fa-user-injured"></i>
-            <span>Pacientes</span>
-        </a>
-        <a href="/agendamento" class="tab-item">
-            <i class="fas fa-calendar-check"></i>
-            <span>Agenda</span>
-        </a>
-        <a href="/financeiro" class="tab-item">
-            <i class="fas fa-hand-holding-usd"></i>
-            <span>Financeiro</span>
-        </a>
-        <a href="/dashboard/configuracoes" class="tab-item">
-            <i class="fas fa-user-cog"></i>
-            <span>Perfil</span>
-        </a>
-    </nav>
-
     <div class="flex h-screen overflow-hidden">
 
-        <!-- ─── Sidebar Desktop ─── -->
-        <aside class="sidebar-desktop fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
+        <!-- ─── Sidebar ─── -->
+        <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
             <div class="flex flex-col">
                 <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
                     <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">
@@ -1526,47 +889,48 @@
             </header>
 
             <!-- Stat Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                <!-- Atendimentos -->
-                <div class="stat-card stat-card-cyan p-6 card-hover-effect">
-                    <div class="flex justify-between items-center">
-                        <p class="card-label">Atendimentos Dia</p>
-                        <i class="fas fa-user-check text-base" style="color:var(--cyan)"></i>
-                    </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statAtendimentos">–</h3>
-                    <div class="mt-2 text-xs font-bold flex items-center gap-1" id="statAtendimentosVariacao" style="color:var(--emerald)">
-                        <i class="fas fa-arrow-up"></i> <span id="statAtendimentosVariacaoTexto">--</span>
-                    </div>
-                </div>
-                <!-- Cancelamentos -->
-                <div class="stat-card stat-card-red p-6 card-hover-effect">
-                    <div class="flex justify-between items-center">
-                        <p class="card-label">Cancelamentos de Hoje</p>
-                        <i class="fas fa-user-times text-base" style="color:#f87171"></i>
-                    </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statCancelamentos">–</h3>
-                    <span class="text-xs font-bold block mt-1" style="color:#f87171">Taxa de <span id="statCancelamentosTaxa">--</span>%</span>
-                </div>
-                <!-- Faturamento -->
-                <div class="stat-card p-6 card-hover-effect">
-                    <p class="card-label">Faturamento</p>
-                    <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent" id="statFaturamento">R$ –</h3>
-                    <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
-                        <span id="statFaturamentoSessoes">0</span> sessões liquidadas
-                    </span>
-                </div>
-                <!-- Sessões Próximos 7 Dias -->
-                <div class="stat-card p-6 card-hover-effect">
-                    <div class="flex justify-between items-center">
-                        <p class="card-label">Próximos 7 Dias</p>
-                        <i class="fas fa-calendar-week text-base" style="color:#818cf8"></i>
-                    </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statProximaSemana">–</h3>
-                    <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
-                        sessões agendadas
-                    </span>
-                </div>
-            </div>
+           <!-- Stat Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    <!-- Atendimentos -->
+    <div class="stat-card stat-card-cyan p-6 card-hover-effect">
+        <div class="flex justify-between items-center">
+            <p class="card-label">Atendimentos Dia</p>
+            <i class="fas fa-user-check text-base" style="color:var(--cyan)"></i>
+        </div>
+        <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statAtendimentos">–</h3>
+        <div class="mt-2 text-xs font-bold flex items-center gap-1" id="statAtendimentosVariacao" style="color:var(--emerald)">
+            <i class="fas fa-arrow-up"></i> <span id="statAtendimentosVariacaoTexto">--</span>
+        </div>
+    </div>
+    <!-- Cancelamentos -->
+    <div class="stat-card stat-card-red p-6 card-hover-effect">
+        <div class="flex justify-between items-center">
+            <p class="card-label">Cancelamentos de Hoje</p>
+            <i class="fas fa-user-times text-base" style="color:#f87171"></i>
+        </div>
+        <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statCancelamentos">–</h3>
+        <span class="text-xs font-bold block mt-1" style="color:#f87171">Taxa de <span id="statCancelamentosTaxa">--</span>%</span>
+    </div>
+    <!-- Faturamento -->
+    <div class="stat-card p-6 card-hover-effect">
+        <p class="card-label">Faturamento</p>
+        <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent" id="statFaturamento">R$ –</h3>
+        <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
+            <span id="statFaturamentoSessoes">0</span> sessões liquidadas
+        </span>
+    </div>
+    <!-- Sessões Próximos 7 Dias -->
+    <div class="stat-card p-6 card-hover-effect">
+        <div class="flex justify-between items-center">
+            <p class="card-label">Próximos 7 Dias</p>
+            <i class="fas fa-calendar-week text-base" style="color:#818cf8"></i>
+        </div>
+        <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statProximaSemana">–</h3>
+        <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
+            sessões agendadas
+        </span>
+    </div>
+</div>
 
             <!-- ─── Patient list + aside ─── -->
             <div class="grid grid-cols-12 gap-8 items-start mb-12">
@@ -1594,8 +958,8 @@
                             </button>
                         </div>
 
-                        <!-- Tabela Desktop (escondida no mobile) -->
-                        <div class="data-table-wrap overflow-x-auto w-full desktop-only">
+                        <!-- Table -->
+                        <div class="data-table-wrap overflow-x-auto w-full">
                             <table class="w-full text-left border-collapse min-w-[750px]">
                                 <thead>
                                     <tr class="border-b border-slate-800 text-xs text-slate-400">
@@ -1611,8 +975,10 @@
                                     <% if (locals.agendamentos && agendamentos.length > 0) { %>
                                         <% agendamentos.forEach(agendamento => { %>
                                             <tr class="border-b border-slate-800/60 hover:bg-slate-900/40 transition-colors">
+                                                <!-- ID -->
                                                 <td class="px-4 py-4 text-xs font-semibold whitespace-nowrap" style="color:rgba(52,211,153,0.4)">#<%= agendamento.id %></td>
                                                 
+                                                <!-- Paciente -->
                                                 <td class="px-4 py-4">
                                                     <div class="patient-name font-bold text-white text-xs truncate max-w-[180px]" title="<%= agendamento.nome %>"><%= agendamento.nome %></div>
                                                     <div class="patient-phone mt-0.5 flex items-center gap-1 text-[11px] text-slate-400 whitespace-nowrap">
@@ -1620,6 +986,7 @@
                                                     </div>
                                                 </td>
                                 
+                                                <!-- Data e Hora -->
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <div class="date-val text-xs text-slate-200"><%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %></div>
                                                     <div class="time-badge mt-1 inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/40 px-2 py-0.5 rounded-md">
@@ -1628,10 +995,12 @@
                                                     </div>
                                                 </td>
                                 
+                                                <!-- Terapia -->
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <span class="therapy-badge text-xs text-slate-300"><%= agendamento.tipo_terapia %></span>
                                                 </td>
                                 
+                                                <!-- Status -->
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <%
                                                         let badgeClass = 'status-default';
@@ -1645,6 +1014,7 @@
                                                     </span>
                                                 </td>
                                 
+                                                <!-- Ações -->
                                                 <td class="px-4 py-4 text-right whitespace-nowrap">
                                                     <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="btn-prontuario text-xs bg-teal-950/60 hover:bg-teal-900/80 text-teal-300 border border-teal-800/50 px-3 py-1.5 rounded-xl transition-all font-bold">
                                                         Ver Prontuário
@@ -1667,61 +1037,6 @@
                                     <% } %>
                                 </tbody>
                             </table>
-                        </div>
-
-                        <!-- Cards Mobile (substitui a tabela) -->
-                        <div class="mobile-patient-cards mobile-only" id="mobile-pacientes-cards">
-                            <% if (locals.agendamentos && agendamentos.length > 0) { %>
-                                <% agendamentos.forEach(agendamento => { %>
-                                    <%
-                                        let badgeClassM = 'status-default';
-                                        if(agendamento.status_agendamento === 'confirmado') badgeClassM = 'status-confirmado';
-                                        else if(agendamento.status_agendamento === 'pendente') badgeClassM = 'status-pendente';
-                                        else if(agendamento.status_agendamento === 'cancelado') badgeClassM = 'status-cancelado';
-                                    %>
-                                    <div class="patient-card-mobile">
-                                        <div class="card-top">
-                                            <div>
-                                                <div class="patient-id">#<%= agendamento.id %></div>
-                                                <div class="patient-name"><%= agendamento.nome %></div>
-                                                <div class="patient-phone">
-                                                    <i class="fab fa-whatsapp"></i> <%= agendamento.telefone %>
-                                                </div>
-                                            </div>
-                                            <span class="status-badge <%= badgeClassM %>">
-                                                <span class="status-dot"></span>
-                                                <%= agendamento.status_agendamento %>
-                                            </span>
-                                        </div>
-
-                                        <div class="card-meta">
-                                            <span class="meta-item">
-                                                <i class="far fa-calendar"></i>
-                                                <%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %>
-                                            </span>
-                                            <span class="meta-item">
-                                                <i class="far fa-clock"></i>
-                                                <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %> hs
-                                            </span>
-                                            <span class="therapy-badge"><%= agendamento.tipo_terapia %></span>
-                                        </div>
-
-                                        <div class="card-actions">
-                                            <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="btn-prontuario">
-                                                <i class="fas fa-folder-open"></i> Ver Prontuário
-                                            </button>
-                                        </div>
-                                    </div>
-                                <% }); %>
-                            <% } else { %>
-                                <div class="empty-state-mobile">
-                                    <div class="empty-icon-wrap">
-                                        <i class="fas fa-calendar-times"></i>
-                                    </div>
-                                    <p class="font-semibold text-slate-200">Nenhum atendimento cadastrado</p>
-                                    <p class="text-sm mt-1 text-slate-500">Sua agenda está livre para este período.</p>
-                                </div>
-                            <% } %>
                         </div>
                     </div>
 
@@ -1755,8 +1070,10 @@
                 </div>
                 <!-- ====== painel de agendamentos ====== -->
 
+                <!-- Moldura principal que se encaixa perfeitamente no seu grid de 12 colunas -->
                 <div class="col-span-12 xl:col-span-8 bg-[#0b131a] border border-slate-800/80 p-6 xl:p-8 rounded-3xl shadow-lg">
     
+                    <!-- Cabeçalho do Painel -->
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                         <div>
                             <h3 class="text-xl font-bold tracking-tight text-white">Painel de Agendamentos</h3>
@@ -1764,23 +1081,28 @@
                         </div>
                     </div>
                 
+                    <!-- Grid de 4 Colunas com o padrão escuro -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
                         
+                        <!-- Coluna 1: Confirmados -->
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Confirmados</div>
                             <div id="coluna-confirmados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
                         </div>
                 
+                        <!-- Coluna 2: Aguardando Sinal -->
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Aguardando Sinal</div>
                             <div id="coluna-aguardando" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
                         </div>
                 
+                        <!-- Coluna 3: Finalizados -->
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Finalizados</div>
                             <div id="coluna-finalizados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
                         </div>
                 
+                        <!-- Coluna 4: Outros / Cancelados -->
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Outros / Cancel.</div>
                             <div id="coluna-outros" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
@@ -1793,6 +1115,7 @@
                 <!-- ─── Right Aside ─── -->
                 <div class="col-span-12 xl:col-span-3 space-y-6">
 
+                    <!-- Patient card -->
                     <div id="asidePaciente" class="p-6 transition-all duration-300" style="position:relative">
                         <div class="glow-circle-blue"></div>
                         <div class="glow-circle-green"></div>
@@ -1832,6 +1155,7 @@
                         </div>
                     </div>
 
+                    <!-- Admin card -->
                     <a href="/configuracoes" class="admin-card p-6 flex flex-col justify-center items-center text-center">
                         <div class="shine"></div>
                         <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center">
@@ -1988,35 +1312,5 @@
     <script src="../ScriptGlobal/logout.js"></script>
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
     <script src="../ScriptGlobal/BotaoFalarAgenda.Script.js"></script>
-
-    <!-- Mobile drawer control -->
-    <script>
-        (function() {
-            const btnOpen = document.getElementById('btnOpenDrawer');
-            const btnClose = document.getElementById('btnCloseDrawer');
-            const drawer = document.getElementById('mobileDrawer');
-            const overlay = document.getElementById('drawerOverlay');
-
-            function openDrawer() {
-                drawer.classList.add('open');
-                overlay.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
-            function closeDrawer() {
-                drawer.classList.remove('open');
-                overlay.classList.remove('open');
-                document.body.style.overflow = '';
-            }
-
-            if (btnOpen) btnOpen.addEventListener('click', openDrawer);
-            if (btnClose) btnClose.addEventListener('click', closeDrawer);
-            if (overlay) overlay.addEventListener('click', closeDrawer);
-
-            // Fecha com Escape
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') closeDrawer();
-            });
-        })();
-    </script>
 </body>
 </html>
