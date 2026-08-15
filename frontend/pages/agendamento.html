@@ -251,11 +251,27 @@
         border-bottom: 1px solid rgba(0, 242, 254, 0.1);
     }
 
-    /* 🔧 CORREÇÃO: Menu de navegação sempre visível (sticky no topo) */
+    /* 🔧 CORREÇÃO: Menu de navegação sempre visível (sticky no topo), mobile-first */
     nav.navbar.bg-transparente {
+        position: -webkit-sticky; /* compatibilidade Safari/iOS */
         position: sticky;
         top: 0;
         z-index: 1030;
+    }
+
+    /* Em telas pequenas a logo de 100px de altura deixa a barra sticky enorme,
+       tomando espaço útil da tela. Reduzimos ela e os espaçamentos apenas no mobile. */
+    @media (max-width: 991.98px) {
+        span.logo-img {
+            height: 60px !important;
+            width: 160px !important;
+            margin-top: 8px;
+            margin-left: 16px;
+        }
+        nav.navbar.bg-transparente .container-fluid {
+            padding-top: 4px;
+            padding-bottom: 4px;
+        }
     }
 
     /* Tarjeta informativa secundária */
