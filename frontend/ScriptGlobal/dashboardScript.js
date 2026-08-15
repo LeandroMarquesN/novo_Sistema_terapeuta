@@ -8,7 +8,7 @@ const dadosAgendamentos = {
     13: { total: 0, horarios: "Livre" }
 };
 
-// Array global para guardar as instâncias dos 4 gráficos e podermos atualizar no Dark Mode
+// Array global para guardar as instâncias dos 4 gráficos
 let meusGraficosMensais = [];
 
 // ========= 0.1 Agenda (Modal) ========
@@ -17,7 +17,6 @@ function abrirModal(paciente) {
 
     const modal = document.getElementById('modalPaciente');
     const content = document.getElementById('modalContent');
-
     if (!modal) return;
 
     const txtNome = document.getElementById('modalNome');
@@ -51,7 +50,7 @@ function abrirModal(paciente) {
     }, 10);
 }
 
-// ========= 0.2 Lógica do Calendário Dinâmico (Agenda) =====
+// ========= 0.2 Lógica do Calendário Dinâmico =========
 function alternarCalendario(tipo) {
     const gridDias = document.getElementById('grid-dias');
     const btnSemana = document.getElementById('btn-semana');
@@ -95,8 +94,7 @@ function alternarCalendario(tipo) {
                       <p class="text-[10px] font-black uppercase tracking-wider text-blue-400 dark:text-blue-600">${info.total} Agendamentos</p>
                       <p class="text-xs mt-1 font-medium opacity-90 truncate">${info.horarios}</p>
                       <div class="absolute top-full left-1/2 -translate-x-1/2 w-3 h-3 bg-gray-900 dark:bg-white rotate-45 -translate-y-1.5"></div>
-                  </div>
-              `;
+                  </div>`;
             }
 
             gridDias.innerHTML += `
@@ -105,8 +103,7 @@ function alternarCalendario(tipo) {
                   <span class="text-xs">${dia}</span>
                   ${isHoje ? '<span class="text-[8px] uppercase font-black tracking-wide">Hoje</span>' : ''}
                   ${(!isHoje && info && info.total > 0) ? `<span class="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1"></span>` : ''}
-              </div>
-          `;
+              </div>`;
         });
     } else {
         btnMes.className = "px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-gray-700 shadow-sm text-blue-600 dark:text-white";
@@ -132,8 +129,7 @@ function alternarCalendario(tipo) {
                       <p class="text-[9px] font-black uppercase text-blue-400 dark:text-blue-600">${info.total} Pacientes</p>
                       <p class="text-[11px] font-medium opacity-80 truncate">${info.horarios}</p>
                       <div class="absolute top-full left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 dark:bg-white rotate-45 -translate-y-1"></div>
-                  </div>
-              `;
+                  </div>`;
             }
 
             gridDias.innerHTML += `
@@ -141,8 +137,7 @@ function alternarCalendario(tipo) {
                   ${popupHtml}
                   <span>${diaReal}</span>
                   ${(info && info.total > 0 && !isHoje) ? `<span class="w-1 h-1 rounded-full bg-emerald-400 absolute bottom-1"></span>` : ''}
-              </div>
-          `;
+              </div>`;
         }
     }
 }
@@ -156,10 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const txtData = document.getElementById('data-hora');
     const containerData = document.getElementById('data-hora-container-tailwind');
 
-    // Inicializa os componentes base
+    // Inicializa componentes base
     alternarCalendario('semana');
     inicializarAsideDinamico();
-    inicializarTodosGraficos(); // 🚀 CORRIGIDO: Agora chama a função correta que cria os 4 gráficos
+    inicializarTodosGraficos();
 
     const usuarioLogado = localStorage.getItem('medlm_user_name') || 'Dr. Leandro Marques';
     const clinicaLogada = localStorage.getItem('medlm_clinic_name') || 'Clínica Vida Ativa';
@@ -181,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     gerenciarRelogio();
     setInterval(gerenciarRelogio, 1000);
 
-    // Gerenciamento Inteligente de Tema (Dark/Light)
+    // Tema Dark/Light
     if (themeBtn) {
         const themeText = themeBtn.querySelector('span');
         const themeIcon = themeBtn.querySelector('i');
@@ -202,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('theme', isDark ? 'dark' : 'light');
             updateBtnUI(isDark);
 
-            // 🚀 CORRIGIDO: Faz o loop correto para atualizar as cores nos 4 gráficos simultaneamente
             meusGraficosMensais.forEach(chartInstance => {
                 if (chartInstance) {
                     chartInstance.updateOptions({
@@ -217,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// ========= 0.4 Controle do Card Lateral Dinâmico (Navegação) =========
+// ========= 0.4 Card Lateral Dinâmico =========
 let indicePacienteAtual = 0;
 
 function inicializarAsideDinamico() {
@@ -294,7 +288,7 @@ function navegarPaciente(direcao) {
     atualizarCardAside(indicePacienteAtual);
 }
 
-// ========= 0.5 Renderização dos Gráficos por Semana do Mês =========
+// ========= 0.5 Gráficos =========
 function inicializarTodosGraficos() {
     if (typeof ApexCharts === 'undefined') {
         setTimeout(inicializarTodosGraficos, 100);
@@ -317,8 +311,6 @@ function inicializarTodosGraficos() {
     criarGraficoSemanal('chart-semana-3', 'Semana 3', dadosReais.semana3, labelsDias);
     criarGraficoSemanal('chart-semana-4', 'Semana 4', dadosReais.semana4, labelsDias);
 }
-
-// ======= 0.5.1  Criar graficos semanais =============
 
 function criarGraficoSemanal(idContainer, nomeSerie, valores, labels) {
     const container = document.getElementById(idContainer);
@@ -390,8 +382,7 @@ function criarGraficoSemanal(idContainer, nomeSerie, valores, labels) {
                                 ${valor} <span class="text-[10px] font-medium text-gray-300 dark:text-gray-600">${textoAtendimento}</span>
                             </p>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
         },
         markers: {
@@ -405,99 +396,10 @@ function criarGraficoSemanal(idContainer, nomeSerie, valores, labels) {
 
     const chart = new ApexCharts(container, options);
     chart.render();
-
     meusGraficosMensais.push(chart);
 }
 
-// ======= 0.6 FILTRAGEM DE PACIENTES (DESKTOP + MOBILE) ========
-
-/**
- * Renderiza os cards mobile a partir da lista de agendamentos
- */
-function renderizarCardsMobile(agendamentos) {
-    const container = document.getElementById('mobile-pacientes-cards');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    if (!agendamentos || agendamentos.length === 0) {
-        container.innerHTML = `
-            <div class="col-span-full flex flex-col items-center justify-center py-12 text-center">
-                <div class="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-3 border border-gray-100 dark:border-gray-700">
-                    <i class="fas fa-calendar-times text-xl"></i>
-                </div>
-                <p class="text-gray-900 dark:text-white font-semibold text-sm">Nenhum atendimento cadastrado</p>
-                <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Sua agenda está livre para este período.</p>
-            </div>`;
-        return;
-    }
-
-    agendamentos.forEach(agendamento => {
-        // Badge de status
-        let badgeClasses = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200';
-        if (agendamento.status_agendamento === 'confirmado') {
-            badgeClasses = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
-        } else if (agendamento.status_agendamento === 'pendente') {
-            badgeClasses = 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/30';
-        } else if (agendamento.status_agendamento === 'cancelado') {
-            badgeClasses = 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/30';
-        }
-
-        const dataLinha = new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR');
-        const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        const cardHtml = `
-            <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all">
-                <div class="flex justify-between items-start gap-3 mb-3">
-                    <div class="min-w-0 flex-1">
-                        <h4 class="font-bold text-gray-900 dark:text-white text-sm truncate">${agendamento.nome || 'Paciente'}</h4>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
-                            <i class="fab fa-whatsapp text-emerald-500"></i>
-                            <span class="truncate">${agendamento.telefone || 'Sem telefone'}</span>
-                        </p>
-                    </div>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border shrink-0 ${badgeClasses}">
-                        <span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-current"></span>
-                        ${agendamento.status_agendamento}
-                    </span>
-                </div>
-
-                <div class="flex items-center justify-between gap-2 mb-3">
-                    <div>
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Data</p>
-                        <p class="text-sm font-bold text-gray-900 dark:text-gray-100">${dataLinha}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Horário</p>
-                        <div class="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg text-xs font-black border border-blue-100/70 dark:border-blue-900/40">
-                            <i class="far fa-clock text-blue-500 text-xs"></i>
-                            ${horaLinha}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center justify-between gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 truncate max-w-[60%]">
-                        ${agendamento.tipo_terapia || '—'}
-                    </span>
-                    <button onclick="abrirGavetaProntuario('${agendamento.id}')"
-                        class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow transition-all">
-                        Ver Prontuário
-                    </button>
-                </div>
-            </div>`;
-
-        container.insertAdjacentHTML('beforeend', cardHtml);
-    });
-}
-
-/**
- * Filtra a tabela desktop + cards mobile
- */
-// ======= 0.6 FILTRAGEM DE PACIENTES (DESKTOP + MOBILE) ========
+// ========= 0.6 FILTRAGEM DE PACIENTES (DESKTOP + MOBILE) =========
 
 /**
  * Renderiza os cards mobile com a mesma estrutura do EJS
@@ -663,132 +565,23 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
             if (tbody) tbody.insertAdjacentHTML('beforeend', linhaHtml);
         });
 
-        // Atualiza também os cards mobile (causa raiz do bug)
+        // Atualiza também os cards mobile
         renderizarCardsMobile(dados.agendamentos);
 
     } catch (error) {
         console.error("Erro ao aplicar filtro assíncrono:", error);
     }
 }
-try {
-    // 1. Faz a busca silenciosa no backend pegando apenas o JSON
-    const response = await fetch(`/dashboard?filtro=${tipoFiltro}`, {
-        headers: { 'Accept': 'application/json' }
-    });
-    const dados = await response.json();
 
-    // 2. Atualiza os estilos visuais dos botões de filtro (efeito de clique ativo)
-    document.querySelectorAll('.filtro-btn').forEach(btn => {
-        if (btn.getAttribute('data-filtro') === tipoFiltro) {
-            btn.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-white');
-            btn.classList.remove('text-gray-400', 'hover:text-gray-600', 'dark:hover:text-gray-300');
-        } else {
-            btn.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-white');
-            btn.classList.add('text-gray-400', 'hover:text-gray-600', 'dark:hover:text-gray-300');
-        }
-    });
-
-    // 3. Pega a tabela do HTML
-    const tbody = document.getElementById('tabela-pacientes-body');
-    tbody.innerHTML = ''; // Limpa as linhas antigas
-
-    // 4. Se não houver agendamentos, renderiza o bloco de aviso vazio
-    if (!dados.agendamentos || dados.agendamentos.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-              <td colspan="6" class="px-6 py-12 text-center">
-                  <div class="flex flex-col items-center justify-center">
-                      <div class="w-12 h-12 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-3 border border-gray-100 dark:border-gray-700">
-                          <i class="fas fa-calendar-times text-lg"></i>
-                      </div>
-                      <p class="text-gray-900 dark:text-white font-semibold text-sm">Nenhum atendimento cadastrado</p>
-                      <p class="text-gray-400 dark:text-gray-500 text-xs mt-0.5">Sua agenda está livre para este período.</p>
-                  </div>
-              </td>
-          </tr>`;
-        return;
-    }
-
-    // 5. Se houver dados, reconstrói as linhas dinamicamente (Exatamente como estava no EJS)
-    dados.agendamentos.forEach(agendamento => {
-        let badgeClasses = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200';
-        if (agendamento.status_agendamento === 'confirmado') {
-            badgeClasses = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
-        } else if (agendamento.status_agendamento === 'pendente') {
-            badgeClasses = 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/30';
-        } else if (agendamento.status_agendamento === 'cancelado') {
-            badgeClasses = 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/30';
-        }
-
-        // --- A LINHA QUE VOCÊ VAI MUDAR É ESSA AQUI EMBAIXO: ---
-        const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
-            dateStyle: 'short',
-            timeStyle: 'short'
-        });
-
-        const dataLinha = new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR');
-        const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-        const linhaHtml = `
-                 <tr class="hover:bg-white/80 dark:hover:bg-gray-800/40 transition-all group">
-                    <td class="px-6 py-4 text-sm font-semibold text-gray-400 dark:text-gray-600 truncate">#${agendamento.id}</td>
-                    <td class="px-6 py-4">
-                        <div class="font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate text-sm">${agendamento.nome}</div>
-                        <div class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1 truncate">
-                            <i class="fab fa-whatsapp text-emerald-500"></i> ${agendamento.telefone}
-                        </div>
-                    </td>
-
-
-                    <td class="px-6 py-4 text-sm font-medium">
-                        <div class="font-bold text-gray-900 dark:text-gray-100 tracking-tight text-[14px]">${dataLinha}</div>
-
-                        <div class="mt-1.5 inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg text-xs font-black border border-blue-100/70 dark:border-blue-900/40 shadow-sm">
-                            <i class="far fa-clock text-blue-500 text-xs animate-pulse"></i>
-                            ${horaLinha} hs
-                        </div>
-                    </td>
-
-                    <td class="px-6 py-4 truncate">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 max-w-full truncate">
-                            ${agendamento.tipo_terapia}
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${badgeClasses}">
-                            <span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-current animate-pulse"></span>
-                            ${agendamento.status_agendamento}
-                        </span>
-                    </td>
-
-                    <td class="px-6 py-4 text-right whitespace-nowrap">
-                        <button onclick="abrirGavetaProntuario('${agendamento.id}')" class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow shadow-sm transition-all">
-                            Ver Prontuário
-                        </button>
-                    </td>
-                </tr>`;
-
-        tbody.insertAdjacentHTML('beforeend', linhaHtml);
-    });
-
-} catch (error) {
-    console.error("Erro ao aplicar filtro assíncrono:", error);
-}
-
-
-// FUNÇÃO PARA ABRIR A GAVETA (BUSCANDO DIRETO DO BANCO EM TEMPO REAL)
+// ========= 0.7 Gaveta de Prontuário =========
 async function abrirGavetaProntuario(agendamentoId) {
     const gaveta = document.getElementById('gaveta-prontuario');
     const backdrop = document.getElementById('gaveta-backdrop');
     const painel = document.getElementById('gaveta-painel');
 
-    // Reseta os campos para o estado de carregamento
     document.getElementById('gaveta-paciente-nome').innerText = "Carregando dados...";
-
-    // Torna a gaveta estruturalmente visível antes da animação
     gaveta.classList.remove('invisible');
 
-    // Pequeno timeout para o Tailwind pegar a transição de CSS smoothly
     setTimeout(() => {
         backdrop.classList.remove('opacity-0');
         backdrop.classList.add('opacity-100');
@@ -797,14 +590,11 @@ async function abrirGavetaProntuario(agendamentoId) {
     }, 10);
 
     try {
-        // CORRIGIDO: Agora batendo na rota certa integrada com o Express
-        // Altere a linha do fetch para esta aqui (incluindo o /api e o 's' em agendamentos):
         const response = await fetch(`/api/agendamentos/detalhes/${agendamentoId}`);
         const dados = await response.json();
 
         if (!response.ok) throw new Error(dados.erro || "Erro ao buscar prontuário.");
 
-        // Preenche os dados em tempo real vindos da tabela agendamentos
         document.getElementById('gaveta-paciente-nome').innerText = dados.nome;
         document.getElementById('gaveta-paciente-data').innerText = `${dados.data_formatada} às ${dados.hora_formatada}`;
         document.getElementById('gaveta-paciente-terapia').innerText = dados.tipo_terapia;
@@ -827,7 +617,6 @@ async function abrirGavetaProntuario(agendamentoId) {
     }
 }
 
-// FUNÇÃO PARA FECHAR A GAVETA COM ANIMAÇÃO INVERSA
 function fecharGavetaProntuario() {
     const gaveta = document.getElementById('gaveta-prontuario');
     const backdrop = document.getElementById('gaveta-backdrop');
@@ -838,15 +627,12 @@ function fecharGavetaProntuario() {
     painel.classList.remove('translate-x-0');
     painel.classList.add('-translate-x-full');
 
-    // Espera a animação de 300ms terminar para colocar a classe invisible de volta
     setTimeout(() => {
         gaveta.classList.add('invisible');
     }, 300);
 }
 
-
-
-// funcao nova para os cards do topo do dashbord
+// ========= 0.8 Estatísticas do Dashboard =========
 async function carregarEstatisticasDashboard() {
     try {
         const response = await fetch('/api/dashboard/estatisticas-hoje', {
@@ -858,7 +644,6 @@ async function carregarEstatisticasDashboard() {
         const data = await response.json();
         if (!data.success) throw new Error(data.message || 'Erro desconhecido');
 
-        // ── Atendimentos ──
         document.getElementById('statAtendimentos').innerText = data.atendimentos.total;
 
         const variacao = data.atendimentos.variacao_percentual;
@@ -876,15 +661,12 @@ async function carregarEstatisticasDashboard() {
             variacaoTexto.innerText = `${variacao}%`;
         }
 
-        // ── Cancelamentos ──
         document.getElementById('statCancelamentos').innerText = data.cancelamentos.total;
         document.getElementById('statCancelamentosTaxa').innerText = data.cancelamentos.taxa_percentual.toFixed(1);
 
-        // ── Faturamento ──
         document.getElementById('statFaturamento').innerText = `R$ ${data.faturamento.total.toFixed(2).replace('.', ',')}`;
         document.getElementById('statFaturamentoSessoes').innerText = data.faturamento.sessoes_liquidadas;
 
-        // ── Próximos 7 dias ──
         document.getElementById('statProximaSemana').innerText = data.proxima_semana.total;
 
     } catch (error) {
@@ -895,7 +677,8 @@ async function carregarEstatisticasDashboard() {
         });
     }
 }
-// painel de agendamentos
+
+// ========= 0.9 Painel de Agendamentos (Kanban) =========
 async function carregarPainelAgendamentosCard() {
     try {
         const response = await fetch('/dashboard?filtro=todos', {
@@ -925,7 +708,6 @@ async function carregarPainelAgendamentosCard() {
             const targetColuna = colunas[item.status_agendamento] || colunas['cancelado'];
             if (!targetColuna) return;
 
-            // Cores e badges baseados no padrão escuro da sua interface (tons de verde água e cinza escuro)
             let badgeStyle = 'bg-slate-800 text-slate-300 border border-slate-700';
             if (item.status_agendamento === 'confirmado') {
                 badgeStyle = 'bg-teal-950/60 text-teal-300 border border-teal-800/50';
@@ -939,7 +721,6 @@ async function carregarPainelAgendamentosCard() {
                 day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
             }) : 'Hora não definida';
 
-            // Template do card com fundo escuro idêntico ao resto da página
             const cardHTML = `
                 <div class="bg-[#121c24] border border-slate-800/90 p-4 rounded-2xl shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between gap-3">
                     <div>
@@ -954,31 +735,28 @@ async function carregarPainelAgendamentosCard() {
                         <span class="text-slate-400 font-medium">${item.telefone || 'Sem tel'}</span>
                         <button class="text-teal-400 hover:text-teal-300 font-bold transition-colors">Detalhes</button>
                     </div>
-                </div>
-            `;
+                </div>`;
             targetColuna.innerHTML += cardHTML;
         });
 
     } catch (error) {
-        console.error('Erro ao renderizar painel de agendamentos escuro:', error);
+        console.error('Erro ao renderizar painel de agendamentos:', error);
     }
 }
 
-// fim do painel de agendamentos
-
-// Inicialização ao carregar a página
+// ========= Inicialização final =========
 document.addEventListener('DOMContentLoaded', () => {
     carregarEstatisticasDashboard();
-    carregarPainelAgendamentosCard(); // Adicionado aqui para carregar junto
+    carregarPainelAgendamentosCard();
 });
 
 // Atualização automática a cada 2 minutos
 setInterval(() => {
     carregarEstatisticasDashboard();
-    carregarPainelAgendamentosCard(); // Atualiza os cards em tempo real junto com as estatísticas
+    carregarPainelAgendamentosCard();
 }, 2 * 60 * 1000);
 
-// Fecha a gaveta se clicar fora (no escuro)
+// Fecha a gaveta ao clicar no backdrop
 const backdrop = document.getElementById('gaveta-backdrop');
 if (backdrop) {
     backdrop.addEventListener('click', fecharGavetaProntuario);
