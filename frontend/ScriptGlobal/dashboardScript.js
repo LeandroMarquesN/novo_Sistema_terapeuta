@@ -409,17 +409,179 @@ function criarGraficoSemanal(idContainer, nomeSerie, valores, labels) {
     meusGraficosMensais.push(chart);
 }
 
-//======= 0.6 FILTRAGEM DE PACIENTES RESFERENTE A SEMANA MES ANO ========
+// ======= 0.6 FILTRAGEM DE PACIENTES (DESKTOP + MOBILE) ========
 
+/**
+ * Renderiza os cards mobile a partir da lista de agendamentos
+ */
+function renderizarCardsMobile(agendamentos) {
+    const container = document.getElementById('mobile-pacientes-cards');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!agendamentos || agendamentos.length === 0) {
+        container.innerHTML = `
+            <div class="col-span-full flex flex-col items-center justify-center py-12 text-center">
+                <div class="w-14 h-14 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center text-gray-400 mb-3 border border-gray-100 dark:border-gray-700">
+                    <i class="fas fa-calendar-times text-xl"></i>
+                </div>
+                <p class="text-gray-900 dark:text-white font-semibold text-sm">Nenhum atendimento cadastrado</p>
+                <p class="text-gray-400 dark:text-gray-500 text-xs mt-1">Sua agenda está livre para este período.</p>
+            </div>`;
+        return;
+    }
+
+    agendamentos.forEach(agendamento => {
+        // Badge de status
+        let badgeClasses = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200';
+        if (agendamento.status_agendamento === 'confirmado') {
+            badgeClasses = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
+        } else if (agendamento.status_agendamento === 'pendente') {
+            badgeClasses = 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/30';
+        } else if (agendamento.status_agendamento === 'cancelado') {
+            badgeClasses = 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/30';
+        }
+
+        const dataLinha = new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR');
+        const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const cardHtml = `
+            <div class="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all">
+                <div class="flex justify-between items-start gap-3 mb-3">
+                    <div class="min-w-0 flex-1">
+                        <h4 class="font-bold text-gray-900 dark:text-white text-sm truncate">${agendamento.nome || 'Paciente'}</h4>
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 flex items-center gap-1">
+                            <i class="fab fa-whatsapp text-emerald-500"></i>
+                            <span class="truncate">${agendamento.telefone || 'Sem telefone'}</span>
+                        </p>
+                    </div>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border shrink-0 ${badgeClasses}">
+                        <span class="w-1.5 h-1.5 rounded-full mr-1.5 bg-current"></span>
+                        ${agendamento.status_agendamento}
+                    </span>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 mb-3">
+                    <div>
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Data</p>
+                        <p class="text-sm font-bold text-gray-900 dark:text-gray-100">${dataLinha}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">Horário</p>
+                        <div class="inline-flex items-center gap-1.5 bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 px-2.5 py-1 rounded-lg text-xs font-black border border-blue-100/70 dark:border-blue-900/40">
+                            <i class="far fa-clock text-blue-500 text-xs"></i>
+                            ${horaLinha}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-2 pt-3 border-t border-gray-100 dark:border-gray-800">
+                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/30 truncate max-w-[60%]">
+                        ${agendamento.tipo_terapia || '—'}
+                    </span>
+                    <button onclick="abrirGavetaProntuario('${agendamento.id}')"
+                        class="inline-flex items-center gap-1.5 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 text-xs font-bold px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700 hover:shadow transition-all">
+                        Ver Prontuário
+                    </button>
+                </div>
+            </div>`;
+
+        container.insertAdjacentHTML('beforeend', cardHtml);
+    });
+}
+
+/**
+ * Filtra a tabela desktop + cards mobile
+ */
+// ======= 0.6 FILTRAGEM DE PACIENTES (DESKTOP + MOBILE) ========
+
+/**
+ * Renderiza os cards mobile com a mesma estrutura do EJS
+ */
+function renderizarCardsMobile(agendamentos) {
+    const container = document.getElementById('mobile-pacientes-cards');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!agendamentos || agendamentos.length === 0) {
+        container.innerHTML = `
+            <div class="empty-state-mobile">
+                <div class="empty-icon-wrap">
+                    <i class="fas fa-calendar-times"></i>
+                </div>
+                <p class="font-semibold text-slate-200">Nenhum atendimento cadastrado</p>
+                <p class="text-sm mt-1 text-slate-500">Sua agenda está livre para este período.</p>
+            </div>`;
+        return;
+    }
+
+    agendamentos.forEach(agendamento => {
+        let badgeClassM = 'status-default';
+        if (agendamento.status_agendamento === 'confirmado') badgeClassM = 'status-confirmado';
+        else if (agendamento.status_agendamento === 'pendente') badgeClassM = 'status-pendente';
+        else if (agendamento.status_agendamento === 'cancelado') badgeClassM = 'status-cancelado';
+
+        const dataLinha = new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR');
+        const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', {
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        const cardHtml = `
+            <div class="patient-card-mobile">
+                <div class="card-top">
+                    <div>
+                        <div class="patient-id">#${agendamento.id}</div>
+                        <div class="patient-name">${agendamento.nome || 'Paciente'}</div>
+                        <div class="patient-phone">
+                            <i class="fab fa-whatsapp"></i> ${agendamento.telefone || 'Sem telefone'}
+                        </div>
+                    </div>
+                    <span class="status-badge ${badgeClassM}">
+                        <span class="status-dot"></span>
+                        ${agendamento.status_agendamento}
+                    </span>
+                </div>
+
+                <div class="card-meta">
+                    <span class="meta-item">
+                        <i class="far fa-calendar"></i>
+                        ${dataLinha}
+                    </span>
+                    <span class="meta-item">
+                        <i class="far fa-clock"></i>
+                        ${horaLinha} hs
+                    </span>
+                    <span class="therapy-badge">${agendamento.tipo_terapia || '—'}</span>
+                </div>
+
+                <div class="card-actions">
+                    <button onclick="abrirGavetaProntuario('${agendamento.id}')" class="btn-prontuario">
+                        <i class="fas fa-folder-open"></i> Ver Prontuário
+                    </button>
+                </div>
+            </div>`;
+
+        container.insertAdjacentHTML('beforeend', cardHtml);
+    });
+}
+
+/**
+ * Filtra tabela desktop + cards mobile
+ */
 async function filtrarTabelaTerapeutica(tipoFiltro) {
     try {
-        // 1. Faz a busca silenciosa no backend pegando apenas o JSON
         const response = await fetch(`/dashboard?filtro=${tipoFiltro}`, {
             headers: { 'Accept': 'application/json' }
         });
         const dados = await response.json();
 
-        // 2. Atualiza os estilos visuais dos botões de filtro (efeito de clique ativo)
+        // Atualiza estilo dos botões de filtro
         document.querySelectorAll('.filtro-btn').forEach(btn => {
             if (btn.getAttribute('data-filtro') === tipoFiltro) {
                 btn.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-white');
@@ -430,13 +592,109 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
             }
         });
 
-        // 3. Pega a tabela do HTML
         const tbody = document.getElementById('tabela-pacientes-body');
-        tbody.innerHTML = ''; // Limpa as linhas antigas
+        if (tbody) tbody.innerHTML = '';
 
-        // 4. Se não houver agendamentos, renderiza o bloco de aviso vazio
+        // Estado vazio
         if (!dados.agendamentos || dados.agendamentos.length === 0) {
-            tbody.innerHTML = `
+            if (tbody) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center justify-center">
+                                <div class="empty-icon-wrap mb-2 text-slate-500">
+                                    <i class="fas fa-calendar-times text-lg"></i>
+                                </div>
+                                <p class="font-semibold text-sm text-slate-200">Nenhum atendimento cadastrado</p>
+                                <p class="text-xs mt-0.5 text-slate-500">Sua agenda está livre para este período.</p>
+                            </div>
+                        </td>
+                    </tr>`;
+            }
+            renderizarCardsMobile([]);
+            return;
+        }
+
+        // Monta linhas da tabela desktop
+        dados.agendamentos.forEach(agendamento => {
+            let badgeClass = 'status-default';
+            if (agendamento.status_agendamento === 'confirmado') badgeClass = 'status-confirmado';
+            else if (agendamento.status_agendamento === 'pendente') badgeClass = 'status-pendente';
+            else if (agendamento.status_agendamento === 'cancelado') badgeClass = 'status-cancelado';
+
+            const dataLinha = new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR');
+            const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const linhaHtml = `
+                <tr class="border-b border-slate-800/60 hover:bg-slate-900/40 transition-colors">
+                    <td class="px-4 py-4 text-xs font-semibold whitespace-nowrap" style="color:rgba(52,211,153,0.4)">#${agendamento.id}</td>
+                    <td class="px-4 py-4">
+                        <div class="patient-name font-bold text-white text-xs truncate max-w-[180px]" title="${agendamento.nome || ''}">${agendamento.nome || 'Paciente'}</div>
+                        <div class="patient-phone mt-0.5 flex items-center gap-1 text-[11px] text-slate-400 whitespace-nowrap">
+                            <i class="fab fa-whatsapp text-teal-400"></i> ${agendamento.telefone || ''}
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <div class="date-val text-xs text-slate-200">${dataLinha}</div>
+                        <div class="time-badge mt-1 inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/40 px-2 py-0.5 rounded-md">
+                            <i class="far fa-clock text-[9px]"></i>
+                            ${horaLinha} hs
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <span class="therapy-badge text-xs text-slate-300">${agendamento.tipo_terapia || '—'}</span>
+                    </td>
+                    <td class="px-4 py-4 whitespace-nowrap">
+                        <span class="status-badge ${badgeClass} inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium">
+                            <span class="status-dot w-1.5 h-1.5 rounded-full bg-current"></span>
+                            ${agendamento.status_agendamento}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-right whitespace-nowrap">
+                        <button onclick="abrirGavetaProntuario('${agendamento.id}')" class="btn-prontuario text-xs bg-teal-950/60 hover:bg-teal-900/80 text-teal-300 border border-teal-800/50 px-3 py-1.5 rounded-xl transition-all font-bold">
+                            Ver Prontuário
+                        </button>
+                    </td>
+                </tr>`;
+
+            if (tbody) tbody.insertAdjacentHTML('beforeend', linhaHtml);
+        });
+
+        // Atualiza também os cards mobile (causa raiz do bug)
+        renderizarCardsMobile(dados.agendamentos);
+
+    } catch (error) {
+        console.error("Erro ao aplicar filtro assíncrono:", error);
+    }
+}
+try {
+    // 1. Faz a busca silenciosa no backend pegando apenas o JSON
+    const response = await fetch(`/dashboard?filtro=${tipoFiltro}`, {
+        headers: { 'Accept': 'application/json' }
+    });
+    const dados = await response.json();
+
+    // 2. Atualiza os estilos visuais dos botões de filtro (efeito de clique ativo)
+    document.querySelectorAll('.filtro-btn').forEach(btn => {
+        if (btn.getAttribute('data-filtro') === tipoFiltro) {
+            btn.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-white');
+            btn.classList.remove('text-gray-400', 'hover:text-gray-600', 'dark:hover:text-gray-300');
+        } else {
+            btn.classList.remove('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-white');
+            btn.classList.add('text-gray-400', 'hover:text-gray-600', 'dark:hover:text-gray-300');
+        }
+    });
+
+    // 3. Pega a tabela do HTML
+    const tbody = document.getElementById('tabela-pacientes-body');
+    tbody.innerHTML = ''; // Limpa as linhas antigas
+
+    // 4. Se não houver agendamentos, renderiza o bloco de aviso vazio
+    if (!dados.agendamentos || dados.agendamentos.length === 0) {
+        tbody.innerHTML = `
           <tr>
               <td colspan="6" class="px-6 py-12 text-center">
                   <div class="flex flex-col items-center justify-center">
@@ -448,30 +706,30 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
                   </div>
               </td>
           </tr>`;
-            return;
+        return;
+    }
+
+    // 5. Se houver dados, reconstrói as linhas dinamicamente (Exatamente como estava no EJS)
+    dados.agendamentos.forEach(agendamento => {
+        let badgeClasses = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200';
+        if (agendamento.status_agendamento === 'confirmado') {
+            badgeClasses = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
+        } else if (agendamento.status_agendamento === 'pendente') {
+            badgeClasses = 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/30';
+        } else if (agendamento.status_agendamento === 'cancelado') {
+            badgeClasses = 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/30';
         }
 
-        // 5. Se houver dados, reconstrói as linhas dinamicamente (Exatamente como estava no EJS)
-        dados.agendamentos.forEach(agendamento => {
-            let badgeClasses = 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200';
-            if (agendamento.status_agendamento === 'confirmado') {
-                badgeClasses = 'bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
-            } else if (agendamento.status_agendamento === 'pendente') {
-                badgeClasses = 'bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-900/30';
-            } else if (agendamento.status_agendamento === 'cancelado') {
-                badgeClasses = 'bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900/30';
-            }
+        // --- A LINHA QUE VOCÊ VAI MUDAR É ESSA AQUI EMBAIXO: ---
+        const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
+            dateStyle: 'short',
+            timeStyle: 'short'
+        });
 
-            // --- A LINHA QUE VOCÊ VAI MUDAR É ESSA AQUI EMBAIXO: ---
-            const dataFormatada = new Date(agendamento.data_agendamento).toLocaleString('pt-BR', {
-                dateStyle: 'short',
-                timeStyle: 'short'
-            });
+        const dataLinha = new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR');
+        const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-            const dataLinha = new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR');
-            const horaLinha = new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-
-            const linhaHtml = `
+        const linhaHtml = `
                  <tr class="hover:bg-white/80 dark:hover:bg-gray-800/40 transition-all group">
                     <td class="px-6 py-4 text-sm font-semibold text-gray-400 dark:text-gray-600 truncate">#${agendamento.id}</td>
                     <td class="px-6 py-4">
@@ -510,13 +768,13 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
                     </td>
                 </tr>`;
 
-            tbody.insertAdjacentHTML('beforeend', linhaHtml);
-        });
+        tbody.insertAdjacentHTML('beforeend', linhaHtml);
+    });
 
-    } catch (error) {
-        console.error("Erro ao aplicar filtro assíncrono:", error);
-    }
+} catch (error) {
+    console.error("Erro ao aplicar filtro assíncrono:", error);
 }
+
 
 // FUNÇÃO PARA ABRIR A GAVETA (BUSCANDO DIRETO DO BANCO EM TEMPO REAL)
 async function abrirGavetaProntuario(agendamentoId) {
