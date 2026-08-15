@@ -492,92 +492,6 @@
         </div>
     </div>
   </div>
-<!-- m========================= modal pagamentos======== -->
-<div id="modalPagamento1" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/70 backdrop-blur-md p-4">
-    <!-- Trocado bg-white por uma estrutura escura com borda temática -->
-    <div class="bg-[#020c12] border border-[rgba(52,211,153,0.2)] rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
-        <div class="p-8">
-            <div class="flex justify-between items-center mb-6">
-                <!-- Trocado text-gray-900 por text-slate-100 -->
-                <h3 class="text-xl font-black text-slate-100 tracking-tight">Confirmar Recebimento</h3>
-                <button onclick="fecharModal()" class="text-gray-400 hover:text-emerald-400"><i class="fas fa-times"></i></button>
-            </div>
-  
-            <div class="space-y-6">
-                <!-- Trocado bg-blue-50 por um container escuro sutil -->
-                <div class="bg-white/5 border border-white/10 p-4 rounded-2xl">
-                    <p class="text-[10px] font-bold text-cyan-400 uppercase">Paciente</p>
-                    <p id="modalNomePaciente" class="font-bold text-slate-200">Lavinia Nascimento</p>
-                    <p id="modalValor" class="text-2xl font-black text-emerald-400 mt-1">R$ 159,90</p>
-                </div>
-  
-                <!-- Botões de métodos de pagamento (ajustados para contrastar no escuro) -->
-                <div>
-                    <label class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 block">Forma de Pagamento</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <button onclick="selecionarMetodo('pix', this)" class="metodo-btn p-4 rounded-2xl border border-white/10 bg-white/5 text-slate-300 hover:border-emerald-500 transition flex flex-col items-center gap-2">
-                            <i class="fab fa-pix text-emerald-400 text-xl"></i>
-                            <span class="text-[10px] font-bold">PIX</span>
-                        </button>
-                        <button onclick="selecionarMetodo('cartao', this)" class="metodo-btn p-4 rounded-2xl border border-white/10 bg-white/5 text-slate-300 hover:border-emerald-500 transition flex flex-col items-center gap-2">
-                            <i class="fas fa-credit-card text-blue-500 text-xl"></i>
-                            <span class="text-[10px] font-bold">CARTÃO</span>
-                        </button>
-                        <button onclick="selecionarMetodo('dinheiro', this)" class="metodo-btn p-4 rounded-2xl border border-white/10 bg-white/5 text-slate-300 hover:border-emerald-500 transition flex flex-col items-center gap-2">
-                            <i class="fas fa-money-bill-wave text-amber-500 text-xl"></i>
-                            <span class="text-[10px] font-bold">DINHEIRO</span>
-                        </button>
-                        <!-- Aplicar a mesma lógica nos outros botões... -->
-                    </div>
-                </div>
-            </div>
-  
-            <!-- Botão principal em harmonia com o tema -->
-            <button onclick="processarBaixa()" class="w-full mt-8 bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-900/30">
-                Confirmar e Dar Baixa
-            </button>
-        </div>
-    </div>
-  </div>
-
-<!-- ===========================modal pagamento antigo=============== -->
-<div id="modalPagamento2" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-gray-950/50 backdrop-blur-sm p-4">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden transform transition-all">
-        <div class="p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-black text-gray-900 tracking-tight">Confirmar Recebimento</h3>
-                <button onclick="fecharModal()" class="text-gray-400 hover:text-gray-600"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="space-y-6">
-                <div class="bg-blue-50 p-4 rounded-2xl">
-                    <p class="text-[10px] font-bold text-blue-500 uppercase">Paciente</p>
-                    <p id="modalNomePaciente" class="font-bold text-gray-900">Lavinia Nascimento</p>
-                    <p id="modalValor" class="text-2xl font-black text-blue-600 mt-1">R$ 159,90</p>
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 block">Forma de Pagamento</label>
-                    <div class="grid grid-cols-3 gap-3">
-                        <button onclick="selecionarMetodo('pix', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-emerald-500 transition flex flex-col items-center gap-2">
-                            <i class="fab fa-pix text-emerald-500 text-xl"></i>
-                            <span class="text-[10px] font-bold">PIX</span>
-                        </button>
-                        <button onclick="selecionarMetodo('cartao', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-blue-500 transition flex flex-col items-center gap-2">
-                            <i class="fas fa-credit-card text-blue-500 text-xl"></i>
-                            <span class="text-[10px] font-bold">CARTÃO</span>
-                        </button>
-                        <button onclick="selecionarMetodo('dinheiro', this)" class="metodo-btn p-4 rounded-2xl border-2 border-gray-100 hover:border-amber-500 transition flex flex-col items-center gap-2">
-                            <i class="fas fa-money-bill-wave text-amber-500 text-xl"></i>
-                            <span class="text-[10px] font-bold">DINHEIRO</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <button onclick="processarBaixa()" class="w-full mt-8 bg-gray-900 text-white font-bold py-4 rounded-2xl hover:bg-emerald-600 transition-colors shadow-lg shadow-gray-200">
-                Confirmar e Dar Baixa
-            </button>
-        </div>
-    </div>
-</div>
 <!-- ================== modal despesas====================== -->
 <div id="modalDespesas" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="fecharModalDespesas()"></div>
@@ -624,55 +538,55 @@
     </div>
 </div>
 <!-- =========== modal gaveta  -->
-<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-[600px] bg-[#020c12] border-l border-[rgba(52,211,153,0.15)] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
+<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-full sm:w-[420px] md:w-[500px] lg:w-[600px] max-w-full bg-[#020c12] border-l border-[rgba(52,211,153,0.15)] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
 
-    <div class="p-6 border-b border-[rgba(52,211,153,0.15)] flex justify-between items-center bg-white/[0.02] backdrop-blur-md">
-        <div>
-            <h3 class="text-lg font-black text-slate-100 tracking-tight font-['Space_Grotesk']">Extrato Financeiro</h3>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-1">
-                <p id="extratoPacienteNome" class="text-xs text-cyan-400 font-bold uppercase tracking-wider">Paciente: -</p>
-                <button onclick="prepararImpressaoExtrato()" class="px-2.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20 text-[10px] font-black hover:bg-cyan-600 hover:text-white transition flex items-center gap-1 uppercase tracking-wider">
+    <div class="p-4 sm:p-6 border-b border-[rgba(52,211,153,0.15)] flex justify-between items-center bg-white/[0.02] backdrop-blur-md">
+        <div class="min-w-0">
+            <h3 class="text-base sm:text-lg font-black text-slate-100 tracking-tight font-['Space_Grotesk'] truncate">Extrato Financeiro</h3>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
+                <p id="extratoPacienteNome" class="text-xs text-cyan-400 font-bold uppercase tracking-wider truncate">Paciente: -</p>
+                <button onclick="prepararImpressaoExtrato()" class="self-start px-2.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20 text-[10px] font-black hover:bg-cyan-600 hover:text-white transition flex items-center gap-1 uppercase tracking-wider whitespace-nowrap">
                     <i class="fas fa-print"></i> Imprimir Extrato
                 </button>
             </div>
         </div>
-        <button onclick="fecharGavetaExtrato()" class="w-8 h-8 rounded-full bg-white/5 text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition flex items-center justify-center">
+        <button onclick="fecharGavetaExtrato()" class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition flex items-center justify-center">
             <i class="fas fa-times text-xs"></i>
         </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto p-6 space-y-6">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
 
-        <div class="grid grid-cols-3 gap-3">
-            <div class="bg-emerald-500/[0.03] border border-emerald-500/20 rounded-xl p-4 flex flex-col relative overflow-hidden">
-                <span class="text-[10px] font-bold text-emerald-500/60 uppercase tracking-wider">Total Pago</span>
-                <span id="extratoCardPago" class="text-base font-black text-emerald-400 mt-1 font-['Space_Grotesk']">R$ 0,00</span>
+        <div class="grid grid-cols-3 gap-2 sm:gap-3">
+            <div class="bg-emerald-500/[0.03] border border-emerald-500/20 rounded-xl p-2.5 sm:p-4 flex flex-col relative overflow-hidden">
+                <span class="text-[9px] sm:text-[10px] font-bold text-emerald-500/60 uppercase tracking-wider">Total Pago</span>
+                <span id="extratoCardPago" class="text-xs sm:text-base font-black text-emerald-400 mt-1 font-['Space_Grotesk'] truncate">R$ 0,00</span>
             </div>
-            <div class="bg-cyan-500/[0.03] border border-cyan-500/20 rounded-xl p-4 flex flex-col relative overflow-hidden">
-                <span class="text-[10px] font-bold text-cyan-500/60 uppercase tracking-wider">A Receber</span>
-                <span id="extratoCardAberto" class="text-base font-black text-cyan-400 mt-1 font-['Space_Grotesk']">R$ 0,00</span>
+            <div class="bg-cyan-500/[0.03] border border-cyan-500/20 rounded-xl p-2.5 sm:p-4 flex flex-col relative overflow-hidden">
+                <span class="text-[9px] sm:text-[10px] font-bold text-cyan-500/60 uppercase tracking-wider">A Receber</span>
+                <span id="extratoCardAberto" class="text-xs sm:text-base font-black text-cyan-400 mt-1 font-['Space_Grotesk'] truncate">R$ 0,00</span>
             </div>
-            <div class="bg-white/[0.02] border border-white/10 rounded-xl p-4 flex flex-col relative overflow-hidden">
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cancelado</span>
-                <span id="extratoCardCancelado" class="text-base font-black text-slate-400 mt-1 font-['Space_Grotesk']">R$ 0,00</span>
+            <div class="bg-white/[0.02] border border-white/10 rounded-xl p-2.5 sm:p-4 flex flex-col relative overflow-hidden">
+                <span class="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cancelado</span>
+                <span id="extratoCardCancelado" class="text-xs sm:text-base font-black text-slate-400 mt-1 font-['Space_Grotesk'] truncate">R$ 0,00</span>
             </div>
         </div>
 
-        <div class="flex justify-between items-center border-t border-white/5 pt-4">
+        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-white/5 pt-4">
             <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Histórico de Movimentações</h4>
-            <button onclick="abrirFormGastoAvulso()" class="px-3 py-1.5 bg-cyan-600 text-white rounded-lg text-[10px] font-bold hover:bg-cyan-500 transition shadow-lg shadow-cyan-950/50 uppercase tracking-wider">
+            <button onclick="abrirFormGastoAvulso()" class="self-start sm:self-auto px-3 py-1.5 bg-cyan-600 text-white rounded-lg text-[10px] font-bold hover:bg-cyan-500 transition shadow-lg shadow-cyan-950/50 uppercase tracking-wider whitespace-nowrap">
                 <i class="fas fa-plus"></i> Adicionar Gasto Avulso
             </button>
         </div>
 
-        <div id="formGastoAvulso" class="bg-white/[0.02] border border-[rgba(52,211,153,0.15)] rounded-xl p-5 hidden transition-all duration-300">
+        <div id="formGastoAvulso" class="bg-white/[0.02] border border-[rgba(52,211,153,0.15)] rounded-xl p-4 sm:p-5 hidden transition-all duration-300">
             <input type="hidden" id="extratoPacienteId"> 
             <h5 class="text-[10px] font-black text-cyan-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
                 <i class="fas fa-file-invoice-dollar"></i> Novo Lançamento Avulso
             </h5>
 
-            <form id="meuFormAvulso" onsubmit="salvarGastoAvulso(event)" class="grid grid-cols-2 gap-4 text-xs">
-                <div class="col-span-2">
+            <form id="meuFormAvulso" onsubmit="salvarGastoAvulso(event)" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div class="col-span-1 sm:col-span-2">
                     <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Descrição</label>
                     <input type="text" id="avulsoDescricao" required placeholder="Ex: Livro 'O Estoico Inteligente' ou Sessão Extra" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition">
                 </div>
@@ -706,21 +620,21 @@
                     </select>
                 </div>
 
-                <div class="col-span-2 flex justify-end gap-2 pt-2">
+                <div class="col-span-1 sm:col-span-2 flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
                     <button type="button" onclick="fecharFormGastoAvulso()" class="px-4 py-2 bg-white/5 text-slate-400 rounded-lg font-bold hover:bg-white/10 transition text-[11px] uppercase tracking-wider">Cancelar</button>
                     <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-500 transition shadow-md shadow-emerald-950/50 text-[11px] uppercase tracking-wider">Salvar Registro</button>
                 </div>
             </form>
         </div>
 
-        <div class="bg-white/[0.015] border border-[rgba(52,211,153,0.12)] rounded-xl overflow-hidden shadow-sm">
-            <table class="w-full text-left border-collapse">
+        <div class="bg-white/[0.015] border border-[rgba(52,211,153,0.12)] rounded-xl overflow-hidden shadow-sm overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[420px]">
                 <thead class="bg-emerald-500/[0.04] text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider border-b border-[rgba(52,211,153,0.12)]">
                     <tr>
-                        <th class="px-4 py-3.5">Vencimento</th>
-                        <th class="px-4 py-3.5">Descrição / Cat</th>
-                        <th class="px-4 py-3.5 text-right">Valor</th>
-                        <th class="px-4 py-3.5 text-center">Status</th>
+                        <th class="px-3 sm:px-4 py-3.5 whitespace-nowrap">Vencimento</th>
+                        <th class="px-3 sm:px-4 py-3.5">Descrição / Cat</th>
+                        <th class="px-3 sm:px-4 py-3.5 text-right whitespace-nowrap">Valor</th>
+                        <th class="px-3 sm:px-4 py-3.5 text-center whitespace-nowrap">Status</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaExtratoCorpo" class="divide-y divide-white/[0.03] text-xs text-slate-300">
@@ -732,215 +646,11 @@
 </div>
 
 <div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 hidden transition-opacity duration-300"></div>
-<!-- ==================== modal gaveta antigo 1  -->
-<div id="gavetaExtrato1" class="fixed inset-y-0 right-0 w-[600px] bg-[#020c12] border-l border-[rgba(52,211,153,0.15)] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
-
-    <div class="p-6 border-b border-[rgba(52,211,153,0.15)] flex justify-between items-center bg-white/[0.02] backdrop-blur-md">
-        <div>
-            <h3 class="text-lg font-black text-slate-100 tracking-tight font-['Space_Grotesk']">Extrato Financeiro</h3>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-3 mt-1">
-                <p id="extratoPacienteNome" class="text-xs text-cyan-400 font-bold uppercase tracking-wider">Paciente: -</p>
-                <button onclick="prepararImpressaoExtrato()" class="px-2.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20 text-[10px] font-black hover:bg-cyan-600 hover:text-white transition flex items-center gap-1 uppercase tracking-wider">
-                    <i class="fas fa-print"></i> Imprimir Extrato
-                </button>
-            </div>
-        </div>
-        <button onclick="fecharGavetaExtrato()" class="w-8 h-8 rounded-full bg-white/5 text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition flex items-center justify-center">
-            <i class="fas fa-times text-xs"></i>
-        </button>
-    </div>
-
-    <div class="flex-1 overflow-y-auto p-6 space-y-6">
-
-        <div class="grid grid-cols-3 gap-3">
-            <div class="bg-emerald-500/[0.03] border border-emerald-500/20 rounded-xl p-4 flex flex-col relative overflow-hidden">
-                <span class="text-[10px] font-bold text-emerald-500/60 uppercase tracking-wider">Total Pago</span>
-                <span id="extratoCardPago" class="text-base font-black text-emerald-400 mt-1 font-['Space_Grotesk']">R$ 0,00</span>
-            </div>
-            <div class="bg-cyan-500/[0.03] border border-cyan-500/20 rounded-xl p-4 flex flex-col relative overflow-hidden">
-                <span class="text-[10px] font-bold text-cyan-500/60 uppercase tracking-wider">A Receber</span>
-                <span id="extratoCardAberto" class="text-base font-black text-cyan-400 mt-1 font-['Space_Grotesk']">R$ 0,00</span>
-            </div>
-            <div class="bg-white/[0.02] border border-white/10 rounded-xl p-4 flex flex-col relative overflow-hidden">
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cancelado</span>
-                <span id="extratoCardCancelado" class="text-base font-black text-slate-400 mt-1 font-['Space_Grotesk']">R$ 0,00</span>
-            </div>
-        </div>
-
-        <div class="flex justify-between items-center border-t border-white/5 pt-4">
-            <h4 class="text-xs font-black text-slate-400 uppercase tracking-widest">Histórico de Movimentações</h4>
-            <button onclick="abrirFormGastoAvulso()" class="px-3 py-1.5 bg-cyan-600 text-white rounded-lg text-[10px] font-bold hover:bg-cyan-500 transition shadow-lg shadow-cyan-950/50 uppercase tracking-wider">
-                <i class="fas fa-plus"></i> Adicionar Gasto Avulso
-            </button>
-        </div>
-
-        <div id="formGastoAvulso" class="bg-white/[0.02] border border-[rgba(52,211,153,0.15)] rounded-xl p-5 hidden transition-all duration-300">
-            <input type="hidden" id="extratoPacienteId"> 
-            <h5 class="text-[10px] font-black text-cyan-400 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <i class="fas fa-file-invoice-dollar"></i> Novo Lançamento Avulso
-            </h5>
-
-            <form id="meuFormAvulso" onsubmit="salvarGastoAvulso(event)" class="grid grid-cols-2 gap-4 text-xs">
-                <div class="col-span-2">
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Descrição</label>
-                    <input type="text" id="avulsoDescricao" required placeholder="Ex: Livro 'O Estoico Inteligente' ou Sessão Extra" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/10 transition">
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Categoria</label>
-                    <select id="avulsoCategoria" class="w-full p-3 bg-[#0d1f2d] border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500 transition appearance-none">
-                        <option value="Consulta">Consulta</option>
-                        <option value="Material">Material Didático</option>
-                        <option value="Retorno">Taxa de Retorno</option>
-                        <option value="Multa">Multa por Falta</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Valor (R$)</label>
-                    <input type="number" id="avulsoValor" step="0.01" required placeholder="0.00" class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-slate-200 font-bold focus:outline-none focus:border-cyan-500 transition">
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Vencimento</label>
-                    <input type="date" id="avulsoVencimento" required class="w-full p-3 bg-white/5 border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500 transition">
-                </div>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Status Inicial</label>
-                    <select id="avulsoStatus" class="w-full p-3 bg-[#0d1f2d] border border-white/10 rounded-xl text-slate-200 focus:outline-none focus:border-cyan-500 transition appearance-none">
-                        <option value="aberto">Em Aberto</option>
-                        <option value="pago">Já Pago</option>
-                    </select>
-                </div>
-
-                <div class="col-span-2 flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="fecharFormGastoAvulso()" class="px-4 py-2 bg-white/5 text-slate-400 rounded-lg font-bold hover:bg-white/10 transition text-[11px] uppercase tracking-wider">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-500 transition shadow-md shadow-emerald-950/50 text-[11px] uppercase tracking-wider">Salvar Registro</button>
-                </div>
-            </form>
-        </div>
-
-        <div class="bg-white/[0.015] border border-[rgba(52,211,153,0.12)] rounded-xl overflow-hidden shadow-sm">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-emerald-500/[0.04] text-[10px] font-bold text-emerald-400/70 uppercase tracking-wider border-b border-[rgba(52,211,153,0.12)]">
-                    <tr>
-                        <th class="px-4 py-3.5">Vencimento</th>
-                        <th class="px-4 py-3.5">Descrição / Cat</th>
-                        <th class="px-4 py-3.5 text-right">Valor</th>
-                        <th class="px-4 py-3.5 text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaExtratoCorpo" class="divide-y divide-white/[0.03] text-xs text-slate-300">
-                    </tbody>
-            </table>
-        </div>
-
-    </div>
-</div>
-
-<div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 hidden transition-opacity duration-300"></div>
-<!-- ========================moda da gaveta antigo 2 ============= -->
-<div id="gavetaExtrato2" class="fixed inset-y-0 right-0 w-[600px] bg-white shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
-    <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-        <div>
-            <h3 class="text-lg font-black text-gray-900">Extrato Financeiro</h3>
-            <div class="flex flex-col sm:flex-row sm:items-center gap-2 mt-0.5">
-                <p id="extratoPacienteNome" class="text-xs text-indigo-600 font-bold uppercase tracking-wider">Paciente: -</p>
-                <button onclick="prepararImpressaoExtrato()" class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded border border-indigo-100 text-[10px] font-black hover:bg-[#1A5FA1] hover:text-white transition flex items-center gap-1">
-                    <i class="fas fa-print"></i> Imprimir Extrato
-                </button>
-            </div>
-        </div>
-        <button onclick="fecharGavetaExtrato()" class="w-8 h-8 rounded-full bg-gray-200 text-gray-600 hover:bg-red-500 hover:text-white transition flex items-center justify-center">
-            <i class="fas fa-times text-xs"></i>
-        </button>
-    </div>
-    <div class="flex-1 overflow-y-auto p-6 space-y-6">
-        <div class="grid grid-cols-3 gap-3">
-            <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex flex-col">
-                <span class="text-[10px] font-bold text-emerald-700 uppercase">Total Pago</span>
-                <span id="extratoCardPago" class="text-base font-black text-emerald-600 mt-1">R$ 0,00</span>
-            </div>
-            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 flex flex-col">
-                <span class="text-[10px] font-bold text-blue-700 uppercase">A Receber</span>
-                <span id="extratoCardAberto" class="text-base font-black text-blue-600 mt-1">R$ 0,00</span>
-            </div>
-            <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col">
-                <span class="text-[10px] font-bold text-gray-600 uppercase">Cancelado</span>
-                <span id="extratoCardCancelado" class="text-base font-black text-gray-500 mt-1">R$ 0,00</span>
-            </div>
-        </div>
-        <div class="flex justify-between items-center border-t border-gray-100 pt-4">
-            <h4 class="text-xs font-black text-gray-700 uppercase tracking-wider">Histórico de Movimentações</h4>
-            <button onclick="abrirFormGastoAvulso()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-[10px] font-bold hover:bg-indigo-700 transition shadow-sm">
-                <i class="fas fa-plus"></i> Adicionar Gasto Avulso
-            </button>
-        </div>
-        <div id="formGastoAvulso" class="bg-gray-50 border border-gray-200 rounded-xl p-4 hidden transition-all duration-300">
-            <input type="hidden" id="extratoPacienteId"> 
-            <h5 class="text-[10px] font-black text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-1 text-indigo-600">
-                <i class="fas fa-file-invoice-dollar"></i> Novo Lançamento Avulso
-            </h5>
-            <form id="meuFormAvulso" onsubmit="salvarGastoAvulso(event)" class="grid grid-cols-2 gap-3 text-xs">
-                <div class="col-span-2">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Descrição</label>
-                    <input type="text" id="avulsoDescricao" required placeholder="Ex: Livro 'O Estoico Inteligente' ou Sessão Extra" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Categoria</label>
-                    <select id="avulsoCategoria" class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-500">
-                        <option value="Consulta">Consulta</option>
-                        <option value="Material">Material Didático</option>
-                        <option value="Retorno">Taxa de Retorno</option>
-                        <option value="Multa">Multa por Falta</option>
-                        <option value="Outros">Outros</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Valor (R$)</label>
-                    <input type="number" id="avulsoValor" step="0.01" required placeholder="0.00" class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Vencimento</label>
-                    <input type="date" id="avulsoVencimento" required class="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-indigo-500">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Status Inicial</label>
-                    <select id="avulsoStatus" class="w-full p-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:border-indigo-500">
-                        <option value="aberto">Em Aberto</option>
-                        <option value="pago">Já Pago</option>
-                    </select>
-                </div>
-                <div class="col-span-2 flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="fecharFormGastoAvulso()" class="px-3 py-1.5 bg-gray-200 text-gray-600 rounded-lg font-bold hover:bg-gray-300 transition">Cancelar</button>
-                    <button type="submit" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition shadow-sm">Salvar Registro</button>
-                </div>
-            </form>
-        </div>
-        <div class="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-100">
-                    <tr>
-                        <th class="px-4 py-3">Vencimento</th>
-                        <th class="px-4 py-3">Descrição / Cat</th>
-                        <th class="px-4 py-3 text-right">Valor</th>
-                        <th class="px-4 py-3 text-center">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tabelaExtratoCorpo" class="divide-y divide-gray-50 text-xs"></tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/40 z-40 hidden transition-opacity duration-300"></div>
 <!-- ================ modal impressao recibo -->
-<div id="modalImpressaoRecibo" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm no-print">
-    <div class="bg-gray-100 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
-        <div class="px-6 py-4 bg-white border-b border-gray-100 flex items-center justify-between no-print">
-            <div class="flex items-center gap-2 text-gray-800 font-bold">
+<div id="modalImpressaoRecibo" class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm no-print">
+    <div class="bg-gray-100 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+        <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-gray-100 flex items-center justify-between no-print">
+            <div class="flex items-center gap-2 text-gray-800 font-bold text-sm sm:text-base">
                 <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
                 <span>Visualizar Recibo de Extrato</span>
             </div>
@@ -948,16 +658,16 @@
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
-        <div id="conteudoRecibo" class="overflow-y-auto bg-[#f4f7f6] p-4 flex justify-center">
+        <div id="conteudoRecibo" class="overflow-auto bg-[#f4f7f6] p-2 sm:p-4 flex justify-center">
             </div>
-        <div class="px-6 py-4 bg-white border-t border-gray-100 flex justify-end gap-3 no-print">
+        <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 no-print">
             <button onclick="fecharModalImpressao()" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition text-sm font-semibold">
                 Fechar
             </button>
-            <button id="btnEnviarEmailRecibo" onclick="dispararReciboEmail()" class="px-5 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+            <button id="btnEnviarEmailRecibo" onclick="dispararReciboEmail()" class="px-5 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
                 <i class="fas fa-paper-plane"></i> Enviar por E-mail
             </button>
-            <button onclick="window.print()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold flex items-center gap-2 shadow-sm">
+            <button onclick="window.print()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
                 <i class="fas fa-print"></i> Imprimir / Salvar PDF
             </button>
         </div>

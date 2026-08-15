@@ -81,20 +81,34 @@ function renderizar(dadosParaExibir = lancamentos) {
   console.log("DEBUG RENDER: Dados recebidos na função:", dadosParaExibir);
 
   const tbody = document.getElementById('listaFinanceira');
+  const mobileCards = document.getElementById('mobile-fin-cards');
+
   if (!tbody) {
     console.error("ERRO: Elemento 'listaFinanceira' não encontrado no HTML!");
     return;
   }
 
+  // Estado vazio
   if (!dadosParaExibir || dadosParaExibir.length === 0) {
     console.warn("RENDER: Recebi um array vazio. Limpando a tabela.");
     tbody.innerHTML = '<tr><td colspan="6" class="text-center py-10 text-gray-500">Nenhum registro encontrado.</td></tr>';
+    if (mobileCards) {
+      mobileCards.innerHTML = `
+        <div style="text-align:center;padding:40px 20px;">
+          <div style="width:56px;height:56px;margin:0 auto 12px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid rgba(52,211,153,0.15);display:flex;align-items:center;justify-content:center;color:rgba(148,163,184,0.4);font-size:22px;">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </div>
+          <p style="font-weight:700;color:#e2e8f0;font-size:15px;">Nenhum registro encontrado</p>
+          <p style="font-size:12px;color:rgba(148,163,184,0.5);margin-top:4px;">Ajuste os filtros ou o período.</p>
+        </div>`;
+    }
     return;
   }
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
+  // ── Tabela Desktop ──
   tbody.innerHTML = dadosParaExibir.map(item => {
     const dataVencimento = item.data_vencimento.includes('T')
       ? new Date(item.data_vencimento)
@@ -129,7 +143,6 @@ function renderizar(dadosParaExibir = lancamentos) {
                 ` : '<span class="text-[10px] text-gray-400">Sem telefone</span>'}
             </div>
         </td>
-
         <td class="px-8 py-6">
             <div class="flex flex-col">
                 <span class="text-xs text-white font-bold">${item.descricao || 'Sinal de Consulta'}</span>
@@ -137,18 +150,16 @@ function renderizar(dadosParaExibir = lancamentos) {
             </div>
         </td>
         <td class="px-8 py-6 text-center">
-        <button onclick="irParaReagendamento(${item.id}, ${item.paciente_id}, '${item.paciente_nome}', '${item.paciente_cpf || ''}', '${item.paciente_email || ''}', '${item.paciente_tel || ''}')"
-        class="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-bold hover:bg-indigo-600 hover:text-white transition border border-indigo-100">
-    <i class="fas fa-calendar-plus"></i> Novo Horário
-</button>
+          <button onclick="irParaReagendamento(${item.id}, ${item.paciente_id}, '${item.paciente_nome}', '${item.paciente_cpf || ''}', '${item.paciente_email || ''}', '${item.paciente_tel || ''}')"
+            class="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-bold hover:bg-indigo-600 hover:text-white transition border border-indigo-100">
+            <i class="fas fa-calendar-plus"></i> Novo Horário
+          </button>
         </td>
-
         <td class="px-8 py-6 text-right">
             <span class="text-sm font-black ${item.status_pagamento === 'pago' ? 'text-emerald-500' : (isCancelado || isInadimplente ? 'text-red-600' : 'text-gray-900')}">
                 R$ ${parseFloat(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </span>
         </td>
-
         <td class="px-8 py-6 text-center">
             <div class="flex justify-center gap-2">
                 ${item.status_pagamento === 'aberto' ? `
@@ -159,7 +170,6 @@ function renderizar(dadosParaExibir = lancamentos) {
                         <i class="fas fa-user-slash text-[10px]"></i>
                     </button>
                 ` : (isCancelado ? '<span class="text-orange-600 text-[10px] font-bold uppercase">Sem Visita</span>' : '<i class="fas fa-check-double text-emerald-500" title="Pago"></i>')}
-
                 <button onclick="abrirExtratoPaciente(${item.paciente_id}, '${item.paciente_nome}')"
                       class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white transition shadow-sm"
                       title="Ver Extrato de Gastos">
@@ -167,9 +177,94 @@ function renderizar(dadosParaExibir = lancamentos) {
               </button>
             </div>
         </td>
-    </tr>
-`;
+    </tr>`;
   }).join('');
+
+  // ── Cards Mobile ──
+  if (mobileCards) {
+    mobileCards.innerHTML = dadosParaExibir.map(item => {
+      const dataVencimento = item.data_vencimento.includes('T')
+        ? new Date(item.data_vencimento)
+        : new Date(item.data_vencimento + 'T00:00:00');
+
+      const dataVencimentoZerada = new Date(dataVencimento);
+      dataVencimentoZerada.setHours(0, 0, 0, 0);
+
+      const isInadimplente = dataVencimentoZerada < hoje && item.status_pagamento === 'aberto';
+      const isCancelado = item.status_pagamento === 'cancelado';
+      const isPago = item.status_pagamento === 'pago';
+
+      const telefoneLimpo = item.paciente_tel ? String(item.paciente_tel).replace(/\D/g, '') : '';
+      const valorFormatado = parseFloat(item.valor).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+      // Badge de status
+      let badgeHtml = '';
+      if (isPago) {
+        badgeHtml = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);color:#34d399;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Pago</span>`;
+      } else if (isCancelado) {
+        badgeHtml = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;background:rgba(251,146,60,0.12);border:1px solid rgba(251,146,60,0.3);color:#fb923c;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Cancelado</span>`;
+      } else if (isInadimplente) {
+        badgeHtml = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);color:#f87171;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Vencido</span>`;
+      } else {
+        badgeHtml = `<span style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:8px;font-size:10px;font-weight:800;text-transform:uppercase;background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.3);color:#22d3ee;"><span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>Aberto</span>`;
+      }
+
+      // Botões de ação
+      let acoesHtml = '';
+      if (item.status_pagamento === 'aberto') {
+        acoesHtml = `
+          <button onclick="abrirModal(${item.id})" class="btn-action primary">
+            <i class="fas fa-check"></i> Baixar
+          </button>
+          <button onclick="cancelar(${item.id})" class="btn-action">
+            <i class="fas fa-user-slash"></i>
+          </button>
+          <button onclick="abrirExtratoPaciente(${item.paciente_id}, '${item.paciente_nome}')" class="btn-action">
+            <i class="fas fa-file-invoice-dollar"></i>
+          </button>`;
+      } else {
+        acoesHtml = `
+          <button onclick="abrirExtratoPaciente(${item.paciente_id}, '${item.paciente_nome}')" class="btn-action primary" style="flex:1;">
+            <i class="fas fa-file-invoice-dollar"></i> Extrato
+          </button>
+          <button onclick="irParaReagendamento(${item.id}, ${item.paciente_id}, '${item.paciente_nome}', '${item.paciente_cpf || ''}', '${item.paciente_email || ''}', '${item.paciente_tel || ''}')" class="btn-action">
+            <i class="fas fa-calendar-plus"></i>
+          </button>`;
+      }
+
+      return `
+        <div class="fin-card-mobile" id="lancamento-mobile-${item.id}">
+          <div class="card-top">
+            <div>
+              <div class="patient-name">${item.paciente_nome || 'Paciente'}</div>
+              <div class="vencimento">
+                <i class="far fa-calendar" style="margin-right:4px;"></i>
+                ${dataVencimento.toLocaleDateString('pt-BR')}
+                ${telefoneLimpo ? ` · <a href="https://wa.me/55${telefoneLimpo}" target="_blank" style="color:#34d399;"><i class="fab fa-whatsapp"></i></a>` : ''}
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <div class="valor" style="${isInadimplente || isCancelado ? 'color:#f87171;' : (isPago ? 'color:#34d399;' : '')}">
+                R$ ${valorFormatado}
+              </div>
+              <div style="margin-top:6px;">${badgeHtml}</div>
+            </div>
+          </div>
+
+          <div class="card-meta">
+            <span class="meta-item">
+              <i class="fas fa-file-alt"></i>
+              ${item.descricao || 'Sinal de Consulta'}
+            </span>
+            ${item.categoria ? `<span class="meta-item" style="background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.25);color:#a78bfa;">${item.categoria}</span>` : ''}
+          </div>
+
+          <div class="card-actions">
+            ${acoesHtml}
+          </div>
+        </div>`;
+    }).join('');
+  }
 }
 // 1. Captura o agendamentoId no clique
 function irParaReagendamento(agendamentoId, pacienteId, nome, cpf, email, tel) {
