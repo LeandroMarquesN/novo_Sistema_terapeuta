@@ -6,8 +6,8 @@ const auth = require('../middleware/authMiddleware')
 
 // 2. Adicione o 'auth' antes de chamar o controller
 router.get('/', auth, pacientesController.listarPacientes);
-router.get('/:id/prontuario', auth, pacientesController.verProntuario);
-// ✅ ADICIONE ESSA LINHA AQUI:
 router.get('/ficha-express/:id', auth, pacientesController.obterFichaExpressa);
+router.get('/:id/prontuario', auth, pacientesController.verProntuario);
+router.delete('/:id', auth, pacientesController.deletarPaciente);
 
 module.exports = router;

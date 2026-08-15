@@ -72,7 +72,8 @@ exports.login = async (req, res) => {
             token: token,
             redirectUrl: redirectUrl,
             usuarioNome: usuario.nome,
-            clinicaNome: usuario.clinica_nome || 'MedLM Admin'
+            clinicaNome: usuario.clinica_nome || 'MedLM Admin',
+            cargo: usuario.cargo
         });
 
     } catch (error) {

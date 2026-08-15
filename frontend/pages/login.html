@@ -625,6 +625,13 @@
           if (data.usuarioNome) localStorage.setItem('medlm_user_name', data.usuarioNome);
           if (data.clinicaNome) localStorage.setItem('medlm_clinic_name', data.clinicaNome);
 
+          // 🔑 SALVA O CARGO (necessário para permissão de exclusão)
+          if (data.cargo) {
+            localStorage.setItem('medlm_user_cargo', data.cargo);
+          } else if (data.usuario && data.usuario.cargo) {
+            localStorage.setItem('medlm_user_cargo', data.usuario.cargo);
+          }
+
           btn.innerHTML = '<i class="fas fa-check" style="margin-right:8px"></i> Acesso liberado!';
 
           if (data.redirectUrl) {
@@ -632,7 +639,7 @@
           } else {
             window.location.href = '/dashboard';
           }
-        } else {
+        }else {
           btn.classList.remove('loading');
           btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:8px"></i> Entrar no Sistema';
           errorMsg.textContent   = data.error || 'Erro ao realizar login.';

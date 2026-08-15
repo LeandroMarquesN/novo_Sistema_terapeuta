@@ -87,3 +87,39 @@ exports.obterFichaExpressa = async (req, res) => {
         res.status(500).json({ erro: err.message });
     }
 };
+
+// Excluir paciente da clínica
+exports.deletarPaciente = async (req, res) => {
+    if (!req.usuario) {
+        return res.status(401).json({ success: false, message: 'Usuário não autenticado ou token inválido' });
+    }
+
+    const { id } = req.params;
+    const clinicaId = req.usuario.clinica_id;
+
+    try {
+        // Só exclui se o paciente pertencer à clínica do usuário logado
+        const [result] = await db.query(
+            'DELETE FROM pacientes WHERE id = ? AND clinica_id = ?',
+            [id, clinicaId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Paciente não encontrado ou não pertence à sua clínica.'
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Paciente excluído com sucesso.'
+        });
+    } catch (err) {
+        console.error('Erro ao excluir paciente:', err);
+        return res.status(500).json({
+            success: false,
+            message: err.message || 'Erro interno ao excluir paciente.'
+        });
+    }
+};

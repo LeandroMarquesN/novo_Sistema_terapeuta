@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prontuário de Pacientes | MedLM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
+  <!-- Estilos Globais do Sistema (preservados) -->
+  <link rel="stylesheet" href="../css/stiloDataHora.css">
+  <link rel="stylesheet" href="../css/stileLogo.css">
+  <link rel="stylesheet" href="../css/darckModeStile.css">
+  <link rel="stylesheet" href="../css/prontuarioModal.css">
+  <link rel="stylesheet" href="../css/animacaoBack.css">
+  <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+
+  <style>
+    /* ─── Design Tokens ─── */
+    :root {
+      --emerald:   #34d399;
+      --emerald-d: #059669;
+      --cyan:      #22d3ee;
+      --teal:      #0f766e;
+      --amber:     #fbbf24;
+      --red:       #f87171;
+      --purple:    #a78bfa;
+      --slate-bg:  #020c12;
+      --border:    rgba(52,211,153,0.15);
+      --border-cy: rgba(34,211,238,0.18);
+      --card:      rgba(255,255,255,0.028);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { height: 100%; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--slate-bg);
+      background-image:
+        radial-gradient(ellipse 75% 60% at 10% 0%,   rgba(8,145,178,0.22) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 55% at 90% 100%, rgba(5,150,105,0.20) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 40% at 50% 45%,  rgba(251,191,36,0.04) 0%, transparent 70%);
+      color: #cbd5e1;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scanlines */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Floating orbs */
+    .orb {
+      position: fixed; border-radius: 50%;
+      pointer-events: none; filter: blur(80px); z-index: 0;
+    }
+    .orb-1 {
+      width: 520px; height: 520px;
+      background: radial-gradient(circle, rgba(8,145,178,0.16), transparent 70%);
+      top: -12%; left: -8%;
+      animation: orbFloat1 14s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 440px; height: 440px;
+      background: radial-gradient(circle, rgba(5,150,105,0.14), transparent 70%);
+      bottom: -8%; right: -6%;
+      animation: orbFloat2 18s ease-in-out infinite;
+    }
+    .orb-3 {
+      width: 280px; height: 280px;
+      background: radial-gradient(circle, rgba(251,191,36,0.05), transparent 70%);
+      top: 45%; left: 42%;
+      animation: orbFloat1 22s ease-in-out infinite reverse;
+    }
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0,0); }
+      50% { transform: translate(30px, 22px); }
+    }
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0,0); }
+      50% { transform: translate(-22px, -30px); }
+    }
+
+    /* Grid lines bg */
+    .hero-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(52,211,153,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(52,211,153,0.035) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+    /* ─── App layout ─── */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+      position: relative; z-index: 1;
+    }
+
+    /* ─── Sidebar ─── */
+    aside {
+      width: 72px;
+      background: rgba(2,12,18,0.90);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+      overflow: hidden;
+      transition: width 0.3s ease;
+    }
+    aside:hover { width: 230px; }
+
+    .brand-area {
+      height: 72px;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .brand-logo-circle {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #0891b2, #059669);
+      border-radius: 10px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 18px rgba(8,145,178,0.45), 0 0 36px rgba(5,150,105,0.18);
+    }
+    .brand-logo-circle i {
+      font-size: 15px; color: #fff;
+      background: none; -webkit-text-fill-color: #fff;
+    }
+
+    .brand-name {
+      margin-left: 12px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px; font-weight: 800;
+      color: #e2e8f0;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .brand-name .accent { color: var(--emerald); text-shadow: 0 0 10px rgba(52,211,153,0.5); }
+    aside:hover .brand-name { opacity: 1; }
+
+    .nav-menu {
+      flex: 1;
+      padding: 16px 10px;
+      display: flex; flex-direction: column; gap: 4px;
+      overflow: hidden;
+    }
+
+    .nav-item {
+      display: flex; align-items: center;
+      padding: 11px 12px;
+      border-radius: 12px;
+      color: rgba(148,163,184,0.6);
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all 0.22s;
+      white-space: nowrap; overflow: hidden;
+      font-size: 13px; font-weight: 600;
+    }
+    .nav-item i {
+      width: 20px; font-size: 15px;
+      text-align: center; flex-shrink: 0;
+    }
+    .nav-item span {
+      margin-left: 12px;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    aside:hover .nav-item span { opacity: 1; }
+
+    .nav-item:hover {
+      color: var(--emerald);
+      border-color: var(--border);
+      background: rgba(52,211,153,0.05);
+    }
+    .nav-item:hover i { text-shadow: 0 0 8px rgba(52,211,153,0.7); }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.20));
+      border: 1px solid rgba(52,211,153,0.35);
+      color: var(--emerald);
+      box-shadow: 0 0 18px rgba(52,211,153,0.10);
+    }
+    .nav-item.active i { text-shadow: 0 0 10px rgba(52,211,153,0.8); }
+
+    .nav-item-danger { color: rgba(248,113,113,0.55) !important; }
+    .nav-item-danger:hover {
+      color: var(--red) !important;
+      border-color: rgba(248,113,113,0.3) !important;
+      background: rgba(248,113,113,0.06) !important;
+    }
+
+    .aside-footer {
+      padding: 10px 10px 16px;
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ─── Main ─── */
+    main {
+      flex: 1;
+      margin-left: 72px;
+      padding: 32px 36px;
+      min-height: 100vh;
+      position: relative; z-index: 1;
+    }
+
+    /* ─── Top meta bar ─── */
+    .top-meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 20px;
+      backdrop-filter: blur(10px);
+      position: relative;
+    }
+    .top-meta-bar::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+      opacity: 0.35; border-radius: 14px;
+    }
+
+    .top-meta-time {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600;
+      color: rgba(148,163,184,0.6);
+    }
+    .top-meta-time i { color: var(--emerald); }
+    #data-hora { color: var(--emerald); }
+
+    #theme-toggle-btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: rgba(148,163,184,0.6);
+      border-radius: 10px; padding: 6px 14px;
+      font-size: 11px; font-weight: 700; cursor: pointer;
+      transition: all 0.25s; font-family: 'Inter', sans-serif;
+    }
+    #theme-toggle-btn:hover { color: var(--amber); border-color: rgba(251,191,36,0.3); }
+
+    /* ─── Panel ─── */
+    .glass-panel {
+      background: rgba(255,255,255,0.022);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 32px;
+      position: relative; overflow: hidden;
+    }
+    .glass-panel::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+      opacity: 0.4;
+    }
+
+    .panel-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px; font-weight: 800;
+      color: #f1f5f9; letter-spacing: -0.02em;
+    }
+    .panel-sub { color: rgba(148,163,184,0.5); font-size: 13px; margin-top: 4px; }
+
+    /* ─── Search ─── */
+    .search-wrapper { position: relative; max-width: 420px; width: 100%; }
+    .search-wrapper i {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      color: rgba(52,211,153,0.4); font-size: 14px; pointer-events: none;
+    }
+    .search-bar {
+      width: 100%;
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 13px !important;
+      padding: 11px 16px 11px 44px !important;
+      color: #e2e8f0 !important;
+      font-size: 13px; font-weight: 500;
+      font-family: 'Inter', sans-serif;
+      outline: none; transition: all 0.25s;
+    }
+    .search-bar::placeholder { color: rgba(148,163,184,0.22) !important; }
+    .search-bar:focus {
+      border-color: rgba(52,211,153,0.4) !important;
+      background: rgba(52,211,153,0.04) !important;
+      box-shadow: 0 0 0 3px rgba(52,211,153,0.08) !important;
+    }
+
+    /* ─── Stats bar (top of panel) ─── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 0;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden;
+      margin-bottom: 28px;
+      position: relative;
+    }
+    .stats-bar::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+      opacity: 0.5;
+    }
+    .stat-item {
+      padding: 16px 20px; text-align: center;
+      border-right: 1px solid var(--border);
+      transition: background 0.2s;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-item:hover { background: rgba(52,211,153,0.04); }
+    .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(90deg, var(--cyan), var(--emerald));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; display: block;
+    }
+    .stat-lbl { font-size: 10px; font-weight: 700; color: rgba(148,163,184,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    /* ─── Patient cards ─── */
+    .patient-card {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      position: relative;
+      height: 100%;
+    }
+    .patient-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(52,211,153,0.45), transparent);
+    }
+    .patient-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(52,211,153,0.3);
+      box-shadow: 0 12px 40px rgba(52,211,153,0.10);
+      background: rgba(255,255,255,0.04);
+    }
+    .patient-card:hover::before {
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+      opacity: 0.7;
+    }
+
+    .card-body { padding: 22px; }
+
+    /* Avatar */
+    .card-avatar-box {
+      width: 52px; height: 52px;
+      background: linear-gradient(135deg, rgba(8,145,178,0.2), rgba(5,150,105,0.15));
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(8,145,178,0.15);
+    }
+    .card-avatar-box i { color: var(--cyan); font-size: 18px; }
+
+    /* Patient info */
+    .patient-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 15px; font-weight: 800;
+      color: #f1f5f9; margin-bottom: 3px;
+      transition: color 0.2s;
+    }
+    .patient-card:hover .patient-name { color: var(--emerald); }
+
+    .patient-cpf {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(52,211,153,0.08);
+      border: 1px solid rgba(52,211,153,0.18);
+      color: rgba(52,211,153,0.7);
+      font-size: 10px; font-weight: 700;
+      padding: 2px 9px; border-radius: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    .patient-info-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; color: rgba(148,163,184,0.55);
+      margin-bottom: 4px;
+    }
+    .patient-info-row i { color: rgba(34,211,238,0.5); width: 14px; text-align: center; font-size: 11px; }
+
+    /* Card divider */
+    .card-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 14px 0;
+    }
+
+    /* Action buttons */
+    .btn-action-atender {
+      background: linear-gradient(135deg, #0891b2, #059669);
+      color: #fff; border: none;
+      font-weight: 700; font-size: 12px;
+      border-radius: 11px; padding: 9px 14px;
+      transition: all 0.28s;
+      text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      font-family: 'Space Grotesk', sans-serif;
+      box-shadow: 0 0 16px rgba(8,145,178,0.25);
+      flex: 1;
+    }
+    .btn-action-atender:hover {
+      color: #fff; transform: translateY(-1px);
+      box-shadow: 0 0 26px rgba(8,145,178,0.45);
+    }
+
+    .btn-action-outline {
+      background: rgba(34,211,238,0.07);
+      border: 1px solid rgba(34,211,238,0.22);
+      color: var(--cyan);
+      border-radius: 11px;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.22s; cursor: pointer; font-size: 13px;
+    }
+    .btn-action-outline:hover {
+      background: rgba(34,211,238,0.18);
+      box-shadow: 0 0 14px rgba(34,211,238,0.2);
+    }
+
+    .btn-action-delete {
+      background: rgba(248,113,113,0.07);
+      border: 1px solid rgba(248,113,113,0.2);
+      color: var(--red);
+      border-radius: 11px;
+      width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.22s; cursor: pointer; font-size: 13px;
+    }
+    .btn-action-delete:hover {
+      background: rgba(248,113,113,0.18);
+      box-shadow: 0 0 14px rgba(248,113,113,0.2);
+    }
+
+    /* ─── Loading state ─── */
+    .loading-state {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 60px 20px; color: rgba(148,163,184,0.5);
+    }
+    .loading-ring {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 3px solid rgba(52,211,153,0.1);
+      border-top-color: var(--emerald);
+      animation: spin 0.9s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 13px; font-weight: 600; color: rgba(148,163,184,0.5); }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 60px 20px;
+    }
+    .empty-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(52,211,153,0.4); font-size: 22px;
+      margin-bottom: 14px;
+    }
+    .empty-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .empty-sub { color: rgba(148,163,184,0.4); font-size: 13px; }
+
+    /* ─── Bootstrap modal dark override ─── */
+    #modalProntuario .modal-content {
+      background: rgba(2,12,18,0.97) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 22px !important;
+      backdrop-filter: blur(28px);
+      color: #e2e8f0 !important;
+    }
+    #modalProntuario .modal-header {
+      border-bottom: 1px solid var(--border) !important;
+      background: rgba(52,211,153,0.04) !important;
+      border-radius: 22px 22px 0 0 !important;
+      padding: 20px 24px !important;
+    }
+    #modalProntuario .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      color: #f1f5f9 !important; font-weight: 800;
+      display: flex; align-items: center; gap: 8px;
+    }
+    #modalProntuario .modal-title i { color: var(--cyan) !important; }
+    #modalProntuario .btn-close { filter: invert(1) opacity(0.4); }
+    #modalProntuario .modal-body { padding: 24px !important; }
+    #modalProntuario .modal-footer {
+      border-top: 1px solid var(--border) !important;
+      background: rgba(255,255,255,0.02) !important;
+      border-radius: 0 0 22px 22px !important;
+      padding: 16px 24px !important;
+    }
+    #modalProntuario .btn-secondary {
+      background: rgba(255,255,255,0.05) !important;
+      border: 1px solid var(--border) !important;
+      color: rgba(148,163,184,0.7) !important;
+      border-radius: 11px !important; font-weight: 700;
+    }
+
+    /* Modal prontuario internals */
+    .modal-prontuario-avatar {
+      width: 90px; height: 90px;
+      border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(52,211,153,0.3);
+      box-shadow: 0 0 20px rgba(52,211,153,0.15);
+    }
+    .modal-patient-name {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px; font-weight: 800; color: #f1f5f9;
+    }
+    .modal-active-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
+      color: var(--emerald); font-size: 10px; font-weight: 800;
+      padding: 3px 10px; border-radius: 99px; letter-spacing: 0.08em;
+    }
+    .modal-active-badge::before {
+      content: '';
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--emerald); box-shadow: 0 0 6px var(--emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+
+    .modal-info-grid {
+      background: rgba(255,255,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 14px; padding: 16px;
+    }
+    .modal-info-label { font-size: 10px; font-weight: 700; color: rgba(148,163,184,0.4); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
+    .modal-info-val { font-weight: 700; color: #e2e8f0; font-size: 14px; }
+
+    .modal-blood-badge {
+      background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.25);
+      color: var(--red); padding: 2px 10px; border-radius: 7px;
+      font-size: 13px; font-weight: 800; font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .modal-conditions {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      border-radius: 13px; padding: 14px;
+      font-size: 13px; color: rgba(203,213,225,0.7); line-height: 1.6;
+    }
+    .modal-conditions-title {
+      font-size: 10px; font-weight: 800; color: rgba(148,163,184,0.4);
+      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+    }
+
+    .modal-history-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px; font-weight: 800; color: var(--cyan);
+      display: flex; align-items: center; gap: 7px;
+      margin-bottom: 14px; margin-top: 20px;
+    }
+
+    .history-line {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(52,211,153,0.08);
+      border-left: 2px solid rgba(52,211,153,0.3);
+      border-radius: 12px; padding: 14px 16px;
+      margin-bottom: 10px;
+      transition: border-color 0.2s;
+    }
+    .history-line:hover { border-color: rgba(52,211,153,0.2); border-left-color: var(--emerald); }
+
+    .history-date {
+      display: inline-flex; align-items: center;
+      background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.22);
+      color: var(--cyan); font-size: 10px; font-weight: 800;
+      padding: 3px 9px; border-radius: 7px; letter-spacing: 0.06em;
+    }
+    .history-therapy {
+      font-size: 13px; font-weight: 700; color: #e2e8f0; margin: 8px 0 4px;
+    }
+    .history-notes { font-size: 12px; color: rgba(148,163,184,0.55); }
+
+    /* Modal vertical divider */
+    .modal-col-divider {
+      border-left: 1px solid var(--border);
+    }
+
+    /* Error/alert in modal */
+    .modal-error {
+      background: rgba(248,113,113,0.08);
+      border: 1px solid rgba(248,113,113,0.22);
+      border-radius: 14px; padding: 28px;
+      text-align: center; color: var(--red);
+    }
+
+    /* responsive */
+    @media (max-width: 992px) {
+      main { margin-left: 72px; padding: 20px 16px; }
+      .stats-bar { grid-template-columns: repeat(2,1fr); }
+    }
+    @media (max-width: 640px) {
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Atmosphere -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="hero-grid"></div>
+
+  <div class="app-container">
+
+    <!-- ─── Sidebar ─── -->
+    <aside>
+      <div class="brand-area">
+        <div class="brand-logo-circle">
+          <i class="fas fa-heartbeat"></i>
+        </div>
+        <span class="brand-name">Med<span class="accent">LM</span></span>
+      </div>
+
+      <nav class="nav-menu">
+        <a href="/dashboard" class="nav-item">
+          <i class="fas fa-chart-line"></i><span>Dashboard</span>
+        </a>
+        <a href="/pacientes" class="nav-item active">
+          <i class="fas fa-user-injured"></i><span>Pacientes</span>
+        </a>
+        <a href="/financeiro" class="nav-item">
+          <i class="fas fa-hand-holding-usd"></i><span>Financeiro</span>
+        </a>
+        <a href="/agendamento" class="nav-item">
+          <i class="fas fa-calendar-check"></i><span>Agendamento</span>
+        </a>
+        <a href="/atendimento" class="nav-item">
+          <i class="fas fa-user-md"></i><span>Atendimento</span>
+        </a>
+        <a href="/equipe" class="nav-item">
+          <i class="fas fa-users-cog"></i><span>Minha Equipe</span>
+        </a>
+        <a href="/dashboard/configuracoes" class="nav-item">
+          <i class="fas fa-cogs"></i><span>Configurações</span>
+        </a>
+      </nav>
+
+      <div class="aside-footer">
+        <a href="javascript:void(0)" onclick="handleLogout(event)" class="nav-item nav-item-danger">
+          <i class="fas fa-sign-out-alt"></i><span>Sair</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ─── Main ─── -->
+    <main>
+
+      <!-- Top meta bar -->
+      <div class="top-meta-bar">
+        <div class="top-meta-time">
+          <i class="fas fa-calendar-alt"></i>
+          <span id="data-hora"></span>
+        </div>
+        <button id="theme-toggle-btn">
+          <i class="fas fa-moon"></i> Modo Escuro
+        </button>
+      </div>
+
+      <!-- Panel -->
+      <div class="glass-panel">
+
+        <!-- Header row -->
+        <div class="row mb-4 align-items-center g-3">
+          <div class="col-md-6">
+            <h1 class="panel-title">Gestão de Pacientes</h1>
+            <p class="panel-sub">Consulte, analise e inicie atendimentos clínicos em tempo real.</p>
+          </div>
+          <div class="col-md-6 d-flex justify-content-md-end">
+            <div class="search-wrapper">
+              <i class="fas fa-search"></i>
+              <input type="text" id="inputBusca" class="search-bar form-control" placeholder="Buscar por Nome ou CPF..." onkeyup="filtrarPacientes()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="stats-bar mb-4" id="statsBar">
+          <div class="stat-item">
+            <span class="stat-num" id="statTotal">—</span>
+            <span class="stat-lbl">Pacientes</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statAtivos">—</span>
+            <span class="stat-lbl">Ativos</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statHoje">—</span>
+            <span class="stat-lbl">Agendados Hoje</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-num" id="statMes">—</span>
+            <span class="stat-lbl">No Mês</span>
+          </div>
+        </div>
+
+        <!-- Cards grid -->
+        <div id="container-pacientes" class="row g-4">
+          <div class="col-12">
+            <div class="loading-state">
+              <div class="loading-ring"></div>
+              <p class="loading-text">Carregando carteira de pacientes...</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ─── Modal Prontuário ─── -->
+  <div class="modal fade" id="modalProntuario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-folder-open"></i> Histórico Clínico Digital
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="corpoModalProntuario">
+          <!-- Preenchido dinamicamente pelo JS -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fechar Registro</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // ─── CARREGAR PACIENTES (lógica original preservada + stats) ───
+    async function carregarPacientes() {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        const pacientes = await res.json();
+
+        if (!Array.isArray(pacientes)) {
+          console.error("Backend retornou erro ou formato inválido:", pacientes);
+          return;
+        }
+
+        // Atualizar stats bar
+        document.getElementById('statTotal').textContent = pacientes.length;
+        document.getElementById('statAtivos').textContent = pacientes.length;
+        const hoje = new Date().toDateString();
+        document.getElementById('statHoje').textContent = '—';
+        document.getElementById('statMes').textContent = '—';
+
+        const container = document.getElementById('container-pacientes');
+
+        if (pacientes.length === 0) {
+          container.innerHTML = `
+            <div class="col-12">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-user-slash"></i></div>
+                <p class="empty-title">Nenhum paciente cadastrado</p>
+                <p class="empty-sub">Adicione pacientes via agendamento para visualizá-los aqui.</p>
+              </div>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = pacientes.map(p => `
+          <div class="col-md-6 col-lg-4 item-paciente">
+            <div class="patient-card">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3 gap-3">
+                  <div class="card-avatar-box">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <h5 class="patient-name text-truncate">${p.nome}</h5>
+                    <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <p class="patient-info-row">
+                    <i class="fas fa-phone"></i>
+                    <span class="text-truncate">${p.telefone || '—'}</span>
+                  </p>
+                  <p class="patient-info-row" style="margin-bottom:0">
+                    <i class="fas fa-envelope"></i>
+                    <span class="text-truncate">${p.email || '—'}</span>
+                  </p>
+                </div>
+
+                <div class="card-divider"></div>
+
+                <div class="d-flex align-items-center gap-2">
+                  <a href="/atendimento?pacienteId=${p.id}" class="btn-action-atender">
+                    <i class="fas fa-user-md"></i> Atender
+                  </a>
+                  <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
+                    <i class="fas fa-file-medical"></i>
+                  </button>
+                  <button class="btn-action-delete" onclick="deletarPaciente(${p.id})" title="Excluir Registro">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (e) {
+        console.error("Erro fatal ao buscar carteira de pacientes", e);
+        document.getElementById('container-pacientes').innerHTML = `
+          <div class="col-12">
+            <div class="empty-state">
+              <div class="empty-icon" style="border-color:rgba(248,113,113,0.3);color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
+              <p class="empty-title">Erro ao carregar pacientes</p>
+              <p class="empty-sub">Verifique a conexão com o servidor.</p>
+            </div>
+          </div>`;
+      }
+    }
+
+    // ─── VER PRONTUÁRIO (lógica original preservada + dark styling) ───
+    async function verProntuario(id) {
+      const modalProntuarioEl = document.getElementById('modalProntuario');
+      const conteudo = document.getElementById('corpoModalProntuario');
+
+      if (!conteudo) return;
+
+      conteudo.innerHTML = `
+        <div class="loading-state" style="padding:40px 0">
+          <div class="loading-ring"></div>
+          <p class="loading-text">Reunindo dados clínicos e históricos...</p>
+        </div>`;
+
+      const modalBootstrap = new bootstrap.Modal(modalProntuarioEl);
+      modalBootstrap.show();
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(`/api/pacientes/${id}/prontuario`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+
+        conteudo.innerHTML = `
+          <div class="row g-3 mb-4">
+            <div class="col-md-4 text-center d-flex flex-column align-items-center justify-content-center" style="border-right:1px solid var(--border)">
+              <img src="${data.dados.foto_perfil ? '/uploads/'+data.dados.foto_perfil : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
+                   class="modal-prontuario-avatar mb-3">
+              <h5 class="modal-patient-name mb-2">${data.dados.nome}</h5>
+              <span class="modal-active-badge">Ficha Ativa</span>
+            </div>
+            <div class="col-md-8">
+              <div class="modal-info-grid">
+                <div class="row g-3">
+                  <div class="col-6">
+                    <span class="modal-info-label">Idade</span>
+                    <span class="modal-info-val">${data.dados.idade || '—'} anos</span>
+                  </div>
+                  <div class="col-6">
+                    <span class="modal-info-label">Grupo Sanguíneo</span>
+                    <span class="modal-blood-badge">${data.dados.tipo_sanguineo || 'N/A'}</span>
+                  </div>
+                  <div class="col-6">
+                    <span class="modal-info-label">Massa Corporal</span>
+                    <span class="modal-info-val">${data.dados.peso || '—'} kg</span>
+                  </div>
+                  <div class="col-6">
+                    <span class="modal-info-label">Estatura</span>
+                    <span class="modal-info-val">${data.dados.altura || '—'} m</span>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-conditions mt-3">
+                <p class="modal-conditions-title">Morbidades &amp; Condições Pré-existentes</p>
+                <p style="margin:0">${data.dados.condicoes_preexistentes || 'Nenhuma patologia registrada.'}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-history-title">
+            <i class="fas fa-clock-rotate-left"></i> Evolução Temporal de Sessões
+          </div>
+
+          <div>
+            ${data.consultas && data.consultas.length > 0
+              ? data.consultas.map(c => `
+                  <div class="history-line">
+                    <span class="history-date">
+                      ${new Date(c.data_agendamento.replace('T',' ').replace('Z','')).toLocaleDateString('pt-BR')}
+                    </span>
+                    <p class="history-therapy">${c.tipo_terapia}</p>
+                    <p class="history-notes">${c.motivo_consulta || 'Sem notas complementares.'}</p>
+                  </div>`).join('')
+              : `<div class="empty-state" style="padding:28px 0">
+                   <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
+                   <p class="empty-title" style="font-size:14px">Sem sessões registradas</p>
+                   <p class="empty-sub">Nenhuma sessão pregressa localizada no banco.</p>
+                 </div>`
+            }
+          </div>
+        `;
+      } catch (e) {
+        conteudo.innerHTML = `
+          <div class="modal-error">
+            <i class="fas fa-exclamation-triangle fa-2x mb-3 d-block"></i>
+            <p style="font-weight:700;margin-bottom:4px">Falha ao recuperar prontuário</p>
+            <p style="font-size:12px;color:rgba(248,113,113,0.7);margin:0">Erro estrutural ao recuperar prontuário eletrônico.</p>
+          </div>`;
+      }
+    }
+
+    // ─── FILTRO DE BUSCA (lógica original corrigida) ───
+    function filtrarPacientes() {
+      const termo = document.getElementById('inputBusca').value.toLowerCase();
+      const cards = document.querySelectorAll('.item-paciente');
+
+      cards.forEach(card => {
+        const texto = card.innerText.toLowerCase();
+        card.style.display = texto.includes(termo) ? '' : 'none';
+      });
+    }
+
+    // ─── Inicialização ───
+    carregarPacientes();
+  </script>
+
+  <!-- Scripts Globais do Ecossistema (preservados) -->
+  <script src="../ScriptGlobal/FuncDataHora.js"></script>
+  <script src="../ScriptGlobal/DarkMode.js"></script>
+  <script src="../ScriptGlobal/verifiLog.js"></script>
+  <script src="../ScriptGlobal/logout.js"></script>
+</body>
+</html>
