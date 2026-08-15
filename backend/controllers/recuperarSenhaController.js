@@ -56,7 +56,7 @@ exports.resetPassword = async (req, res) => {
     }
 
     try {
-        // Busca apenas pelo token
+        // Busca o usuário pelo token
         const [users] = await db.execute(
             'SELECT * FROM usuarios WHERE reset_token = ?',
             [token]
@@ -68,11 +68,19 @@ exports.resetPassword = async (req, res) => {
 
         const user = users[0];
 
-        // Salva a nova senha em texto puro diretamente no banco e limpa o token
+        // Atualiza a senha do usuário
         await db.execute(
             'UPDATE usuarios SET senha = ?, reset_token = NULL, reset_expires = NULL WHERE id = ?',
             [newPassword, user.id]
         );
+
+        // Se o usuário é o dono da clínica, sincroniza a senha_master também
+        if (user.cargo === 'dono' && user.clinica_id) {
+            await db.execute(
+                'UPDATE clinicas SET senha_master = ? WHERE id = ?',
+                [newPassword, user.clinica_id]
+            );
+        }
 
         return res.json({ message: 'Senha redefinida com sucesso! Você já pode fazer login.' });
     } catch (error) {

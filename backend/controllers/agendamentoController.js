@@ -37,12 +37,25 @@ exports.criarAgendamento = async (req, res) => {
   if (data_agendamento) {
     data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
   }
+  // calcula aidade do paciente
+  // Calcula idade a partir da data de nascimento, caso não venha preenchida (ou para garantir consistência)
+  if (data_nascimento) {
+    const nascimento = new Date(data_nascimento);
+    const hoje = new Date();
+    let idadeCalculada = hoje.getFullYear() - nascimento.getFullYear();
+    const mesAtual = hoje.getMonth() - nascimento.getMonth();
+    if (mesAtual < 0 || (mesAtual === 0 && hoje.getDate() < nascimento.getDate())) {
+      idadeCalculada--;
+    }
+    idade = idadeCalculada;
+  }
+  // fim da funcao calcular idade
 
   const clinicaId = req.usuario ? req.usuario.clinica_id : null;
   const usuarioId = req.usuario.id;
 
-  const patientPhoto = req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
-  const anexos = req.files['anexos'] || [];
+  const patientPhoto = req.files && req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
+  const anexos = (req.files && req.files['anexos']) || [];
   let fotoPerfilFilename = patientPhoto ? patientPhoto.filename : null;
 
   let condicoesString = '';

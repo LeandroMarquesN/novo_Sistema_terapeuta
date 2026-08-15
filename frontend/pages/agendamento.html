@@ -16,11 +16,6 @@
   <link rel="stylesheet" href="/css/transicaoTela.css">
   <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
 
-   <script>
-   const APP_BASE_URL = process.env.APP_BASE_URL_ENV || "http://localhost:3000";
-   url_portal: `${APP_BASE_URL}/agendar/${clinica.slug}`,
-  </Script>
-
   <style>
     /* ==========================================================================
        CYBER-MEDICAL ESSENTIAL THEME - MEDLM DASHBOARD EXPERIENCIE
@@ -254,6 +249,13 @@
         backdrop-filter: var(--glass-blur);
         -webkit-backdrop-filter: var(--glass-blur);
         border-bottom: 1px solid rgba(0, 242, 254, 0.1);
+    }
+
+    /* 🔧 CORREÇÃO: Menu de navegação sempre visível (sticky no topo) */
+    nav.navbar.bg-transparente {
+        position: sticky;
+        top: 0;
+        z-index: 1030;
     }
 
     /* Tarjeta informativa secundária */
@@ -931,7 +933,8 @@ document.querySelector('form').addEventListener('submit', function(e) {
                 weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
                 hour: '2-digit', minute: '2-digit', second: '2-digit'
             });
-            document.getElementById('data-hora').textContent = dataHora;
+            const elDataHora = document.getElementById('data-hora');
+            if (elDataHora) elDataHora.textContent = dataHora;
         }
         atualizarDataHora();
         setInterval(atualizarDataHora, 1000);
@@ -1051,35 +1054,6 @@ document.querySelector('form').addEventListener('submit', function(e) {
 
     let currentAppointments = [];
     const APPOINTMENT_DURATION_MS = 10 * 60 * 60 * 1000;
-
-    // --- Lógica do Dark Mode ---
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const body = document.body;
-    const currentTheme = localStorage.getItem('theme');
-
-    function applyTheme(theme) {
-        if (theme === 'dark') {
-            body.classList.add('dark-mode');
-            themeToggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-            themeToggleBtn.classList.remove('btn-outline-dark');
-            themeToggleBtn.classList.add('btn-outline-light');
-        } else {
-            body.classList.remove('dark-mode');
-            themeToggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-            themeToggleBtn.classList.remove('btn-outline-light');
-            themeToggleBtn.classList.add('btn-outline-dark');
-        }
-    }
-
-    if (currentTheme) {
-        applyTheme(currentTheme);
-    }
-
-    themeToggleBtn.addEventListener('click', () => {
-        const newTheme = body.classList.contains('dark-mode') ? 'light' : 'dark';
-        applyTheme(newTheme);
-        localStorage.setItem('theme', newTheme);
-    });
 
     // --- Lógica do Botão "Voltar ao Topo" ---
     const backToTopBtn = document.getElementById('back-to-top-btn');
@@ -1340,12 +1314,12 @@ document.querySelector('form').addEventListener('submit', function(e) {
           const formData = new FormData(form);
 
           // Remover o campo de anexos do FormData original, pois será adicionado novamente
-          // Se o campo for 'anexos[]', o FormData.delete pode não funcionar corretamente
           // O melhor é criar um FormData do zero.
           const finalFormData = new FormData();
 
           for (const pair of formData.entries()) {
-              if (pair[0] !== 'anexos[]') {
+              // 🔧 CORREÇÃO: o input se chama "anexos" (sem colchetes), não "anexos[]"
+              if (pair[0] !== 'anexos') {
                   let valor = pair[1];
 
                   // Se o campo for a data, garantimos que ela vá como texto puro
