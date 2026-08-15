@@ -110,6 +110,11 @@ CREATE TABLE IF NOT EXISTS pacientes (
   altura DECIMAL(3,2),
   condicoes_preexistentes TEXT,
   foto_perfil VARCHAR(255),
+ 
+  ativo TINYINT(1) NOT NULL DEFAULT 1,
+  arquivado_em DATETIME NULL,
+  arquivado_por INT NULL,
+  motivo_arquivamento VARCHAR(255) NULL,
   
   -- Novas colunas para o Portal do Paciente
   token_acesso VARCHAR(128) DEFAULT NULL,

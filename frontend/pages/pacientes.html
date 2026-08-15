@@ -75,7 +75,6 @@
 
     .app-container { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
-    /* Sidebar Desktop */
     aside {
       width: 72px;
       background: rgba(2,12,18,0.90);
@@ -204,7 +203,6 @@
     }
     .stat-lbl { font-size: 10px; font-weight: 700; color: rgba(148,163,184,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
 
-    /* Cards de paciente – ESTILOS PRESERVADOS */
     .patient-card {
       background: rgba(255,255,255,0.025); border: 1px solid var(--border);
       border-radius: 20px; overflow: hidden;
@@ -265,13 +263,19 @@
       transition: all 0.22s; cursor: pointer; font-size: 13px;
     }
     .btn-action-outline:hover { background: rgba(34,211,238,0.18); box-shadow: 0 0 14px rgba(34,211,238,0.2); }
-    .btn-action-delete {
-      background: rgba(248,113,113,0.07); border: 1px solid rgba(248,113,113,0.2);
-      color: var(--red); border-radius: 11px; width: 38px; height: 38px;
+    .btn-action-archive {
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      color: #fbbf24;
+      border-radius: 11px;
+      width: 38px; height: 38px;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.22s; cursor: pointer; font-size: 13px;
     }
-    .btn-action-delete:hover { background: rgba(248,113,113,0.18); box-shadow: 0 0 14px rgba(248,113,113,0.2); }
+    .btn-action-archive:hover {
+      background: rgba(251, 191, 36, 0.18);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.2);
+    }
 
     .loading-state { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; color: rgba(148,163,184,0.5); }
     .loading-ring {
@@ -292,14 +296,99 @@
     .empty-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
     .empty-sub { color: rgba(148,163,184,0.4); font-size: 13px; }
 
-    /* Modal permissão negada */
-    .perm-modal-overlay {
+    /* Arquivados */
+    .archive-section {
+      margin-top: 32px;
+      background: rgba(251,191,36,0.03);
+      border: 1px solid rgba(251,191,36,0.18);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .archive-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(251,191,36,0.45), transparent);
+    }
+    .archive-header {
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 16px; margin-bottom: 18px;
+    }
+    .archive-title-wrap { display: flex; align-items: center; gap: 12px; }
+    .archive-icon-box {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25);
+      display: flex; align-items: center; justify-content: center;
+      color: #fbbf24; font-size: 18px;
+    }
+    .archive-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 800; color: #f1f5f9; }
+    .archive-sub { font-size: 12px; color: rgba(148,163,184,0.5); margin-top: 2px; }
+    .archive-total-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25);
+      color: #fbbf24; font-size: 12px; font-weight: 800;
+      padding: 6px 14px; border-radius: 99px;
+    }
+    .btn-listar-arquivados {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.1));
+      border: 1px solid rgba(251,191,36,0.35); color: #fbbf24;
+      font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800;
+      padding: 11px 18px; border-radius: 12px; cursor: pointer; transition: all 0.25s;
+    }
+    .btn-listar-arquivados:hover {
+      background: rgba(251,191,36,0.25); box-shadow: 0 0 18px rgba(251,191,36,0.15);
+    }
+    .archive-toolbar {
+      display: none; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px;
+    }
+    .archive-toolbar.visible { display: flex; }
+    .archive-search { flex: 1; min-width: 200px; position: relative; }
+    .archive-search i {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: rgba(251,191,36,0.45); font-size: 13px; pointer-events: none;
+    }
+    .archive-search input {
+      width: 100%; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(251,191,36,0.2); border-radius: 12px;
+      padding: 11px 14px 11px 40px; color: #e2e8f0; font-size: 13px; outline: none;
+    }
+    .archive-search input:focus {
+      border-color: rgba(251,191,36,0.45);
+      box-shadow: 0 0 0 3px rgba(251,191,36,0.08);
+    }
+    #container-arquivados { display: none; }
+    #container-arquivados.visible { display: flex; flex-wrap: wrap; }
+    .patient-card.archived { border-color: rgba(251,191,36,0.2); }
+    .patient-card.archived::before {
+      background: linear-gradient(90deg, transparent, rgba(251,191,36,0.45), transparent);
+    }
+    .badge-arquivado {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25);
+      color: #fbbf24; font-size: 9px; font-weight: 800;
+      padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .btn-action-restore {
+      background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; border-radius: 11px; padding: 9px 14px;
+      font-weight: 700; font-size: 12px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Space Grotesk', sans-serif; transition: all 0.22s; flex: 1;
+    }
+    .btn-action-restore:hover {
+      background: rgba(52,211,153,0.2); box-shadow: 0 0 14px rgba(52,211,153,0.15);
+    }
+
+    /* Modais */
+    .perm-modal-overlay, .confirm-modal-overlay {
       position: fixed; inset: 0; z-index: 200;
       background: rgba(2,12,18,0.85); backdrop-filter: blur(12px);
       display: none; align-items: center; justify-content: center; padding: 20px;
     }
-    .perm-modal-overlay.open { display: flex; }
-    .perm-modal {
+    .perm-modal-overlay.open, .confirm-modal-overlay.open { display: flex; }
+    .perm-modal, .confirm-modal {
       background: rgba(2,12,18,0.97);
       border: 1px solid rgba(248,113,113,0.3);
       border-radius: 24px; padding: 36px 32px; text-align: center;
@@ -307,21 +396,22 @@
       box-shadow: 0 0 60px rgba(248,113,113,0.12);
       animation: permIn 0.3s ease;
     }
+    .confirm-modal { border-color: rgba(251,191,36,0.3); box-shadow: 0 0 50px rgba(251,191,36,0.1); }
     @keyframes permIn {
       from { opacity: 0; transform: scale(0.92) translateY(12px); }
       to { opacity: 1; transform: scale(1) translateY(0); }
     }
-    .perm-modal .perm-icon {
+    .perm-modal .perm-icon, .confirm-modal .perm-icon {
       width: 64px; height: 64px; border-radius: 50%;
       background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3);
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 18px; font-size: 26px; color: #f87171;
     }
-    .perm-modal h3 {
+    .perm-modal h3, .confirm-modal h3 {
       font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800;
       color: #f1f5f9; margin-bottom: 10px;
     }
-    .perm-modal p { font-size: 14px; color: rgba(148,163,184,0.7); line-height: 1.55; margin-bottom: 24px; }
+    .perm-modal p, .confirm-modal p { font-size: 14px; color: rgba(148,163,184,0.7); line-height: 1.55; margin-bottom: 24px; }
     .perm-modal .perm-cargo {
       display: inline-block; background: rgba(248,113,113,0.1);
       border: 1px solid rgba(248,113,113,0.25); color: #f87171;
@@ -329,34 +419,12 @@
       text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px;
     }
     .perm-modal .btn-entendi {
-      width: 100%; padding: 14px; border-radius: 14px; border: none;
+      width: 100%; padding: 14px; border-radius: 14px;
       background: linear-gradient(135deg, rgba(248,113,113,0.2), rgba(248,113,113,0.12));
       border: 1px solid rgba(248,113,113,0.35); color: #f87171;
-      font-weight: 800; font-size: 13px; cursor: pointer; transition: all 0.25s;
+      font-weight: 800; font-size: 13px; cursor: pointer;
       font-family: 'Space Grotesk', sans-serif;
     }
-    .perm-modal .btn-entendi:hover { background: rgba(248,113,113,0.25); box-shadow: 0 0 20px rgba(248,113,113,0.15); }
-
-    /* Modal confirmação exclusão */
-    .confirm-modal-overlay {
-      position: fixed; inset: 0; z-index: 200;
-      background: rgba(2,12,18,0.85); backdrop-filter: blur(12px);
-      display: none; align-items: center; justify-content: center; padding: 20px;
-    }
-    .confirm-modal-overlay.open { display: flex; }
-    .confirm-modal {
-      background: rgba(2,12,18,0.97);
-      border: 1px solid rgba(248,113,113,0.25);
-      border-radius: 24px; padding: 32px; text-align: center;
-      max-width: 400px; width: 100%;
-      box-shadow: 0 0 50px rgba(248,113,113,0.1);
-      animation: permIn 0.3s ease;
-    }
-    .confirm-modal h3 {
-      font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 800;
-      color: #f1f5f9; margin-bottom: 8px;
-    }
-    .confirm-modal p { font-size: 13px; color: rgba(148,163,184,0.65); margin-bottom: 24px; line-height: 1.5; }
     .confirm-modal .btns { display: flex; gap: 10px; }
     .confirm-modal .btn-cancel {
       flex: 1; padding: 12px; border-radius: 12px;
@@ -365,12 +433,10 @@
     }
     .confirm-modal .btn-confirm {
       flex: 1; padding: 12px; border-radius: 12px;
-      background: rgba(248,113,113,0.15); border: 1px solid rgba(248,113,113,0.35);
-      color: #f87171; font-weight: 800; font-size: 13px; cursor: pointer;
+      background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.35);
+      color: #fbbf24; font-weight: 800; font-size: 13px; cursor: pointer;
     }
-    .confirm-modal .btn-confirm:hover { background: rgba(248,113,113,0.25); }
 
-    /* Bootstrap modal dark */
     #modalProntuario .modal-content {
       background: rgba(2,12,18,0.97) !important; border: 1px solid var(--border) !important;
       border-radius: 22px !important; backdrop-filter: blur(28px); color: #e2e8f0 !important;
@@ -430,7 +496,7 @@
     .history-notes { font-size: 12px; color: rgba(148,163,184,0.55); }
     .modal-error { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.22); border-radius: 14px; padding: 28px; text-align: center; color: var(--red); }
 
-    /* ══════ MOBILE STRUCTURE ══════ */
+    /* Mobile */
     .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer, .mobile-only { display: none; }
 
     @media (max-width: 1024px) {
@@ -538,6 +604,11 @@
       .panel-title { font-size: 20px !important; }
       .search-wrapper { max-width: 100% !important; }
       .stats-bar { grid-template-columns: repeat(2, 1fr) !important; }
+      .archive-section { padding: 18px 14px; }
+      .archive-header { flex-direction: column; align-items: stretch; }
+      .btn-listar-arquivados { width: 100%; justify-content: center; }
+      .archive-toolbar { flex-direction: column; }
+      .archive-search { width: 100%; min-width: 0; }
     }
   </style>
 </head>
@@ -548,7 +619,6 @@
   <div class="orb orb-3"></div>
   <div class="hero-grid"></div>
 
-  <!-- ═══ MOBILE TOP BAR ═══ -->
   <div class="mobile-topbar">
     <div class="logo-wrap">
       <button class="icon-btn" id="btnOpenDrawer" aria-label="Abrir menu"><i class="fas fa-bars"></i></button>
@@ -561,7 +631,6 @@
     </div>
   </div>
 
-  <!-- ═══ MOBILE DRAWER ═══ -->
   <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
   <div class="mobile-drawer" id="mobileDrawer">
     <div class="drawer-header">
@@ -586,7 +655,6 @@
     </div>
   </div>
 
-  <!-- ═══ MOBILE BOTTOM TAB BAR ═══ -->
   <nav class="mobile-bottom-tabbar">
     <a href="/dashboard" class="tab-item"><i class="fas fa-home"></i><span>Início</span></a>
     <a href="/pacientes" class="tab-item active"><i class="fas fa-user-injured"></i><span>Pacientes</span></a>
@@ -596,7 +664,6 @@
   </nav>
 
   <div class="app-container">
-    <!-- Sidebar Desktop -->
     <aside>
       <div class="brand-area">
         <div class="brand-logo-circle"><i class="fas fa-heartbeat"></i></div>
@@ -656,6 +723,37 @@
             </div>
           </div>
         </div>
+
+        <!-- SEÇÃO ARQUIVADOS -->
+        <div class="archive-section" id="archiveSection">
+          <div class="archive-header">
+            <div class="archive-title-wrap">
+              <div class="archive-icon-box"><i class="fas fa-box-archive"></i></div>
+              <div>
+                <div class="archive-title">Pacientes Arquivados</div>
+                <div class="archive-sub">Prontuários preservados · listagem sob demanda</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <span class="archive-total-badge">
+                <i class="fas fa-database"></i>
+                Total: <span id="statArquivados">—</span>
+              </span>
+              <button type="button" class="btn-listar-arquivados" id="btnListarArquivados" onclick="listarArquivados()">
+                <i class="fas fa-list"></i> Listar arquivados
+              </button>
+            </div>
+          </div>
+
+          <div class="archive-toolbar" id="archiveToolbar">
+            <div class="archive-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="inputBuscaArquivados" placeholder="Filtrar por nome ou CPF..." onkeyup="filtrarArquivados()">
+            </div>
+          </div>
+
+          <div id="container-arquivados" class="row g-4"></div>
+        </div>
       </div>
     </main>
   </div>
@@ -682,23 +780,23 @@
       <div class="perm-icon"><i class="fas fa-lock"></i></div>
       <h3>Acesso Negado</h3>
       <span class="perm-cargo" id="permCargoLabel">Seu cargo</span>
-      <p>Você não tem permissão para excluir pacientes.<br>
+      <p>Você não tem permissão para arquivar ou restaurar pacientes.<br>
          Apenas profissionais de saúde e gestores (exceto <strong>Admin</strong> e <strong>Recepção</strong>) podem realizar essa ação.</p>
       <button class="btn-entendi" onclick="fecharPermModal()">Entendi</button>
     </div>
   </div>
 
-  <!-- Modal Confirmação de Exclusão -->
+  <!-- Modal Confirmação -->
   <div class="confirm-modal-overlay" id="confirmModal">
     <div class="confirm-modal">
-      <div class="perm-icon" style="background:rgba(248,113,113,0.1);border-color:rgba(248,113,113,0.25);color:#f87171;">
-        <i class="fas fa-trash-alt"></i>
+      <div class="perm-icon" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.25);color:#fbbf24;">
+        <i class="fas fa-box-archive"></i>
       </div>
-      <h3>Excluir paciente?</h3>
-      <p id="confirmMsg">Esta ação não pode ser desfeita. O registro do paciente será removido permanentemente.</p>
+      <h3 id="confirmTitle">Arquivar paciente?</h3>
+      <p id="confirmMsg">O paciente sairá da lista ativa, mas o prontuário será preservado.</p>
       <div class="btns">
         <button class="btn-cancel" onclick="fecharConfirmModal()">Cancelar</button>
-        <button class="btn-confirm" id="btnConfirmDelete">Sim, excluir</button>
+        <button class="btn-confirm" id="btnConfirmAction">Sim, arquivar</button>
       </div>
     </div>
   </div>
@@ -706,11 +804,9 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // Cargos que NÃO podem excluir
     const CARGOS_BLOQUEADOS = ['admin', 'recepcao'];
 
     function getCargoUsuario() {
-      // Tenta várias chaves comuns no localStorage
       return (
         localStorage.getItem('medlm_user_cargo') ||
         localStorage.getItem('user_cargo') ||
@@ -719,13 +815,12 @@
       ).toLowerCase().trim();
     }
 
-    function podeExcluirPaciente() {
+    function podeArquivarPaciente() {
       const cargo = getCargoUsuario();
-      if (!cargo) return false; // sem cargo conhecido = bloqueia por segurança
+      if (!cargo) return false;
       return !CARGOS_BLOQUEADOS.includes(cargo);
     }
 
-    // ─── Carregar pacientes ───
     async function carregarPacientes() {
       try {
         const token = localStorage.getItem('token');
@@ -735,7 +830,7 @@
         const pacientes = await res.json();
 
         if (!Array.isArray(pacientes)) {
-          console.error("Backend retornou erro ou formato inválido:", pacientes);
+          console.error('Backend retornou formato inválido:', pacientes);
           return;
         }
 
@@ -751,47 +846,47 @@
             <div class="col-12">
               <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-user-slash"></i></div>
-                <p class="empty-title">Nenhum paciente cadastrado</p>
-                <p class="empty-sub">Adicione pacientes via agendamento para visualizá-los aqui.</p>
+                <p class="empty-title">Nenhum paciente ativo</p>
+                <p class="empty-sub">Adicione pacientes via agendamento ou restaure um arquivado.</p>
               </div>
             </div>`;
-          return;
-        }
-
-        container.innerHTML = pacientes.map(p => `
-          <div class="col-md-6 col-lg-4 item-paciente">
-            <div class="patient-card">
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3 gap-3">
-                  <div class="card-avatar-box"><i class="fas fa-user"></i></div>
-                  <div style="flex:1;min-width:0">
-                    <h5 class="patient-name text-truncate">${p.nome}</h5>
-                    <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
+        } else {
+          container.innerHTML = pacientes.map(p => `
+            <div class="col-md-6 col-lg-4 item-paciente">
+              <div class="patient-card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="card-avatar-box"><i class="fas fa-user"></i></div>
+                    <div style="flex:1;min-width:0">
+                      <h5 class="patient-name text-truncate">${p.nome}</h5>
+                      <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
+                    </div>
                   </div>
-                </div>
-                <div class="mb-3">
-                  <p class="patient-info-row"><i class="fas fa-phone"></i><span class="text-truncate">${p.telefone || '—'}</span></p>
-                  <p class="patient-info-row" style="margin-bottom:0"><i class="fas fa-envelope"></i><span class="text-truncate">${p.email || '—'}</span></p>
-                </div>
-                <div class="card-divider"></div>
-                <div class="d-flex align-items-center gap-2">
-                  <a href="/atendimento?pacienteId=${p.id}" class="btn-action-atender">
-                    <i class="fas fa-user-md"></i> Atender
-                  </a>
-                  <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
-                    <i class="fas fa-file-medical"></i>
-                  </button>
-                  <button class="btn-action-delete" onclick="solicitarExclusao(${p.id}, '${(p.nome || '').replace(/'/g, "\\'")}')" title="Excluir Registro">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                  <div class="mb-3">
+                    <p class="patient-info-row"><i class="fas fa-phone"></i><span class="text-truncate">${p.telefone || '—'}</span></p>
+                    <p class="patient-info-row" style="margin-bottom:0"><i class="fas fa-envelope"></i><span class="text-truncate">${p.email || '—'}</span></p>
+                  </div>
+                  <div class="card-divider"></div>
+                  <div class="d-flex align-items-center gap-2">
+                    <a href="/atendimento?pacienteId=${p.id}" class="btn-action-atender">
+                      <i class="fas fa-user-md"></i> Atender
+                    </a>
+                    <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
+                      <i class="fas fa-file-medical"></i>
+                    </button>
+                    <button class="btn-action-archive" onclick="solicitarArquivamento(${p.id}, '${(p.nome || '').replace(/'/g, "\\'")}')" title="Arquivar paciente">
+                      <i class="fas fa-box-archive"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        `).join('');
+          `).join('');
+        }
 
+        carregarTotalArquivados();
       } catch (e) {
-        console.error("Erro fatal ao buscar carteira de pacientes", e);
+        console.error(e);
         document.getElementById('container-pacientes').innerHTML = `
           <div class="col-12">
             <div class="empty-state">
@@ -803,19 +898,152 @@
       }
     }
 
-    // ─── Solicitação de exclusão (com permissão) ───
-    let pacienteParaExcluir = null;
+    async function carregarTotalArquivados() {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/arquivados?somenteTotal=1', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const total = data.total ?? (Array.isArray(data.pacientes) ? data.pacientes.length : (Array.isArray(data) ? data.length : 0));
+        document.getElementById('statArquivados').textContent = total;
+      } catch (e) {
+        document.getElementById('statArquivados').textContent = '—';
+      }
+    }
 
-    function solicitarExclusao(id, nome) {
-      if (!podeExcluirPaciente()) {
-        const cargo = getCargoUsuario() || 'desconhecido';
-        document.getElementById('permCargoLabel').textContent = cargo;
+    let arquivadosCarregados = false;
+
+    async function listarArquivados() {
+      const container = document.getElementById('container-arquivados');
+      const toolbar = document.getElementById('archiveToolbar');
+      const btn = document.getElementById('btnListarArquivados');
+
+      container.classList.add('visible');
+      toolbar.classList.add('visible');
+      container.innerHTML = `
+        <div class="col-12">
+          <div class="loading-state" style="padding:40px 0">
+            <div class="loading-ring"></div>
+            <p class="loading-text">Carregando arquivados...</p>
+          </div>
+        </div>`;
+
+      btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Carregando...';
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/arquivados', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const lista = Array.isArray(data) ? data : (data.pacientes || []);
+
+        document.getElementById('statArquivados').textContent = data.total ?? lista.length;
+        arquivadosCarregados = true;
+        btn.innerHTML = '<i class="fas fa-sync"></i> Atualizar lista';
+
+        if (lista.length === 0) {
+          container.innerHTML = `
+            <div class="col-12">
+              <div class="empty-state" style="padding:36px 0">
+                <div class="empty-icon" style="color:#fbbf24;border-color:rgba(251,191,36,0.25)"><i class="fas fa-box-open"></i></div>
+                <p class="empty-title">Nenhum paciente arquivado</p>
+                <p class="empty-sub">Quando arquivar alguém, ele aparecerá aqui.</p>
+              </div>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = lista.map(p => {
+          const dataArq = p.arquivado_em
+            ? new Date(p.arquivado_em).toLocaleDateString('pt-BR')
+            : '—';
+          return `
+            <div class="col-md-6 col-lg-4 item-arquivado">
+              <div class="patient-card archived">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="card-avatar-box" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08)">
+                      <i class="fas fa-user" style="color:#fbbf24"></i>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <h5 class="patient-name text-truncate">${p.nome}</h5>
+                      <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
+                      <div style="margin-top:6px"><span class="badge-arquivado"><i class="fas fa-box-archive"></i> Arquivado</span></div>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <p class="patient-info-row"><i class="fas fa-phone"></i><span>${p.telefone || '—'}</span></p>
+                    <p class="patient-info-row" style="margin-bottom:0"><i class="far fa-calendar"></i><span>Arquivado em ${dataArq}</span></p>
+                  </div>
+                  <div class="card-divider"></div>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn-action-restore" onclick="restaurarPaciente(${p.id}, '${(p.nome || '').replace(/'/g, "\\'")}')">
+                      <i class="fas fa-undo"></i> Restaurar
+                    </button>
+                    <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
+                      <i class="fas fa-file-medical"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        btn.innerHTML = '<i class="fas fa-list"></i> Listar arquivados';
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="empty-state">
+              <div class="empty-icon" style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
+              <p class="empty-title">Erro ao listar arquivados</p>
+              <p class="empty-sub">Tente novamente em instantes.</p>
+            </div>
+          </div>`;
+      }
+    }
+
+    function filtrarArquivados() {
+      const termo = (document.getElementById('inputBuscaArquivados')?.value || '').toLowerCase();
+      document.querySelectorAll('.item-arquivado').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(termo) ? '' : 'none';
+      });
+    }
+
+    let pacienteParaArquivar = null;
+    let pacienteParaRestaurar = null;
+    let acaoConfirmacao = null;
+
+    function solicitarArquivamento(id, nome) {
+      if (!podeArquivarPaciente()) {
+        document.getElementById('permCargoLabel').textContent = getCargoUsuario() || 'desconhecido';
         document.getElementById('permModal').classList.add('open');
         return;
       }
-      pacienteParaExcluir = id;
+      acaoConfirmacao = 'arquivar';
+      pacienteParaArquivar = id;
+      document.getElementById('confirmTitle').textContent = 'Arquivar paciente?';
       document.getElementById('confirmMsg').innerHTML =
-        `Deseja realmente excluir <strong style="color:#f1f5f9">${nome}</strong>?<br>Esta ação não pode ser desfeita.`;
+        `Deseja arquivar <strong style="color:#f1f5f9">${nome}</strong>?<br>
+         O paciente sairá da lista ativa, mas o prontuário e o histórico serão preservados.`;
+      document.getElementById('btnConfirmAction').textContent = 'Sim, arquivar';
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function restaurarPaciente(id, nome) {
+      if (!podeArquivarPaciente()) {
+        document.getElementById('permCargoLabel').textContent = getCargoUsuario() || 'desconhecido';
+        document.getElementById('permModal').classList.add('open');
+        return;
+      }
+      acaoConfirmacao = 'restaurar';
+      pacienteParaRestaurar = id;
+      document.getElementById('confirmTitle').textContent = 'Restaurar paciente?';
+      document.getElementById('confirmMsg').innerHTML =
+        `Deseja restaurar <strong style="color:#f1f5f9">${nome}</strong>?<br>
+         Ele voltará para a lista de pacientes ativos.`;
+      document.getElementById('btnConfirmAction').textContent = 'Sim, restaurar';
       document.getElementById('confirmModal').classList.add('open');
     }
 
@@ -825,35 +1053,63 @@
 
     function fecharConfirmModal() {
       document.getElementById('confirmModal').classList.remove('open');
-      pacienteParaExcluir = null;
+      pacienteParaArquivar = null;
+      pacienteParaRestaurar = null;
+      acaoConfirmacao = null;
     }
 
-    document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
-      if (!pacienteParaExcluir) return;
-      const id = pacienteParaExcluir;
-      fecharConfirmModal();
+    document.getElementById('btnConfirmAction').addEventListener('click', async () => {
+      const token = localStorage.getItem('token');
 
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch(`/api/pacientes/${id}`, {
-          method: 'DELETE',
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json().catch(() => ({}));
-
-        if (!res.ok) {
-          alert(data.message || data.erro || 'Não foi possível excluir o paciente.');
-          return;
+      if (acaoConfirmacao === 'arquivar' && pacienteParaArquivar) {
+        const id = pacienteParaArquivar;
+        fecharConfirmModal();
+        try {
+          const res = await fetch(`/api/pacientes/${id}/arquivar`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ motivo: 'Arquivado pela tela de pacientes' })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            alert(data.message || data.erro || 'Não foi possível arquivar.');
+            return;
+          }
+          await carregarPacientes();
+          if (arquivadosCarregados) listarArquivados();
+          else carregarTotalArquivados();
+        } catch (err) {
+          console.error(err);
+          alert('Erro de conexão ao arquivar.');
         }
-        // Remove o card da tela sem recarregar tudo
-        carregarPacientes();
-      } catch (err) {
-        console.error(err);
-        alert('Erro de conexão ao tentar excluir o paciente.');
+        return;
+      }
+
+      if (acaoConfirmacao === 'restaurar' && pacienteParaRestaurar) {
+        const id = pacienteParaRestaurar;
+        fecharConfirmModal();
+        try {
+          const res = await fetch(`/api/pacientes/${id}/restaurar`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            alert(data.message || data.erro || 'Não foi possível restaurar.');
+            return;
+          }
+          await carregarPacientes();
+          listarArquivados();
+        } catch (err) {
+          console.error(err);
+          alert('Erro de conexão ao restaurar.');
+        }
       }
     });
 
-    // ─── Ver prontuário ───
     async function verProntuario(id) {
       const modalProntuarioEl = document.getElementById('modalProntuario');
       const conteudo = document.getElementById('corpoModalProntuario');
@@ -910,7 +1166,6 @@
               : `<div class="empty-state" style="padding:28px 0">
                    <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
                    <p class="empty-title" style="font-size:14px">Sem sessões registradas</p>
-                   <p class="empty-sub">Nenhuma sessão pregressa localizada no banco.</p>
                  </div>`
             }
           </div>`;
@@ -918,8 +1173,7 @@
         conteudo.innerHTML = `
           <div class="modal-error">
             <i class="fas fa-exclamation-triangle fa-2x mb-3 d-block"></i>
-            <p style="font-weight:700;margin-bottom:4px">Falha ao recuperar prontuário</p>
-            <p style="font-size:12px;color:rgba(248,113,113,0.7);margin:0">Erro estrutural ao recuperar prontuário eletrônico.</p>
+            <p style="font-weight:700">Falha ao recuperar prontuário</p>
           </div>`;
       }
     }
@@ -931,13 +1185,11 @@
       });
     }
 
-    // Drawer mobile
-    (function() {
+    (function () {
       const btnOpen = document.getElementById('btnOpenDrawer');
       const btnClose = document.getElementById('btnCloseDrawer');
       const drawer = document.getElementById('mobileDrawer');
       const overlay = document.getElementById('drawerOverlay');
-
       function openDrawer() {
         drawer.classList.add('open');
         overlay.classList.add('open');
@@ -948,7 +1200,6 @@
         overlay.classList.remove('open');
         document.body.style.overflow = '';
       }
-
       if (btnOpen) btnOpen.addEventListener('click', openDrawer);
       if (btnClose) btnClose.addEventListener('click', closeDrawer);
       if (overlay) overlay.addEventListener('click', closeDrawer);

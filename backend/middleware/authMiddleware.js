@@ -45,6 +45,9 @@ module.exports = async (req, res, next) => {
         req.usuario = verificado;
         next();
     } catch (err) {
-        res.redirect('/login');
+        if (req.path.includes('/api/') || req.originalUrl.includes('/api/')) {
+            return res.status(401).json({ error: 'Token inválido ou expirado.' });
+        }
+        return res.redirect('/login');
     }
 };

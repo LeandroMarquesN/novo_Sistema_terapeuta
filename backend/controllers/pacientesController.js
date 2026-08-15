@@ -1,17 +1,31 @@
 const db = require('../config/db');
 
-// Listar todos os pacientes da clínica (para a tabela principal)
+// Cargos que NÃO podem arquivar/restaurar (mesma regra do frontend)
+const CARGOS_BLOQUEADOS = ['admin', 'recepcao'];
+
+function podeArquivar(req) {
+    const cargo = (req.usuario?.cargo || '').toLowerCase().trim();
+    if (!cargo) return false;
+    return !CARGOS_BLOQUEADOS.includes(cargo);
+}
+
+// ─────────────────────────────────────────────
+// Listar pacientes ATIVOS da clínica
+// ─────────────────────────────────────────────
 exports.listarPacientes = async (req, res) => {
-    // 1. Trava de segurança: impede o erro "undefined"
     if (!req.usuario) {
-        return res.status(401).json({ erro: "Usuário não autenticado ou token inválido" });
+        return res.status(401).json({ erro: 'Usuário não autenticado ou token inválido' });
     }
 
     const clinicaId = req.usuario.clinica_id;
 
     try {
         const [pacientes] = await db.query(
-            'SELECT * FROM pacientes WHERE clinica_id = ? ORDER BY nome ASC',
+            `SELECT *
+       FROM pacientes
+       WHERE clinica_id = ?
+         AND (ativo = 1 OR ativo IS NULL)
+       ORDER BY nome ASC`,
             [clinicaId]
         );
         res.json(pacientes);
@@ -20,31 +34,192 @@ exports.listarPacientes = async (req, res) => {
     }
 };
 
-// Ver prontuário completo (Dados + Consultas + Anexos)
-exports.verProntuario = async (req, res) => {
-    if (!req.usuario) return res.status(401).json({ erro: "Acesso negado" });
+// ─────────────────────────────────────────────
+// Listar arquivados (ou só total)
+// GET /api/pacientes/arquivados
+// GET /api/pacientes/arquivados?somenteTotal=1
+// GET /api/pacientes/arquivados?q=nome_ou_cpf
+// ─────────────────────────────────────────────
+exports.listarArquivados = async (req, res) => {
+    if (!req.usuario) {
+        return res.status(401).json({ erro: 'Usuário não autenticado ou token inválido' });
+    }
+
+    const clinicaId = req.usuario.clinica_id;
+    const somenteTotal = String(req.query.somenteTotal || '') === '1';
+    const q = (req.query.q || '').trim();
+
+    try {
+        if (somenteTotal) {
+            const [rows] = await db.query(
+                `SELECT COUNT(*) AS total
+         FROM pacientes
+         WHERE clinica_id = ? AND ativo = 0`,
+                [clinicaId]
+            );
+            return res.json({ total: rows[0]?.total || 0 });
+        }
+
+        let sql = `
+      SELECT id, nome, cpf, telefone, email,
+             arquivado_em, arquivado_por, motivo_arquivamento, ativo
+      FROM pacientes
+      WHERE clinica_id = ? AND ativo = 0
+    `;
+        const params = [clinicaId];
+
+        if (q) {
+            sql += ` AND (nome LIKE ? OR cpf LIKE ?)`;
+            params.push(`%${q}%`, `%${q}%`);
+        }
+
+        sql += ` ORDER BY arquivado_em DESC, nome ASC`;
+
+        const [pacientes] = await db.query(sql, params);
+
+        return res.json({
+            total: pacientes.length,
+            pacientes
+        });
+    } catch (err) {
+        console.error('Erro ao listar arquivados:', err);
+        res.status(500).json({ erro: err.message });
+    }
+};
+
+// ─────────────────────────────────────────────
+// Arquivar paciente (soft delete)
+// PATCH /api/pacientes/:id/arquivar
+// body opcional: { motivo: "..." }
+// ─────────────────────────────────────────────
+exports.arquivarPaciente = async (req, res) => {
+    if (!req.usuario) {
+        return res.status(401).json({ success: false, message: 'Não autenticado' });
+    }
+
+    if (!podeArquivar(req)) {
+        return res.status(403).json({
+            success: false,
+            message: 'Seu cargo não permite arquivar pacientes.'
+        });
+    }
+
+    const { id } = req.params;
+    const clinicaId = req.usuario.clinica_id;
+    const motivo = (req.body?.motivo || 'Arquivado pela tela de pacientes').slice(0, 255);
+
+    try {
+        const [result] = await db.query(
+            `UPDATE pacientes
+       SET ativo = 0,
+           arquivado_em = NOW(),
+           arquivado_por = ?,
+           motivo_arquivamento = ?
+       WHERE id = ?
+         AND clinica_id = ?
+         AND (ativo = 1 OR ativo IS NULL)`,
+            [req.usuario.id, motivo, id, clinicaId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Paciente não encontrado, já arquivado ou fora da sua clínica.'
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Paciente arquivado com sucesso. O prontuário foi preservado.'
+        });
+    } catch (err) {
+        console.error('Erro ao arquivar paciente:', err);
+        return res.status(500).json({
+            success: false,
+            message: err.message || 'Erro interno ao arquivar paciente.'
+        });
+    }
+};
+
+// ─────────────────────────────────────────────
+// Restaurar paciente
+// PATCH /api/pacientes/:id/restaurar
+// ─────────────────────────────────────────────
+exports.restaurarPaciente = async (req, res) => {
+    if (!req.usuario) {
+        return res.status(401).json({ success: false, message: 'Não autenticado' });
+    }
+
+    if (!podeArquivar(req)) {
+        return res.status(403).json({
+            success: false,
+            message: 'Seu cargo não permite restaurar pacientes.'
+        });
+    }
 
     const { id } = req.params;
     const clinicaId = req.usuario.clinica_id;
 
     try {
-        // 1. Dados do Paciente (Aqui garantimos que ele pertence à clínica logada)
+        const [result] = await db.query(
+            `UPDATE pacientes
+       SET ativo = 1,
+           arquivado_em = NULL,
+           arquivado_por = NULL,
+           motivo_arquivamento = NULL
+       WHERE id = ?
+         AND clinica_id = ?
+         AND ativo = 0`,
+            [id, clinicaId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Paciente não encontrado, já ativo ou fora da sua clínica.'
+            });
+        }
+
+        return res.json({
+            success: true,
+            message: 'Paciente restaurado com sucesso.'
+        });
+    } catch (err) {
+        console.error('Erro ao restaurar paciente:', err);
+        return res.status(500).json({
+            success: false,
+            message: err.message || 'Erro interno ao restaurar paciente.'
+        });
+    }
+};
+
+// ─────────────────────────────────────────────
+// Ver prontuário (ativos e arquivados)
+// ─────────────────────────────────────────────
+exports.verProntuario = async (req, res) => {
+    if (!req.usuario) return res.status(401).json({ erro: 'Acesso negado' });
+
+    const { id } = req.params;
+    const clinicaId = req.usuario.clinica_id;
+
+    try {
         const [paciente] = await db.query(
             'SELECT * FROM pacientes WHERE id = ? AND clinica_id = ?',
             [id, clinicaId]
         );
 
         if (paciente.length === 0) {
-            return res.status(404).json({ msg: "Paciente não encontrado nesta clínica" });
+            return res.status(404).json({ msg: 'Paciente não encontrado nesta clínica' });
         }
 
-        // 2. Histórico de Consultas (Adicionamos clinica_id por segurança extra)
         const [historico] = await db.query(
-            'SELECT id, data_agendamento, tipo_terapia, motivo_consulta, status_agendamento FROM agendamentos WHERE paciente_id = ? AND clinica_id = ? ORDER BY data_agendamento DESC',
+            `SELECT id, data_agendamento, tipo_terapia, motivo_consulta, status_agendamento
+       FROM agendamentos
+       WHERE paciente_id = ? AND clinica_id = ?
+       ORDER BY data_agendamento DESC`,
             [id, clinicaId]
         );
 
-        // 3. Todos os Anexos do Paciente (Adicionamos clinica_id por segurança extra)
         const [anexos] = await db.query(
             'SELECT * FROM anexos WHERE paciente_id = ? AND clinica_id = ?',
             [id, clinicaId]
@@ -60,66 +235,32 @@ exports.verProntuario = async (req, res) => {
     }
 };
 
+// ─────────────────────────────────────────────
+// Ficha expressa
+// ─────────────────────────────────────────────
 exports.obterFichaExpressa = async (req, res) => {
     const { id } = req.params;
     const clinicaId = req.usuario.clinica_id;
 
     try {
-        // Buscamos os dados da tabela pacientes E pegamos o último motivo/condição do agendamento
         const sql = `
-            SELECT p.*, a.motivo_consulta, a.condicoes as condicoes_saude
-            FROM pacientes p
-            LEFT JOIN agendamentos a ON p.id = a.paciente_id
-            WHERE p.id = ? AND p.clinica_id = ?
-            ORDER BY a.data_agendamento DESC
-            LIMIT 1
-        `;
+      SELECT p.*, a.motivo_consulta, a.condicoes AS condicoes_saude
+      FROM pacientes p
+      LEFT JOIN agendamentos a ON p.id = a.paciente_id
+      WHERE p.id = ? AND p.clinica_id = ?
+      ORDER BY a.data_agendamento DESC
+      LIMIT 1
+    `;
 
         const [resultados] = await db.query(sql, [id, clinicaId]);
 
         if (!resultados || resultados.length === 0) {
-            return res.status(404).json({ error: "Paciente não localizado" });
+            return res.status(404).json({ error: 'Paciente não localizado' });
         }
 
         res.json(resultados[0]);
     } catch (err) {
-        console.error("ERRO NO BANCO:", err);
+        console.error('ERRO NO BANCO:', err);
         res.status(500).json({ erro: err.message });
-    }
-};
-
-// Excluir paciente da clínica
-exports.deletarPaciente = async (req, res) => {
-    if (!req.usuario) {
-        return res.status(401).json({ success: false, message: 'Usuário não autenticado ou token inválido' });
-    }
-
-    const { id } = req.params;
-    const clinicaId = req.usuario.clinica_id;
-
-    try {
-        // Só exclui se o paciente pertencer à clínica do usuário logado
-        const [result] = await db.query(
-            'DELETE FROM pacientes WHERE id = ? AND clinica_id = ?',
-            [id, clinicaId]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({
-                success: false,
-                message: 'Paciente não encontrado ou não pertence à sua clínica.'
-            });
-        }
-
-        return res.json({
-            success: true,
-            message: 'Paciente excluído com sucesso.'
-        });
-    } catch (err) {
-        console.error('Erro ao excluir paciente:', err);
-        return res.status(500).json({
-            success: false,
-            message: err.message || 'Erro interno ao excluir paciente.'
-        });
     }
 };
