@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
+    <title>MED-LM | Portal do Paciente</title>
+    <style>
+        body { font-family: 'Poppins', sans-serif; background: #f8fafc; }
+    </style>
+</head>
+<body>
+
+    <nav class="fixed top-0 w-full bg-slate-900 text-white p-4 shadow-lg z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <!-- Logo customizada com iniciais -->
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-700 flex items-center justify-center font-bold text-2xl shadow-lg border border-white/10">
+                    ML
+                </div>
+                <div class="flex flex-col">
+                    <span id="nomeClinica" class="font-bold text-lg tracking-wider uppercase leading-tight">MED-LM</span>
+                    <span class="text-[10px] uppercase tracking-widest text-emerald-400">Portal do Paciente</span>
+                </div>
+            </div>
+            
+            <!-- Boas vindas -->
+            <span id="boasVindas" class="font-medium opacity-80 text-sm">Olá, bem-vindo!</span>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto pt-24 p-6">
+        <div id="bannerClinica" class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-8 text-white mb-8 shadow-xl">
+            <h2 class="text-2xl font-semibold">Horário de Atendimento</h2>
+            <p id="horarioInfo" class="mt-2 text-emerald-50 text-lg">Carregando...</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Card Perfil (IDs ADICIONADOS AQUI) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
+                <div class="text-emerald-600 mb-4 text-5xl">👤</div>
+                <h3 class="font-bold text-xl">Seus Dados</h3>
+                <p class="text-sm text-slate-700 mt-2">Nome: <span id="nome" class="font-semibold">...</span></p>
+                <p class="text-sm text-slate-700">Idade: <span id="idade">...</span></p>
+                <p class="text-sm text-slate-700">Tipo Sanguíneo: <span id="sangue">...</span></p>
+            </div>
+
+            <!-- Card Agendamentos (ID ADICIONADO AQUI) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="text-blue-600 mb-4 text-5xl text-center">📅</div>
+                <h3 class="font-bold text-xl text-center">Agendamentos</h3>
+                <div id="lista-agendamentos" class="mt-4 space-y-2"></div>
+            </div>
+
+            <!-- Card Prontuário (ID ADICIONADO AQUI) -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div class="text-purple-600 mb-4 text-5xl text-center">📝</div>
+                <h3 class="font-bold text-xl text-center">Prontuário</h3>
+                <div id="timeline-prontuarios" class="mt-4 space-y-2"></div>
+            </div>
+        </div>
+        <br>
+        <br>
+        <!-- Container de Ação do Paciente -->
+        <div id="propaganda-carousel" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border-l-8 border-emerald-600">
+            <div class="flex flex-col md:flex-row items-center gap-8">
+                <div class="flex-1">
+                    <!-- Título Dinâmico -->
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Gerencie sua saúde com autonomia</h3>
+                    <p class="text-slate-600 mb-6">
+                        Como você já possui acesso ao nosso portal exclusivo, reagendar sua consulta ficou muito mais rápido e prático. 
+                        Esqueça filas e esperas telefônicas: tenha o controle total da sua agenda na palma da sua mão.
+                    </p>
+                    <ul class="text-sm text-slate-500 space-y-2 mb-6">
+                        <li>✅ <strong>Agendamento em segundos:</strong> Escolha o melhor horário para você.</li>
+                        <li>✅ <strong>Sem burocracia:</strong> Disponível 24h por dia, 7 dias por semana.</li>
+                        <li>✅ <strong>Segurança total:</strong> Seus dados protegidos com criptografia.</li>
+                    </ul>
+                    
+                    <!-- Botão Dinâmico -->
+                    <a id="btnAgendar" href="#" 
+                    class="inline-block bg-gradient-to-r from-emerald-600 to-blue-800 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
+                        Reagendar Consulta Agora
+                    </a>
+                </div>
+                
+                <!-- Ícone representativo -->
+                <div class="hidden md:block w-48 h-48 bg-emerald-50 rounded-full flex items-center justify-center border-4 border-emerald-100">
+                    <span class="text-7xl">⚡</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch('/portal_paciente/api/dados')
+                .then(r => r.json())
+                .then(data => {
+                    if (!data || !data.paciente) throw new Error("Dados não encontrados");
+    
+                    // Atualiza cabeçalho
+                    document.getElementById('boasVindas').innerText = `Olá, ${data.paciente.nome}`;
+                    document.getElementById('nomeClinica').innerText = data.paciente.nome_clinica || "Clínica MED-LM";
+    
+                    // Perfil
+                    document.getElementById('nome').innerText = data.paciente.nome;
+                    document.getElementById('idade').innerText = (data.paciente.idade || '--') + ' anos';
+                    document.getElementById('sangue').innerText = data.paciente.tipo_sanguineo || 'N/A';
+
+                    // mudando o title par ao nome da clinica
+                    // Dentro do seu script, logo após receber os dados:
+                    document.title = `${data.paciente.nome_clinica} | Portal do Paciente`;
+                    // Injeta o slug no link do botão de agendamento
+                        const btnAgendar = document.getElementById('btnAgendar');
+                        if (btnAgendar && data.paciente.slug) {
+                            btnAgendar.href = `/agendar/${data.paciente.slug}`;
+                        } else {
+                            console.warn("Slug da clínica não encontrado ou botão inexistente.");
+                        }
+                    
+                    // Horários
+                    if (data.config && document.getElementById('horarioInfo')) {
+                        document.getElementById('horarioInfo').innerText = 
+                            `Aberto de ${data.config.horario_abertura.substring(0,5)} às ${data.config.horario_fechamento.substring(0,5)}`;
+                    }
+    
+                    // Agendamentos
+                    const agendaDiv = document.getElementById('lista-agendamentos');
+                    if (agendaDiv) {
+                        if (data.agendamentos.length === 0) agendaDiv.innerHTML = "<p class='text-sm text-slate-500'>Nenhum agendamento.</p>";
+                        else {
+                            agendaDiv.innerHTML = "";
+                            data.agendamentos.forEach(a => {
+                                agendaDiv.innerHTML += `
+                                    <div class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-100">
+                                        <p class="font-bold">${new Date(a.data_agendamento).toLocaleDateString()}</p>
+                                        <p class="text-blue-600">${a.status_agendamento}</p>
+                                    </div>`;
+                            });
+                        }
+                    }
+    
+                    // Prontuários
+                    const timelineDiv = document.getElementById('timeline-prontuarios');
+                    if (timelineDiv && data.prontuarios) {
+                        data.prontuarios.forEach(p => {
+                            timelineDiv.innerHTML += `
+                                <div class="bg-purple-50 p-3 rounded-lg text-sm border border-purple-100">
+                                    <p class="text-xs text-purple-400">${new Date(p.data_atendimento).toLocaleDateString()}</p>
+                                    <p class="text-purple-800">${(p.texto_evolucao || '').substring(0, 100)}...</p>
+                                </div>`;
+                        });
+                    }
+                })
+                .catch(err => {
+                    console.error("Erro no carregamento:", err);
+                    const el = document.getElementById('boasVindas');
+                    if (el) el.innerText = "Erro ao carregar.";
+                });
+        });
+    </script>
+</body>
+</html>

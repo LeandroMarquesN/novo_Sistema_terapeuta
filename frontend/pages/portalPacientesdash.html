@@ -2,109 +2,371 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
     <title>MED-LM | Portal do Paciente</title>
     <style>
-        body { font-family: 'Poppins', sans-serif; background: #f8fafc; }
+        :root {
+            --bg-void: #020c12;
+            --bg-panel: #071620;
+            --emerald: #34d399;
+            --cyan: #22d3ee;
+            --amber: #fbbf24;
+            --line: rgba(148, 197, 189, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-void);
+            color: #e6f4f1;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* ---------- Atmosphere ---------- */
+        .atmosphere {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 15% 10%, rgba(52, 211, 153, 0.10), transparent 45%),
+                radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.10), transparent 45%),
+                radial-gradient(circle at 50% 100%, rgba(52, 211, 153, 0.06), transparent 55%),
+                var(--bg-void);
+        }
+
+        .scanlines {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            pointer-events: none;
+            background: repeating-linear-gradient(
+                to bottom,
+                rgba(255, 255, 255, 0.012) 0px,
+                rgba(255, 255, 255, 0.012) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            opacity: 0.5;
+        }
+
+        .orb {
+            position: fixed;
+            border-radius: 9999px;
+            filter: blur(90px);
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+            animation: float 16s ease-in-out infinite;
+        }
+        .orb-1 { width: 380px; height: 380px; background: var(--emerald); top: -120px; left: -100px; animation-delay: 0s; }
+        .orb-2 { width: 320px; height: 320px; background: var(--cyan); bottom: -140px; right: -80px; animation-delay: -6s; }
+        .orb-3 { width: 220px; height: 220px; background: var(--amber); top: 40%; right: 20%; opacity: 0.12; animation-delay: -10s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, -30px) scale(1.06); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .orb { animation: none; }
+        }
+
+        /* ---------- Layout shell ---------- */
+        .content { position: relative; z-index: 10; }
+
+        .glass {
+            background: linear-gradient(180deg, rgba(15, 32, 39, 0.75), rgba(7, 22, 32, 0.75));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+        }
+
+        .topbar {
+            background: rgba(2, 12, 18, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .logo-mark {
+            background: linear-gradient(135deg, var(--emerald), var(--cyan));
+            box-shadow: 0 0 24px rgba(52, 211, 153, 0.35);
+        }
+
+        .badge-tag {
+            letter-spacing: 0.18em;
+        }
+
+        /* ---------- Hero ---------- */
+        .hero-card {
+            background: linear-gradient(120deg, rgba(6, 30, 26, 0.9), rgba(7, 22, 36, 0.9));
+            border: 1px solid rgba(52, 211, 153, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 90% 0%, rgba(34, 211, 238, 0.18), transparent 60%);
+        }
+
+        /* ---------- Cards ---------- */
+        .panel {
+            border-radius: 1.25rem;
+            transition: border-color 0.25s ease, transform 0.25s ease;
+        }
+        .panel:hover {
+            border-color: rgba(52, 211, 153, 0.35);
+        }
+
+        .icon-chip {
+            width: 3.25rem;
+            height: 3.25rem;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-row {
+            border-bottom: 1px dashed var(--line);
+        }
+        .stat-row:last-child { border-bottom: none; }
+
+        /* ---------- Agenda items ---------- */
+        .agenda-item {
+            border-left: 3px solid var(--cyan);
+            background: rgba(34, 211, 238, 0.06);
+            border-radius: 0.75rem;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.15rem 0.65rem;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+        .status-dot { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }
+
+        /* ---------- Prontuário timeline ---------- */
+        .timeline-track {
+            position: relative;
+            padding-left: 1.75rem;
+        }
+        .timeline-track::before {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 6px;
+            bottom: 6px;
+            width: 2px;
+            background: linear-gradient(180deg, var(--emerald), transparent);
+        }
+        .timeline-entry {
+            position: relative;
+            border-radius: 1rem;
+        }
+        .timeline-entry::before {
+            content: "";
+            position: absolute;
+            left: -1.75rem;
+            top: 1.4rem;
+            width: 11px;
+            height: 11px;
+            border-radius: 9999px;
+            background: var(--bg-void);
+            border: 2px solid var(--emerald);
+        }
+
+        .record-text {
+            white-space: pre-line;
+            word-break: break-word;
+        }
+
+        /* ---------- CTA ---------- */
+        .cta-card {
+            background: linear-gradient(135deg, rgba(6, 30, 26, 0.85), rgba(7, 22, 36, 0.85));
+            border: 1px solid rgba(52, 211, 153, 0.25);
+        }
+        .cta-btn {
+            background: linear-gradient(90deg, var(--emerald), var(--cyan));
+            box-shadow: 0 8px 30px rgba(52, 211, 153, 0.25);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .cta-btn:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 12px 36px rgba(52, 211, 153, 0.35);
+        }
+
+        .empty-state {
+            border: 1px dashed var(--line);
+            border-radius: 1rem;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.3); border-radius: 9999px; }
+
+        a:focus-visible, button:focus-visible {
+            outline: 2px solid var(--cyan);
+            outline-offset: 2px;
+        }
     </style>
 </head>
 <body>
 
-    <nav class="fixed top-0 w-full bg-slate-900 text-white p-4 shadow-lg z-50">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <!-- Logo customizada com iniciais -->
-            <div class="flex items-center gap-4">
-                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-blue-700 flex items-center justify-center font-bold text-2xl shadow-lg border border-white/10">
-                    ML
+    <div class="atmosphere"></div>
+    <div class="scanlines"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <div class="content">
+        <nav class="topbar fixed top-0 w-full z-50">
+            <div class="max-w-6xl mx-auto flex justify-between items-center px-4 sm:px-6 py-3">
+                <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                    <div class="logo-mark w-11 h-11 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center font-bold text-xl sm:text-2xl text-slate-950 shrink-0">
+                        ML
+                    </div>
+                    <div class="flex flex-col min-w-0">
+                        <span id="nomeClinica" class="font-bold text-base sm:text-lg tracking-wider uppercase leading-tight text-white truncate">MED-LM</span>
+                        <span class="badge-tag text-[9px] sm:text-[10px] uppercase text-emerald-400">Portal do Paciente</span>
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <span id="nomeClinica" class="font-bold text-lg tracking-wider uppercase leading-tight">MED-LM</span>
-                    <span class="text-[10px] uppercase tracking-widest text-emerald-400">Portal do Paciente</span>
-                </div>
-            </div>
-            
-            <!-- Boas vindas -->
-            <span id="boasVindas" class="font-medium opacity-80 text-sm">Olá, bem-vindo!</span>
-        </div>
-    </nav>
 
-    <main class="max-w-6xl mx-auto pt-24 p-6">
-        <div id="bannerClinica" class="bg-gradient-to-r from-emerald-600 to-teal-500 rounded-2xl p-8 text-white mb-8 shadow-xl">
-            <h2 class="text-2xl font-semibold">Horário de Atendimento</h2>
-            <p id="horarioInfo" class="mt-2 text-emerald-50 text-lg">Carregando...</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Card Perfil (IDs ADICIONADOS AQUI) -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                <div class="text-emerald-600 mb-4 text-5xl">👤</div>
-                <h3 class="font-bold text-xl">Seus Dados</h3>
-                <p class="text-sm text-slate-700 mt-2">Nome: <span id="nome" class="font-semibold">...</span></p>
-                <p class="text-sm text-slate-700">Idade: <span id="idade">...</span></p>
-                <p class="text-sm text-slate-700">Tipo Sanguíneo: <span id="sangue">...</span></p>
+                <span id="boasVindas" class="mono font-medium text-xs sm:text-sm text-emerald-100/80 truncate ml-3">Olá, bem-vindo!</span>
             </div>
+        </nav>
 
-            <!-- Card Agendamentos (ID ADICIONADO AQUI) -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <div class="text-blue-600 mb-4 text-5xl text-center">📅</div>
-                <h3 class="font-bold text-xl text-center">Agendamentos</h3>
-                <div id="lista-agendamentos" class="mt-4 space-y-2"></div>
-            </div>
+        <main class="max-w-6xl mx-auto pt-24 sm:pt-28 px-4 sm:px-6 pb-16">
 
-            <!-- Card Prontuário (ID ADICIONADO AQUI) -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <div class="text-purple-600 mb-4 text-5xl text-center">📝</div>
-                <h3 class="font-bold text-xl text-center">Prontuário</h3>
-                <div id="timeline-prontuarios" class="mt-4 space-y-2"></div>
-            </div>
-        </div>
-        <br>
-        <br>
-        <!-- Container de Ação do Paciente -->
-        <div id="propaganda-carousel" class="bg-white rounded-2xl shadow-lg p-8 mb-8 border-l-8 border-emerald-600">
-            <div class="flex flex-col md:flex-row items-center gap-8">
-                <div class="flex-1">
-                    <!-- Título Dinâmico -->
-                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Gerencie sua saúde com autonomia</h3>
-                    <p class="text-slate-600 mb-6">
-                        Como você já possui acesso ao nosso portal exclusivo, reagendar sua consulta ficou muito mais rápido e prático. 
-                        Esqueça filas e esperas telefônicas: tenha o controle total da sua agenda na palma da sua mão.
-                    </p>
-                    <ul class="text-sm text-slate-500 space-y-2 mb-6">
-                        <li>✅ <strong>Agendamento em segundos:</strong> Escolha o melhor horário para você.</li>
-                        <li>✅ <strong>Sem burocracia:</strong> Disponível 24h por dia, 7 dias por semana.</li>
-                        <li>✅ <strong>Segurança total:</strong> Seus dados protegidos com criptografia.</li>
-                    </ul>
-                    
-                    <!-- Botão Dinâmico -->
-                    <a id="btnAgendar" href="#" 
-                    class="inline-block bg-gradient-to-r from-emerald-600 to-blue-800 text-white px-8 py-3 rounded-full font-bold shadow-lg hover:scale-105 transition-transform">
-                        Reagendar Consulta Agora
-                    </a>
-                </div>
-                
-                <!-- Ícone representativo -->
-                <div class="hidden md:block w-48 h-48 bg-emerald-50 rounded-full flex items-center justify-center border-4 border-emerald-100">
-                    <span class="text-7xl">⚡</span>
+            <!-- Hero: horário -->
+            <div class="hero-card rounded-2xl p-6 sm:p-8 mb-8 shadow-xl">
+                <div class="relative z-10">
+                    <span class="badge-tag text-[10px] uppercase text-cyan-300/80">Status da clínica</span>
+                    <h2 class="text-xl sm:text-2xl font-semibold text-white mt-1">Horário de Atendimento</h2>
+                    <p id="horarioInfo" class="mt-2 text-emerald-100 text-base sm:text-lg mono">Carregando...</p>
                 </div>
             </div>
-        </div>
-    </main>
+
+            <!-- Perfil + Agendamentos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+                <!-- Card Perfil -->
+                <div class="glass panel p-6 sm:p-7">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="icon-chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">👤</div>
+                        <div>
+                            <h3 class="font-bold text-lg text-white">Seus Dados</h3>
+                            <p class="text-xs text-slate-400">Informações cadastrais</p>
+                        </div>
+                    </div>
+                    <div class="space-y-0">
+                        <div class="stat-row flex justify-between items-center py-3">
+                            <span class="text-sm text-slate-400">Nome</span>
+                            <span id="nome" class="text-sm font-semibold text-white text-right">...</span>
+                        </div>
+                        <div class="stat-row flex justify-between items-center py-3">
+                            <span class="text-sm text-slate-400">Idade</span>
+                            <span id="idade" class="text-sm font-semibold text-white">...</span>
+                        </div>
+                        <div class="stat-row flex justify-between items-center py-3">
+                            <span class="text-sm text-slate-400">Tipo Sanguíneo</span>
+                            <span id="sangue" class="text-sm font-semibold text-amber-400 mono">...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card Agendamentos -->
+                <div class="glass panel p-6 sm:p-7">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="icon-chip bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">📅</div>
+                        <div>
+                            <h3 class="font-bold text-lg text-white">Agendamentos</h3>
+                            <p class="text-xs text-slate-400">Suas próximas sessões</p>
+                        </div>
+                    </div>
+                    <div id="lista-agendamentos" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <!-- Prontuário - largura total, informações completas -->
+            <div class="glass panel p-6 sm:p-8 mb-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="icon-chip bg-purple-500/10 text-purple-300 border border-purple-400/20">📝</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white">Prontuário</h3>
+                        <p class="text-xs text-slate-400">Histórico completo dos seus atendimentos</p>
+                    </div>
+                </div>
+                <div id="timeline-prontuarios" class="timeline-track space-y-5"></div>
+            </div>
+
+            <!-- CTA reagendamento -->
+            <div id="propaganda-carousel" class="cta-card rounded-2xl shadow-lg p-6 sm:p-8">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="flex-1">
+                        <h3 class="text-xl sm:text-2xl font-bold text-white mb-4">Gerencie sua saúde com autonomia</h3>
+                        <p class="text-slate-300 mb-6 text-sm sm:text-base">
+                            Como você já possui acesso ao nosso portal exclusivo, reagendar sua consulta ficou muito mais rápido e prático.
+                            Esqueça filas e esperas telefônicas: tenha o controle total da sua agenda na palma da sua mão.
+                        </p>
+                        <ul class="text-sm text-slate-400 space-y-2 mb-6">
+                            <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> <span><strong class="text-slate-200">Agendamento em segundos:</strong> escolha o melhor horário para você.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> <span><strong class="text-slate-200">Sem burocracia:</strong> disponível 24h por dia, 7 dias por semana.</span></li>
+                            <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> <span><strong class="text-slate-200">Segurança total:</strong> seus dados protegidos com criptografia.</span></li>
+                        </ul>
+
+                        <a id="btnAgendar" href="#"
+                        class="cta-btn inline-block text-slate-950 px-8 py-3 rounded-full font-bold">
+                            Reagendar Consulta Agora
+                        </a>
+                    </div>
+
+                    <div class="hidden md:flex w-40 h-40 lg:w-48 lg:h-48 bg-emerald-500/10 rounded-full items-center justify-center border-4 border-emerald-500/20 shrink-0">
+                        <span class="text-6xl lg:text-7xl">⚡</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <script>
+        function statusStyle(status) {
+            const s = (status || '').toLowerCase();
+            if (s.includes('cancel')) return { color: '#fb7185' };
+            if (s.includes('conclu') || s.includes('realiz')) return { color: '#34d399' };
+            if (s.includes('pend') || s.includes('aguard')) return { color: '#fbbf24' };
+            return { color: '#22d3ee' };
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
             fetch('/portal_paciente/api/dados')
                 .then(r => r.json())
                 .then(data => {
                     if (!data || !data.paciente) throw new Error("Dados não encontrados");
-    
+
                     // Atualiza cabeçalho
                     document.getElementById('boasVindas').innerText = `Olá, ${data.paciente.nome}`;
                     document.getElementById('nomeClinica').innerText = data.paciente.nome_clinica || "Clínica MED-LM";
-    
+
                     // Perfil
                     document.getElementById('nome').innerText = data.paciente.nome;
                     document.getElementById('idade').innerText = (data.paciente.idade || '--') + ' anos';
@@ -120,39 +382,48 @@
                         } else {
                             console.warn("Slug da clínica não encontrado ou botão inexistente.");
                         }
-                    
+
                     // Horários
                     if (data.config && document.getElementById('horarioInfo')) {
-                        document.getElementById('horarioInfo').innerText = 
+                        document.getElementById('horarioInfo').innerText =
                             `Aberto de ${data.config.horario_abertura.substring(0,5)} às ${data.config.horario_fechamento.substring(0,5)}`;
                     }
-    
+
                     // Agendamentos
                     const agendaDiv = document.getElementById('lista-agendamentos');
                     if (agendaDiv) {
-                        if (data.agendamentos.length === 0) agendaDiv.innerHTML = "<p class='text-sm text-slate-500'>Nenhum agendamento.</p>";
-                        else {
+                        if (data.agendamentos.length === 0) {
+                            agendaDiv.innerHTML = "<div class='empty-state p-4 text-center'><p class='text-sm text-slate-500'>Nenhum agendamento.</p></div>";
+                        } else {
                             agendaDiv.innerHTML = "";
                             data.agendamentos.forEach(a => {
+                                const st = statusStyle(a.status_agendamento);
                                 agendaDiv.innerHTML += `
-                                    <div class="bg-blue-50 p-3 rounded-lg text-sm border border-blue-100">
-                                        <p class="font-bold">${new Date(a.data_agendamento).toLocaleDateString()}</p>
-                                        <p class="text-blue-600">${a.status_agendamento}</p>
+                                    <div class="agenda-item p-3">
+                                        <p class="font-bold text-sm text-white">${new Date(a.data_agendamento).toLocaleDateString()}</p>
+                                        <span class="status-pill mt-1" style="color:${st.color}; background:${st.color}1A;">
+                                            <span class="status-dot"></span>${a.status_agendamento}
+                                        </span>
                                     </div>`;
                             });
                         }
                     }
-    
-                    // Prontuários
+
+                    // Prontuários — histórico completo e visível
                     const timelineDiv = document.getElementById('timeline-prontuarios');
                     if (timelineDiv && data.prontuarios) {
-                        data.prontuarios.forEach(p => {
-                            timelineDiv.innerHTML += `
-                                <div class="bg-purple-50 p-3 rounded-lg text-sm border border-purple-100">
-                                    <p class="text-xs text-purple-400">${new Date(p.data_atendimento).toLocaleDateString()}</p>
-                                    <p class="text-purple-800">${(p.texto_evolucao || '').substring(0, 100)}...</p>
-                                </div>`;
-                        });
+                        if (data.prontuarios.length === 0) {
+                            timelineDiv.innerHTML = "<div class='empty-state p-6 text-center'><p class='text-sm text-slate-500'>Nenhum registro de prontuário ainda.</p></div>";
+                        } else {
+                            timelineDiv.innerHTML = "";
+                            data.prontuarios.forEach(p => {
+                                timelineDiv.innerHTML += `
+                                    <div class="timeline-entry glass p-4 sm:p-5">
+                                        <p class="mono text-xs text-purple-300 mb-2">${new Date(p.data_atendimento).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
+                                        <p class="record-text text-sm text-slate-200 leading-relaxed">${p.texto_evolucao || ''}</p>
+                                    </div>`;
+                            });
+                        }
                     }
                 })
                 .catch(err => {
