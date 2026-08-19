@@ -1,15 +1,16 @@
 /**
  * MedLM - Inteligência de Atendimento Clínico Multi-tenant
- * Handler oficial refatorado para integração com LEFT JOIN (Pacientes + Agendamentos)
- * + fluxo de assinatura eletrônica por senha e trava visual de prontuário finalizado
+ * + assinatura eletrônica por senha
+ * + trava visual de prontuário finalizado
+ * + CRM/UF do profissional no cabeçalho
  */
 
 const token = localStorage.getItem('token');
 
-// Elementos Globais mapeados da estrutura Glassmorphism
 const elementosFicha = {
   clinica: document.getElementById('nomeClinicaHeader'),
   usuario: document.getElementById('nomeUsuarioHeader'),
+  crmUsuario: document.getElementById('crmUsuarioHeader'), // <-- CRM
   pacienteHeader: document.getElementById('nomePacienteHeader'),
   cpf: document.getElementById('infoCpf'),
   email: document.getElementById('infoEmail'),
@@ -29,7 +30,6 @@ const elementosFicha = {
   diagnosticoCid: document.getElementById('diagnosticoCid')
 };
 
-// 🌟 INICIALIZAÇÃO
 document.addEventListener('DOMContentLoaded', () => {
   const urlParams = new URLSearchParams(window.location.search);
   const pacienteId = urlParams.get('pacienteId');
@@ -47,33 +47,50 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// 🏢 1. DADOS DE SESSÃO
+// ─── CRM no cabeçalho ───────────────────────────────────────────
+function atualizarCrmNoHeader(crm, ufCrm) {
+  if (!elementosFicha.crmUsuario) return;
+
+  if (crm) {
+    elementosFicha.crmUsuario.innerText = ufCrm
+      ? `CRM ${crm}/${ufCrm}`
+      : `CRM ${crm}`;
+  } else {
+    elementosFicha.crmUsuario.innerText = '';
+  }
+}
+
+// ─── 1. DADOS DE SESSÃO ─────────────────────────────────────────
 function carregarDadosSessaoSaaS() {
   try {
-    const token = localStorage.getItem('token');
-    if (!token) return;
+    const tokenLocal = localStorage.getItem('token');
+    if (!tokenLocal) return;
 
-    const payload = JSON.parse(atob(token.split('.')[1]));
+    const payload = JSON.parse(atob(tokenLocal.split('.')[1]));
 
-    // Extraindo dados do token
     const nomeUsuario = payload.nome || 'Profissional';
-    const cargoUsuario = payload.cargo ? ` - ${payload.cargo.charAt(0).toUpperCase() + payload.cargo.slice(1)}` : '';
+    const cargoUsuario = payload.cargo
+      ? ` - ${payload.cargo.charAt(0).toUpperCase() + payload.cargo.slice(1)}`
+      : '';
     const nomeClinica = payload.nome_clinica || 'Clínica Vinculada';
 
-    // Atualiza o DOM
-    if (elementosFicha.clinica) elementosFicha.clinica.innerText = nomeClinica;
+    if (elementosFicha.clinica) {
+      elementosFicha.clinica.innerText = nomeClinica;
+    }
 
-    // Aqui incluímos o nome + cargo (ex: Lavinia Marques - Medico)
     if (elementosFicha.usuario) {
       elementosFicha.usuario.innerText = `${nomeUsuario}${cargoUsuario}`;
     }
+
+    // Preenche CRM / UF a partir do JWT
+    atualizarCrmNoHeader(payload.crm, payload.uf_crm);
 
   } catch (error) {
     console.error('Erro ao carregar sessão:', error);
   }
 }
 
-// 👤 2. CARGA DE FICHA (Integrada com Join Agendamentos)
+// ─── 2. FICHA DO PACIENTE ───────────────────────────────────────
 async function carregarFichaPaciente(pacienteId) {
   try {
     const response = await fetch(`/api/pacientes/ficha-express/${pacienteId}`, {
@@ -83,34 +100,29 @@ async function carregarFichaPaciente(pacienteId) {
     if (!response.ok) throw new Error('Dados não encontrados');
     const p = await response.json();
 
-    // Atualização de elementos com tratamento de nulos
     if (elementosFicha.pacienteHeader) elementosFicha.pacienteHeader.innerText = p.nome?.toUpperCase() || '---';
     if (elementosFicha.cpf) elementosFicha.cpf.innerText = formatarCPF(p.cpf) || 'Não informado';
     if (elementosFicha.email) elementosFicha.email.innerText = p.email || '---';
 
-    // Telefone via Join
     if (elementosFicha.whatsapp) {
-      elementosFicha.whatsapp.innerHTML = p.telefone ?
-        `<i class="fab fa-whatsapp" style="color:var(--emerald)"></i> ${formatarTelefone(p.telefone)}` : 'Não informado';
+      elementosFicha.whatsapp.innerHTML = p.telefone
+        ? `<i class="fab fa-whatsapp" style="color:var(--emerald)"></i> ${formatarTelefone(p.telefone)}`
+        : 'Não informado';
     }
 
     if (elementosFicha.origem) elementosFicha.origem.innerText = p.origem || 'Manual';
 
-    // Datas
     if (p.data_nascimento) {
       const dataFormatada = new Date(p.data_nascimento).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
       if (elementosFicha.nascimento) elementosFicha.nascimento.innerText = dataFormatada;
       if (elementosFicha.idade) elementosFicha.idade.innerText = `(${calcularIdade(p.data_nascimento)} anos)`;
     }
 
-    // Biometria e Clínica (Campos vindos do Join)
     if (elementosFicha.peso) elementosFicha.peso.innerText = p.peso ? `${p.peso} kg` : '-- kg';
     if (elementosFicha.altura) elementosFicha.altura.innerText = p.altura ? `${p.altura} m` : '-- m';
     if (elementosFicha.sangue) elementosFicha.sangue.innerText = p.tipo_sanguineo || '--';
     if (elementosFicha.motivo) elementosFicha.motivo.innerText = p.motivo_consulta || 'Nenhum motivo registrado.';
 
-    // Condições vindas do Join (p.condicoes_saude mapeado do campo 'condicoes' da tabela agendamentos)
-    // CORRIGIDO: cores fixas para tema escuro, sem depender do prefixo "dark:" (que só ativa com o toggle)
     if (elementosFicha.condicoes) {
       elementosFicha.condicoes.innerText = p.condicoes_saude || 'Sem condições preexistentes.';
       elementosFicha.condicoes.className = "p-3 rounded-xl font-bold leading-relaxed";
@@ -130,7 +142,7 @@ async function carregarFichaPaciente(pacienteId) {
   }
 }
 
-// ⏱️ 3. TIMELINE (Histórico de Evoluções)
+// ─── 3. TIMELINE ────────────────────────────────────────────────
 async function carregarTimelineProntuarios(pacienteId) {
   try {
     const response = await fetch(`/api/prontuarios/historico/${pacienteId}`, {
@@ -160,7 +172,7 @@ async function carregarTimelineProntuarios(pacienteId) {
   }
 }
 
-// 💾 4. SALVAR EVOLUÇÃO — agora em duas etapas: abrir modal de senha → confirmar
+// ─── 4. SALVAR / ASSINAR ────────────────────────────────────────
 function salvarEvolucao(event) {
   if (event) event.preventDefault();
   abrirModalAssinatura();
@@ -231,7 +243,7 @@ async function confirmarAssinatura(event) {
   }
 }
 
-// Função para carregar um prontuário antigo no editor
+// ─── 5. VISUALIZAR PRONTUÁRIO ANTIGO ────────────────────────────
 async function visualizarEvolucaoAntiga(prontuarioId) {
   try {
     const response = await fetch(`/api/prontuarios/detalhe/${prontuarioId}`, {
@@ -242,25 +254,29 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
 
     const prontuario = await response.json();
 
-    // 1. Preenche o CID
     if (elementosFicha.diagnosticoCid) {
       elementosFicha.diagnosticoCid.value = prontuario.diagnostico_cid || '';
     }
 
-    // 2. Preenche o Editor Quill
     quill.clipboard.dangerouslyPasteHTML(prontuario.texto_evolucao || '');
 
-    // 3. A CONEXÃO QUE FALTAVA:
-    // Pega o ID que veio da lista e coloca no campo hidden
     const inputHidden = document.getElementById('idDoProntuarioAtual');
     if (inputHidden) {
       inputHidden.value = prontuarioId;
     }
 
-    // 4. 🔐 Aplica o estado de trava visual (badge + editor bloqueado) conforme o status
     if (typeof aplicarEstadoProntuario === 'function') {
       aplicarEstadoProntuario(prontuario.status_prontuario);
     }
+
+    // Nome + CRM do autor do prontuário
+    if (elementosFicha.usuario && prontuario.nome_profissional) {
+      elementosFicha.usuario.innerText = prontuario.nome_profissional;
+    }
+    atualizarCrmNoHeader(
+      prontuario.crm_profissional,
+      prontuario.uf_crm_profissional
+    );
 
     console.log("Prontuário ID atualizado para:", prontuarioId);
 
@@ -269,12 +285,12 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
     alert("Não foi possível carregar esta evolução.");
   }
 }
-// ==== enviar prontuario por email ====
+
+// ─── 6. E-MAIL ──────────────────────────────────────────────────
 async function enviarProntuarioEmail() {
   const inputId = document.getElementById('idDoProntuarioAtual');
   const btn = document.getElementById('btnEnviarEmail');
 
-  // Verifica se o input existe e se tem valor
   if (!inputId || !inputId.value) {
     alert("Atenção: Por favor, selecione um prontuário na lista ao lado primeiro.");
     return;
@@ -310,8 +326,8 @@ async function enviarProntuarioEmail() {
     btn.innerText = "ENVIAR EMAIL";
   }
 }
-// ==funcao para auditoria de quem visualizou , enviou, ou modificou o prontuario
 
+// ─── 7. AUDITORIA ───────────────────────────────────────────────
 async function abrirModalAuditoria() {
   const prontuarioId = document.getElementById('idDoProntuarioAtual').value;
   if (!prontuarioId) {
@@ -322,13 +338,12 @@ async function abrirModalAuditoria() {
   document.getElementById('modalAuditoria').classList.remove('hidden');
   document.getElementById('modalAuditoria').classList.add('flex');
 
-  // Busca no Backend (Crie essa rota como te passei antes)
-  const response = await fetch(`/api/prontuarios/logs/${prontuarioId}`);
+  const response = await fetch(`/api/prontuarios/logs/${prontuarioId}`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
   const logs = await response.json();
 
   const lista = document.getElementById('listaLogs');
-  // CORRIGIDO: reaproveita a classe .audit-item (definida no CSS do atendimento.html)
-  // em vez de bg-white/30 + dark:*, que ficava ilegível sem o toggle de dark mode ativo
   lista.innerHTML = logs.map(log => `
       <div class="flex justify-between items-center audit-item">
           <div>
@@ -345,7 +360,6 @@ function fecharModalAuditoria() {
   document.getElementById('modalAuditoria').classList.remove('flex');
 }
 
-// Isso garante que a função fique visível para o clique no HTML
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;
 window.salvarEvolucao = salvarEvolucao;
 window.confirmarAssinatura = confirmarAssinatura;
@@ -354,7 +368,7 @@ window.abrirModalAuditoria = abrirModalAuditoria;
 window.fecharModalAuditoria = fecharModalAuditoria;
 window.enviarProntuarioEmail = enviarProntuarioEmail;
 
-// 🧮 AUXILIARES (Refinadas)
+// ─── AUXILIARES ─────────────────────────────────────────────────
 function calcularIdade(data) {
   const d = new Date(data);
   return new Date().getFullYear() - d.getFullYear();
