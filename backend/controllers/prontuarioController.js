@@ -209,11 +209,20 @@ exports.enviarProntuarioEmail = async (req, res) => {
 };
 
 // 6. LISTAR LOGS DE AUDITORIA
+// 6. LISTAR LOGS DE AUDITORIA
 exports.listarLogs = async (req, res) => {
   const { prontuarioId } = req.params;
   try {
     const [logs] = await db.query(
-      'SELECT l.*, u.nome as usuario_nome FROM logs_auditoria l JOIN usuarios u ON l.usuario_id = u.id WHERE l.prontuario_id = ? ORDER BY l.data_acesso DESC',
+      `SELECT 
+         l.*,
+         u.nome AS usuario_nome,
+         u.crm AS usuario_crm,
+         u.uf_crm AS usuario_uf_crm
+       FROM logs_auditoria l
+       JOIN usuarios u ON l.usuario_id = u.id
+       WHERE l.prontuario_id = ?
+       ORDER BY l.data_acesso DESC`,
       [prontuarioId]
     );
     res.json(logs);

@@ -2,7 +2,7 @@
  * MedLM - Inteligência de Atendimento Clínico Multi-tenant
  * + assinatura eletrônica por senha
  * + trava visual de prontuário finalizado
- * + CRM/UF do profissional no cabeçalho
+ * + CRM/UF e Cargo do profissional no cabeçalho
  */
 
 const token = localStorage.getItem('token');
@@ -10,7 +10,8 @@ const token = localStorage.getItem('token');
 const elementosFicha = {
   clinica: document.getElementById('nomeClinicaHeader'),
   usuario: document.getElementById('nomeUsuarioHeader'),
-  crmUsuario: document.getElementById('crmUsuarioHeader'), // <-- CRM
+  cargoUsuario: document.getElementById('cargoUsuarioHeader'), // Cargo
+  crmUsuario: document.getElementById('crmUsuarioHeader'),     // CRM
   pacienteHeader: document.getElementById('nomePacienteHeader'),
   cpf: document.getElementById('infoCpf'),
   email: document.getElementById('infoEmail'),
@@ -60,6 +61,18 @@ function atualizarCrmNoHeader(crm, ufCrm) {
   }
 }
 
+// ─── Cargo no cabeçalho ─────────────────────────────────────────
+function atualizarCargoNoHeader(cargo) {
+  if (!elementosFicha.cargoUsuario) return;
+
+  if (cargo) {
+    const texto = cargo.charAt(0).toUpperCase() + cargo.slice(1);
+    elementosFicha.cargoUsuario.innerText = texto;
+  } else {
+    elementosFicha.cargoUsuario.innerText = '';
+  }
+}
+
 // ─── 1. DADOS DE SESSÃO ─────────────────────────────────────────
 function carregarDadosSessaoSaaS() {
   try {
@@ -69,20 +82,18 @@ function carregarDadosSessaoSaaS() {
     const payload = JSON.parse(atob(tokenLocal.split('.')[1]));
 
     const nomeUsuario = payload.nome || 'Profissional';
-    const cargoUsuario = payload.cargo
-      ? ` - ${payload.cargo.charAt(0).toUpperCase() + payload.cargo.slice(1)}`
-      : '';
     const nomeClinica = payload.nome_clinica || 'Clínica Vinculada';
 
     if (elementosFicha.clinica) {
       elementosFicha.clinica.innerText = nomeClinica;
     }
 
+    // Só o nome (cargo vai em linha separada)
     if (elementosFicha.usuario) {
-      elementosFicha.usuario.innerText = `${nomeUsuario}${cargoUsuario}`;
+      elementosFicha.usuario.innerText = nomeUsuario;
     }
 
-    // Preenche CRM / UF a partir do JWT
+    atualizarCargoNoHeader(payload.cargo);
     atualizarCrmNoHeader(payload.crm, payload.uf_crm);
 
   } catch (error) {
@@ -273,6 +284,10 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
     if (elementosFicha.usuario && prontuario.nome_profissional) {
       elementosFicha.usuario.innerText = prontuario.nome_profissional;
     }
+    // Cargo do autor (se a API devolver cargo_profissional)
+    if (prontuario.cargo_profissional) {
+      atualizarCargoNoHeader(prontuario.cargo_profissional);
+    }
     atualizarCrmNoHeader(
       prontuario.crm_profissional,
       prontuario.uf_crm_profissional
@@ -351,7 +366,6 @@ async function abrirModalAuditoria() {
   }
 
   lista.innerHTML = logs.map(log => {
-    // Monta o texto do CRM (ex: CRM 123456/SP)
     let crmTexto = '';
     if (log.usuario_crm) {
       crmTexto = log.usuario_uf_crm
