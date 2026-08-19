@@ -10,18 +10,13 @@
     <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
 
-    <!-- Fontes do sistema (mesmo padrão de Configurações e Dashboard) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
-    <!-- 🌟 Editor de Texto Premium (Quill.js) com Suporte a Alinhamento Centralizado -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
 
     <style>
-        /* ═══════════════════════════════════════════════════════════
-           DESIGN TOKENS — mesmo padrão usado em Configurações/Dashboard
-        ═══════════════════════════════════════════════════════════ */
         :root {
             --emerald:   #34d399;
             --emerald-d: #059669;
@@ -47,7 +42,6 @@
             color: #cbd5e1;
         }
 
-        /* Scanlines sutis (marca registrada do sistema) */
         body::before {
             content: '';
             position: fixed; inset: 0;
@@ -58,7 +52,6 @@
             pointer-events: none; z-index: 0;
         }
 
-        /* Orbs decorativos */
         .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0; }
         .orb-1 {
             width: 500px; height: 500px;
@@ -75,7 +68,6 @@
         @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(24px,18px)} }
         @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-18px,-22px)} }
 
-        /* Grid de fundo */
         .hero-grid {
             position: fixed; inset: 0; z-index: 0;
             background-image:
@@ -85,16 +77,12 @@
             mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 20%, transparent 100%);
         }
 
-        /* Scrollbar minimalista */
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
 
         main, aside, header { position: relative; z-index: 1; }
 
-        /* ═══════════════════════════════════════════════════════════
-           GLASS CARD — painel padrão com linha superior em gradiente
-        ═══════════════════════════════════════════════════════════ */
         .glass-panel {
             background: var(--card);
             border: 1px solid var(--border);
@@ -130,7 +118,6 @@
             border-color: rgba(52,211,153,0.25);
         }
 
-        /* Título com gradiente cyan → emerald (padrão do sistema) */
         .page-title {
             font-family: 'Space Grotesk', sans-serif;
             font-weight: 800;
@@ -146,7 +133,6 @@
             text-transform: uppercase; letter-spacing: 0.1em;
         }
 
-        /* Chips de identificação (Clínica / Operador) */
         .info-chip {
             display: flex; align-items: center; gap: 6px;
             background: rgba(255,255,255,0.03);
@@ -155,14 +141,12 @@
             font-size: 11px; font-weight: 700; color: #cbd5e1;
         }
 
-        /* Card do paciente selecionado no header */
         .patient-chip {
             background: var(--card);
             border: 1px solid var(--border-cy);
             border-radius: 18px;
         }
 
-        /* Ícone circular com variantes de cor */
         .icon-wrap {
             width: 36px; height: 36px; border-radius: 12px;
             display: flex; align-items: center; justify-content: center;
@@ -173,9 +157,6 @@
         .icon-amber   { background: rgba(251,191,36,0.1);  border: 1px solid rgba(251,191,36,0.25);  color: var(--amber); }
         .icon-blue    { background: rgba(96,165,250,0.1);  border: 1px solid rgba(96,165,250,0.25);  color: var(--blue); }
 
-        /* ═══════════════════════════════════════════════════════════
-           INPUTS — mesmo padrão input-premium de Configurações
-        ═══════════════════════════════════════════════════════════ */
         .input-premium {
             background: rgba(255,255,255,0.04) !important;
             border: 1px solid var(--border) !important;
@@ -191,9 +172,6 @@
         }
         .input-premium::placeholder { color: rgba(148,163,184,0.3) !important; }
 
-        /* ═══════════════════════════════════════════════════════════
-           BOTÕES — padrões reaproveitados do sistema
-        ═══════════════════════════════════════════════════════════ */
         .btn-primary-gradient {
             background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
             color: #fff; border: 1px solid rgba(52,211,153,0.3);
@@ -231,9 +209,6 @@
         }
         .btn-audit:hover { background: rgba(96,165,250,0.18); }
 
-        /* ═══════════════════════════════════════════════════════════
-           SIDEBAR — recolorida para o tema escuro
-        ═══════════════════════════════════════════════════════════ */
         .app-sidebar {
             background: rgba(255,255,255,0.025);
             border-right: 1px solid var(--border);
@@ -259,13 +234,11 @@
             box-shadow: 0 0 16px rgba(52,211,153,0.25);
         }
 
-        /* Timeline (Coluna 2) */
         .timeline-empty {
             text-align: center; color: rgba(148,163,184,0.35);
             font-size: 12px; padding: 32px 12px;
         }
 
-        /* Badge contador */
         .badge-count {
             background: rgba(52,211,153,0.12);
             border: 1px solid rgba(52,211,153,0.25);
@@ -274,9 +247,6 @@
             padding: 2px 9px; border-radius: 99px;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           QUILL EDITOR — reskin dark, seguindo os tokens do sistema
-        ═══════════════════════════════════════════════════════════ */
         .ql-toolbar.ql-snow {
             border: 1px solid var(--border) !important;
             border-top-left-radius: 16px !important;
@@ -302,7 +272,6 @@
         .ql-toolbar.ql-snow .ql-formats button:hover .ql-fill,
         .ql-toolbar.ql-snow .ql-formats button.ql-active .ql-fill { fill: var(--emerald) !important; }
 
-        /* Modal de Auditoria */
         .modal-panel {
             background: rgba(2,12,18,0.97);
             border: 1px solid var(--border-cy);
@@ -316,7 +285,6 @@
             padding: 10px 14px;
         }
 
-        /* Impressão: mantém comportamento original */
         @media print {
             .no-print, button, nav, aside { display: none !important; }
             body { background: white !important; padding: 20px; color: #000 !important; }
@@ -324,21 +292,12 @@
             .prontuario-container { border: none !important; box-shadow: none !important; }
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           RESPONSIVIDADE — trava o sidebar flyout em telas < 1024px
-           (mesmo padrão já usado em Minha Equipe)
-        ═══════════════════════════════════════════════════════════ */
         @media (max-width: 1023px) {
             .app-sidebar {
                 width: 5rem !important;
             }
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           PROFUNDIDADE 3D — bordas deixam de parecer "chapadas"
-           Combina: brilho no topo (luz) + sombra interna embaixo (profundidade)
-           + sombra externa projetada (elevação)
-        ═══════════════════════════════════════════════════════════ */
         .glass-panel {
             box-shadow:
                 0 1px 0 rgba(255,255,255,0.05) inset,
@@ -404,15 +363,10 @@
                 0 0 60px rgba(34,211,238,0.08) !important;
         }
 
-        /* Editor Quill — altura mínima garantida mesmo quando a coluna
-           empilha em telas menores (sem isso ele pode colapsar) */
         .ql-editor {
             min-height: 220px !important;
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           BREAKPOINTS EXTRA — telas muito pequenas e super grandes
-        ═══════════════════════════════════════════════════════════ */
         @media (max-width: 479px) {
             .page-title { font-size: 1.25rem !important; }
             .info-chip { font-size: 10px !important; padding: 5px 9px !important; }
@@ -422,9 +376,6 @@
             .prontuario-container .ql-editor { font-size: 1.05rem !important; }
         }
 
-        /* ═══════════════════════════════════════════════════════════
-           🔐 ESTADO TRAVADO — prontuário finalizado e assinado
-        ═══════════════════════════════════════════════════════════ */
         .prontuario-travado .ql-toolbar,
         .prontuario-travado #diagnosticoCid {
             opacity: 0.5;
@@ -438,23 +389,20 @@
 
 <body class="h-screen overflow-hidden font-sans antialiased transition-colors duration-300">
 
-    <!-- Atmosfera decorativa (padrão do sistema) -->
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="hero-grid"></div>
 
     <div class="flex h-full w-full overflow-hidden">
 
-        <!-- 1. ASIDE MENU -->
+        <!-- ASIDE MENU -->
         <aside class="app-sidebar fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-xl flex flex-col justify-between">
             <div>
-                <!-- Logo -->
                 <div class="h-20 flex items-center px-6 border-b overflow-hidden" style="border-color: var(--border)">
                     <div class="w-10 h-10 logo-badge rounded-xl flex-shrink-0 flex items-center justify-center text-white font-black" style="font-family:'Space Grotesk',sans-serif">M</div>
                     <span class="ml-4 font-black text-lg text-white opacity-0 group-hover:opacity-100 transition-opacity" style="font-family:'Space Grotesk',sans-serif">Med<span style="color:var(--emerald)">LM</span></span>
                 </div>
 
-                <!-- Navegação -->
                 <nav class="px-3 pt-6 space-y-2">
                     <a href="/dashboard" class="nav-link flex items-center p-3 rounded-xl transition">
                         <i class="fas fa-th-large w-6 text-center"></i><span class="ml-4 opacity-0 group-hover:opacity-100 font-medium transition-opacity">Dashboard</span>
@@ -471,7 +419,6 @@
                 </nav>
             </div>
 
-            <!-- Rodapé do Menu -->
             <div class="px-3 pb-6 space-y-2">
                 <button onclick="toggleDarkMode()" class="w-full nav-link flex items-center p-3 rounded-xl text-left app-btn-toggle">
                     <i class="fas fa-moon w-6 text-center" id="darkModeIcon"></i>
@@ -485,7 +432,7 @@
             </div>
         </aside>
 
-        <!-- 2. MAIN CONTAINER -->
+        <!-- MAIN -->
         <main class="flex-1 ml-20 p-4 sm:p-6 lg:p-8 flex flex-col h-screen overflow-y-auto lg:overflow-hidden">
 
             <!-- TOP BAR HEADER -->
@@ -493,19 +440,20 @@
                 <div>
                     <h1 class="text-xl sm:text-2xl page-title tracking-tight">Módulo de Atendimento Clínico</h1>
 
-                    <!-- Dados Consolidados da Clínica e do Usuário Operador -->
                     <div class="flex flex-wrap items-center gap-3 mt-2 text-xs font-semibold">
                         <span class="info-chip">
-                            <i class="fas fa-clinic-medical text-[10px]" style="color:var(--emerald)"></i> Clínica: <strong id="nomeClinicaHeader" class="text-white">CARREGANDO...</strong>
+                            <i class="fas fa-clinic-medical text-[10px]" style="color:var(--emerald)"></i>
+                            Clínica: <strong id="nomeClinicaHeader" class="text-white">CARREGANDO...</strong>
                         </span>
                         <span class="w-1.5 h-1.5 rounded-full hidden sm:inline-block" style="background: rgba(148,163,184,0.3)"></span>
                         <span class="info-chip">
-                            <i class="fas fa-user-shield text-[10px]" style="color:var(--cyan)"></i> Operador: <strong id="nomeUsuarioHeader" class="text-white">CARREGANDO...</strong>
+                            <i class="fas fa-user-shield text-[10px]" style="color:var(--cyan)"></i>
+                            Operador: <strong id="nomeUsuarioHeader" class="text-white">CARREGANDO...</strong>
+                            <span id="crmUsuarioHeader" class="text-slate-400 font-mono text-[10px] ml-1"></span>
                         </span>
                     </div>
                 </div>
 
-                <!-- Identificação Superior do Paciente Selecionado -->
                 <div class="patient-chip px-5 py-3 flex items-center gap-3 shadow-lg w-full md:w-auto">
                     <div class="w-9 h-9 rounded-xl icon-emerald flex items-center justify-center text-sm">
                         <i class="fas fa-id-badge"></i>
@@ -515,13 +463,12 @@
                         <h4 id="nomePacienteHeader" class="text-sm font-black text-white">CARREGANDO...</h4>
                     </div>
                 </div>
-
             </header>
 
-            <!-- 🔄 ÁREA OPERACIONAL DE FLUXO (TRÊS COLUNAS) -->
+            <!-- TRÊS COLUNAS -->
             <div class="flex-1 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-y-auto lg:overflow-hidden pb-4 lg:pb-2 max-w-[1900px] mx-auto w-full">
 
-                <!-- COLUNA 1: FICHA CLÍNICA EXPRESSA -->
+                <!-- COLUNA 1: FICHA -->
                 <section class="w-full lg:w-72 xl:w-80 glass-panel flex flex-col overflow-hidden flex-shrink-0">
                     <div class="p-5 glass-header flex items-center gap-2">
                         <i class="fas fa-file-medical" style="color:var(--emerald)"></i>
@@ -529,8 +476,6 @@
                     </div>
 
                     <div class="max-h-[360px] lg:max-h-none lg:flex-1 overflow-y-auto p-4 sm:p-5 space-y-4 text-xs">
-
-                        <!-- Dados Cadastrais -->
                         <div class="glass-card p-4 space-y-3">
                             <div>
                                 <span class="form-label block mb-1">CPF (Obrigatório MarketUp)</span>
@@ -548,7 +493,6 @@
                             </div>
                         </div>
 
-                        <!-- Perfil & Origem -->
                         <div class="grid grid-cols-2 gap-2">
                             <div class="glass-card p-3 text-center">
                                 <span class="form-label block mb-1">Origem</span>
@@ -561,7 +505,6 @@
                             </div>
                         </div>
 
-                        <!-- Métricas Físicas -->
                         <div class="glass-card p-3.5 grid grid-cols-3 gap-2 text-center">
                             <div>
                                 <span class="form-label block mb-1">Peso</span>
@@ -577,7 +520,6 @@
                             </div>
                         </div>
 
-                        <!-- Motivo Médica -->
                         <div class="space-y-1">
                             <span class="form-label flex items-center gap-1">
                                 <i class="fas fa-align-left" style="color:var(--cyan)"></i> Motivo da Consulta
@@ -587,7 +529,6 @@
                             </div>
                         </div>
 
-                        <!-- Condições Preexistentes -->
                         <div class="space-y-1">
                             <span class="form-label flex items-center gap-1" style="color: rgba(251,191,36,0.75)">
                                 <i class="fas fa-heartbeat"></i> Condições de Saúde / Alergias
@@ -596,11 +537,10 @@
                                 CARREGANDO...
                             </div>
                         </div>
-
                     </div>
                 </section>
 
-                <!-- COLUNA 2: LINHA DO TEMPO -->
+                <!-- COLUNA 2: TIMELINE -->
                 <section class="w-full lg:w-64 xl:w-72 glass-panel flex flex-col overflow-hidden flex-shrink-0">
                     <div class="p-5 glass-header flex items-center justify-between">
                         <h3 class="text-xs font-black uppercase tracking-wider text-white">Histórico de Evolução</h3>
@@ -615,14 +555,13 @@
                     </div>
                 </section>
 
-                <!-- COLUNA 3: PRONTUÁRIO INTEGRADO ATIVO -->
+                <!-- COLUNA 3: PRONTUÁRIO -->
                 <section class="w-full flex-1 glass-panel flex flex-col overflow-hidden prontuario-container min-h-[560px] lg:min-h-0">
                     <form id="formAtendimento" onsubmit="salvarEvolucao(event)" class="flex flex-col h-full">
 
                         <input type="hidden" id="atendimentoPacienteId" value="">
                         <input type="hidden" id="atendimentoAgendamentoId" value="">
 
-                        <!-- Top Control Dashboard -->
                         <div class="p-5 glass-header flex flex-wrap items-center justify-between gap-3">
                             <div class="flex items-center gap-3">
                                 <label class="form-label flex items-center gap-1">
@@ -640,7 +579,6 @@
                             </div>
                         </div>
 
-                        <!-- Editor de Texto -->
                         <div class="flex-1 p-4 sm:p-5 overflow-hidden flex flex-col min-h-[300px]">
                             <label class="form-label mb-2 flex items-center gap-1">
                                 <i class="fas fa-keyboard" style="color:var(--cyan)"></i> Relatório de Evolução Clínica do Paciente
@@ -650,7 +588,6 @@
                             </div>
                         </div>
 
-                        <!-- Operações do Rodapé -->
                         <div class="p-4 sm:p-5 glass-header flex flex-col sm:flex-row sm:flex-wrap justify-end gap-2 sm:gap-3">
                             <button type="button" onclick="limparFormulario()" class="btn-secondary w-full sm:w-auto px-4 py-2.5 rounded-xl transition text-xs font-black uppercase tracking-wider">
                                 Limpar
@@ -700,7 +637,7 @@
         </div>
     </div>
 
-    <!-- MODAL ASSINATURA (confirmação de senha ao finalizar o atendimento) -->
+    <!-- MODAL ASSINATURA -->
     <div id="modalAssinatura" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
         <div class="modal-panel w-full max-w-sm rounded-[28px] p-6 shadow-2xl">
             <div class="flex justify-between items-center mb-4 pb-4" style="border-bottom: 1px solid var(--border)">
@@ -731,18 +668,16 @@
         </div>
     </div>
 
-    <!-- ⚡ SCRIPT OPERACIONAL — LÓGICA INTOCADA -->
     <script>
-        // 🖋️ Inicialização Completa do Editor Quill com Alinhamentos Solicitados
         const quill = new Quill('#editorEvolucao', {
             theme: 'snow',
             placeholder: 'Inicie a digitação do relatório e evolução do paciente de forma detalhada...',
             modules: {
                 toolbar: [
-                    ['bold', 'italic', 'underline'],                       // Negrito, Itálico, Sublinhado
-                    [{ 'align': [] }],                                      // Esquerda, Centro, Direita, Justificado
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],           // Listas Ordenadas e por Tópicos
-                    ['clean']                                               // Limpar formatador
+                    ['bold', 'italic', 'underline'],
+                    [{ 'align': [] }],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['clean']
                 ]
             }
         });
@@ -754,7 +689,6 @@
             document.getElementById('diagnosticoCid').value = '';
         }
 
-        // 🔐 Aplica o estado visual de "travado" quando o prontuário está finalizado
         function aplicarEstadoProntuario(status) {
             const container = document.querySelector('.prontuario-container');
             const badge = document.getElementById('badgeFinalizado');
@@ -766,7 +700,6 @@
             badge.classList.toggle('flex', isFinalizado);
         }
 
-        // 🌗 Sistema Nativo de Controle do Dark Mode Integrado ao Menu Lateral
         function aplicarTemaSalvo() {
             const tema = localStorage.getItem('darkMode') || 'disabled';
             if (tema === 'enabled') {
@@ -802,7 +735,6 @@
             }
         }
 
-        // Executa a verificação na inicialização da página
         aplicarTemaSalvo();
     </script>
 

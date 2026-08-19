@@ -33,7 +33,6 @@
     </script>
 
     <style>
-        /* ─── TOKENS DE DESIGN ULTRA-IMPACTO (CYBER PREMIUM) ─── */
         body {
             background-color: #020c12 !important;
             background-image: 
@@ -44,7 +43,6 @@
             min-height: 100vh;
         }
 
-        /* Painéis Sólidos de Alta Definição com Borda Neon */
         .cyber-panel {
             background: #06131c !important;
             border: 1px solid rgba(34, 211, 238, 0.18) !important;
@@ -53,7 +51,6 @@
             overflow: hidden;
         }
 
-        /* Card Premium com Glow Activo ao Passar o Mouse */
         .cyber-card-premium {
             background: #081924 !important;
             border: 1px solid rgba(52, 211, 153, 0.15) !important;
@@ -65,7 +62,6 @@
             transform: translateY(-2px);
         }
 
-        /* Filete de Luz Pura (Top Glow Line) */
         .glow-line::before {
             content: "";
             position: absolute;
@@ -77,16 +73,13 @@
             z-index: 10;
         }
 
-        /* Custom Scrollbar High-Contrast */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #020c12; }
         ::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.4); border-radius: 99px; }
 
-        /* ─── CORREÇÕES DE RESPONSIVIDADE ─── */
-        /* Sidebar sempre estreita em mobile/tablet. Expande só no desktop */
         @media (max-width: 1023px) {
             #sidebarMenu {
-                width: 5rem !important; /* w-20 */
+                width: 5rem !important;
             }
             #sidebarMenu .logo-text-brand,
             #sidebarMenu nav span,
@@ -100,20 +93,18 @@
             }
         }
 
-        /* Em desktop (lg+) a sidebar continua expandindo no hover normalmente */
         @media (min-width: 1024px) {
             #sidebarMenu:hover {
-                width: 16rem; /* w-64 */
+                width: 16rem;
             }
         }
     </style>
 </head>
 <body class="font-sans antialiased flex overflow-x-hidden">
     
-    <!-- Container Wrapper -->
     <div class="flex w-full min-h-screen relative group">
 
-        <!-- Sidebar Inteligente Dinâmica -->
+        <!-- Sidebar -->
         <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden bg-slate-950/95 group flex flex-col justify-between cyber-panel border-r border-white/5" id="sidebarMenu">
             <div class="flex flex-col">
                 <div class="h-24 flex items-center justify-between px-6 logo-block overflow-hidden">
@@ -172,12 +163,12 @@
             </div>
         </aside>
 
-        <!-- Área de Conteúdo Principal -->
+        <!-- Conteúdo Principal -->
         <main class="flex-1 min-h-screen pl-20 lg:group-hover:pl-64 flex flex-col transition-all duration-300 w-full">
 
             <div class="container-fluid p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-[1600px] mx-auto w-full">
 
-                <!-- Cabeçalho Superior -->
+                <!-- Cabeçalho -->
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div class="min-w-0">
                         <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2 sm:gap-3 font-['Space_Grotesk']">
@@ -191,10 +182,9 @@
                     <button id="btnNovoProfissional" onclick="toggleModal()" class="w-full sm:w-auto shrink-0 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black py-3.5 sm:py-4 px-5 sm:px-6 rounded-xl shadow-lg shadow-cyan-950/60 transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0">
                         <i class="fas fa-plus"></i> <span id="btnNovoProfissionalTexto">Novo Profissional</span>
                     </button>
-                    
                 </div>
 
-                <!-- Status de Licença do Plano -->
+                <!-- Status do Plano -->
                 <div id="status-plano-container" class="cyber-card-premium rounded-2xl p-4 border-l-4 border-emerald-400 shadow-xl" style="display: none;">
                     <div class="flex items-center space-x-3 sm:space-x-4">
                         <div class="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-400 border border-emerald-500/20 shrink-0">
@@ -206,17 +196,17 @@
                     </div>
                 </div>
 
-                <!-- Painel de Busca -->
+                <!-- Busca -->
                 <div class="cyber-panel rounded-2xl p-3 sm:p-4">
                     <div class="relative">
                         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
                         <input type="text" id="campo-busca" oninput="filtrarEquipe()" 
-                               placeholder="Filtrar por Nome, CPF ou E-mail..." 
+                               placeholder="Filtrar por Nome, E-mail ou Cargo..." 
                                class="w-full pl-11 pr-4 py-3 sm:py-3.5 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-semibold">
                     </div>
                 </div>
 
-                <!-- Tabela Principal -->
+                <!-- Tabela -->
                 <div class="cyber-panel glow-line rounded-2xl overflow-hidden">
                     <div class="overflow-x-auto w-full">
                         <table class="min-w-full divide-y divide-white/5">
@@ -225,11 +215,11 @@
                                     <th class="py-3.5 sm:py-4 px-4 sm:px-6 text-left whitespace-nowrap">Profissional / Identificação</th>
                                     <th class="py-3.5 sm:py-4 px-4 sm:px-6 text-left whitespace-nowrap">E-mail de Acesso</th>
                                     <th class="py-3.5 sm:py-4 px-4 sm:px-6 text-left whitespace-nowrap">Atribuição / Cargo</th>
+                                    <th class="py-3.5 sm:py-4 px-4 sm:px-6 text-left whitespace-nowrap">CRM / UF</th>
                                     <th class="py-3.5 sm:py-4 px-4 sm:px-6 text-center whitespace-nowrap">Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="lista-equipe" class="divide-y divide-white/5 text-xs text-slate-300 font-medium">
-                                <!-- Elementos carregados pelo script -->
                             </tbody>
                         </table>
                     </div>
@@ -281,6 +271,55 @@
                     </select>
                 </div>
 
+                <!-- Campos CRM e UF -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            CRM / Registro Profissional
+                        </label>
+                        <input type="text" name="crm" id="campo-crm"
+                               placeholder="Ex: 123456"
+                               class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-semibold font-mono">
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                            UF do CRM
+                        </label>
+                        <select name="uf_crm" id="campo-uf-crm"
+                                class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition text-xs font-bold uppercase tracking-wider cursor-pointer appearance-none">
+                            <option value="">— Selecione —</option>
+                            <option value="AC">AC</option>
+                            <option value="AL">AL</option>
+                            <option value="AP">AP</option>
+                            <option value="AM">AM</option>
+                            <option value="BA">BA</option>
+                            <option value="CE">CE</option>
+                            <option value="DF">DF</option>
+                            <option value="ES">ES</option>
+                            <option value="GO">GO</option>
+                            <option value="MA">MA</option>
+                            <option value="MT">MT</option>
+                            <option value="MS">MS</option>
+                            <option value="MG">MG</option>
+                            <option value="PA">PA</option>
+                            <option value="PB">PB</option>
+                            <option value="PR">PR</option>
+                            <option value="PE">PE</option>
+                            <option value="PI">PI</option>
+                            <option value="RJ">RJ</option>
+                            <option value="RN">RN</option>
+                            <option value="RS">RS</option>
+                            <option value="RO">RO</option>
+                            <option value="RR">RR</option>
+                            <option value="SC">SC</option>
+                            <option value="SP">SP</option>
+                            <option value="SE">SE</option>
+                            <option value="TO">TO</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 mt-6 border-t border-white/5">
                     <button type="button" onclick="toggleModal()" class="px-4 py-2.5 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 font-bold transition text-[11px] uppercase tracking-wider">
                         Cancelar
@@ -293,7 +332,7 @@
         </div>
     </div>
 
-    <!-- Toast Informativo -->
+    <!-- Toast -->
     <div id="toast-sucesso" class="fixed bottom-6 right-4 sm:right-6 transform translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-50">
         <div class="cyber-panel border-l-4 border-emerald-400 text-white px-5 sm:px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 sm:space-x-4 max-w-sm">
             <div class="bg-emerald-500/10 p-2.5 rounded-xl text-emerald-400 border border-emerald-500/20 shrink-0">
@@ -306,13 +345,11 @@
         </div>
     </div>
 
-    <!-- ─── SEÇÃO JAVASCRIPT TOTALMENTE PRESERVADA ─── -->
     <script>
         const token = localStorage.getItem('token');
         let dadosEquipeMemoria = []; 
 
         function toggleSidebar() {
-            // Mantido por compatibilidade (não é mais usado no mobile)
             const sidebar = document.getElementById('sidebarMenu');
             sidebar.classList.toggle('-translate-x-full');
         }
@@ -370,6 +407,7 @@
                     showToast();
                     e.target.reset();
                     carregarEquipe();
+                    carregarStatusPlano();
                 } else {
                     const result = await response.json();
                     alert('⚠️ ' + (result.error || 'Erro ao salvar integrante.'));
@@ -415,48 +453,60 @@
             if (lista.length === 0) {
                 tabela.innerHTML = `
                     <tr>
-                        <td colspan="4" class="text-center py-12 text-slate-600 font-bold uppercase tracking-wider">
-                            <i class="fas fa-user-slash text-3xl mb-3 block text-slate-700"></i>Nenhum profissional encontrado.
+                        <td colspan="5" class="text-center py-12 text-slate-600 font-bold uppercase tracking-wider">
+                            <i class="fas fa-user-slash text-3xl mb-3 block text-slate-700"></i>
+                            Nenhum profissional encontrado.
                         </td>
                     </tr>`;
                 return;
             }
 
-                    lista.forEach(membro => {
-                        const podeRemover = membro.cargo !== 'dono' && Number(membro.id) !== Number(meuId);
+            lista.forEach(membro => {
+                const podeRemover = membro.cargo !== 'dono' && Number(membro.id) !== Number(meuId);
 
-                        tabela.innerHTML += `
-                            <tr class="hover:bg-white/[0.02] border-b border-white/5 transition duration-150">
-                                <td class="py-4 px-4 sm:px-6 text-slate-200 font-semibold">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-white/[0.01] flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-black uppercase font-['Space_Grotesk'] shrink-0">
-                                            ${membro.nome.charAt(0)}
-                                        </div>
-                                        <div class="min-w-0">
-                                            <span class="block text-slate-200 text-xs font-bold truncate">${membro.nome}</span>
-                                            <span class="text-[10px] font-bold text-slate-600 uppercase font-['Space_Grotesk'] tracking-wider">ID: #${membro.id}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-4 px-4 sm:px-6 text-slate-400 font-mono text-xs font-semibold tracking-wide whitespace-nowrap">${membro.email}</td>
-                                <td class="py-4 px-4 sm:px-6">
-                                    <span class="text-[10px] font-black px-2.5 py-1.5 rounded-xl uppercase tracking-widest font-['Space_Grotesk'] ${obterEstiloBadge(membro.cargo)} whitespace-nowrap">
-                                        ${membro.cargo === 'admin' ? 'Administrador' : membro.cargo}
-                                    </span>
-                                </td>
-                                <td class="py-4 px-4 sm:px-6 text-center">
-                                    ${podeRemover
-                                        ? `<button onclick="removerMembro(${membro.id}, '${membro.nome.replace(/'/g, "\\'")}')" class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 transition inline-flex items-center justify-center" title="Remover profissional">
-                                            <i class="fas fa-trash-alt text-xs"></i>
-                                        </button>`
-                                        : `<span class="text-slate-700 text-xs" title="Não é possível remover">—</span>`
-                                    }
-                                </td>
-                            </tr>
-                        `;
-                    });
+                let crmTexto = '—';
+                if (membro.crm) {
+                    crmTexto = membro.uf_crm
+                        ? `${membro.crm} / ${membro.uf_crm}`
+                        : membro.crm;
                 }
 
+                tabela.innerHTML += `
+                    <tr class="hover:bg-white/[0.02] border-b border-white/5 transition duration-150">
+                        <td class="py-4 px-4 sm:px-6 text-slate-200 font-semibold">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-cyan-500/20 to-white/[0.01] flex items-center justify-center text-cyan-400 border border-cyan-500/30 font-black uppercase font-['Space_Grotesk'] shrink-0">
+                                    ${membro.nome.charAt(0)}
+                                </div>
+                                <div class="min-w-0">
+                                    <span class="block text-slate-200 text-xs font-bold truncate">${membro.nome}</span>
+                                    <span class="text-[10px] font-bold text-slate-600 uppercase font-['Space_Grotesk'] tracking-wider">ID: #${membro.id}</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4 px-4 sm:px-6 text-slate-400 font-mono text-xs font-semibold tracking-wide whitespace-nowrap">${membro.email}</td>
+                        <td class="py-4 px-4 sm:px-6">
+                            <span class="text-[10px] font-black px-2.5 py-1.5 rounded-xl uppercase tracking-widest font-['Space_Grotesk'] ${obterEstiloBadge(membro.cargo)} whitespace-nowrap">
+                                ${membro.cargo === 'admin' ? 'Administrador' : membro.cargo}
+                            </span>
+                        </td>
+                        <td class="py-4 px-4 sm:px-6 text-slate-300 font-mono text-xs font-semibold tracking-wide whitespace-nowrap">
+                            ${crmTexto}
+                        </td>
+                        <td class="py-4 px-4 sm:px-6 text-center">
+                            ${podeRemover
+                                ? `<button onclick="removerMembro(${membro.id}, '${membro.nome.replace(/'/g, "\\'")}')"
+                                           class="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 hover:text-red-300 transition inline-flex items-center justify-center"
+                                           title="Remover profissional">
+                                        <i class="fas fa-trash-alt text-xs"></i>
+                                   </button>`
+                                : `<span class="text-slate-700 text-xs" title="Não é possível remover">—</span>`
+                            }
+                        </td>
+                    </tr>
+                `;
+            });
+        }
 
         async function carregarEquipe() {
             try {
@@ -472,27 +522,27 @@
         }
 
         async function removerMembro(id, nome) {
-    const confirmar = confirm(`Tem certeza que deseja remover "${nome}" da equipe? Essa ação não pode ser desfeita.`);
-    if (!confirmar) return;
+            const confirmar = confirm(`Tem certeza que deseja remover "${nome}" da equipe? Essa ação não pode ser desfeita.`);
+            if (!confirmar) return;
 
-    try {
-        const response = await fetch(`/api/equipe/remover/${id}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+            try {
+                const response = await fetch(`/api/equipe/remover/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-        const result = await response.json();
+                const result = await response.json();
 
-        if (response.ok) {
-            carregarEquipe();
-            carregarStatusPlano(); // atualiza o contador do plano e destrava o botão se preciso
-        } else {
-            alert('⚠️ ' + (result.error || 'Erro ao remover profissional.'));
+                if (response.ok) {
+                    carregarEquipe();
+                    carregarStatusPlano();
+                } else {
+                    alert('⚠️ ' + (result.error || 'Erro ao remover profissional.'));
+                }
+            } catch (error) {
+                alert('❌ Falha crítica de comunicação com o servidor.');
+            }
         }
-    } catch (error) {
-        alert('❌ Falha crítica de comunicação com o servidor.');
-    }
-}
 
         function filtrarEquipe() {
             const termo = document.getElementById('campo-busca').value.toLowerCase().trim();
@@ -503,44 +553,42 @@
             const filtrados = dadosEquipeMemoria.filter(m =>
                 m.nome.toLowerCase().includes(termo) ||
                 m.email.toLowerCase().includes(termo) ||
-                (m.cargo && m.cargo.toLowerCase().includes(termo))
+                (m.cargo && m.cargo.toLowerCase().includes(termo)) ||
+                (m.crm && String(m.crm).toLowerCase().includes(termo))
             );
             renderizarTabela(filtrados);
         }
 
         async function carregarStatusPlano() {
-    try {
-        const response = await fetch('/api/equipe/status-plano', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await response.json();
+            try {
+                const response = await fetch('/api/equipe/status-plano', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await response.json();
 
-        if (response.ok) {
-            const container = document.getElementById('status-plano-container');
-            const texto = document.getElementById('plano-info-texto');
-            const btn = document.getElementById('btnNovoProfissional');
-            const btnTexto = document.getElementById('btnNovoProfissionalTexto');
+                if (response.ok) {
+                    const container = document.getElementById('status-plano-container');
+                    const texto = document.getElementById('plano-info-texto');
+                    const btn = document.getElementById('btnNovoProfissional');
+                    const btnTexto = document.getElementById('btnNovoProfissionalTexto');
 
-            container.style.display = 'block';
-            texto.innerHTML = `Licença do Plano: <strong class="text-cyan-400 font-bold uppercase tracking-wider font-['Space_Grotesk']">${data.plano.toUpperCase()}</strong>. Volume de Alocação: <strong class="text-slate-100 font-bold font-['Space_Grotesk']">${data.usado}</strong> de <strong class="text-slate-500 font-bold font-['Space_Grotesk']">${data.limite}</strong> integrantes cadastrados.`;
+                    container.style.display = 'block';
+                    texto.innerHTML = `Licença do Plano: <strong class="text-cyan-400 font-bold uppercase tracking-wider font-['Space_Grotesk']">${data.plano.toUpperCase()}</strong>. Volume de Alocação: <strong class="text-slate-100 font-bold font-['Space_Grotesk']">${data.usado}</strong> de <strong class="text-slate-500 font-bold font-['Space_Grotesk']">${data.limite}</strong> integrantes cadastrados.`;
 
-            if (data.restante === 0) {
-                container.classList.remove('border-emerald-500');
-                container.classList.add('border-red-500', 'bg-red-500/5');
-
-                // NOVO — trava o botão quando o limite do plano é atingido
-                btn.disabled = true;
-                btnTexto.innerText = "Limite do Plano Atingido";
-            } else {
-                // NOVO — garante que o botão volta ao normal se algum membro for removido depois
-                btn.disabled = false;
-                btnTexto.innerText = "Novo Profissional";
+                    if (data.restante === 0) {
+                        container.classList.remove('border-emerald-500');
+                        container.classList.add('border-red-500', 'bg-red-500/5');
+                        btn.disabled = true;
+                        btnTexto.innerText = "Limite do Plano Atingido";
+                    } else {
+                        btn.disabled = false;
+                        btnTexto.innerText = "Novo Profissional";
+                    }
+                }
+            } catch (error) {
+                console.error("Erro ao sincronizar plano corporativo:", error);
             }
         }
-    } catch (error) {
-        console.error("Erro ao sincronizar plano corporativo:", error);
-    }
-}
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarStatusPlano();
