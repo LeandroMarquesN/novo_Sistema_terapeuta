@@ -296,6 +296,8 @@ CREATE TABLE IF NOT EXISTS logs_auditoria (
   prontuario_id INT NOT NULL,
   acao VARCHAR(50) NOT NULL,
   data_acesso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  crm VARCHAR(30) NULL,
+  uf_crm CHAR(2) NULL,
   CONSTRAINT fk_log_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
   CONSTRAINT fk_log_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id)
 ) ENGINE=InnoDB;
