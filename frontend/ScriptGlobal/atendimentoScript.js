@@ -344,15 +344,39 @@ async function abrirModalAuditoria() {
   const logs = await response.json();
 
   const lista = document.getElementById('listaLogs');
-  lista.innerHTML = logs.map(log => `
-      <div class="flex justify-between items-center audit-item">
-          <div>
+
+  if (!logs || logs.length === 0) {
+    lista.innerHTML = `<p class="text-center text-slate-500 text-xs">Nenhum registro de auditoria encontrado.</p>`;
+    return;
+  }
+
+  lista.innerHTML = logs.map(log => {
+    // Monta o texto do CRM (ex: CRM 123456/SP)
+    let crmTexto = '';
+    if (log.usuario_crm) {
+      crmTexto = log.usuario_uf_crm
+        ? `CRM ${log.usuario_crm}/${log.usuario_uf_crm}`
+        : `CRM ${log.usuario_crm}`;
+    }
+
+    return `
+      <div class="flex justify-between items-start audit-item gap-3">
+          <div class="min-w-0">
               <p class="text-[11px] font-black" style="color:#e2e8f0">${log.acao}</p>
-              <p class="text-[9px]" style="color: rgba(148,163,184,0.6)">Por: ${log.usuario_nome}</p>
+              <p class="text-[9px] mt-0.5" style="color: rgba(148,163,184,0.6)">
+                  Por: <span style="color:#e2e8f0; font-weight:700">${log.usuario_nome || '—'}</span>
+              </p>
+              ${crmTexto
+        ? `<p class="text-[9px] font-mono mt-0.5" style="color: var(--cyan)">${crmTexto}</p>`
+        : ''
+      }
           </div>
-          <span class="text-[10px] font-bold" style="color: rgba(148,163,184,0.5)">${new Date(log.data_acesso).toLocaleString('pt-BR')}</span>
+          <span class="text-[10px] font-bold shrink-0" style="color: rgba(148,163,184,0.5)">
+              ${new Date(log.data_acesso).toLocaleString('pt-BR')}
+          </span>
       </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function fecharModalAuditoria() {
