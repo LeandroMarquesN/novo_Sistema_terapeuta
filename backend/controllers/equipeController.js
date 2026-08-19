@@ -1,8 +1,19 @@
 const db = require('../config/db');
 
+// Cargos da área de saúde que exigem CRM / registro profissional
+const CARGOS_SAUDE = [
+    'medico',
+    'psicologo',
+    'fisioterapeuta',
+    'nutricionista',
+    'fonoaudiologo',
+    'profissional da saude',
+    'terapeuta'
+];
+
 // --- FUNÇÃO PARA ADICIONAR MEMBRO ---
 exports.adicionarMembro = async (req, res) => {
-    const { nome, email, senha, cargo } = req.body;
+    const { nome, email, senha, cargo, crm, uf_crm } = req.body;
     const clinicaId = req.usuario.clinica_id;
 
     try {
@@ -12,8 +23,7 @@ exports.adicionarMembro = async (req, res) => {
             return res.status(400).json({ error: "Este e-mail já está em uso." });
         }
 
-        // 2. BUSCA O LIMITE DO PLANO (AQUI ESTÁ A MÁGICA)
-        // Fazemos um JOIN entre clinicas e planos para pegar o limite_membros do plano daquela clínica
+        // 2. BUSCA O LIMITE DO PLANO
         const [clinicaPlanos] = await db.execute(`
             SELECT p.limite_membros
             FROM clinicas c
@@ -28,7 +38,10 @@ exports.adicionarMembro = async (req, res) => {
         const limitePermitido = clinicaPlanos[0].limite_membros;
 
         // 3. Conta quantos membros a clínica já possui
-        const [countRows] = await db.execute("SELECT COUNT(*) as total FROM usuarios WHERE clinica_id = ?", [clinicaId]);
+        const [countRows] = await db.execute(
+            "SELECT COUNT(*) as total FROM usuarios WHERE clinica_id = ?",
+            [clinicaId]
+        );
         const totalAtual = countRows[0].total;
 
         // 4. Validação de Limite
@@ -38,11 +51,30 @@ exports.adicionarMembro = async (req, res) => {
             });
         }
 
-        // 5. Inserção do novo membro
-        const cargoFormatado = cargo.toLowerCase();
+        // 5. Normalização e validação de CRM / UF
+        const cargoFormatado = (cargo || '').toLowerCase().trim();
+        const crmLimpo = crm ? String(crm).trim() : null;
+        const ufLimpa = uf_crm ? String(uf_crm).trim().toUpperCase() : null;
+
+        const ehCargoSaude = CARGOS_SAUDE.includes(cargoFormatado);
+
+        if (ehCargoSaude) {
+            if (!crmLimpo || !ufLimpa) {
+                return res.status(400).json({
+                    error: "Para cargos da área de saúde é obrigatório informar o CRM e a UF do CRM."
+                });
+            }
+            if (ufLimpa.length !== 2) {
+                return res.status(400).json({ error: "UF do CRM inválida." });
+            }
+        }
+
+        // 6. Inserção do novo membro (com CRM e UF)
         await db.execute(
-            "INSERT INTO usuarios (clinica_id, nome, email, senha, cargo) VALUES (?, ?, ?, ?, ?)",
-            [clinicaId, nome, email, senha, cargoFormatado]
+            `INSERT INTO usuarios 
+                (clinica_id, nome, email, senha, cargo, crm, uf_crm) 
+             VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [clinicaId, nome, email, senha, cargoFormatado, crmLimpo, ufLimpa]
         );
 
         res.json({ message: "Membro adicionado com sucesso!" });
@@ -58,7 +90,9 @@ exports.listarMembros = async (req, res) => {
     try {
         const clinicaId = req.usuario.clinica_id;
         const [membros] = await db.execute(
-            "SELECT id, nome, email, cargo FROM usuarios WHERE clinica_id = ?",
+            `SELECT id, nome, email, cargo, crm, uf_crm 
+             FROM usuarios 
+             WHERE clinica_id = ?`,
             [clinicaId]
         );
         res.json(membros);
@@ -67,13 +101,12 @@ exports.listarMembros = async (req, res) => {
         res.status(500).json({ error: "Erro ao buscar dados da equipe." });
     }
 };
+
 // --- FUNÇÃO PARA PEGAR STATUS DO PLANO E MEMBROS ---
 exports.obterStatusPlano = async (req, res) => {
-    // Usando o clinica_id que vem do seu middleware de autenticação
     const clinicaId = req.usuario.clinica_id;
 
     try {
-        // 1. Busca o nome do plano e o limite de membros fazendo JOIN com a tabela planos
         const [planoInfo] = await db.execute(`
             SELECT p.nome_plano, p.limite_membros
             FROM clinicas c
@@ -85,13 +118,11 @@ exports.obterStatusPlano = async (req, res) => {
             return res.status(404).json({ error: "Plano ou clínica não encontrados." });
         }
 
-        // 2. Conta quantos membros (usuários) já estão cadastrados para esta clínica
         const [countRows] = await db.execute(
             "SELECT COUNT(*) as total FROM usuarios WHERE clinica_id = ?",
             [clinicaId]
         );
 
-        // 3. Retorna o JSON que o seu HTML (fetch) está esperando
         res.json({
             plano: planoInfo[0].nome_plano,
             limite: planoInfo[0].limite_membros,
@@ -112,8 +143,6 @@ exports.removerMembro = async (req, res) => {
     const usuarioLogadoId = req.usuario.id;
 
     try {
-        // 1. Busca o membro garantindo que ele pertence à MESMA clínica de quem está pedindo
-        //    (evita que alguém, manipulando a URL, remova usuário de outra clínica)
         const [membros] = await db.execute(
             "SELECT id, nome, cargo FROM usuarios WHERE id = ? AND clinica_id = ?",
             [id, clinicaId]
@@ -125,18 +154,18 @@ exports.removerMembro = async (req, res) => {
 
         const membro = membros[0];
 
-        // 2. Ninguém pode remover a própria conta por essa tela
         if (Number(id) === Number(usuarioLogadoId)) {
             return res.status(400).json({ error: "Você não pode remover a si mesmo." });
         }
 
-        // 3. Protege o dono da clínica contra remoção acidental
         if (membro.cargo === 'dono') {
             return res.status(403).json({ error: "Não é possível remover o dono da clínica." });
         }
 
-        // 4. Remove
-        await db.execute("DELETE FROM usuarios WHERE id = ? AND clinica_id = ?", [id, clinicaId]);
+        await db.execute(
+            "DELETE FROM usuarios WHERE id = ? AND clinica_id = ?",
+            [id, clinicaId]
+        );
 
         console.log(`Log: Usuário ${membro.nome} (ID: ${id}) foi removido da equipe da clínica ${clinicaId} por ${req.usuario.nome} (ID: ${usuarioLogadoId}).`);
 
