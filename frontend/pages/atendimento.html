@@ -421,6 +421,18 @@
         @media (min-width: 1920px) {
             .prontuario-container .ql-editor { font-size: 1.05rem !important; }
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           🔐 ESTADO TRAVADO — prontuário finalizado e assinado
+        ═══════════════════════════════════════════════════════════ */
+        .prontuario-travado .ql-toolbar,
+        .prontuario-travado #diagnosticoCid {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .prontuario-travado #btnSalvarProntuario {
+            display: none;
+        }
     </style>
 </head>
 
@@ -618,8 +630,13 @@
                                 </label>
                                 <input type="text" id="diagnosticoCid" placeholder="Ex: F41.1" class="input-premium w-28 px-3 py-1.5 text-xs font-black uppercase text-center">
                             </div>
-                            <div class="info-chip">
-                                <i class="fas fa-calendar-alt" style="color:var(--emerald)"></i> Registro: <span id="dataAtualAtendimento" class="text-white font-black">-</span>
+                            <div class="flex items-center gap-3">
+                                <span id="badgeFinalizado" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider" style="background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); color: var(--emerald);">
+                                    <i class="fas fa-lock"></i> Finalizado e Assinado
+                                </span>
+                                <div class="info-chip">
+                                    <i class="fas fa-calendar-alt" style="color:var(--emerald)"></i> Registro: <span id="dataAtualAtendimento" class="text-white font-black">-</span>
+                                </div>
                             </div>
                         </div>
 
@@ -683,6 +700,37 @@
         </div>
     </div>
 
+    <!-- MODAL ASSINATURA (confirmação de senha ao finalizar o atendimento) -->
+    <div id="modalAssinatura" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="modal-panel w-full max-w-sm rounded-[28px] p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4 pb-4" style="border-bottom: 1px solid var(--border)">
+                <h3 class="text-base font-black text-white flex items-center gap-2" style="font-family:'Space Grotesk',sans-serif">
+                    <i class="fas fa-file-signature" style="color:var(--emerald)"></i> Confirmar Assinatura
+                </h3>
+                <button onclick="fecharModalAssinatura()" class="text-slate-500 hover:text-red-400 transition"><i class="fas fa-times"></i></button>
+            </div>
+
+            <p class="text-xs mb-4" style="color: rgba(148,163,184,0.7)">
+                Digite sua senha de acesso para confirmar a autoria e finalizar este atendimento. Após confirmar, o registro não poderá mais ser editado.
+            </p>
+
+            <form onsubmit="confirmarAssinatura(event)">
+                <label class="form-label block mb-1.5">Sua Senha</label>
+                <input type="password" id="senhaAssinatura" autocomplete="current-password" class="input-premium w-full px-3 py-2.5 text-sm mb-1" placeholder="••••••••" required>
+                <p id="erroSenhaAssinatura" class="hidden text-[11px] font-bold mb-3" style="color: var(--red)"></p>
+
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="fecharModalAssinatura()" class="btn-secondary flex-1 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="btnConfirmarAssinatura" class="btn-primary-gradient flex-1 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider">
+                        Confirmar Assinatura
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- ⚡ SCRIPT OPERACIONAL — LÓGICA INTOCADA -->
     <script>
         // 🖋️ Inicialização Completa do Editor Quill com Alinhamentos Solicitados
@@ -704,6 +752,18 @@
         function limparFormulario() {
             quill.setContents([]);
             document.getElementById('diagnosticoCid').value = '';
+        }
+
+        // 🔐 Aplica o estado visual de "travado" quando o prontuário está finalizado
+        function aplicarEstadoProntuario(status) {
+            const container = document.querySelector('.prontuario-container');
+            const badge = document.getElementById('badgeFinalizado');
+            const isFinalizado = status === 'finalizado';
+
+            quill.enable(!isFinalizado);
+            container.classList.toggle('prontuario-travado', isFinalizado);
+            badge.classList.toggle('hidden', !isFinalizado);
+            badge.classList.toggle('flex', isFinalizado);
         }
 
         // 🌗 Sistema Nativo de Controle do Dark Mode Integrado ao Menu Lateral

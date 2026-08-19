@@ -1,6 +1,7 @@
 /**
  * MedLM - Inteligência de Atendimento Clínico Multi-tenant
  * Handler oficial refatorado para integração com LEFT JOIN (Pacientes + Agendamentos)
+ * + fluxo de assinatura eletrônica por senha e trava visual de prontuário finalizado
  */
 
 const token = localStorage.getItem('token');
@@ -159,28 +160,74 @@ async function carregarTimelineProntuarios(pacienteId) {
   }
 }
 
-// 💾 4. SALVAR EVOLUÇÃO
-async function salvarEvolucao(event) {
+// 💾 4. SALVAR EVOLUÇÃO — agora em duas etapas: abrir modal de senha → confirmar
+function salvarEvolucao(event) {
   if (event) event.preventDefault();
+  abrirModalAssinatura();
+}
+
+function abrirModalAssinatura() {
+  const modal = document.getElementById('modalAssinatura');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+  document.getElementById('senhaAssinatura').value = '';
+  document.getElementById('erroSenhaAssinatura').classList.add('hidden');
+  setTimeout(() => document.getElementById('senhaAssinatura').focus(), 50);
+}
+
+function fecharModalAssinatura() {
+  const modal = document.getElementById('modalAssinatura');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+async function confirmarAssinatura(event) {
+  if (event) event.preventDefault();
+
+  const senha = document.getElementById('senhaAssinatura').value;
+  const erroEl = document.getElementById('erroSenhaAssinatura');
+  const btn = document.getElementById('btnConfirmarAssinatura');
+
+  if (!senha) {
+    erroEl.innerText = "Digite sua senha para confirmar.";
+    erroEl.classList.remove('hidden');
+    return;
+  }
 
   const payload = {
     pacienteId: elementosFicha.pacienteIdHidden.value,
     agendamentoId: elementosFicha.agendamentoIdHidden?.value,
     codigoCid: elementosFicha.diagnosticoCid?.value.toUpperCase(),
-    relatoClinico: quill.getSemanticHTML()
+    relatoClinico: quill.getSemanticHTML(),
+    senhaAssinatura: senha
   };
 
-  const response = await fetch('/api/prontuarios/salvar', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-    body: JSON.stringify(payload)
-  });
+  try {
+    btn.disabled = true;
+    btn.innerText = "ASSINANDO...";
 
-  if (response.ok) {
-    alert("✅ Evolução assinada com sucesso!");
-    location.reload();
-  } else {
-    alert("❌ Erro ao salvar.");
+    const response = await fetch('/api/prontuarios/salvar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      fecharModalAssinatura();
+      alert("✅ Evolução assinada com sucesso!");
+      location.reload();
+    } else {
+      erroEl.innerText = data.erro || "Não foi possível confirmar a assinatura.";
+      erroEl.classList.remove('hidden');
+    }
+  } catch (err) {
+    erroEl.innerText = "Erro de conexão. Tente novamente.";
+    erroEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.innerText = "Confirmar Assinatura";
   }
 }
 
@@ -208,6 +255,11 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
     const inputHidden = document.getElementById('idDoProntuarioAtual');
     if (inputHidden) {
       inputHidden.value = prontuarioId;
+    }
+
+    // 4. 🔐 Aplica o estado de trava visual (badge + editor bloqueado) conforme o status
+    if (typeof aplicarEstadoProntuario === 'function') {
+      aplicarEstadoProntuario(prontuario.status_prontuario);
     }
 
     console.log("Prontuário ID atualizado para:", prontuarioId);
@@ -295,6 +347,12 @@ function fecharModalAuditoria() {
 
 // Isso garante que a função fique visível para o clique no HTML
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;
+window.salvarEvolucao = salvarEvolucao;
+window.confirmarAssinatura = confirmarAssinatura;
+window.fecharModalAssinatura = fecharModalAssinatura;
+window.abrirModalAuditoria = abrirModalAuditoria;
+window.fecharModalAuditoria = fecharModalAuditoria;
+window.enviarProntuarioEmail = enviarProntuarioEmail;
 
 // 🧮 AUXILIARES (Refinadas)
 function calcularIdade(data) {
@@ -318,5 +376,3 @@ function extrairTextoLimpo(html) {
 function exibirAvisoSemPaciente() {
   if (elementosFicha.pacienteHeader) elementosFicha.pacienteHeader.innerText = "SELECIONE UM PACIENTE";
 }
-
-window.salvarEvolucao = salvarEvolucao;

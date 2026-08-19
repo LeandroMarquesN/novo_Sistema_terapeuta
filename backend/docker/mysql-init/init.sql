@@ -71,6 +71,9 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
+    
+    crm VARCHAR(20) NULL AFTER cargo,
+    uf_crm CHAR(2) NULL AFTER crm,
 
     -- 🔑 Novas colunas adicionadas para o "Esqueci minha senha"
     reset_token VARCHAR(255) DEFAULT NULL,

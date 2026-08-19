@@ -6,20 +6,19 @@ const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const authAtendimento = require('../middleware/authAtendimento.js');
 
-// 🎮 Importação do Novo Controller
+// 🎮 Importação do Controller
 const prontuarioController = require('../controllers/prontuarioController');
 
 // 🏎️ ROTA PREMIUM: Limpa, segura e seguindo o padrão MVC puro
-// Remova o '/prontuarios' de todas as rotas abaixo
 router.post('/salvar', authMiddleware, authAtendimento, prontuarioController.salvarProntuario);
-router.post('/enviar-email', authMiddleware, prontuarioController.enviarProntuarioEmail); // AQUI
+router.post('/enviar-email', authMiddleware, prontuarioController.enviarProntuarioEmail);
 
 router.get('/historico/:pacienteId', authMiddleware, authAtendimento, prontuarioController.listarHistorico);
 router.get('/detalhe/:id', authMiddleware, authAtendimento, prontuarioController.obterDetalheProntuario);
 
-// routes/prontuarioRoutes.js
+// 🔐 EDIÇÃO — o controller bloqueia com 403 se status_prontuario = 'finalizado'
+router.put('/atualizar/:id', authMiddleware, authAtendimento, prontuarioController.atualizarProntuario);
+
 router.get('/logs/:prontuarioId', authMiddleware, prontuarioController.listarLogs);
-
-
 
 module.exports = router;

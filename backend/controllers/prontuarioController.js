@@ -1,16 +1,17 @@
 /**
- * MedLM - Controller de Prontuários (Corrigido)
+ * MedLM - Controller de Prontuários
+ * Conformidade jurídica: autoria vinculada à sessão, imutabilidade pós-finalização,
+ * assinatura por confirmação de senha e trilha de auditoria.
  */
 const db = require('../config/db');
 const fs = require('fs').promises;
 const path = require('path');
-// CORREÇÃO: Importamos o serviço corretamente
 const notificationService = require('../services/notificationService');
 const auditService = require('../services/auditService');
 
-// 1. SALVAR PRONTUÁRIO
+// 1. SALVAR PRONTUÁRIO (assinatura eletrônica por senha)
 exports.salvarProntuario = async (req, res) => {
-  const { pacienteId, agendamentoId, codigoCid, relatoClinico } = req.body;
+  const { pacienteId, agendamentoId, codigoCid, relatoClinico, senhaAssinatura } = req.body;
   const usuarioId = req.usuario?.id;
   const clinicaId = req.usuario?.clinica_id;
 
@@ -18,7 +19,26 @@ exports.salvarProntuario = async (req, res) => {
     return res.status(400).json({ erro: "Dados obrigatórios ausentes." });
   }
 
+  if (!senhaAssinatura) {
+    return res.status(400).json({ erro: "Senha de assinatura é obrigatória para finalizar o prontuário." });
+  }
+
   try {
+    // 🔏 Confirmação de identidade no momento da assinatura
+    const [userRows] = await db.query('SELECT senha FROM usuarios WHERE id = ?', [usuarioId]);
+    if (!userRows.length) {
+      return res.status(401).json({ erro: "Usuário não encontrado." });
+    }
+
+    // ⚠️ TODO SEGURANÇA: authController.js atualmente compara senha em texto puro
+    // (usuarios.senha não está hasheada). Esta comparação segue o mesmo padrão por
+    // consistência, mas o ideal é migrar para bcrypt o quanto antes:
+    //   const senhaValida = bcrypt.compareSync(senhaAssinatura, userRows[0].senha);
+    const senhaValida = senhaAssinatura === userRows[0].senha;
+    if (!senhaValida) {
+      return res.status(401).json({ erro: "Senha incorreta. Assinatura não confirmada." });
+    }
+
     const sql = `
       INSERT INTO prontuarios
       (clinica_id, paciente_id, usuario_id, agendamento_id, texto_evolucao, diagnostico_cid, status_prontuario, data_atendimento)
@@ -37,6 +57,9 @@ exports.salvarProntuario = async (req, res) => {
     if (agendamentoId) {
       await db.query('UPDATE agendamentos SET status_agendamento = "finalizado" WHERE id = ?', [agendamentoId]);
     }
+
+    // Registro de auditoria da assinatura confirmada por senha
+    await auditService.registrarLog(usuarioId, result.insertId, 'ASSINOU_COM_SENHA');
 
     res.status(201).json({ success: true, prontuarioId: result.insertId });
   } catch (error) {
@@ -63,14 +86,18 @@ exports.listarHistorico = async (req, res) => {
   }
 };
 
-// 3. OBTER DETALHE COMPLETO
+// 3. OBTER DETALHE COMPLETO (com CRM/UF do profissional via JOIN)
 exports.obterDetalheProntuario = async (req, res) => {
   const { id } = req.params;
   const clinicaId = req.usuario.clinica_id;
 
   try {
     const sql = `
-      SELECT p.*, u.nome as nome_profissional, pac.nome as nome_paciente
+      SELECT p.*,
+             u.nome as nome_profissional,
+             u.crm as crm_profissional,
+             u.uf_crm as uf_crm_profissional,
+             pac.nome as nome_paciente
       FROM prontuarios p
       LEFT JOIN usuarios u ON p.usuario_id = u.id
       LEFT JOIN pacientes pac ON p.paciente_id = pac.id
@@ -89,7 +116,50 @@ exports.obterDetalheProntuario = async (req, res) => {
   }
 };
 
-// 4. ENVIO DE EMAIL (CORRIGIDO - COM TOKEN)
+// 4. ATUALIZAR PRONTUÁRIO — trava jurídica de imutabilidade
+exports.atualizarProntuario = async (req, res) => {
+  const { id } = req.params;
+  const { codigoCid, relatoClinico } = req.body;
+  const clinicaId = req.usuario?.clinica_id;
+  const usuarioId = req.usuario?.id; // autoria sempre da sessão, nunca do body
+
+  if (!relatoClinico) {
+    return res.status(400).json({ erro: "Dados obrigatórios ausentes." });
+  }
+
+  try {
+    // Confere existência + status ANTES de qualquer escrita
+    const [rows] = await db.query(
+      'SELECT status_prontuario FROM prontuarios WHERE id = ? AND clinica_id = ?',
+      [id, clinicaId]
+    );
+
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ erro: "Registro não encontrado." });
+    }
+
+    if (rows[0].status_prontuario === 'finalizado') {
+      return res.status(403).json({
+        erro: "Este prontuário já foi finalizado e está travado para edição.",
+        codigo: "PRONTUARIO_TRAVADO"
+      });
+    }
+
+    await db.query(
+      'UPDATE prontuarios SET texto_evolucao = ?, diagnostico_cid = ? WHERE id = ? AND clinica_id = ?',
+      [relatoClinico, codigoCid || null, id, clinicaId]
+    );
+
+    await auditService.registrarLog(usuarioId, id, 'EDITOU');
+
+    res.json({ success: true, message: "Prontuário atualizado com sucesso." });
+  } catch (error) {
+    console.error("ERRO AO ATUALIZAR PRONTUÁRIO:", error);
+    res.status(500).json({ erro: "Erro crítico ao atualizar prontuário." });
+  }
+};
+
+// 5. ENVIO DE EMAIL (com token)
 exports.enviarProntuarioEmail = async (req, res) => {
   const { prontuarioId } = req.body;
   const clinicaId = req.usuario.clinica_id;
@@ -101,7 +171,7 @@ exports.enviarProntuarioEmail = async (req, res) => {
         u.nome as nome_profissional, 
         pac.nome as nome_paciente, 
         pac.email as email_paciente,
-        pac.token_acesso          -- ← ADICIONADO
+        pac.token_acesso
       FROM prontuarios p
       JOIN usuarios u ON p.usuario_id = u.id
       JOIN pacientes pac ON p.paciente_id = pac.id
@@ -125,7 +195,7 @@ exports.enviarProntuarioEmail = async (req, res) => {
       codigo_cid: dados.diagnostico_cid ? dados.diagnostico_cid : 'Não informado!',
       texto_evolucao: dados.texto_evolucao,
       qr_code_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://medlm.com.br/validar/" + dados.id,
-      token_acesso: dados.token_acesso   // ← ADICIONADO (obrigatório)
+      token_acesso: dados.token_acesso
     };
 
     await notificationService.sendProntuarioEmailNotification(dadosEnvio);
@@ -138,7 +208,7 @@ exports.enviarProntuarioEmail = async (req, res) => {
   }
 };
 
-// prontuarioController.js
+// 6. LISTAR LOGS DE AUDITORIA
 exports.listarLogs = async (req, res) => {
   const { prontuarioId } = req.params;
   try {
