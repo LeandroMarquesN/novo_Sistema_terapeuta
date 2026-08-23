@@ -2,9 +2,10 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <title>MedLM | Quantum Admin</title>
     <script src="../ScriptGlobal/verifiLog.js"></script>
-   
+
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,31 +13,107 @@
     <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
 
     <style>
-        body { background: #050a15; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        :root {
+            --neon-blue: #00c3ff;
+            --neon-purple: #a855f7;
+            --neon-orange: #fb923c;
+            --neon-red: #f87171;
+            --neon-green: #10b981;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: #050a15;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Atmosfera neon ambiente */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.25;
+        }
+        body::before {
+            width: 480px; height: 480px;
+            background: var(--neon-blue);
+            top: -160px; left: -120px;
+            animation: floatOrb 14s ease-in-out infinite;
+        }
+        body::after {
+            width: 420px; height: 420px;
+            background: var(--neon-purple);
+            bottom: -140px; right: -100px;
+            animation: floatOrb 18s ease-in-out infinite reverse;
+        }
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -20px) scale(1.08); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body::before, body::after { animation: none; }
+        }
 
         .glass {
             background: rgba(30, 41, 59, 0.4);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+            position: relative;
         }
 
-        .neon-blue { color: #00c3ff; text-shadow: 0 0 15px rgba(0, 195, 255, 0.4); }
-        .neon-border-blue { border-left: 4px solid #00c3ff; }
-        .neon-border-purple { border-left: 4px solid #a855f7; }
+        .neon-blue { color: var(--neon-blue); text-shadow: 0 0 15px rgba(0, 195, 255, 0.45); }
+        .neon-border-blue { border-left: 4px solid var(--neon-blue); box-shadow: -4px 0 20px -6px rgba(0,195,255,0.35), 0 8px 32px 0 rgba(0,0,0,0.35); }
+        .neon-border-purple { border-left: 4px solid var(--neon-purple); box-shadow: -4px 0 20px -6px rgba(168,85,247,0.35), 0 8px 32px 0 rgba(0,0,0,0.35); }
+        .neon-border-orange { border-left: 4px solid var(--neon-orange); box-shadow: -4px 0 20px -6px rgba(251,146,60,0.35), 0 8px 32px 0 rgba(0,0,0,0.35); }
+        .neon-border-red { border-left: 4px solid var(--neon-red); box-shadow: -4px 0 20px -6px rgba(248,113,113,0.35), 0 8px 32px 0 rgba(0,0,0,0.35); }
 
         /* CORREÇÃO DOS GRÁFICOS: Container com altura fixa e posição relativa */
         .chart-container {
             position: relative;
-            height: 300px; /* Altura controlada */
+            height: 300px; /* Altura controlada (desktop) */
             width: 100%;
         }
+        @media (max-width: 1024px) {
+            .chart-container { height: 260px; }
+        }
+        @media (max-width: 480px) {
+            .chart-container { height: 220px; }
+        }
 
-        aside { box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+        aside {
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            z-index: 60;
+        }
 
-        @media (max-width: 768px) {
-            aside { transform: translateX(-100%); transition: 0.3s; }
-            main { margin-left: 0 !important; padding: 1rem !important; }
+        #sidebarOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 15, 0.7);
+            backdrop-filter: blur(2px);
+            z-index: 55;
+        }
+
+        #mobileMenuBtn { display: none; }
+
+        @media (max-width: 1024px) {
+            aside { transform: translateX(-100%); position: fixed; }
+            aside.sidebar-open { transform: translateX(0); }
+            main { margin-left: 0 !important; padding: 1.25rem !important; padding-top: 4.5rem !important; }
+            #mobileMenuBtn { display: inline-flex; }
         }
 
         /* Estilo para os botões de ação na tabela */
@@ -49,6 +126,7 @@
             border-radius: 8px;
             transition: all 0.3s;
         }
+        .btn-action:hover { box-shadow: 0 0 14px currentColor; }
 
         /* MODAL DE LOGOUT */
         #logoutModal {
@@ -61,13 +139,52 @@
             align-items: center;
             justify-content: center;
         }
+
+        /* Tabela responsiva -> vira cards em telas pequenas */
+        @media (max-width: 768px) {
+            #tabelaClinicas { display: block; }
+            #tabelaClinicas tr {
+                display: block;
+                margin: 0 1rem 1rem 1rem;
+                border-radius: 1.25rem;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.06);
+                overflow: hidden;
+            }
+            #tabelaClinicas tr:last-child { margin-bottom: 1rem; }
+            #tabelaClinicas td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+                padding: 0.85rem 1rem !important;
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+                text-align: right;
+            }
+            #tabelaClinicas td:last-child { border-bottom: none; }
+            #tabelaClinicas td::before {
+                content: attr(data-label);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                text-transform: uppercase;
+                color: #64748b;
+                text-align: left;
+                flex-shrink: 0;
+            }
+            #tabelaClinicas td[data-label="Clínica / Responsável"] { display: block; text-align: left; }
+            #tabelaClinicas td[data-label="Clínica / Responsável"]::before { display: block; margin-bottom: 0.35rem; }
+            #tabelaClinicas td[data-label="Fase do Ciclo"] > div:first-child { margin: 0 0 0 auto; }
+            #tabelaClinicas td[data-label="Ações"] .flex { justify-content: flex-end; width: 100%; }
+            table thead { display: none; }
+        }
     </style>
 </head>
 <body class="min-h-screen">
 
     <!-- MODAL DE LOGOUT (O script logout.js vai procurar por este ID) -->
     <div id="logoutModal">
-        <div class="glass p-8 rounded-3xl text-center max-w-sm border-blue-500/30">
+        <div class="glass p-8 rounded-3xl text-center max-w-sm border-blue-500/30 mx-4">
             <div class="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-sign-out-alt text-blue-400 text-2xl animate-pulse"></i>
             </div>
@@ -76,12 +193,25 @@
         </div>
     </div>
 
-    <div class="flex min-h-screen">
+    <!-- BOTÃO MENU MOBILE -->
+    <button id="mobileMenuBtn" onclick="toggleSidebar()" class="fixed top-4 left-4 z-[65] w-11 h-11 glass rounded-xl items-center justify-center text-blue-400">
+        <i class="fas fa-bars text-lg"></i>
+    </button>
+
+    <!-- OVERLAY MOBILE -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="flex min-h-screen relative z-10">
         <!-- SIDEBAR -->
-        <aside class="w-64 border-r border-slate-800 bg-[#070e1d] flex flex-col fixed h-full z-50">
-            <div class="p-6">
-                <h1 class="text-2xl font-black italic tracking-tighter neon-blue">MedLM <span class="text-white not-italic font-light text-sm">v2.0</span></h1>
-                <p class="text-slate-500 text-[10px] uppercase tracking-widest mt-1">SaaS Command Center</p>
+        <aside id="sidebar" class="w-64 border-r border-slate-800 bg-[#070e1d] flex flex-col fixed h-full">
+            <div class="p-6 flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-black italic tracking-tighter neon-blue">MedLM <span class="text-white not-italic font-light text-sm">v2.0</span></h1>
+                    <p class="text-slate-500 text-[10px] uppercase tracking-widest mt-1">SaaS Command Center</p>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden text-slate-500 hover:text-white w-8 h-8 flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
 
             <nav class="flex-1 px-4 space-y-2">
@@ -104,47 +234,49 @@
         </aside>
 
         <!-- CONTEÚDO PRINCIPAL -->
-        <main class="flex-1 ml-64 p-8 md:p-12">
-            <div class="flex justify-between items-end mb-10">
+        <main class="flex-1 lg:ml-64 p-4 sm:p-8 md:p-12">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 mb-8 md:mb-10">
                 <div>
-                    <h2 class="text-sm font-bold text-slate-500 uppercase tracking-[0.3em]">Visão Geral</h2>
-                    <h3 class="text-3xl font-bold">Performance Global</h3>
+                    <h2 class="text-[11px] sm:text-sm font-bold text-slate-500 uppercase tracking-[0.3em]">Visão Geral</h2>
+                    <h3 class="text-2xl sm:text-3xl font-bold">Performance Global</h3>
                 </div>
-                <div class="text-right">
-                    <span class="text-[10px] bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20">SISTEMA ONLINE</span>
+                <div class="text-left sm:text-right">
+                    <span class="text-[10px] bg-green-500/10 text-green-400 px-3 py-1 rounded-full border border-green-500/20 inline-flex items-center gap-1.5">
+                        <span class="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse"></span> SISTEMA ONLINE
+                    </span>
                 </div>
             </div>
 
             <!-- KPI CARDS -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div class="glass p-6 rounded-3xl neon-border-blue">
-                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Receita Estimada</p>
-                    <h2 class="text-3xl font-black mt-2 text-white" id="mrrValue">R$ 0,00</h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                <div class="glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl neon-border-blue">
+                    <p class="text-slate-400 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Receita Estimada</p>
+                    <h2 class="text-xl sm:text-3xl font-black mt-2 text-white truncate" id="mrrValue">R$ 0,00</h2>
                 </div>
-                <div class="glass p-6 rounded-3xl neon-border-purple">
-                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Clínicas Ativas</p>
-                    <h2 class="text-3xl font-black mt-2 text-white" id="totalAtivas">0</h2>
+                <div class="glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl neon-border-purple">
+                    <p class="text-slate-400 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Clínicas Ativas</p>
+                    <h2 class="text-xl sm:text-3xl font-black mt-2 text-white" id="totalAtivas">0</h2>
                 </div>
-                <div class="glass p-6 rounded-3xl border-l-4 border-l-orange-500">
-                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Upgrade Pendente</p>
-                    <h2 class="text-3xl font-black text-orange-400 mt-2" id="totalUpgrade">0</h2>
+                <div class="glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl neon-border-orange">
+                    <p class="text-slate-400 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Upgrade Pendente</p>
+                    <h2 class="text-xl sm:text-3xl font-black text-orange-400 mt-2" id="totalUpgrade">0</h2>
                 </div>
-                <div class="glass p-6 rounded-3xl border-l-4 border-l-red-500">
-                    <p class="text-slate-400 text-[10px] font-bold tracking-widest uppercase">Inadimplentes</p>
-                    <h2 class="text-3xl font-black text-red-400 mt-2" id="totalInadimplentes">0</h2>
+                <div class="glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl neon-border-red">
+                    <p class="text-slate-400 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase">Inadimplentes</p>
+                    <h2 class="text-xl sm:text-3xl font-black text-red-400 mt-2" id="totalInadimplentes">0</h2>
                 </div>
             </div>
 
-            <!-- GRÁFICOS CORRIGIDOS -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-                <div class="glass p-6 rounded-3xl overflow-hidden">
-                    <h3 class="text-sm font-bold text-slate-400 mb-6 uppercase tracking-widest">Crescimento de Receita</h3>
+            <!-- GRÁFICOS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
+                <div class="glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl overflow-hidden">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-400 mb-4 sm:mb-6 uppercase tracking-widest">Crescimento de Receita</h3>
                     <div class="chart-container">
                         <canvas id="revenueChart"></canvas>
                     </div>
                 </div>
-                <div class="glass p-6 rounded-3xl overflow-hidden">
-                    <h3 class="text-sm font-bold text-slate-400 mb-6 uppercase tracking-widest">Distribuição de Planos</h3>
+                <div class="glass p-4 sm:p-6 rounded-2xl sm:rounded-3xl overflow-hidden">
+                    <h3 class="text-xs sm:text-sm font-bold text-slate-400 mb-4 sm:mb-6 uppercase tracking-widest">Distribuição de Planos</h3>
                     <div class="chart-container">
                         <canvas id="plansChart"></canvas>
                     </div>
@@ -152,12 +284,12 @@
             </div>
 
             <!-- TABELA -->
-            <div class="glass rounded-3xl overflow-hidden">
-                <div class="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
-                    <h3 class="font-bold">Ciclo de Vida das Unidades</h3>
+            <div class="glass rounded-2xl sm:rounded-3xl overflow-hidden">
+                <div class="p-4 sm:p-6 border-b border-white/5 flex flex-wrap gap-2 justify-between items-center bg-white/5">
+                    <h3 class="font-bold text-sm sm:text-base">Ciclo de Vida das Unidades</h3>
                     <div class="flex gap-2 items-center">
                         <div class="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></div>
-                        <span class="text-[10px] text-blue-400 font-bold uppercase">Monitoramento Ativo</span>
+                        <span class="text-[9px] sm:text-[10px] text-blue-400 font-bold uppercase">Monitoramento Ativo</span>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -182,7 +314,15 @@
         let revenueChart;
         let plansChart;
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isOpen = sidebar.classList.toggle('sidebar-open');
+            overlay.style.display = isOpen ? 'block' : 'none';
+        }
+
         function initCharts() {
+            const isSmall = window.innerWidth < 640;
             const ctxRev = document.getElementById('revenueChart').getContext('2d');
             revenueChart = new Chart(ctxRev, {
                 type: 'line',
@@ -202,8 +342,8 @@
                     maintainAspectRatio: false, // CRITICAL: Permite o controle manual de altura
                     plugins: { legend: { display: false } },
                     scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
-                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b', font: { size: isSmall ? 9 : 11 } } },
+                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: isSmall ? 9 : 11 } } }
                     }
                 }
             });
@@ -226,7 +366,7 @@
                     plugins: {
                         legend: {
                             position: 'bottom',
-                            labels: { color: '#64748b', padding: 20, font: { size: 10 } }
+                            labels: { color: '#64748b', padding: isSmall ? 12 : 20, font: { size: isSmall ? 9 : 10 } }
                         }
                     }
                 }
@@ -269,21 +409,27 @@
 
                     return `
                         <tr class="hover:bg-white/5 transition">
-                            <td class="p-6">
-                                <div class="font-bold text-slate-200">${c.nome_clinica}</div>
-                                <div class="text-[10px] text-slate-500 uppercase">${c.nome_plano} | ${new Date(c.data_cadastro).toLocaleDateString()}</div>
-                            </td>
-                            <td class="p-6">
-                                <div class="w-32 mx-auto bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
-                                    <div class="bg-blue-500 h-full shadow-[0_0_8px_#00c3ff]" style="width: ${progresso}%"></div>
+                            <td class="p-6" data-label="Clínica / Responsável">
+                                <div>
+                                    <div class="font-bold text-slate-200">${c.nome_clinica}</div>
+                                    <div class="text-[10px] text-slate-500 uppercase">${c.nome_plano} | ${new Date(c.data_cadastro).toLocaleDateString()}</div>
                                 </div>
-                                <div class="text-center text-[9px] uppercase font-bold ${corFase}">${labelFase}</div>
                             </td>
-                            <td class="p-6">
-                                <div class="text-[10px] text-slate-500 mb-1">${c.status.toUpperCase()}</div>
-                                <div class="font-black neon-blue">R$ ${parseFloat(c.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                            <td class="p-6" data-label="Fase do Ciclo">
+                                <div>
+                                    <div class="w-32 mx-auto bg-slate-800 h-1.5 rounded-full overflow-hidden mb-2">
+                                        <div class="bg-blue-500 h-full shadow-[0_0_8px_#00c3ff]" style="width: ${progresso}%"></div>
+                                    </div>
+                                    <div class="text-center text-[9px] uppercase font-bold ${corFase}">${labelFase}</div>
+                                </div>
                             </td>
-                            <td class="p-6 text-right">
+                            <td class="p-6" data-label="Valor Atual">
+                                <div>
+                                    <div class="text-[10px] text-slate-500 mb-1">${c.status.toUpperCase()}</div>
+                                    <div class="font-black neon-blue">R$ ${parseFloat(c.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                                </div>
+                            </td>
+                            <td class="p-6" data-label="Ações">
                                 <div class="flex justify-end gap-2">
                                     <button onclick="mudarStatus(${c.id}, 'ativo')" class="btn-action bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white">
                                         <i class="fas fa-check"></i>
@@ -339,6 +485,14 @@
             initCharts();
             carregarDados();
         };
+
+        // Fecha o menu mobile automaticamente ao redimensionar para desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                document.getElementById('sidebar').classList.remove('sidebar-open');
+                document.getElementById('sidebarOverlay').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
