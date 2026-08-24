@@ -2,23 +2,86 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <title>MedLM | Gestão Estratégica de Unidades</title>
     <script src="/ScriptGlobal/verifiLog.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { background: #050a15; color: #f8fafc; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        .neon-blue { color: #00c3ff; text-shadow: 0 0 15px rgba(0, 195, 255, 0.3); }
-        .btn-filter { transition: all 0.3s; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-filter.active { background: #3b82f6; border-color: #3b82f6; color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+        :root {
+            --neon-blue: #00c3ff;
+            --neon-purple: #a855f7;
+        }
+
+        * { -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background: #050a15;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Atmosfera neon ambiente */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.22;
+        }
+        body::before {
+            width: 460px; height: 460px;
+            background: var(--neon-blue);
+            top: -150px; left: -110px;
+            animation: floatOrb 14s ease-in-out infinite;
+        }
+        body::after {
+            width: 400px; height: 400px;
+            background: var(--neon-purple);
+            bottom: -130px; right: -90px;
+            animation: floatOrb 18s ease-in-out infinite reverse;
+        }
+        @keyframes floatOrb {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, -20px) scale(1.08); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            body::before, body::after { animation: none; }
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.35);
+        }
+        .neon-blue { color: var(--neon-blue); text-shadow: 0 0 15px rgba(0, 195, 255, 0.3); }
+
+        .btn-filter {
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+            white-space: nowrap;
+        }
+        .btn-filter.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+            color: white;
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
 
         #editModal {
             display: none; /* Começa escondido */
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(6px);
             z-index: 1000; /* Garante que fica na frente de tudo */
             align-items: center;
             justify-content: center;
@@ -27,13 +90,86 @@
         /* Alerta de Vencimento */
         .status-vencido { color: #ef4444; font-weight: bold; animation: pulse-red 2s infinite; }
         @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+
+        /* SIDEBAR responsiva */
+        aside {
+            box-shadow: 10px 0 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+            z-index: 60;
+        }
+        #sidebarOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 15, 0.7);
+            backdrop-filter: blur(2px);
+            z-index: 55;
+        }
+        #mobileMenuBtn { display: none; }
+
+        @media (max-width: 1024px) {
+            aside { transform: translateX(-100%); position: fixed; }
+            aside.sidebar-open { transform: translateX(0); }
+            main { margin-left: 0 !important; padding: 1.25rem !important; padding-top: 4.5rem !important; }
+            #mobileMenuBtn { display: inline-flex; }
+        }
+
+        /* Tabela responsiva -> vira cards em telas pequenas */
+        @media (max-width: 900px) {
+            #tabelaMaster thead { display: none; }
+            #listaCorpo { display: block; }
+            #listaCorpo tr {
+                display: block;
+                margin: 0 0 1rem 0;
+                border-radius: 1.25rem;
+                background: rgba(255,255,255,0.03);
+                border: 1px solid rgba(255,255,255,0.06);
+                overflow: hidden;
+                padding: 0;
+            }
+            #listaCorpo td {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                gap: 1rem;
+                padding: 0.85rem 1.1rem !important;
+                border-bottom: 1px solid rgba(255,255,255,0.04);
+                text-align: right;
+            }
+            #listaCorpo td:last-child { border-bottom: none; }
+            #listaCorpo td::before {
+                content: attr(data-label);
+                font-size: 9px;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                color: #64748b;
+                text-align: left;
+                flex-shrink: 0;
+                padding-top: 2px;
+            }
+            #listaCorpo td[data-label="ID / Unidade"] { text-align: left; }
+            #listaCorpo td[data-label="Gestor Master"] { text-align: right; }
+            #listaCorpo td[data-label="Controle"] { justify-content: flex-end; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex">
 
+    <!-- BOTÃO MENU MOBILE -->
+    <button id="mobileMenuBtn" onclick="toggleSidebar()" class="fixed top-4 left-4 z-[65] w-11 h-11 glass rounded-xl items-center justify-center text-blue-400">
+        <i class="fas fa-bars text-lg"></i>
+    </button>
+
+    <!-- OVERLAY MOBILE -->
+    <div id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
     <!-- SIDEBAR -->
-    <aside class="w-64 border-r border-slate-800 bg-[#070e1d] flex flex-col fixed h-full z-50">
-        <div class="p-6 text-center">
+    <aside id="sidebar" class="w-64 border-r border-slate-800 bg-[#070e1d] flex flex-col fixed h-full">
+        <div class="p-6 text-center relative">
+            <button onclick="toggleSidebar()" class="lg:hidden absolute right-4 top-6 text-slate-500 hover:text-white w-8 h-8 flex items-center justify-center">
+                <i class="fas fa-times"></i>
+            </button>
             <h1 class="text-2xl font-black italic neon-blue">MedLM</h1>
             <p class="text-[9px] text-slate-500 uppercase tracking-[0.3em]">Master Control</p>
         </div>
@@ -48,19 +184,19 @@
     </aside>
 
     <!-- CONTEÚDO -->
-    <main class="flex-1 ml-64 p-8">
-        <header class="mb-10">
-            <h2 class="text-3xl font-bold">Gestão de Unidades</h2>
-            <p class="text-slate-500">Filtre, edite e monitore o ciclo de vida das clínicas MedLM.</p>
+    <main class="flex-1 lg:ml-64 p-4 sm:p-8">
+        <header class="mb-6 sm:mb-10">
+            <h2 class="text-2xl sm:text-3xl font-bold">Gestão de Unidades</h2>
+            <p class="text-slate-500 text-sm">Filtre, edite e monitore o ciclo de vida das clínicas MedLM.</p>
         </header>
 
         <!-- FILTROS E BUSCA -->
-        <div class="flex flex-wrap gap-4 mb-8 items-center justify-between">
-            <div class="flex gap-2" id="filterContainer">
-                <button onclick="filtrar('todos')" class="btn-filter active px-4 py-2 rounded-lg text-xs font-bold uppercase" data-filter="todos">Ver Todas</button>
-                <button onclick="filtrar('ativo')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase" data-filter="ativo text-emerald-500">Ativas</button>
-                <button onclick="filtrar('inadimplente')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase text-yellow-500" data-filter="inadimplente">Inadimplentes</button>
-                <button onclick="filtrar('suspenso')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase text-orange-500" data-filter="suspenso">Suspensas</button>
+        <div class="flex flex-col md:flex-row flex-wrap gap-4 mb-6 sm:mb-8 items-stretch md:items-center justify-between">
+            <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" id="filterContainer">
+                <button onclick="filtrar('todos')" class="btn-filter active px-4 py-2 rounded-lg text-xs font-bold uppercase shrink-0" data-filter="todos">Ver Todas</button>
+                <button onclick="filtrar('ativo')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase shrink-0" data-filter="ativo text-emerald-500">Ativas</button>
+                <button onclick="filtrar('inadimplente')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase text-yellow-500 shrink-0" data-filter="inadimplente">Inadimplentes</button>
+                <button onclick="filtrar('suspenso')" class="btn-filter bg-slate-800 px-4 py-2 rounded-lg text-xs font-bold uppercase text-orange-500 shrink-0" data-filter="suspenso">Suspensas</button>
             </div>
 
             <div class="relative w-full md:w-80">
@@ -71,30 +207,32 @@
         </div>
 
         <!-- TABELA -->
-        <div class="glass rounded-3xl overflow-hidden border border-white/5">
-            <table class="w-full text-left text-sm" id="tabelaMaster">
-                <thead class="bg-slate-900/80 text-slate-500 uppercase text-[10px] tracking-widest">
-                    <tr>
-                        <th class="p-6">ID / Unidade</th>
-                        <th class="p-6">Gestor Master</th>
-                        <th class="p-6">Expiração</th>
-                        <th class="p-6">Plano / Valor</th>
-                        <th class="p-6">Status</th>
-                        <th class="p-6 text-right">Controle</th>
-                    </tr>
-                </thead>
-                <tbody id="listaCorpo" class="divide-y divide-white/5">
-                    <!-- Dinâmico -->
-                </tbody>
-            </table>
+        <div class="glass rounded-2xl sm:rounded-3xl overflow-hidden border border-white/5">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm" id="tabelaMaster">
+                    <thead class="bg-slate-900/80 text-slate-500 uppercase text-[10px] tracking-widest">
+                        <tr>
+                            <th class="p-6">ID / Unidade</th>
+                            <th class="p-6">Gestor Master</th>
+                            <th class="p-6">Expiração</th>
+                            <th class="p-6">Plano / Valor</th>
+                            <th class="p-6">Status</th>
+                            <th class="p-6 text-right">Controle</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaCorpo" class="divide-y divide-white/5">
+                        <!-- Dinâmico -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </main>
 
     <!-- MODAL DE EDIÇÃO (MESMO DO ANTERIOR COM MELHORIAS) -->
     <div id="editModal">
         <!-- Estrutura do modal mantida conforme o anterior -->
-         <div class="glass p-8 rounded-3xl w-full max-w-md border-blue-500/30">
-            <h3 class="text-xl font-bold mb-6">Editar Unidade: <span id="modalNomeClinica" class="neon-blue"></span></h3>
+         <div class="glass p-6 sm:p-8 rounded-2xl sm:rounded-3xl w-full max-w-md border-blue-500/30 mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg sm:text-xl font-bold mb-6">Editar Unidade: <span id="modalNomeClinica" class="neon-blue"></span></h3>
 
             <form id="formEdicao" class="space-y-4">
                 <input type="hidden" id="editId">
@@ -134,6 +272,13 @@
     <script>
         let todasAsClinicas = [];
 
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const isOpen = sidebar.classList.toggle('sidebar-open');
+            overlay.style.display = isOpen ? 'block' : 'none';
+        }
+
         async function carregar() {
             const token = localStorage.getItem('token');
             const res = await fetch('/api/admin/dashboard-dados', {
@@ -155,30 +300,38 @@
 
                 return `
                 <tr class="hover:bg-white/5 transition group">
-                    <td class="p-6">
-                        <span class="text-[10px] font-mono text-slate-600 block">#${c.id}</span>
-                        <div class="font-bold text-slate-200">${c.nome_clinica}</div>
-                        <div class="text-[10px] text-slate-500 italic">${c.email_master}</div>
-                    </td>
-                    <td class="p-6">
-                        <div class="text-slate-300 font-medium">${c.dono_nome}</div>
-                        <div class="text-[11px] text-green-500"><i class="fab fa-whatsapp"></i> ${c.telefone_dono}</div>
-                    </td>
-                    <td class="p-6">
-                        <div class="text-xs ${isVencido ? 'status-vencido' : 'text-slate-400'}">
-                            <i class="far fa-calendar-alt mr-1"></i>
-                            ${dataExp.toLocaleDateString('pt-BR')}
+                    <td class="p-6" data-label="ID / Unidade">
+                        <div>
+                            <span class="text-[10px] font-mono text-slate-600 block">#${c.id}</span>
+                            <div class="font-bold text-slate-200">${c.nome_clinica}</div>
+                            <div class="text-[10px] text-slate-500 italic">${c.email_master}</div>
                         </div>
-                        ${isVencido ? '<span class="text-[8px] uppercase text-red-500 font-black">Reajuste Atrasado</span>' : ''}
                     </td>
-                    <td class="p-6">
-                        <div class="text-[10px] uppercase font-bold text-blue-400">${c.nome_plano}</div>
-                        <div class="font-black text-white">R$ ${parseFloat(c.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                    <td class="p-6" data-label="Gestor Master">
+                        <div>
+                            <div class="text-slate-300 font-medium">${c.dono_nome}</div>
+                            <div class="text-[11px] text-green-500"><i class="fab fa-whatsapp"></i> ${c.telefone_dono}</div>
+                        </div>
                     </td>
-                    <td class="p-6">
+                    <td class="p-6" data-label="Expiração">
+                        <div>
+                            <div class="text-xs ${isVencido ? 'status-vencido' : 'text-slate-400'}">
+                                <i class="far fa-calendar-alt mr-1"></i>
+                                ${dataExp.toLocaleDateString('pt-BR')}
+                            </div>
+                            ${isVencido ? '<span class="text-[8px] uppercase text-red-500 font-black">Reajuste Atrasado</span>' : ''}
+                        </div>
+                    </td>
+                    <td class="p-6" data-label="Plano / Valor">
+                        <div>
+                            <div class="text-[10px] uppercase font-bold text-blue-400">${c.nome_plano}</div>
+                            <div class="font-black text-white">R$ ${parseFloat(c.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                        </div>
+                    </td>
+                    <td class="p-6" data-label="Status">
                         <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${statusClass}">${c.status}</span>
                     </td>
-                    <td class="p-6 text-right">
+                    <td class="p-6" data-label="Controle">
                         <button onclick='abrirEditor(${JSON.stringify(c)})' class="bg-blue-500/10 text-blue-400 p-2 rounded-lg hover:bg-blue-500 hover:text-white transition">
                             <i class="fas fa-sliders-h"></i>
                         </button>
@@ -290,6 +443,14 @@ document.getElementById('formEdicao').onsubmit = async (e) => {
 };
 
         window.onload = carregar;
+
+        // Fecha o menu mobile automaticamente ao redimensionar para desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                document.getElementById('sidebar').classList.remove('sidebar-open');
+                document.getElementById('sidebarOverlay').style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>

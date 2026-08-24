@@ -76,7 +76,7 @@
             box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
         }
 
-        #editModal {
+        #editModal, #detailModal {
             display: none; /* Começa escondido */
             position: fixed;
             inset: 0;
@@ -150,8 +150,13 @@
             }
             #listaCorpo td[data-label="ID / Unidade"] { text-align: left; }
             #listaCorpo td[data-label="Gestor Master"] { text-align: right; }
+            #listaCorpo td[data-label="Sistema"] { text-align: right; }
             #listaCorpo td[data-label="Controle"] { justify-content: flex-end; }
         }
+
+        /* Grid de campos do modal "Registro Completo" (estilo phpMyAdmin) */
+        #detailGrid > div { min-width: 0; }
+        #detailGrid .campo-valor { word-break: break-word; }
     </style>
 </head>
 <body class="min-h-screen flex">
@@ -217,6 +222,7 @@
                             <th class="p-6">Expiração</th>
                             <th class="p-6">Plano / Valor</th>
                             <th class="p-6">Status</th>
+                            <th class="p-6">Sistema</th>
                             <th class="p-6 text-right">Controle</th>
                         </tr>
                     </thead>
@@ -269,8 +275,126 @@
         </div>
     </div>
 
+    <!-- MODAL DE REGISTRO COMPLETO (VISÃO ESTILO PHPMYADMIN, COM TODOS OS CAMPOS DA TABELA CLINICAS) -->
+    <div id="detailModal">
+        <div class="glass rounded-2xl sm:rounded-3xl w-full max-w-4xl border-purple-500/30 mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 sm:p-8 border-b border-white/5 flex justify-between items-start gap-4 sticky top-0 bg-[#0b1220]/95 backdrop-blur z-10">
+                <div>
+                    <p class="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-1">Registro Completo · Tabela clinicas</p>
+                    <h3 class="text-lg sm:text-xl font-bold">
+                        <span id="detailId" class="font-mono text-slate-500 mr-2"></span>
+                        <span id="detailNomeClinica" class="neon-blue"></span>
+                    </h3>
+                </div>
+                <button onclick="closeDetailModal()" class="text-slate-500 hover:text-white w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/5 transition shrink-0">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-6 sm:p-8">
+                <!-- Senha em destaque, mascarada por padrão -->
+                <div class="bg-slate-900/40 border border-white/5 rounded-xl p-3 mb-4 flex items-center justify-between gap-4">
+                    <div class="min-w-0">
+                        <div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">Senha Master</div>
+                        <div id="detailSenha" class="text-sm font-mono text-slate-300 truncate"></div>
+                    </div>
+                    <button onclick="toggleSenha()" class="text-slate-500 hover:text-blue-400 w-9 h-9 flex items-center justify-center rounded-lg hover:bg-white/5 transition shrink-0">
+                        <i id="toggleSenhaIcon" class="fas fa-eye"></i>
+                    </button>
+                </div>
+
+                <div id="detailGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <!-- Dinâmico -->
+                </div>
+
+                <p class="text-[10px] text-slate-600 mt-6 italic">
+                    <i class="fas fa-triangle-exclamation mr-1"></i> A senha é armazenada em texto puro no banco — evite deixar esta tela aberta em ambientes compartilhados.
+                </p>
+            </div>
+        </div>
+    </div>
+
     <script>
         let todasAsClinicas = [];
+        let clinicaDetalheAtual = null;
+        let senhaVisivel = false;
+
+        // Todos os campos da tabela `clinicas` exibidos no "Registro Completo",
+        // exceto asaas_customer_id, asaas_subscription_id e status_pagamento (não solicitados)
+        // e senha_master (tratada à parte, mascarada por padrão).
+        const CAMPOS_DETALHE = [
+            { label: 'ID', key: 'id', mono: true },
+            { label: 'Nome da Clínica', key: 'nome_clinica' },
+            { label: 'Slug', key: 'slug', mono: true },
+            { label: 'Dono', key: 'dono_nome' },
+            { label: 'Telefone da Clínica', key: 'telefone_clinica' },
+            { label: 'Telefone do Dono', key: 'telefone_dono' },
+            { label: 'Email Master', key: 'email_master' },
+            { label: 'Plano (ID)', key: 'plano_id', mono: true },
+            { label: 'Nome do Plano', key: 'nome_plano' },
+            { label: 'Tipo de Plano', key: 'tipo_plano' },
+            { label: 'Gateway ID', key: 'gateway_id', mono: true },
+            { label: 'Valor Atual', key: 'valor_atual', money: true },
+            { label: 'Status', key: 'status' },
+            { label: 'Início do Trial', key: 'data_inicio_trial', date: true },
+            { label: 'Fim da Gratuidade', key: 'data_fim_gratuidade', date: true },
+            { label: 'Fim da Promoção', key: 'data_fim_promocao', date: true },
+            { label: 'Data de Cadastro', key: 'data_cadastro', date: true },
+            { label: 'Data de Expiração', key: 'data_expiracao', date: true },
+            { label: 'Data de Cancelamento', key: 'data_cancelamento', date: true },
+            { label: 'Criado em', key: 'criado_em', date: true, hora: true }
+        ];
+
+        function formatarCampo(campo, valor) {
+            if (valor === null || valor === undefined || valor === '') {
+                return '<span class="text-slate-600 italic">NULL</span>';
+            }
+            if (campo.money) {
+                return `R$ ${parseFloat(valor).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+            }
+            if (campo.date) {
+                const d = new Date(valor);
+                if (isNaN(d)) return valor;
+                return campo.hora ? d.toLocaleString('pt-BR') : d.toLocaleDateString('pt-BR');
+            }
+            return valor;
+        }
+
+        function abrirDetalhes(clinica) {
+            clinicaDetalheAtual = clinica;
+            senhaVisivel = false;
+
+            document.getElementById('detailId').innerText = '#' + clinica.id;
+            document.getElementById('detailNomeClinica').innerText = clinica.nome_clinica;
+
+            const grid = document.getElementById('detailGrid');
+            grid.innerHTML = CAMPOS_DETALHE.map(campo => `
+                <div class="bg-slate-900/40 border border-white/5 rounded-xl p-3">
+                    <div class="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-1">${campo.label}</div>
+                    <div class="text-sm campo-valor ${campo.mono ? 'font-mono text-slate-300' : 'text-slate-200'}">${formatarCampo(campo, clinica[campo.key])}</div>
+                </div>
+            `).join('');
+
+            atualizarSenhaDisplay();
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function atualizarSenhaDisplay() {
+            if (!clinicaDetalheAtual) return;
+            const el = document.getElementById('detailSenha');
+            const senha = clinicaDetalheAtual.senha_master;
+            el.innerText = senhaVisivel ? (senha || 'NULL') : '••••••••••';
+            document.getElementById('toggleSenhaIcon').className = senhaVisivel ? 'fas fa-eye-slash' : 'fas fa-eye';
+        }
+
+        function toggleSenha() {
+            senhaVisivel = !senhaVisivel;
+            atualizarSenhaDisplay();
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
 
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -298,12 +422,21 @@
                 const isVencido = dataExp < hoje && c.status === 'ativo';
                 const statusClass = getStatusStyles(c.status);
 
+                const tipoPlanoBadge = c.tipo_plano === 'FUNDADOR'
+                    ? '<span class="ml-1 px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-amber-500/10 text-amber-400 border border-amber-500/20">Fundador</span>'
+                    : '';
+                const cancelamentoHtml = c.data_cancelamento
+                    ? `<div class="text-[9px] uppercase text-red-500 font-black mt-1">Cancelado em ${new Date(c.data_cancelamento).toLocaleDateString('pt-BR')}</div>`
+                    : '';
+                const criadoEm = c.criado_em ? new Date(c.criado_em).toLocaleDateString('pt-BR') : '—';
+
                 return `
                 <tr class="hover:bg-white/5 transition group">
                     <td class="p-6" data-label="ID / Unidade">
                         <div>
                             <span class="text-[10px] font-mono text-slate-600 block">#${c.id}</span>
                             <div class="font-bold text-slate-200">${c.nome_clinica}</div>
+                            <div class="text-[9px] font-mono text-slate-600">${c.slug || '—'}</div>
                             <div class="text-[10px] text-slate-500 italic">${c.email_master}</div>
                         </div>
                     </td>
@@ -311,6 +444,7 @@
                         <div>
                             <div class="text-slate-300 font-medium">${c.dono_nome}</div>
                             <div class="text-[11px] text-green-500"><i class="fab fa-whatsapp"></i> ${c.telefone_dono}</div>
+                            <div class="text-[11px] text-slate-500"><i class="fas fa-phone"></i> ${c.telefone_clinica || '—'}</div>
                         </div>
                     </td>
                     <td class="p-6" data-label="Expiração">
@@ -320,21 +454,33 @@
                                 ${dataExp.toLocaleDateString('pt-BR')}
                             </div>
                             ${isVencido ? '<span class="text-[8px] uppercase text-red-500 font-black">Reajuste Atrasado</span>' : ''}
+                            ${cancelamentoHtml}
                         </div>
                     </td>
                     <td class="p-6" data-label="Plano / Valor">
                         <div>
-                            <div class="text-[10px] uppercase font-bold text-blue-400">${c.nome_plano}</div>
+                            <div class="text-[10px] uppercase font-bold text-blue-400">${c.nome_plano}${tipoPlanoBadge}</div>
                             <div class="font-black text-white">R$ ${parseFloat(c.valor_atual).toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
                         </div>
                     </td>
                     <td class="p-6" data-label="Status">
                         <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase border ${statusClass}">${c.status}</span>
                     </td>
+                    <td class="p-6" data-label="Sistema">
+                        <div>
+                            <div class="text-[10px] font-mono text-slate-500">${c.gateway_id || '<span class="italic text-slate-700">NULL</span>'}</div>
+                            <div class="text-[9px] text-slate-600 mt-1">Criado em ${criadoEm}</div>
+                        </div>
+                    </td>
                     <td class="p-6" data-label="Controle">
-                        <button onclick='abrirEditor(${JSON.stringify(c)})' class="bg-blue-500/10 text-blue-400 p-2 rounded-lg hover:bg-blue-500 hover:text-white transition">
-                            <i class="fas fa-sliders-h"></i>
-                        </button>
+                        <div class="flex justify-end gap-2">
+                            <button onclick='abrirDetalhes(${JSON.stringify(c)})' class="bg-purple-500/10 text-purple-400 p-2 rounded-lg hover:bg-purple-500 hover:text-white transition">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick='abrirEditor(${JSON.stringify(c)})' class="bg-blue-500/10 text-blue-400 p-2 rounded-lg hover:bg-blue-500 hover:text-white transition">
+                                <i class="fas fa-sliders-h"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
