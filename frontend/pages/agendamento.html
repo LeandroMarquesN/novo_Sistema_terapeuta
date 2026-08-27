@@ -1101,14 +1101,8 @@
           <label for="anexoInput" class="form-label mt-2">Anexar Exames ou Imagens</label>
           <input type="file" id="anexoInput" name="anexos" class="form-control" multiple>
         </div> -->
-        <div class="col-12">
-          <div class="form-check my-3 p-3 border rounded bg-light">
-            <input class="form-check-input" type="checkbox" value="true" id="aceite_lgpd" name="aceite_lgpd" required>
-            <label class="form-check-label" for="aceite_lgpd">
-              Concordo que minhas informações de saúde e dados pessoais sejam armazenados com segurança para uso exclusivo no atendimento clínico, em conformidade com a LGPD.
-            </label>
-          </div>
-        </div>
+
+        <!-- CHECKBOX LGPD DUPLICADO REMOVIDO AQUI -->
 
         <div class="col-12 text-end">
           <button type="submit" class="btn btn-primary mt-3">
@@ -1564,6 +1558,9 @@ document.querySelector('form').addEventListener('submit', function(e) {
     async function carregarAgendamentos() {
 
       const tabelaBody = document.getElementById('tabelaAgendamentos');
+      // Se a tabela não existir (está comentada), sai silenciosamente
+      if (!tabelaBody) return;
+
       tabelaBody.innerHTML = '<tr><td colspan="4" class="text-center">Carregando agendamentos...</td></tr>';
       try {
         // CORREÇÃO: O token deve ser passado dentro do objeto de configuração do fetch
@@ -1688,7 +1685,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
       return { hasConflict: false };
     }
 
-    // --- Lógica da Câmera ---
+    // --- Lógica da Câmera (protegida – só roda se os elementos existirem) ---
     const video = document.getElementById('camera-stream');
     const canvas = document.getElementById('photo-canvas');
     const photo = document.getElementById('captured-photo');
@@ -1699,49 +1696,51 @@ document.querySelector('form').addEventListener('submit', function(e) {
     let currentStream;
     let patientPhotoBlob = null; // Variável para armazenar o blob da foto
 
-    btnOpenCamera.addEventListener('click', async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            currentStream = stream;
-            video.srcObject = stream;
-            video.style.display = 'block';
-            btnOpenCamera.style.display = 'none';
-            btnTakePhoto.style.display = 'block';
+    if (btnOpenCamera && video && canvas && photo && btnTakePhoto && btnRetakePhoto) {
+        btnOpenCamera.addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                currentStream = stream;
+                video.srcObject = stream;
+                video.style.display = 'block';
+                btnOpenCamera.style.display = 'none';
+                btnTakePhoto.style.display = 'block';
+                photo.style.display = 'none';
+                patientPhotoBlob = null; // Reseta o blob ao abrir a câmera
+            } catch (err) {
+                console.error('Erro ao acessar a câmera:', err);
+                showClinicalAlert('Erro', 'Não foi possível acessar a câmera. Verifique as permissões do navegador.', 'error');
+            }
+        });
+
+        btnTakePhoto.addEventListener('click', () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            canvas.toBlob((blob) => {
+                patientPhotoBlob = blob;
+                const imageDataUrl = URL.createObjectURL(blob);
+                photo.src = imageDataUrl;
+                photo.style.display = 'block';
+                video.style.display = 'none';
+                btnTakePhoto.style.display = 'none';
+                btnRetakePhoto.style.display = 'block';
+            }, 'image/jpeg');
+
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+            }
+        });
+
+        btnRetakePhoto.addEventListener('click', () => {
+            patientPhotoBlob = null;
             photo.style.display = 'none';
-            patientPhotoBlob = null; // Reseta o blob ao abrir a câmera
-        } catch (err) {
-            console.error('Erro ao acessar a câmera:', err);
-            showClinicalAlert('Erro', 'Não foi possível acessar a câmera. Verifique as permissões do navegador.', 'error');
-        }
-    });
-
-    btnTakePhoto.addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob((blob) => {
-            patientPhotoBlob = blob;
-            const imageDataUrl = URL.createObjectURL(blob);
-            photo.src = imageDataUrl;
-            photo.style.display = 'block';
-            video.style.display = 'none';
-            btnTakePhoto.style.display = 'none';
-            btnRetakePhoto.style.display = 'block';
-        }, 'image/jpeg');
-
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-        }
-    });
-
-    btnRetakePhoto.addEventListener('click', () => {
-        patientPhotoBlob = null;
-        photo.style.display = 'none';
-        photo.src = '';
-        btnRetakePhoto.style.display = 'none';
-        btnOpenCamera.style.display = 'block';
-    });
+            photo.src = '';
+            btnRetakePhoto.style.display = 'none';
+            btnOpenCamera.style.display = 'block';
+        });
+    }
 
     // Listener para o formulário de agendamento
     document.addEventListener('DOMContentLoaded', () => {
@@ -1821,16 +1820,16 @@ document.querySelector('form').addEventListener('submit', function(e) {
             .map(checkbox => checkbox.value);
           finalFormData.set('condicoes', JSON.stringify(condicoesSaude));
 
-          // Adicionar os anexos do input de arquivo
+          // Anexos (só se o input existir)
           const anexoInput = document.getElementById('anexoInput');
-          if (anexoInput.files.length > 0) {
+          if (anexoInput && anexoInput.files && anexoInput.files.length > 0) {
               for (const file of anexoInput.files) {
                   finalFormData.append('anexos', file);
               }
           }
 
-          // Adicionar o blob da foto do paciente (se existir)
-          if (patientPhotoBlob) {
+          // Foto do paciente (só se existir)
+          if (typeof patientPhotoBlob !== 'undefined' && patientPhotoBlob) {
               finalFormData.append('patient_photo', patientPhotoBlob, 'patient_photo.jpeg');
           }
 
@@ -1887,7 +1886,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
             carregarAgendamentos();
 
             // Reset visual da câmera/foto
-            if (typeof video !== 'undefined') video.style.display = 'none';
+            if (typeof video !== 'undefined' && video) video.style.display = 'none';
             patientPhotoBlob = null;
 
           } catch (erro) {
