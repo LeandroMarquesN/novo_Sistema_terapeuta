@@ -167,12 +167,16 @@ exports.criarAgendamento = async (req, res) => {
   const clinica_id = req.clinicaId;
   const {
     nome, email, telefone, cpf, data, horario,
-    genero, data_nascimento, tipo_terapia, motivo_consulta,
+    genero, data_nascimento, tipo_terapia, motivo_consulta, aceite_lgpd,// <-- Captura o aceite vindo do portal
     forma_pagamento // 'plataforma' (futuro) — qualquer outro valor/ausente = sem sinal
   } = req.body;
 
   if (!clinica_id) {
     return res.status(401).json({ success: false, message: "Clínica não identificada." });
+  }
+  // 🛡️ Trava de segurança LGPD
+  if (!aceite_lgpd || aceite_lgpd === 'false' || aceite_lgpd === false || aceite_lgpd === '0') {
+    return res.status(400).json({ success: false, message: 'O consentimento da LGPD é obrigatório para realizar o agendamento.' });
   }
 
   const connection = await db.getConnection();
@@ -245,13 +249,16 @@ exports.criarAgendamento = async (req, res) => {
     if (pacientesExistentes.length > 0) {
       pacienteId = pacientesExistentes[0].id;
       await connection.execute(
-        'UPDATE pacientes SET email = ?, telefone = ?, nome = ?, token_acesso = ?, token_expiracao = ? WHERE id = ?',
+        `UPDATE pacientes SET 
+         email = ?, telefone = ?, nome = ?, token_acesso = ?, token_expiracao = ?, 
+         aceite_lgpd = 1, data_aceite_lgpd = NOW() 
+        WHERE id = ?`,
         [email, telefone, nome, novoToken, novaExpiracao, pacienteId]
       );
     } else {
       const [resPaciente] = await connection.execute(
-        `INSERT INTO pacientes (clinica_id, nome, email, telefone, cpf, origem, token_acesso, token_expiracao) 
-         VALUES (?, ?, ?, ?, ?, 'portal', ?, ?)`,
+        `INSERT INTO pacientes (clinica_id, nome, email, telefone, cpf, origem, token_acesso, token_expiracao, aceite_lgpd, data_aceite_lgpd) 
+        VALUES (?, ?, ?, ?, ?, 'portal', ?, ?, 1, NOW())`,
         [clinica_id, nome, email, telefone, cpf, novoToken, novaExpiracao]
       );
       pacienteId = resPaciente.insertId;

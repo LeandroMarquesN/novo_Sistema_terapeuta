@@ -71,14 +71,12 @@ CREATE TABLE IF NOT EXISTS usuarios (
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
-    
-    crm VARCHAR(20) NULL AFTER cargo,
-    uf_crm CHAR(2) NULL AFTER crm,
 
     -- 🔑 Novas colunas adicionadas para o "Esqueci minha senha"
     reset_token VARCHAR(255) DEFAULT NULL,
     reset_expires DATETIME DEFAULT NULL,
-   current_session_token VARCHAR(255) DEFAULT NULL,
+    current_session_token VARCHAR(255) DEFAULT NULL,
+
     cargo ENUM(
         'dono',
         'admin',
@@ -91,10 +89,13 @@ CREATE TABLE IF NOT EXISTS usuarios (
         'fonoaudiologo',
         'profissional da saude'
     ) DEFAULT 'terapeuta',
+
+    crm VARCHAR(20) NULL,
+    uf_crm CHAR(2) NULL,
+
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_usuario_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
 -- 5. PACIENTES (Versão Atualizada com Sistema de Tokens)
 CREATE TABLE IF NOT EXISTS pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -113,6 +114,9 @@ CREATE TABLE IF NOT EXISTS pacientes (
   altura DECIMAL(3,2),
   condicoes_preexistentes TEXT,
   foto_perfil VARCHAR(255),
+
+  aceite_lgpd TINYINT(1) NOT NULL DEFAULT 0,
+  data_aceite_lgpd TIMESTAMP NULL DEFAULT NULL,
  
   ativo TINYINT(1) NOT NULL DEFAULT 1,
   arquivado_em DATETIME NULL,

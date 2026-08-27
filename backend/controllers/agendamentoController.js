@@ -29,9 +29,14 @@ exports.criarAgendamento = async (req, res) => {
   let {
     nome, cpf, email, telefone, data_nascimento, idade,
     peso, genero, altura, tipo_sanguineo, tipo_terapia,
-    data_agendamento, motivo_consulta, origem_indicacao, observacoes,
+    data_agendamento, motivo_consulta, origem_indicacao, observacoes, aceite_lgpd,
     valor_sinal
   } = req.body;
+
+  // Trava de segurança LGPD
+  if (!aceite_lgpd || aceite_lgpd === 'false' || aceite_lgpd === false || aceite_lgpd === '0') {
+    return res.status(400).json({ mensagem: 'O consentimento da LGPD é obrigatório para realizar o agendamento.' });
+  }
 
   // 🌟 CORREÇÃO DE FUSO NO INPUT: Limpa caracteres ISO para salvar a hora local real
   if (data_agendamento) {
@@ -95,7 +100,8 @@ exports.criarAgendamento = async (req, res) => {
           telefone = ?, email = ?, peso = ?, altura = ?,
           idade = ?, tipo_sanguineo = ?, genero = ?,
           condicoes_preexistentes = ?, status_pagamento = 'pendente',
-          token_acesso = ?, token_expiracao = ?
+          token_acesso = ?, token_expiracao = ?,
+          aceite_lgpd = 1, data_aceite_lgpd = NOW() -- Padronizado
          WHERE id = ?`,
         [telefone, email, peso, altura, idade, tipo_sanguineo, genero, condicoesString, novoToken, dataExpiracao, paciente_id]
       );
@@ -104,8 +110,9 @@ exports.criarAgendamento = async (req, res) => {
         `INSERT INTO pacientes (
           clinica_id, nome, cpf, email, telefone, data_nascimento,
           idade, tipo_sanguineo, peso, altura, genero,
-          condicoes_preexistentes, foto_perfil, status_pagamento, token_acesso, token_expiracao
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?)`,
+          condicoes_preexistentes, foto_perfil, status_pagamento, token_acesso, token_expiracao,
+          aceite_lgpd, data_aceite_lgpd
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendente', ?, ?, 1, NOW())`,
         [clinicaId, nome, cpf, email, telefone, data_nascimento, idade, tipo_sanguineo, peso, altura, genero, condicoesString, fotoPerfilFilename, novoToken, dataExpiracao]
       );
       paciente_id = novoPacResult.insertId;

@@ -152,6 +152,13 @@
                             <option value="Não informado">Prefiro não informar</option>
                         </select>
                     </div>
+                    <!-- 🛡️ CHECKBOX LGPD HUMANIZADO -->
+                    <div class="form-check my-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <input class="form-check-input mt-1" type="checkbox" value="true" id="aceite_lgpd" name="aceite_lgpd" required>
+                        <label class="form-check-label text-slate-600 text-xs ms-2" for="aceite_lgpd" style="line-height: 1.4;">
+                            <strong>Privacidade e Sigilo:</strong> Autorizo o armazenamento seguro dos meus dados de saúde e informações pessoais para uso exclusivo no atendimento clínico, garantindo total confidencialidade e conformidade com a LGPD.
+                        </label>
+                    </div>
                 </div>
 
                 <button type="button" onclick="validateStep1()" class="w-full mt-8 bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
@@ -408,24 +415,43 @@
 
 
         // validacao de dados
+        // validacao de dados
         function validateStep1() {
             const campos = ['nome', 'email', 'telefone', 'cpf', 'data_nascimento'];
             let valido = true;
 
+            // Valida os inputs de texto/data
             campos.forEach(id => {
                 const el = document.getElementById(id);
-                if (!el.value) {
-                    el.classList.add('border-red-500', 'bg-red-50');
+                if (!el || !el.value) {
+                    if (el) el.classList.add('border-red-500', 'bg-red-50');
                     valido = false;
                 } else {
                     el.classList.remove('border-red-500', 'bg-red-50');
                 }
             });
 
+            // Validação do Checkbox LGPD
+            const checkLgpd = document.getElementById('aceite_lgpd');
+            const containerLgpd = checkLgpd ? checkLgpd.closest('.form-check') : null; // Pega o container para destacar se quiser
+
+            if (!checkLgpd || !checkLgpd.checked) {
+                valido = false;
+                if (containerLgpd) {
+                    containerLgpd.classList.add('border-red-500', 'bg-red-100'); // Destaca em vermelho se não marcou
+                }
+            } else {
+                if (containerLgpd) {
+                    containerLgpd.classList.remove('border-red-500', 'bg-red-100');
+                }
+            }
+
+            // Se tudo estiver válido, avança. Se não, avisa o usuário.
             if (valido) {
                 goToStep(2);
             } else {
-                alert("Por favor, preencha todos os campos obrigatórios para prosseguir.");
+                // Alerta mais específico para guiar o usuário
+                alert("Por favor, preencha todos os campos obrigatórios e aceite os termos de (LGPD)privacidade para prosseguir.");
             }
         }
 
