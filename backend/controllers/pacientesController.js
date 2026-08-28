@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const cloudinary = require('../config/cloudinary');
 
 // Cargos que NÃO podem arquivar/restaurar (mesma regra do frontend)
 const CARGOS_BLOQUEADOS = ['admin', 'recepcao'];
@@ -262,5 +263,69 @@ exports.obterFichaExpressa = async (req, res) => {
     } catch (err) {
         console.error('ERRO NO BANCO:', err);
         res.status(500).json({ erro: err.message });
+    }
+};
+
+// ─────────────────────────────────────────────
+// Atualizar foto do paciente (Cloudinary)
+// PATCH /api/pacientes/:id/foto
+// campo do form-data: "foto"
+// ─────────────────────────────────────────────
+exports.atualizarFoto = async (req, res) => {
+    if (!req.usuario) {
+        return res.status(401).json({ success: false, message: 'Não autenticado' });
+    }
+
+    const pacienteId = req.params.id;
+    const clinicaId = req.usuario.clinica_id;
+
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'Nenhuma imagem enviada.' });
+    }
+
+    try {
+        const [rows] = await db.query(
+            'SELECT id, foto_perfil FROM pacientes WHERE id = ? AND clinica_id = ? LIMIT 1',
+            [pacienteId, clinicaId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Paciente não encontrado.' });
+        }
+
+        const result = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: `medlm/pacientes/${clinicaId}`,
+                    public_id: `paciente_${pacienteId}`,
+                    overwrite: true,
+                    transformation: [
+                        { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+                        { quality: 'auto', fetch_format: 'auto' },
+                    ],
+                },
+                (err, uploaded) => (err ? reject(err) : resolve(uploaded))
+            );
+            stream.end(req.file.buffer);
+        });
+
+        const urlFoto = result.secure_url;
+
+        await db.query(
+            'UPDATE pacientes SET foto_perfil = ? WHERE id = ? AND clinica_id = ?',
+            [urlFoto, pacienteId, clinicaId]
+        );
+
+        return res.json({
+            success: true,
+            message: 'Foto atualizada com sucesso.',
+            foto_perfil: urlFoto,
+        });
+    } catch (error) {
+        console.error('Erro ao enviar foto do paciente:', error);
+        return res.status(500).json({
+            success: false,
+            message: 'Erro ao salvar a foto.',
+        });
     }
 };

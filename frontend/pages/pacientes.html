@@ -224,8 +224,12 @@
       border: 1px solid rgba(52,211,153,0.2); border-radius: 14px;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       box-shadow: 0 0 20px rgba(8,145,178,0.15);
+      overflow: hidden;
     }
     .card-avatar-box i { color: var(--cyan); font-size: 18px; }
+    .card-avatar-box img {
+      width: 100%; height: 100%; object-fit: cover; border-radius: 14px;
+    }
     .patient-name {
       font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 800;
       color: #f1f5f9; margin-bottom: 3px; transition: color 0.2s;
@@ -296,7 +300,6 @@
     .empty-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
     .empty-sub { color: rgba(148,163,184,0.4); font-size: 13px; }
 
-    /* Arquivados */
     .archive-section {
       margin-top: 32px;
       background: rgba(251,191,36,0.03);
@@ -381,7 +384,6 @@
       background: rgba(52,211,153,0.2); box-shadow: 0 0 14px rgba(52,211,153,0.15);
     }
 
-    /* Modais */
     .perm-modal-overlay, .confirm-modal-overlay {
       position: fixed; inset: 0; z-index: 200;
       background: rgba(2,12,18,0.85); backdrop-filter: blur(12px);
@@ -496,7 +498,6 @@
     .history-notes { font-size: 12px; color: rgba(148,163,184,0.55); }
     .modal-error { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.22); border-radius: 14px; padding: 28px; text-align: center; color: var(--red); }
 
-    /* Mobile */
     .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer, .mobile-only { display: none; }
 
     @media (max-width: 1024px) {
@@ -724,7 +725,6 @@
           </div>
         </div>
 
-        <!-- SEÇÃO ARQUIVADOS -->
         <div class="archive-section" id="archiveSection">
           <div class="archive-header">
             <div class="archive-title-wrap">
@@ -758,7 +758,6 @@
     </main>
   </div>
 
-  <!-- Modal Prontuário -->
   <div class="modal fade" id="modalProntuario" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
@@ -774,7 +773,6 @@
     </div>
   </div>
 
-  <!-- Modal Sem Permissão -->
   <div class="perm-modal-overlay" id="permModal">
     <div class="perm-modal">
       <div class="perm-icon"><i class="fas fa-lock"></i></div>
@@ -786,7 +784,6 @@
     </div>
   </div>
 
-  <!-- Modal Confirmação -->
   <div class="confirm-modal-overlay" id="confirmModal">
     <div class="confirm-modal">
       <div class="perm-icon" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.25);color:#fbbf24;">
@@ -805,6 +802,7 @@
 
   <script>
     const CARGOS_BLOQUEADOS = ['admin', 'recepcao'];
+    const FOTO_PADRAO = 'https://cdn-icons-png.flaticon.com/512/149/149071.png';
 
     function getCargoUsuario() {
       return (
@@ -821,11 +819,68 @@
       return !CARGOS_BLOQUEADOS.includes(cargo);
     }
 
+    function urlFotoPaciente(foto) {
+      if (!foto) return FOTO_PADRAO;
+      // URL completa do Cloudinary (ou qualquer https)
+      if (/^https?:\/\//i.test(foto)) return foto;
+      // Compatibilidade com paths antigos em /uploads
+      return '/uploads/' + String(foto).replace(/^\/+/, '');
+    }
+
+    function abrirSeletorFoto(id) {
+      const input = document.getElementById('inputFoto-' + id);
+      if (input) input.click();
+    }
+
+    async function enviarFotoPaciente(id, input) {
+      if (!input.files || !input.files[0]) return;
+
+      const arquivo = input.files[0];
+      if (!arquivo.type.startsWith('image/')) {
+        alert('Selecione uma imagem válida.');
+        input.value = '';
+        return;
+      }
+      if (arquivo.size > 5 * 1024 * 1024) {
+        alert('A imagem deve ter no máximo 5 MB.');
+        input.value = '';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('foto', arquivo);
+
+      const token = localStorage.getItem('token');
+
+      try {
+        const res = await fetch('/api/pacientes/' + id + '/foto', {
+          method: 'PATCH',
+          headers: { Authorization: 'Bearer ' + token },
+          body: formData
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert(data.message || data.erro || 'Não foi possível enviar a foto.');
+          return;
+        }
+
+        alert('Foto atualizada com sucesso!');
+        await carregarPacientes();
+      } catch (e) {
+        console.error(e);
+        alert('Erro de conexão ao enviar a foto.');
+      } finally {
+        input.value = '';
+      }
+    }
+
     async function carregarPacientes() {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/pacientes', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': 'Bearer ' + token }
         });
         const pacientes = await res.json();
 
@@ -851,14 +906,21 @@
               </div>
             </div>`;
         } else {
-          container.innerHTML = pacientes.map(p => `
+          container.innerHTML = pacientes.map(p => {
+            const foto = urlFotoPaciente(p.foto_perfil);
+            const nomeEsc = (p.nome || '').replace(/'/g, "\\'");
+            return `
             <div class="col-md-6 col-lg-4 item-paciente">
               <div class="patient-card">
                 <div class="card-body">
                   <div class="d-flex align-items-center mb-3 gap-3">
-                    <div class="card-avatar-box"><i class="fas fa-user"></i></div>
+                    <div class="card-avatar-box">
+                      ${p.foto_perfil
+                        ? `<img src="${foto}" alt="Foto de ${p.nome || ''}">`
+                        : `<i class="fas fa-user"></i>`}
+                    </div>
                     <div style="flex:1;min-width:0">
-                      <h5 class="patient-name text-truncate">${p.nome}</h5>
+                      <h5 class="patient-name text-truncate">${p.nome || ''}</h5>
                       <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
                     </div>
                   </div>
@@ -874,14 +936,23 @@
                     <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
                       <i class="fas fa-file-medical"></i>
                     </button>
-                    <button class="btn-action-archive" onclick="solicitarArquivamento(${p.id}, '${(p.nome || '').replace(/'/g, "\\'")}')" title="Arquivar paciente">
+                    <button class="btn-action-outline" onclick="abrirSeletorFoto(${p.id})" title="Foto do paciente">
+                      <i class="fas fa-camera"></i>
+                    </button>
+                    <input type="file"
+                           id="inputFoto-${p.id}"
+                           accept="image/*"
+                           capture="user"
+                           style="display:none"
+                           onchange="enviarFotoPaciente(${p.id}, this)">
+                    <button class="btn-action-archive" onclick="solicitarArquivamento(${p.id}, '${nomeEsc}')" title="Arquivar paciente">
                       <i class="fas fa-box-archive"></i>
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
-          `).join('');
+            </div>`;
+          }).join('');
         }
 
         carregarTotalArquivados();
@@ -902,7 +973,7 @@
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/pacientes/arquivados?somenteTotal=1', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
         const total = data.total ?? (Array.isArray(data.pacientes) ? data.pacientes.length : (Array.isArray(data) ? data.length : 0));
@@ -934,7 +1005,7 @@
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/pacientes/arquivados', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
         const lista = Array.isArray(data) ? data : (data.pacientes || []);
@@ -959,6 +1030,7 @@
           const dataArq = p.arquivado_em
             ? new Date(p.arquivado_em).toLocaleDateString('pt-BR')
             : '—';
+          const nomeEsc = (p.nome || '').replace(/'/g, "\\'");
           return `
             <div class="col-md-6 col-lg-4 item-arquivado">
               <div class="patient-card archived">
@@ -968,7 +1040,7 @@
                       <i class="fas fa-user" style="color:#fbbf24"></i>
                     </div>
                     <div style="flex:1;min-width:0">
-                      <h5 class="patient-name text-truncate">${p.nome}</h5>
+                      <h5 class="patient-name text-truncate">${p.nome || ''}</h5>
                       <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
                       <div style="margin-top:6px"><span class="badge-arquivado"><i class="fas fa-box-archive"></i> Arquivado</span></div>
                     </div>
@@ -979,7 +1051,7 @@
                   </div>
                   <div class="card-divider"></div>
                   <div class="d-flex align-items-center gap-2">
-                    <button class="btn-action-restore" onclick="restaurarPaciente(${p.id}, '${(p.nome || '').replace(/'/g, "\\'")}')">
+                    <button class="btn-action-restore" onclick="restaurarPaciente(${p.id}, '${nomeEsc}')">
                       <i class="fas fa-undo"></i> Restaurar
                     </button>
                     <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
@@ -1065,10 +1137,10 @@
         const id = pacienteParaArquivar;
         fecharConfirmModal();
         try {
-          const res = await fetch(`/api/pacientes/${id}/arquivar`, {
+          const res = await fetch('/api/pacientes/' + id + '/arquivar', {
             method: 'PATCH',
             headers: {
-              'Authorization': `Bearer ${token}`,
+              'Authorization': 'Bearer ' + token,
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({ motivo: 'Arquivado pela tela de pacientes' })
@@ -1092,9 +1164,9 @@
         const id = pacienteParaRestaurar;
         fecharConfirmModal();
         try {
-          const res = await fetch(`/api/pacientes/${id}/restaurar`, {
+          const res = await fetch('/api/pacientes/' + id + '/restaurar', {
             method: 'PATCH',
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { 'Authorization': 'Bearer ' + token }
           });
           const data = await res.json().catch(() => ({}));
           if (!res.ok) {
@@ -1126,17 +1198,19 @@
 
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch(`/api/pacientes/${id}/prontuario`, {
-          headers: { 'Authorization': `Bearer ${token}` }
+        const res = await fetch('/api/pacientes/' + id + '/prontuario', {
+          headers: { 'Authorization': 'Bearer ' + token }
         });
         if (!res.ok) throw new Error();
         const data = await res.json();
 
+        const fotoUrl = urlFotoPaciente(data.dados.foto_perfil);
+
         conteudo.innerHTML = `
           <div class="row g-3 mb-4">
             <div class="col-md-4 text-center d-flex flex-column align-items-center justify-content-center" style="border-right:1px solid var(--border)">
-              <img src="${data.dados.foto_perfil ? '/uploads/'+data.dados.foto_perfil : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="modal-prontuario-avatar mb-3">
-              <h5 class="modal-patient-name mb-2">${data.dados.nome}</h5>
+              <img src="${fotoUrl}" class="modal-prontuario-avatar mb-3" alt="Foto do paciente">
+              <h5 class="modal-patient-name mb-2">${data.dados.nome || ''}</h5>
               <span class="modal-active-badge">Ficha Ativa</span>
             </div>
             <div class="col-md-8">
@@ -1159,8 +1233,8 @@
             ${data.consultas && data.consultas.length > 0
               ? data.consultas.map(c => `
                   <div class="history-line">
-                    <span class="history-date">${new Date(c.data_agendamento.replace('T',' ').replace('Z','')).toLocaleDateString('pt-BR')}</span>
-                    <p class="history-therapy">${c.tipo_terapia}</p>
+                    <span class="history-date">${new Date(String(c.data_agendamento).replace('T',' ').replace('Z','')).toLocaleDateString('pt-BR')}</span>
+                    <p class="history-therapy">${c.tipo_terapia || ''}</p>
                     <p class="history-notes">${c.motivo_consulta || 'Sem notas complementares.'}</p>
                   </div>`).join('')
               : `<div class="empty-state" style="padding:28px 0">

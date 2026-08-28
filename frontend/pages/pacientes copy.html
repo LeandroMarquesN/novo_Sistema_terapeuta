@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Prontuário de Pacientes | MedLM</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
-  <!-- Estilos Globais do Sistema (preservados) -->
   <link rel="stylesheet" href="../css/stiloDataHora.css">
   <link rel="stylesheet" href="../css/stileLogo.css">
   <link rel="stylesheet" href="../css/darckModeStile.css">
@@ -18,7 +17,6 @@
   <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
 
   <style>
-    /* ─── Design Tokens ─── */
     :root {
       --emerald:   #34d399;
       --emerald-d: #059669;
@@ -34,7 +32,6 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { height: 100%; }
 
     body {
@@ -49,50 +46,20 @@
       overflow-x: hidden;
     }
 
-    /* Scanlines */
     body::before {
       content: '';
       position: fixed; inset: 0;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
-      );
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
       pointer-events: none; z-index: 0;
     }
 
-    /* Floating orbs */
-    .orb {
-      position: fixed; border-radius: 50%;
-      pointer-events: none; filter: blur(80px); z-index: 0;
-    }
-    .orb-1 {
-      width: 520px; height: 520px;
-      background: radial-gradient(circle, rgba(8,145,178,0.16), transparent 70%);
-      top: -12%; left: -8%;
-      animation: orbFloat1 14s ease-in-out infinite;
-    }
-    .orb-2 {
-      width: 440px; height: 440px;
-      background: radial-gradient(circle, rgba(5,150,105,0.14), transparent 70%);
-      bottom: -8%; right: -6%;
-      animation: orbFloat2 18s ease-in-out infinite;
-    }
-    .orb-3 {
-      width: 280px; height: 280px;
-      background: radial-gradient(circle, rgba(251,191,36,0.05), transparent 70%);
-      top: 45%; left: 42%;
-      animation: orbFloat1 22s ease-in-out infinite reverse;
-    }
-    @keyframes orbFloat1 {
-      0%, 100% { transform: translate(0,0); }
-      50% { transform: translate(30px, 22px); }
-    }
-    @keyframes orbFloat2 {
-      0%, 100% { transform: translate(0,0); }
-      50% { transform: translate(-22px, -30px); }
-    }
+    .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0; }
+    .orb-1 { width: 520px; height: 520px; background: radial-gradient(circle, rgba(8,145,178,0.16), transparent 70%); top: -12%; left: -8%; animation: orbFloat1 14s ease-in-out infinite; }
+    .orb-2 { width: 440px; height: 440px; background: radial-gradient(circle, rgba(5,150,105,0.14), transparent 70%); bottom: -8%; right: -6%; animation: orbFloat2 18s ease-in-out infinite; }
+    .orb-3 { width: 280px; height: 280px; background: radial-gradient(circle, rgba(251,191,36,0.05), transparent 70%); top: 45%; left: 42%; animation: orbFloat1 22s ease-in-out infinite reverse; }
+    @keyframes orbFloat1 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(30px, 22px); } }
+    @keyframes orbFloat2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-22px, -30px); } }
 
-    /* Grid lines bg */
     .hero-grid {
       position: fixed; inset: 0; z-index: 0;
       background-image:
@@ -102,211 +69,113 @@
       mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 20%, transparent 100%);
     }
 
-    /* Scrollbar */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
 
-    /* ─── App layout ─── */
-    .app-container {
-      display: flex;
-      min-height: 100vh;
-      position: relative; z-index: 1;
-    }
+    .app-container { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
-    /* ─── Sidebar ─── */
     aside {
       width: 72px;
       background: rgba(2,12,18,0.90);
       backdrop-filter: blur(20px);
       border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      height: 100vh;
-      z-index: 100;
-      overflow: hidden;
-      transition: width 0.3s ease;
+      display: flex; flex-direction: column;
+      position: fixed; height: 100vh; z-index: 100;
+      overflow: hidden; transition: width 0.3s ease;
     }
     aside:hover { width: 230px; }
 
     .brand-area {
-      height: 72px;
-      display: flex;
-      align-items: center;
-      padding: 0 18px;
-      border-bottom: 1px solid var(--border);
-      flex-shrink: 0;
-      overflow: hidden;
+      height: 72px; display: flex; align-items: center;
+      padding: 0 18px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; overflow: hidden;
     }
-
     .brand-logo-circle {
       width: 36px; height: 36px;
       background: linear-gradient(135deg, #0891b2, #059669);
-      border-radius: 10px;
-      flex-shrink: 0;
+      border-radius: 10px; flex-shrink: 0;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 0 18px rgba(8,145,178,0.45), 0 0 36px rgba(5,150,105,0.18);
+      box-shadow: 0 0 18px rgba(8,145,178,0.45);
     }
-    .brand-logo-circle i {
-      font-size: 15px; color: #fff;
-      background: none; -webkit-text-fill-color: #fff;
-    }
-
+    .brand-logo-circle i { font-size: 15px; color: #fff; }
     .brand-name {
-      margin-left: 12px;
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 18px; font-weight: 800;
-      color: #e2e8f0;
-      white-space: nowrap;
-      opacity: 0;
-      transition: opacity 0.2s;
+      margin-left: 12px; font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px; font-weight: 800; color: #e2e8f0;
+      white-space: nowrap; opacity: 0; transition: opacity 0.2s;
     }
     .brand-name .accent { color: var(--emerald); text-shadow: 0 0 10px rgba(52,211,153,0.5); }
     aside:hover .brand-name { opacity: 1; }
 
-    .nav-menu {
-      flex: 1;
-      padding: 16px 10px;
-      display: flex; flex-direction: column; gap: 4px;
-      overflow: hidden;
-    }
-
+    .nav-menu { flex: 1; padding: 16px 10px; display: flex; flex-direction: column; gap: 4px; overflow: hidden; }
     .nav-item {
-      display: flex; align-items: center;
-      padding: 11px 12px;
-      border-radius: 12px;
-      color: rgba(148,163,184,0.6);
-      text-decoration: none;
-      border: 1px solid transparent;
-      transition: all 0.22s;
-      white-space: nowrap; overflow: hidden;
+      display: flex; align-items: center; padding: 11px 12px;
+      border-radius: 12px; color: rgba(148,163,184,0.6);
+      text-decoration: none; border: 1px solid transparent;
+      transition: all 0.22s; white-space: nowrap; overflow: hidden;
       font-size: 13px; font-weight: 600;
     }
-    .nav-item i {
-      width: 20px; font-size: 15px;
-      text-align: center; flex-shrink: 0;
-    }
-    .nav-item span {
-      margin-left: 12px;
-      opacity: 0; transition: opacity 0.2s;
-    }
+    .nav-item i { width: 20px; font-size: 15px; text-align: center; flex-shrink: 0; }
+    .nav-item span { margin-left: 12px; opacity: 0; transition: opacity 0.2s; }
     aside:hover .nav-item span { opacity: 1; }
-
-    .nav-item:hover {
-      color: var(--emerald);
-      border-color: var(--border);
-      background: rgba(52,211,153,0.05);
-    }
+    .nav-item:hover { color: var(--emerald); border-color: var(--border); background: rgba(52,211,153,0.05); }
     .nav-item:hover i { text-shadow: 0 0 8px rgba(52,211,153,0.7); }
-
     .nav-item.active {
       background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.20));
-      border: 1px solid rgba(52,211,153,0.35);
-      color: var(--emerald);
+      border: 1px solid rgba(52,211,153,0.35); color: var(--emerald);
       box-shadow: 0 0 18px rgba(52,211,153,0.10);
     }
-    .nav-item.active i { text-shadow: 0 0 10px rgba(52,211,153,0.8); }
-
     .nav-item-danger { color: rgba(248,113,113,0.55) !important; }
     .nav-item-danger:hover {
       color: var(--red) !important;
       border-color: rgba(248,113,113,0.3) !important;
       background: rgba(248,113,113,0.06) !important;
     }
+    .aside-footer { padding: 10px 10px 16px; border-top: 1px solid var(--border); flex-shrink: 0; }
 
-    .aside-footer {
-      padding: 10px 10px 16px;
-      border-top: 1px solid var(--border);
-      flex-shrink: 0;
-    }
+    main { flex: 1; margin-left: 72px; padding: 32px 36px; min-height: 100vh; position: relative; z-index: 1; }
 
-    /* ─── Main ─── */
-    main {
-      flex: 1;
-      margin-left: 72px;
-      padding: 32px 36px;
-      min-height: 100vh;
-      position: relative; z-index: 1;
-    }
-
-    /* ─── Top meta bar ─── */
     .top-meta-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 28px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 10px 20px;
-      backdrop-filter: blur(10px);
-      position: relative;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 28px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 14px;
+      padding: 10px 20px; backdrop-filter: blur(10px); position: relative;
     }
     .top-meta-bar::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
       background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
       opacity: 0.35; border-radius: 14px;
     }
-
-    .top-meta-time {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 12px; font-weight: 600;
-      color: rgba(148,163,184,0.6);
-    }
+    .top-meta-time { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: rgba(148,163,184,0.6); }
     .top-meta-time i { color: var(--emerald); }
     #data-hora { color: var(--emerald); }
 
     #theme-toggle-btn {
       display: inline-flex; align-items: center; gap: 7px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid var(--border);
-      color: rgba(148,163,184,0.6);
-      border-radius: 10px; padding: 6px 14px;
-      font-size: 11px; font-weight: 700; cursor: pointer;
-      transition: all 0.25s; font-family: 'Inter', sans-serif;
+      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      color: rgba(148,163,184,0.6); border-radius: 10px; padding: 6px 14px;
+      font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.25s;
     }
     #theme-toggle-btn:hover { color: var(--amber); border-color: rgba(251,191,36,0.3); }
 
-    /* ─── Panel ─── */
     .glass-panel {
-      background: rgba(255,255,255,0.022);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 32px;
-      position: relative; overflow: hidden;
+      background: rgba(255,255,255,0.022); border: 1px solid var(--border);
+      border-radius: 24px; padding: 32px; position: relative; overflow: hidden;
     }
     .glass-panel::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
-      opacity: 0.4;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent); opacity: 0.4;
     }
-
-    .panel-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 26px; font-weight: 800;
-      color: #f1f5f9; letter-spacing: -0.02em;
-    }
+    .panel-title { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 800; color: #f1f5f9; letter-spacing: -0.02em; }
     .panel-sub { color: rgba(148,163,184,0.5); font-size: 13px; margin-top: 4px; }
 
-    /* ─── Search ─── */
     .search-wrapper { position: relative; max-width: 420px; width: 100%; }
-    .search-wrapper i {
-      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
-      color: rgba(52,211,153,0.4); font-size: 14px; pointer-events: none;
-    }
+    .search-wrapper i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: rgba(52,211,153,0.4); font-size: 14px; pointer-events: none; }
     .search-bar {
-      width: 100%;
-      background: rgba(255,255,255,0.04) !important;
-      border: 1px solid var(--border) !important;
-      border-radius: 13px !important;
-      padding: 11px 16px 11px 44px !important;
-      color: #e2e8f0 !important;
-      font-size: 13px; font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      outline: none; transition: all 0.25s;
+      width: 100%; background: rgba(255,255,255,0.04) !important;
+      border: 1px solid var(--border) !important; border-radius: 13px !important;
+      padding: 11px 16px 11px 44px !important; color: #e2e8f0 !important;
+      font-size: 13px; font-weight: 500; outline: none; transition: all 0.25s;
     }
     .search-bar::placeholder { color: rgba(148,163,184,0.22) !important; }
     .search-bar:focus {
@@ -315,207 +184,270 @@
       box-shadow: 0 0 0 3px rgba(52,211,153,0.08) !important;
     }
 
-    /* ─── Stats bar (top of panel) ─── */
     .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 0;
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border);
-      border-radius: 16px; overflow: hidden;
-      margin-bottom: 28px;
-      position: relative;
+      display: grid; grid-template-columns: repeat(4,1fr); gap: 0;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      border-radius: 16px; overflow: hidden; margin-bottom: 28px; position: relative;
     }
     .stats-bar::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
-      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
-      opacity: 0.5;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent); opacity: 0.5;
     }
-    .stat-item {
-      padding: 16px 20px; text-align: center;
-      border-right: 1px solid var(--border);
-      transition: background 0.2s;
-    }
+    .stat-item { padding: 16px 20px; text-align: center; border-right: 1px solid var(--border); transition: background 0.2s; }
     .stat-item:last-child { border-right: none; }
     .stat-item:hover { background: rgba(52,211,153,0.04); }
     .stat-num {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 22px; font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 800;
       background: linear-gradient(90deg, var(--cyan), var(--emerald));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      background-clip: text; display: block;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: block;
     }
     .stat-lbl { font-size: 10px; font-weight: 700; color: rgba(148,163,184,0.45); text-transform: uppercase; letter-spacing: 0.1em; }
 
-    /* ─── Patient cards ─── */
     .patient-card {
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      overflow: hidden;
+      background: rgba(255,255,255,0.025); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
       transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-      position: relative;
-      height: 100%;
+      position: relative; height: 100%;
     }
     .patient-card::before {
-      content: '';
-      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
       background: linear-gradient(90deg, transparent, rgba(52,211,153,0.45), transparent);
     }
     .patient-card:hover {
-      transform: translateY(-5px);
-      border-color: rgba(52,211,153,0.3);
-      box-shadow: 0 12px 40px rgba(52,211,153,0.10);
-      background: rgba(255,255,255,0.04);
+      transform: translateY(-5px); border-color: rgba(52,211,153,0.3);
+      box-shadow: 0 12px 40px rgba(52,211,153,0.10); background: rgba(255,255,255,0.04);
     }
-    .patient-card:hover::before {
-      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
-      opacity: 0.7;
-    }
-
     .card-body { padding: 22px; }
-
-    /* Avatar */
     .card-avatar-box {
       width: 52px; height: 52px;
       background: linear-gradient(135deg, rgba(8,145,178,0.2), rgba(5,150,105,0.15));
-      border: 1px solid rgba(52,211,153,0.2);
-      border-radius: 14px;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
+      border: 1px solid rgba(52,211,153,0.2); border-radius: 14px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       box-shadow: 0 0 20px rgba(8,145,178,0.15);
     }
     .card-avatar-box i { color: var(--cyan); font-size: 18px; }
-
-    /* Patient info */
     .patient-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 15px; font-weight: 800;
-      color: #f1f5f9; margin-bottom: 3px;
-      transition: color 0.2s;
+      font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 800;
+      color: #f1f5f9; margin-bottom: 3px; transition: color 0.2s;
     }
     .patient-card:hover .patient-name { color: var(--emerald); }
-
     .patient-cpf {
       display: inline-flex; align-items: center; gap: 5px;
-      background: rgba(52,211,153,0.08);
-      border: 1px solid rgba(52,211,153,0.18);
-      color: rgba(52,211,153,0.7);
-      font-size: 10px; font-weight: 700;
-      padding: 2px 9px; border-radius: 6px;
-      letter-spacing: 0.04em;
+      background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.18);
+      color: rgba(52,211,153,0.7); font-size: 10px; font-weight: 700;
+      padding: 2px 9px; border-radius: 6px; letter-spacing: 0.04em;
     }
-
     .patient-info-row {
       display: flex; align-items: center; gap: 8px;
-      font-size: 12px; color: rgba(148,163,184,0.55);
-      margin-bottom: 4px;
+      font-size: 12px; color: rgba(148,163,184,0.55); margin-bottom: 4px;
     }
     .patient-info-row i { color: rgba(34,211,238,0.5); width: 14px; text-align: center; font-size: 11px; }
-
-    /* Card divider */
     .card-divider {
       height: 1px;
       background: linear-gradient(90deg, transparent, var(--border), transparent);
       margin: 14px 0;
     }
-
-    /* Action buttons */
     .btn-action-atender {
-      background: linear-gradient(135deg, #0891b2, #059669);
-      color: #fff; border: none;
-      font-weight: 700; font-size: 12px;
-      border-radius: 11px; padding: 9px 14px;
-      transition: all 0.28s;
-      text-decoration: none;
+      background: linear-gradient(135deg, #0891b2, #059669); color: #fff; border: none;
+      font-weight: 700; font-size: 12px; border-radius: 11px; padding: 9px 14px;
+      transition: all 0.28s; text-decoration: none;
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
       font-family: 'Space Grotesk', sans-serif;
-      box-shadow: 0 0 16px rgba(8,145,178,0.25);
-      flex: 1;
+      box-shadow: 0 0 16px rgba(8,145,178,0.25); flex: 1;
     }
-    .btn-action-atender:hover {
-      color: #fff; transform: translateY(-1px);
-      box-shadow: 0 0 26px rgba(8,145,178,0.45);
-    }
-
+    .btn-action-atender:hover { color: #fff; transform: translateY(-1px); box-shadow: 0 0 26px rgba(8,145,178,0.45); }
     .btn-action-outline {
-      background: rgba(34,211,238,0.07);
-      border: 1px solid rgba(34,211,238,0.22);
-      color: var(--cyan);
+      background: rgba(34,211,238,0.07); border: 1px solid rgba(34,211,238,0.22);
+      color: var(--cyan); border-radius: 11px; width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.22s; cursor: pointer; font-size: 13px;
+    }
+    .btn-action-outline:hover { background: rgba(34,211,238,0.18); box-shadow: 0 0 14px rgba(34,211,238,0.2); }
+    .btn-action-archive {
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      color: #fbbf24;
       border-radius: 11px;
       width: 38px; height: 38px;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.22s; cursor: pointer; font-size: 13px;
     }
-    .btn-action-outline:hover {
-      background: rgba(34,211,238,0.18);
-      box-shadow: 0 0 14px rgba(34,211,238,0.2);
+    .btn-action-archive:hover {
+      background: rgba(251, 191, 36, 0.18);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.2);
     }
 
-    .btn-action-delete {
-      background: rgba(248,113,113,0.07);
-      border: 1px solid rgba(248,113,113,0.2);
-      color: var(--red);
-      border-radius: 11px;
-      width: 38px; height: 38px;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.22s; cursor: pointer; font-size: 13px;
-    }
-    .btn-action-delete:hover {
-      background: rgba(248,113,113,0.18);
-      box-shadow: 0 0 14px rgba(248,113,113,0.2);
-    }
-
-    /* ─── Loading state ─── */
-    .loading-state {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 60px 20px; color: rgba(148,163,184,0.5);
-    }
+    .loading-state { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; color: rgba(148,163,184,0.5); }
     .loading-ring {
       width: 44px; height: 44px; border-radius: 50%;
-      border: 3px solid rgba(52,211,153,0.1);
-      border-top-color: var(--emerald);
-      animation: spin 0.9s linear infinite;
-      margin-bottom: 16px;
+      border: 3px solid rgba(52,211,153,0.1); border-top-color: var(--emerald);
+      animation: spin 0.9s linear infinite; margin-bottom: 16px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-text { font-size: 13px; font-weight: 600; color: rgba(148,163,184,0.5); }
 
-    /* ─── Empty state ─── */
-    .empty-state {
-      display: flex; flex-direction: column; align-items: center;
-      padding: 60px 20px;
-    }
+    .empty-state { display: flex; flex-direction: column; align-items: center; padding: 60px 20px; }
     .empty-icon {
-      width: 56px; height: 56px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-      border-radius: 16px;
+      width: 56px; height: 56px; background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border); border-radius: 16px;
       display: flex; align-items: center; justify-content: center;
-      color: rgba(52,211,153,0.4); font-size: 22px;
-      margin-bottom: 14px;
+      color: rgba(52,211,153,0.4); font-size: 22px; margin-bottom: 14px;
     }
     .empty-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
     .empty-sub { color: rgba(148,163,184,0.4); font-size: 13px; }
 
-    /* ─── Bootstrap modal dark override ─── */
+    /* Arquivados */
+    .archive-section {
+      margin-top: 32px;
+      background: rgba(251,191,36,0.03);
+      border: 1px solid rgba(251,191,36,0.18);
+      border-radius: 20px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .archive-section::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(251,191,36,0.45), transparent);
+    }
+    .archive-header {
+      display: flex; flex-wrap: wrap; align-items: center;
+      justify-content: space-between; gap: 16px; margin-bottom: 18px;
+    }
+    .archive-title-wrap { display: flex; align-items: center; gap: 12px; }
+    .archive-icon-box {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25);
+      display: flex; align-items: center; justify-content: center;
+      color: #fbbf24; font-size: 18px;
+    }
+    .archive-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 800; color: #f1f5f9; }
+    .archive-sub { font-size: 12px; color: rgba(148,163,184,0.5); margin-top: 2px; }
+    .archive-total-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25);
+      color: #fbbf24; font-size: 12px; font-weight: 800;
+      padding: 6px 14px; border-radius: 99px;
+    }
+    .btn-listar-arquivados {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.1));
+      border: 1px solid rgba(251,191,36,0.35); color: #fbbf24;
+      font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800;
+      padding: 11px 18px; border-radius: 12px; cursor: pointer; transition: all 0.25s;
+    }
+    .btn-listar-arquivados:hover {
+      background: rgba(251,191,36,0.25); box-shadow: 0 0 18px rgba(251,191,36,0.15);
+    }
+    .archive-toolbar {
+      display: none; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px;
+    }
+    .archive-toolbar.visible { display: flex; }
+    .archive-search { flex: 1; min-width: 200px; position: relative; }
+    .archive-search i {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      color: rgba(251,191,36,0.45); font-size: 13px; pointer-events: none;
+    }
+    .archive-search input {
+      width: 100%; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(251,191,36,0.2); border-radius: 12px;
+      padding: 11px 14px 11px 40px; color: #e2e8f0; font-size: 13px; outline: none;
+    }
+    .archive-search input:focus {
+      border-color: rgba(251,191,36,0.45);
+      box-shadow: 0 0 0 3px rgba(251,191,36,0.08);
+    }
+    #container-arquivados { display: none; }
+    #container-arquivados.visible { display: flex; flex-wrap: wrap; }
+    .patient-card.archived { border-color: rgba(251,191,36,0.2); }
+    .patient-card.archived::before {
+      background: linear-gradient(90deg, transparent, rgba(251,191,36,0.45), transparent);
+    }
+    .badge-arquivado {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.25);
+      color: #fbbf24; font-size: 9px; font-weight: 800;
+      padding: 2px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .btn-action-restore {
+      background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+      color: #34d399; border-radius: 11px; padding: 9px 14px;
+      font-weight: 700; font-size: 12px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: 'Space Grotesk', sans-serif; transition: all 0.22s; flex: 1;
+    }
+    .btn-action-restore:hover {
+      background: rgba(52,211,153,0.2); box-shadow: 0 0 14px rgba(52,211,153,0.15);
+    }
+
+    /* Modais */
+    .perm-modal-overlay, .confirm-modal-overlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(2,12,18,0.85); backdrop-filter: blur(12px);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    .perm-modal-overlay.open, .confirm-modal-overlay.open { display: flex; }
+    .perm-modal, .confirm-modal {
+      background: rgba(2,12,18,0.97);
+      border: 1px solid rgba(248,113,113,0.3);
+      border-radius: 24px; padding: 36px 32px; text-align: center;
+      max-width: 400px; width: 100%;
+      box-shadow: 0 0 60px rgba(248,113,113,0.12);
+      animation: permIn 0.3s ease;
+    }
+    .confirm-modal { border-color: rgba(251,191,36,0.3); box-shadow: 0 0 50px rgba(251,191,36,0.1); }
+    @keyframes permIn {
+      from { opacity: 0; transform: scale(0.92) translateY(12px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .perm-modal .perm-icon, .confirm-modal .perm-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px; font-size: 26px; color: #f87171;
+    }
+    .perm-modal h3, .confirm-modal h3 {
+      font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 800;
+      color: #f1f5f9; margin-bottom: 10px;
+    }
+    .perm-modal p, .confirm-modal p { font-size: 14px; color: rgba(148,163,184,0.7); line-height: 1.55; margin-bottom: 24px; }
+    .perm-modal .perm-cargo {
+      display: inline-block; background: rgba(248,113,113,0.1);
+      border: 1px solid rgba(248,113,113,0.25); color: #f87171;
+      font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 99px;
+      text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 20px;
+    }
+    .perm-modal .btn-entendi {
+      width: 100%; padding: 14px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(248,113,113,0.2), rgba(248,113,113,0.12));
+      border: 1px solid rgba(248,113,113,0.35); color: #f87171;
+      font-weight: 800; font-size: 13px; cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .confirm-modal .btns { display: flex; gap: 10px; }
+    .confirm-modal .btn-cancel {
+      flex: 1; padding: 12px; border-radius: 12px;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+      color: rgba(148,163,184,0.7); font-weight: 700; font-size: 13px; cursor: pointer;
+    }
+    .confirm-modal .btn-confirm {
+      flex: 1; padding: 12px; border-radius: 12px;
+      background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.35);
+      color: #fbbf24; font-weight: 800; font-size: 13px; cursor: pointer;
+    }
+
     #modalProntuario .modal-content {
-      background: rgba(2,12,18,0.97) !important;
-      border: 1px solid var(--border) !important;
-      border-radius: 22px !important;
-      backdrop-filter: blur(28px);
-      color: #e2e8f0 !important;
+      background: rgba(2,12,18,0.97) !important; border: 1px solid var(--border) !important;
+      border-radius: 22px !important; backdrop-filter: blur(28px); color: #e2e8f0 !important;
     }
     #modalProntuario .modal-header {
       border-bottom: 1px solid var(--border) !important;
       background: rgba(52,211,153,0.04) !important;
-      border-radius: 22px 22px 0 0 !important;
-      padding: 20px 24px !important;
+      border-radius: 22px 22px 0 0 !important; padding: 20px 24px !important;
     }
     #modalProntuario .modal-title {
-      font-family: 'Space Grotesk', sans-serif;
-      color: #f1f5f9 !important; font-weight: 800;
+      font-family: 'Space Grotesk', sans-serif; color: #f1f5f9 !important; font-weight: 800;
       display: flex; align-items: center; gap: 8px;
     }
     #modalProntuario .modal-title i { color: var(--cyan) !important; }
@@ -524,27 +456,17 @@
     #modalProntuario .modal-footer {
       border-top: 1px solid var(--border) !important;
       background: rgba(255,255,255,0.02) !important;
-      border-radius: 0 0 22px 22px !important;
-      padding: 16px 24px !important;
+      border-radius: 0 0 22px 22px !important; padding: 16px 24px !important;
     }
     #modalProntuario .btn-secondary {
-      background: rgba(255,255,255,0.05) !important;
-      border: 1px solid var(--border) !important;
-      color: rgba(148,163,184,0.7) !important;
-      border-radius: 11px !important; font-weight: 700;
+      background: rgba(255,255,255,0.05) !important; border: 1px solid var(--border) !important;
+      color: rgba(148,163,184,0.7) !important; border-radius: 11px !important; font-weight: 700;
     }
-
-    /* Modal prontuario internals */
     .modal-prontuario-avatar {
-      width: 90px; height: 90px;
-      border-radius: 50%; object-fit: cover;
-      border: 2px solid rgba(52,211,153,0.3);
-      box-shadow: 0 0 20px rgba(52,211,153,0.15);
+      width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
+      border: 2px solid rgba(52,211,153,0.3); box-shadow: 0 0 20px rgba(52,211,153,0.15);
     }
-    .modal-patient-name {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 17px; font-weight: 800; color: #f1f5f9;
-    }
+    .modal-patient-name { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 800; color: #f1f5f9; }
     .modal-active-badge {
       display: inline-flex; align-items: center; gap: 5px;
       background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.25);
@@ -552,132 +474,210 @@
       padding: 3px 10px; border-radius: 99px; letter-spacing: 0.08em;
     }
     .modal-active-badge::before {
-      content: '';
-      width: 6px; height: 6px; border-radius: 50%;
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
       background: var(--emerald); box-shadow: 0 0 6px var(--emerald);
       animation: pulse 2s infinite;
     }
     @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-
-    .modal-info-grid {
-      background: rgba(255,255,255,0.025);
-      border: 1px solid var(--border);
-      border-radius: 14px; padding: 16px;
-    }
+    .modal-info-grid { background: rgba(255,255,255,0.025); border: 1px solid var(--border); border-radius: 14px; padding: 16px; }
     .modal-info-label { font-size: 10px; font-weight: 700; color: rgba(148,163,184,0.4); text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px; }
     .modal-info-val { font-weight: 700; color: #e2e8f0; font-size: 14px; }
-
     .modal-blood-badge {
       background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.25);
       color: var(--red); padding: 2px 10px; border-radius: 7px;
       font-size: 13px; font-weight: 800; font-family: 'Space Grotesk', sans-serif;
     }
-
-    .modal-conditions {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid var(--border);
-      border-radius: 13px; padding: 14px;
-      font-size: 13px; color: rgba(203,213,225,0.7); line-height: 1.6;
-    }
-    .modal-conditions-title {
-      font-size: 10px; font-weight: 800; color: rgba(148,163,184,0.4);
-      text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
-    }
-
-    .modal-history-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 13px; font-weight: 800; color: var(--cyan);
-      display: flex; align-items: center; gap: 7px;
-      margin-bottom: 14px; margin-top: 20px;
-    }
-
-    .history-line {
-      background: rgba(255,255,255,0.02);
-      border: 1px solid rgba(52,211,153,0.08);
-      border-left: 2px solid rgba(52,211,153,0.3);
-      border-radius: 12px; padding: 14px 16px;
-      margin-bottom: 10px;
-      transition: border-color 0.2s;
-    }
-    .history-line:hover { border-color: rgba(52,211,153,0.2); border-left-color: var(--emerald); }
-
-    .history-date {
-      display: inline-flex; align-items: center;
-      background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.22);
-      color: var(--cyan); font-size: 10px; font-weight: 800;
-      padding: 3px 9px; border-radius: 7px; letter-spacing: 0.06em;
-    }
-    .history-therapy {
-      font-size: 13px; font-weight: 700; color: #e2e8f0; margin: 8px 0 4px;
-    }
+    .modal-conditions { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 13px; padding: 14px; font-size: 13px; color: rgba(203,213,225,0.7); line-height: 1.6; }
+    .modal-conditions-title { font-size: 10px; font-weight: 800; color: rgba(148,163,184,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+    .modal-history-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--cyan); display: flex; align-items: center; gap: 7px; margin-bottom: 14px; margin-top: 20px; }
+    .history-line { background: rgba(255,255,255,0.02); border: 1px solid rgba(52,211,153,0.08); border-left: 2px solid rgba(52,211,153,0.3); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+    .history-date { display: inline-flex; align-items: center; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.22); color: var(--cyan); font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 7px; }
+    .history-therapy { font-size: 13px; font-weight: 700; color: #e2e8f0; margin: 8px 0 4px; }
     .history-notes { font-size: 12px; color: rgba(148,163,184,0.55); }
+    .modal-error { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.22); border-radius: 14px; padding: 28px; text-align: center; color: var(--red); }
 
-    /* Modal vertical divider */
-    .modal-col-divider {
-      border-left: 1px solid var(--border);
-    }
+    /* Mobile */
+    .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer, .mobile-only { display: none; }
 
-    /* Error/alert in modal */
-    .modal-error {
-      background: rgba(248,113,113,0.08);
-      border: 1px solid rgba(248,113,113,0.22);
-      border-radius: 14px; padding: 28px;
-      text-align: center; color: var(--red);
-    }
+    @media (max-width: 1024px) {
+      aside { display: none !important; }
+      .mobile-topbar, .mobile-bottom-tabbar, .mobile-only { display: flex !important; }
+      body { padding-bottom: 88px; }
 
-    /* responsive */
-    @media (max-width: 992px) {
-      main { margin-left: 72px; padding: 20px 16px; }
-      .stats-bar { grid-template-columns: repeat(2,1fr); }
-    }
-    @media (max-width: 640px) {
-      .stats-bar { grid-template-columns: 1fr 1fr; }
+      .mobile-topbar {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 60;
+        height: 64px; background: rgba(2,12,18,0.95);
+        border-bottom: 1px solid var(--border); backdrop-filter: blur(20px);
+        display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+      }
+      .mobile-topbar .logo-wrap { display: flex; align-items: center; gap: 10px; }
+      .mobile-topbar .logo-icon {
+        width: 38px; height: 38px; border-radius: 12px; font-size: 16px;
+        background: linear-gradient(135deg, #0891b2, #059669);
+        display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700;
+      }
+      .mobile-topbar .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #e2e8f0; }
+      .mobile-topbar .logo-text span { color: var(--emerald); text-shadow: 0 0 10px rgba(52,211,153,0.5); }
+      .mobile-topbar .actions { display: flex; align-items: center; gap: 12px; }
+      .mobile-topbar .icon-btn {
+        width: 44px; height: 44px; border-radius: 12px;
+        background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+        color: rgba(148,163,184,0.8); display: flex; align-items: center; justify-content: center; font-size: 18px;
+      }
+      .mobile-topbar .avatar-btn {
+        width: 42px; height: 42px; border-radius: 50%;
+        background: linear-gradient(135deg, #0891b2, #059669);
+        color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800;
+        display: flex; align-items: center; justify-content: center;
+        border: 2px solid rgba(52,211,153,0.4);
+      }
+
+      .mobile-drawer-overlay {
+        position: fixed; inset: 0; z-index: 70;
+        background: rgba(2,12,18,0.75); backdrop-filter: blur(6px);
+        opacity: 0; pointer-events: none; transition: opacity 0.3s;
+      }
+      .mobile-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+
+      .mobile-drawer {
+        position: fixed; top: 0; left: 0; bottom: 0; z-index: 80;
+        width: 82%; max-width: 320px;
+        background: rgba(2,12,18,0.98); border-right: 1px solid var(--border);
+        transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        display: flex; flex-direction: column; padding: 24px 16px;
+      }
+      .mobile-drawer.open { transform: translateX(0); }
+      .mobile-drawer .drawer-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+      }
+      .mobile-drawer .drawer-logo { display: flex; align-items: center; gap: 12px; }
+      .mobile-drawer .drawer-logo .logo-icon {
+        width: 44px; height: 44px; border-radius: 14px; font-size: 18px;
+        background: linear-gradient(135deg, #0891b2, #059669);
+        display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700;
+      }
+      .mobile-drawer .drawer-logo span { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: #e2e8f0; }
+      .mobile-drawer .drawer-logo span b { color: var(--emerald); }
+      .mobile-drawer .close-drawer {
+        width: 40px; height: 40px; border-radius: 12px;
+        background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25);
+        color: #f87171; display: flex; align-items: center; justify-content: center;
+      }
+      .mobile-drawer nav { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+      .mobile-drawer .nav-item-m {
+        display: flex; align-items: center; gap: 14px; padding: 14px 16px;
+        border-radius: 14px; color: rgba(148,163,184,0.75); font-size: 16px; font-weight: 600;
+        border: 1px solid transparent; text-decoration: none;
+      }
+      .mobile-drawer .nav-item-m i { width: 28px; font-size: 20px; text-align: center; }
+      .mobile-drawer .nav-item-m.active {
+        background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.2));
+        border-color: rgba(52,211,153,0.35); color: var(--emerald);
+      }
+      .mobile-drawer .drawer-footer { padding-top: 16px; border-top: 1px solid var(--border); }
+
+      .mobile-bottom-tabbar {
+        position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+        height: 76px; background: rgba(2,12,18,0.97);
+        border-top: 1px solid var(--border); backdrop-filter: blur(20px);
+        display: flex; align-items: center; justify-content: space-around;
+        padding: 0 8px; padding-bottom: env(safe-area-inset-bottom, 0);
+      }
+      .mobile-bottom-tabbar .tab-item {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 4px; flex: 1; height: 100%;
+        color: rgba(148,163,184,0.55); font-size: 11px; font-weight: 700;
+        text-decoration: none; position: relative;
+      }
+      .mobile-bottom-tabbar .tab-item i { font-size: 22px; margin-bottom: 2px; }
+      .mobile-bottom-tabbar .tab-item.active { color: var(--emerald); }
+      .mobile-bottom-tabbar .tab-item.active::before {
+        content: ''; position: absolute; top: 6px;
+        width: 28px; height: 3px; background: var(--emerald);
+        border-radius: 99px; box-shadow: 0 0 10px var(--emerald);
+      }
+
+      main { margin-left: 0 !important; padding: 80px 14px 24px !important; }
+      .top-meta-bar { display: none !important; }
+      .glass-panel { padding: 20px 14px !important; border-radius: 20px !important; }
+      .panel-title { font-size: 20px !important; }
+      .search-wrapper { max-width: 100% !important; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr) !important; }
+      .archive-section { padding: 18px 14px; }
+      .archive-header { flex-direction: column; align-items: stretch; }
+      .btn-listar-arquivados { width: 100%; justify-content: center; }
+      .archive-toolbar { flex-direction: column; }
+      .archive-search { width: 100%; min-width: 0; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Atmosphere -->
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
   <div class="hero-grid"></div>
 
-  <div class="app-container">
+  <div class="mobile-topbar">
+    <div class="logo-wrap">
+      <button class="icon-btn" id="btnOpenDrawer" aria-label="Abrir menu"><i class="fas fa-bars"></i></button>
+      <div class="logo-icon">M</div>
+      <span class="logo-text">Med<span>LM</span></span>
+    </div>
+    <div class="actions">
+      <button class="icon-btn" aria-label="Notificações"><i class="fas fa-bell"></i></button>
+      <div class="avatar-btn">ML</div>
+    </div>
+  </div>
 
-    <!-- ─── Sidebar ─── -->
+  <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
+  <div class="mobile-drawer" id="mobileDrawer">
+    <div class="drawer-header">
+      <div class="drawer-logo">
+        <div class="logo-icon">M</div>
+        <span>Med<b>LM</b></span>
+      </div>
+      <button class="close-drawer" id="btnCloseDrawer"><i class="fas fa-times"></i></button>
+    </div>
+    <nav>
+      <a href="/dashboard" class="nav-item-m"><i class="fas fa-chart-line"></i> Dashboard</a>
+      <a href="/pacientes" class="nav-item-m active"><i class="fas fa-user-injured"></i> Pacientes</a>
+      <a href="/financeiro" class="nav-item-m"><i class="fas fa-hand-holding-usd"></i> Financeiro</a>
+      <a href="/agendamento" class="nav-item-m"><i class="fas fa-calendar-check"></i> Agendamento</a>
+      <a href="/atendimento" class="nav-item-m"><i class="fas fa-user-md"></i> Atendimento</a>
+      <a href="/equipe" class="nav-item-m"><i class="fas fa-users-cog"></i> Minha Equipe</a>
+      <a href="/dashboard/configuracoes" class="nav-item-m"><i class="fas fa-cogs"></i> Configurações</a>
+      <a href="#" onclick="handleLogout(event)" class="nav-item-m" style="color:rgba(248,113,113,0.7)"><i class="fas fa-sign-out-alt"></i> Sair</a>
+    </nav>
+    <div class="drawer-footer">
+      <button id="theme-toggle-btn-mobile" class="nav-item-m" style="width:100%"><i class="fas fa-moon"></i> Tema</button>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-tabbar">
+    <a href="/dashboard" class="tab-item"><i class="fas fa-home"></i><span>Início</span></a>
+    <a href="/pacientes" class="tab-item active"><i class="fas fa-user-injured"></i><span>Pacientes</span></a>
+    <a href="/agendamento" class="tab-item"><i class="fas fa-calendar-check"></i><span>Agenda</span></a>
+    <a href="/financeiro" class="tab-item"><i class="fas fa-hand-holding-usd"></i><span>Financeiro</span></a>
+    <a href="/dashboard/configuracoes" class="tab-item"><i class="fas fa-user-cog"></i><span>Perfil</span></a>
+  </nav>
+
+  <div class="app-container">
     <aside>
       <div class="brand-area">
-        <div class="brand-logo-circle">
-          <i class="fas fa-heartbeat"></i>
-        </div>
+        <div class="brand-logo-circle"><i class="fas fa-heartbeat"></i></div>
         <span class="brand-name">Med<span class="accent">LM</span></span>
       </div>
-
       <nav class="nav-menu">
-        <a href="/dashboard" class="nav-item">
-          <i class="fas fa-chart-line"></i><span>Dashboard</span>
-        </a>
-        <a href="/pacientes" class="nav-item active">
-          <i class="fas fa-user-injured"></i><span>Pacientes</span>
-        </a>
-        <a href="/financeiro" class="nav-item">
-          <i class="fas fa-hand-holding-usd"></i><span>Financeiro</span>
-        </a>
-        <a href="/agendamento" class="nav-item">
-          <i class="fas fa-calendar-check"></i><span>Agendamento</span>
-        </a>
-        <a href="/atendimento" class="nav-item">
-          <i class="fas fa-user-md"></i><span>Atendimento</span>
-        </a>
-        <a href="/equipe" class="nav-item">
-          <i class="fas fa-users-cog"></i><span>Minha Equipe</span>
-        </a>
-        <a href="/dashboard/configuracoes" class="nav-item">
-          <i class="fas fa-cogs"></i><span>Configurações</span>
-        </a>
+        <a href="/dashboard" class="nav-item"><i class="fas fa-chart-line"></i><span>Dashboard</span></a>
+        <a href="/pacientes" class="nav-item active"><i class="fas fa-user-injured"></i><span>Pacientes</span></a>
+        <a href="/financeiro" class="nav-item"><i class="fas fa-hand-holding-usd"></i><span>Financeiro</span></a>
+        <a href="/agendamento" class="nav-item"><i class="fas fa-calendar-check"></i><span>Agendamento</span></a>
+        <a href="/atendimento" class="nav-item"><i class="fas fa-user-md"></i><span>Atendimento</span></a>
+        <a href="/equipe" class="nav-item"><i class="fas fa-users-cog"></i><span>Minha Equipe</span></a>
+        <a href="/dashboard/configuracoes" class="nav-item"><i class="fas fa-cogs"></i><span>Configurações</span></a>
       </nav>
-
       <div class="aside-footer">
         <a href="javascript:void(0)" onclick="handleLogout(event)" class="nav-item nav-item-danger">
           <i class="fas fa-sign-out-alt"></i><span>Sair</span>
@@ -685,24 +685,16 @@
       </div>
     </aside>
 
-    <!-- ─── Main ─── -->
     <main>
-
-      <!-- Top meta bar -->
       <div class="top-meta-bar">
         <div class="top-meta-time">
           <i class="fas fa-calendar-alt"></i>
           <span id="data-hora"></span>
         </div>
-        <button id="theme-toggle-btn">
-          <i class="fas fa-moon"></i> Modo Escuro
-        </button>
+        <button id="theme-toggle-btn"><i class="fas fa-moon"></i> Modo Escuro</button>
       </div>
 
-      <!-- Panel -->
       <div class="glass-panel">
-
-        <!-- Header row -->
         <div class="row mb-4 align-items-center g-3">
           <div class="col-md-6">
             <h1 class="panel-title">Gestão de Pacientes</h1>
@@ -716,27 +708,13 @@
           </div>
         </div>
 
-        <!-- Stats bar -->
         <div class="stats-bar mb-4" id="statsBar">
-          <div class="stat-item">
-            <span class="stat-num" id="statTotal">—</span>
-            <span class="stat-lbl">Pacientes</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-num" id="statAtivos">—</span>
-            <span class="stat-lbl">Ativos</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-num" id="statHoje">—</span>
-            <span class="stat-lbl">Agendados Hoje</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-num" id="statMes">—</span>
-            <span class="stat-lbl">No Mês</span>
-          </div>
+          <div class="stat-item"><span class="stat-num" id="statTotal">—</span><span class="stat-lbl">Pacientes</span></div>
+          <div class="stat-item"><span class="stat-num" id="statAtivos">—</span><span class="stat-lbl">Ativos</span></div>
+          <div class="stat-item"><span class="stat-num" id="statHoje">—</span><span class="stat-lbl">Agendados Hoje</span></div>
+          <div class="stat-item"><span class="stat-num" id="statMes">—</span><span class="stat-lbl">No Mês</span></div>
         </div>
 
-        <!-- Cards grid -->
         <div id="container-pacientes" class="row g-4">
           <div class="col-12">
             <div class="loading-state">
@@ -746,23 +724,49 @@
           </div>
         </div>
 
+        <!-- SEÇÃO ARQUIVADOS -->
+        <div class="archive-section" id="archiveSection">
+          <div class="archive-header">
+            <div class="archive-title-wrap">
+              <div class="archive-icon-box"><i class="fas fa-box-archive"></i></div>
+              <div>
+                <div class="archive-title">Pacientes Arquivados</div>
+                <div class="archive-sub">Prontuários preservados · listagem sob demanda</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <span class="archive-total-badge">
+                <i class="fas fa-database"></i>
+                Total: <span id="statArquivados">—</span>
+              </span>
+              <button type="button" class="btn-listar-arquivados" id="btnListarArquivados" onclick="listarArquivados()">
+                <i class="fas fa-list"></i> Listar arquivados
+              </button>
+            </div>
+          </div>
+
+          <div class="archive-toolbar" id="archiveToolbar">
+            <div class="archive-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="inputBuscaArquivados" placeholder="Filtrar por nome ou CPF..." onkeyup="filtrarArquivados()">
+            </div>
+          </div>
+
+          <div id="container-arquivados" class="row g-4"></div>
+        </div>
       </div>
     </main>
   </div>
 
-  <!-- ─── Modal Prontuário ─── -->
+  <!-- Modal Prontuário -->
   <div class="modal fade" id="modalProntuario" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">
-            <i class="fas fa-folder-open"></i> Histórico Clínico Digital
-          </h5>
+          <h5 class="modal-title"><i class="fas fa-folder-open"></i> Histórico Clínico Digital</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body" id="corpoModalProntuario">
-          <!-- Preenchido dinamicamente pelo JS -->
-        </div>
+        <div class="modal-body" id="corpoModalProntuario"></div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Fechar Registro</button>
         </div>
@@ -770,29 +774,68 @@
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- Modal Sem Permissão -->
+  <div class="perm-modal-overlay" id="permModal">
+    <div class="perm-modal">
+      <div class="perm-icon"><i class="fas fa-lock"></i></div>
+      <h3>Acesso Negado</h3>
+      <span class="perm-cargo" id="permCargoLabel">Seu cargo</span>
+      <p>Você não tem permissão para arquivar ou restaurar pacientes.<br>
+         Apenas profissionais de saúde e gestores (exceto <strong>Admin</strong> e <strong>Recepção</strong>) podem realizar essa ação.</p>
+      <button class="btn-entendi" onclick="fecharPermModal()">Entendi</button>
+    </div>
+  </div>
+
+  <!-- Modal Confirmação -->
+  <div class="confirm-modal-overlay" id="confirmModal">
+    <div class="confirm-modal">
+      <div class="perm-icon" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.25);color:#fbbf24;">
+        <i class="fas fa-box-archive"></i>
+      </div>
+      <h3 id="confirmTitle">Arquivar paciente?</h3>
+      <p id="confirmMsg">O paciente sairá da lista ativa, mas o prontuário será preservado.</p>
+      <div class="btns">
+        <button class="btn-cancel" onclick="fecharConfirmModal()">Cancelar</button>
+        <button class="btn-confirm" id="btnConfirmAction">Sim, arquivar</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script>
-    // ─── CARREGAR PACIENTES (lógica original preservada + stats) ───
+    const CARGOS_BLOQUEADOS = ['admin', 'recepcao'];
+
+    function getCargoUsuario() {
+      return (
+        localStorage.getItem('medlm_user_cargo') ||
+        localStorage.getItem('user_cargo') ||
+        localStorage.getItem('cargo') ||
+        ''
+      ).toLowerCase().trim();
+    }
+
+    function podeArquivarPaciente() {
+      const cargo = getCargoUsuario();
+      if (!cargo) return false;
+      return !CARGOS_BLOQUEADOS.includes(cargo);
+    }
+
     async function carregarPacientes() {
       try {
         const token = localStorage.getItem('token');
         const res = await fetch('/api/pacientes', {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         const pacientes = await res.json();
 
         if (!Array.isArray(pacientes)) {
-          console.error("Backend retornou erro ou formato inválido:", pacientes);
+          console.error('Backend retornou formato inválido:', pacientes);
           return;
         }
 
-        // Atualizar stats bar
         document.getElementById('statTotal').textContent = pacientes.length;
         document.getElementById('statAtivos').textContent = pacientes.length;
-        const hoje = new Date().toDateString();
         document.getElementById('statHoje').textContent = '—';
         document.getElementById('statMes').textContent = '—';
 
@@ -803,58 +846,47 @@
             <div class="col-12">
               <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-user-slash"></i></div>
-                <p class="empty-title">Nenhum paciente cadastrado</p>
-                <p class="empty-sub">Adicione pacientes via agendamento para visualizá-los aqui.</p>
+                <p class="empty-title">Nenhum paciente ativo</p>
+                <p class="empty-sub">Adicione pacientes via agendamento ou restaure um arquivado.</p>
               </div>
             </div>`;
-          return;
-        }
-
-        container.innerHTML = pacientes.map(p => `
-          <div class="col-md-6 col-lg-4 item-paciente">
-            <div class="patient-card">
-              <div class="card-body">
-                <div class="d-flex align-items-center mb-3 gap-3">
-                  <div class="card-avatar-box">
-                    <i class="fas fa-user"></i>
+        } else {
+          container.innerHTML = pacientes.map(p => `
+            <div class="col-md-6 col-lg-4 item-paciente">
+              <div class="patient-card">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="card-avatar-box"><i class="fas fa-user"></i></div>
+                    <div style="flex:1;min-width:0">
+                      <h5 class="patient-name text-truncate">${p.nome}</h5>
+                      <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
+                    </div>
                   </div>
-                  <div style="flex:1;min-width:0">
-                    <h5 class="patient-name text-truncate">${p.nome}</h5>
-                    <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
+                  <div class="mb-3">
+                    <p class="patient-info-row"><i class="fas fa-phone"></i><span class="text-truncate">${p.telefone || '—'}</span></p>
+                    <p class="patient-info-row" style="margin-bottom:0"><i class="fas fa-envelope"></i><span class="text-truncate">${p.email || '—'}</span></p>
                   </div>
-                </div>
-
-                <div class="mb-3">
-                  <p class="patient-info-row">
-                    <i class="fas fa-phone"></i>
-                    <span class="text-truncate">${p.telefone || '—'}</span>
-                  </p>
-                  <p class="patient-info-row" style="margin-bottom:0">
-                    <i class="fas fa-envelope"></i>
-                    <span class="text-truncate">${p.email || '—'}</span>
-                  </p>
-                </div>
-
-                <div class="card-divider"></div>
-
-                <div class="d-flex align-items-center gap-2">
-                  <a href="/atendimento?pacienteId=${p.id}" class="btn-action-atender">
-                    <i class="fas fa-user-md"></i> Atender
-                  </a>
-                  <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
-                    <i class="fas fa-file-medical"></i>
-                  </button>
-                  <button class="btn-action-delete" onclick="deletarPaciente(${p.id})" title="Excluir Registro">
-                    <i class="fas fa-trash"></i>
-                  </button>
+                  <div class="card-divider"></div>
+                  <div class="d-flex align-items-center gap-2">
+                    <a href="/atendimento?pacienteId=${p.id}" class="btn-action-atender">
+                      <i class="fas fa-user-md"></i> Atender
+                    </a>
+                    <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
+                      <i class="fas fa-file-medical"></i>
+                    </button>
+                    <button class="btn-action-archive" onclick="solicitarArquivamento(${p.id}, '${(p.nome || '').replace(/'/g, "\\'")}')" title="Arquivar paciente">
+                      <i class="fas fa-box-archive"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        `).join('');
+          `).join('');
+        }
 
+        carregarTotalArquivados();
       } catch (e) {
-        console.error("Erro fatal ao buscar carteira de pacientes", e);
+        console.error(e);
         document.getElementById('container-pacientes').innerHTML = `
           <div class="col-12">
             <div class="empty-state">
@@ -866,11 +898,221 @@
       }
     }
 
-    // ─── VER PRONTUÁRIO (lógica original preservada + dark styling) ───
+    async function carregarTotalArquivados() {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/arquivados?somenteTotal=1', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const total = data.total ?? (Array.isArray(data.pacientes) ? data.pacientes.length : (Array.isArray(data) ? data.length : 0));
+        document.getElementById('statArquivados').textContent = total;
+      } catch (e) {
+        document.getElementById('statArquivados').textContent = '—';
+      }
+    }
+
+    let arquivadosCarregados = false;
+
+    async function listarArquivados() {
+      const container = document.getElementById('container-arquivados');
+      const toolbar = document.getElementById('archiveToolbar');
+      const btn = document.getElementById('btnListarArquivados');
+
+      container.classList.add('visible');
+      toolbar.classList.add('visible');
+      container.innerHTML = `
+        <div class="col-12">
+          <div class="loading-state" style="padding:40px 0">
+            <div class="loading-ring"></div>
+            <p class="loading-text">Carregando arquivados...</p>
+          </div>
+        </div>`;
+
+      btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Carregando...';
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/arquivados', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const lista = Array.isArray(data) ? data : (data.pacientes || []);
+
+        document.getElementById('statArquivados').textContent = data.total ?? lista.length;
+        arquivadosCarregados = true;
+        btn.innerHTML = '<i class="fas fa-sync"></i> Atualizar lista';
+
+        if (lista.length === 0) {
+          container.innerHTML = `
+            <div class="col-12">
+              <div class="empty-state" style="padding:36px 0">
+                <div class="empty-icon" style="color:#fbbf24;border-color:rgba(251,191,36,0.25)"><i class="fas fa-box-open"></i></div>
+                <p class="empty-title">Nenhum paciente arquivado</p>
+                <p class="empty-sub">Quando arquivar alguém, ele aparecerá aqui.</p>
+              </div>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = lista.map(p => {
+          const dataArq = p.arquivado_em
+            ? new Date(p.arquivado_em).toLocaleDateString('pt-BR')
+            : '—';
+          return `
+            <div class="col-md-6 col-lg-4 item-arquivado">
+              <div class="patient-card archived">
+                <div class="card-body">
+                  <div class="d-flex align-items-center mb-3 gap-3">
+                    <div class="card-avatar-box" style="border-color:rgba(251,191,36,0.3);background:rgba(251,191,36,0.08)">
+                      <i class="fas fa-user" style="color:#fbbf24"></i>
+                    </div>
+                    <div style="flex:1;min-width:0">
+                      <h5 class="patient-name text-truncate">${p.nome}</h5>
+                      <span class="patient-cpf"><i class="fas fa-id-card" style="font-size:9px"></i> ${p.cpf || 'Não informado'}</span>
+                      <div style="margin-top:6px"><span class="badge-arquivado"><i class="fas fa-box-archive"></i> Arquivado</span></div>
+                    </div>
+                  </div>
+                  <div class="mb-2">
+                    <p class="patient-info-row"><i class="fas fa-phone"></i><span>${p.telefone || '—'}</span></p>
+                    <p class="patient-info-row" style="margin-bottom:0"><i class="far fa-calendar"></i><span>Arquivado em ${dataArq}</span></p>
+                  </div>
+                  <div class="card-divider"></div>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn-action-restore" onclick="restaurarPaciente(${p.id}, '${(p.nome || '').replace(/'/g, "\\'")}')">
+                      <i class="fas fa-undo"></i> Restaurar
+                    </button>
+                    <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
+                      <i class="fas fa-file-medical"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        btn.innerHTML = '<i class="fas fa-list"></i> Listar arquivados';
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="empty-state">
+              <div class="empty-icon" style="color:var(--red)"><i class="fas fa-exclamation-triangle"></i></div>
+              <p class="empty-title">Erro ao listar arquivados</p>
+              <p class="empty-sub">Tente novamente em instantes.</p>
+            </div>
+          </div>`;
+      }
+    }
+
+    function filtrarArquivados() {
+      const termo = (document.getElementById('inputBuscaArquivados')?.value || '').toLowerCase();
+      document.querySelectorAll('.item-arquivado').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(termo) ? '' : 'none';
+      });
+    }
+
+    let pacienteParaArquivar = null;
+    let pacienteParaRestaurar = null;
+    let acaoConfirmacao = null;
+
+    function solicitarArquivamento(id, nome) {
+      if (!podeArquivarPaciente()) {
+        document.getElementById('permCargoLabel').textContent = getCargoUsuario() || 'desconhecido';
+        document.getElementById('permModal').classList.add('open');
+        return;
+      }
+      acaoConfirmacao = 'arquivar';
+      pacienteParaArquivar = id;
+      document.getElementById('confirmTitle').textContent = 'Arquivar paciente?';
+      document.getElementById('confirmMsg').innerHTML =
+        `Deseja arquivar <strong style="color:#f1f5f9">${nome}</strong>?<br>
+         O paciente sairá da lista ativa, mas o prontuário e o histórico serão preservados.`;
+      document.getElementById('btnConfirmAction').textContent = 'Sim, arquivar';
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function restaurarPaciente(id, nome) {
+      if (!podeArquivarPaciente()) {
+        document.getElementById('permCargoLabel').textContent = getCargoUsuario() || 'desconhecido';
+        document.getElementById('permModal').classList.add('open');
+        return;
+      }
+      acaoConfirmacao = 'restaurar';
+      pacienteParaRestaurar = id;
+      document.getElementById('confirmTitle').textContent = 'Restaurar paciente?';
+      document.getElementById('confirmMsg').innerHTML =
+        `Deseja restaurar <strong style="color:#f1f5f9">${nome}</strong>?<br>
+         Ele voltará para a lista de pacientes ativos.`;
+      document.getElementById('btnConfirmAction').textContent = 'Sim, restaurar';
+      document.getElementById('confirmModal').classList.add('open');
+    }
+
+    function fecharPermModal() {
+      document.getElementById('permModal').classList.remove('open');
+    }
+
+    function fecharConfirmModal() {
+      document.getElementById('confirmModal').classList.remove('open');
+      pacienteParaArquivar = null;
+      pacienteParaRestaurar = null;
+      acaoConfirmacao = null;
+    }
+
+    document.getElementById('btnConfirmAction').addEventListener('click', async () => {
+      const token = localStorage.getItem('token');
+
+      if (acaoConfirmacao === 'arquivar' && pacienteParaArquivar) {
+        const id = pacienteParaArquivar;
+        fecharConfirmModal();
+        try {
+          const res = await fetch(`/api/pacientes/${id}/arquivar`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ motivo: 'Arquivado pela tela de pacientes' })
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            alert(data.message || data.erro || 'Não foi possível arquivar.');
+            return;
+          }
+          await carregarPacientes();
+          if (arquivadosCarregados) listarArquivados();
+          else carregarTotalArquivados();
+        } catch (err) {
+          console.error(err);
+          alert('Erro de conexão ao arquivar.');
+        }
+        return;
+      }
+
+      if (acaoConfirmacao === 'restaurar' && pacienteParaRestaurar) {
+        const id = pacienteParaRestaurar;
+        fecharConfirmModal();
+        try {
+          const res = await fetch(`/api/pacientes/${id}/restaurar`, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json().catch(() => ({}));
+          if (!res.ok) {
+            alert(data.message || data.erro || 'Não foi possível restaurar.');
+            return;
+          }
+          await carregarPacientes();
+          listarArquivados();
+        } catch (err) {
+          console.error(err);
+          alert('Erro de conexão ao restaurar.');
+        }
+      }
+    });
+
     async function verProntuario(id) {
       const modalProntuarioEl = document.getElementById('modalProntuario');
       const conteudo = document.getElementById('corpoModalProntuario');
-
       if (!conteudo) return;
 
       conteudo.innerHTML = `
@@ -887,37 +1129,23 @@
         const res = await fetch(`/api/pacientes/${id}/prontuario`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-
         if (!res.ok) throw new Error();
         const data = await res.json();
 
         conteudo.innerHTML = `
           <div class="row g-3 mb-4">
             <div class="col-md-4 text-center d-flex flex-column align-items-center justify-content-center" style="border-right:1px solid var(--border)">
-              <img src="${data.dados.foto_perfil ? '/uploads/'+data.dados.foto_perfil : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}"
-                   class="modal-prontuario-avatar mb-3">
+              <img src="${data.dados.foto_perfil ? '/uploads/'+data.dados.foto_perfil : 'https://cdn-icons-png.flaticon.com/512/149/149071.png'}" class="modal-prontuario-avatar mb-3">
               <h5 class="modal-patient-name mb-2">${data.dados.nome}</h5>
               <span class="modal-active-badge">Ficha Ativa</span>
             </div>
             <div class="col-md-8">
               <div class="modal-info-grid">
                 <div class="row g-3">
-                  <div class="col-6">
-                    <span class="modal-info-label">Idade</span>
-                    <span class="modal-info-val">${data.dados.idade || '—'} anos</span>
-                  </div>
-                  <div class="col-6">
-                    <span class="modal-info-label">Grupo Sanguíneo</span>
-                    <span class="modal-blood-badge">${data.dados.tipo_sanguineo || 'N/A'}</span>
-                  </div>
-                  <div class="col-6">
-                    <span class="modal-info-label">Massa Corporal</span>
-                    <span class="modal-info-val">${data.dados.peso || '—'} kg</span>
-                  </div>
-                  <div class="col-6">
-                    <span class="modal-info-label">Estatura</span>
-                    <span class="modal-info-val">${data.dados.altura || '—'} m</span>
-                  </div>
+                  <div class="col-6"><span class="modal-info-label">Idade</span><span class="modal-info-val">${data.dados.idade || '—'} anos</span></div>
+                  <div class="col-6"><span class="modal-info-label">Grupo Sanguíneo</span><span class="modal-blood-badge">${data.dados.tipo_sanguineo || 'N/A'}</span></div>
+                  <div class="col-6"><span class="modal-info-label">Massa Corporal</span><span class="modal-info-val">${data.dados.peso || '—'} kg</span></div>
+                  <div class="col-6"><span class="modal-info-label">Estatura</span><span class="modal-info-val">${data.dados.altura || '—'} m</span></div>
                 </div>
               </div>
               <div class="modal-conditions mt-3">
@@ -926,55 +1154,61 @@
               </div>
             </div>
           </div>
-
-          <div class="modal-history-title">
-            <i class="fas fa-clock-rotate-left"></i> Evolução Temporal de Sessões
-          </div>
-
+          <div class="modal-history-title"><i class="fas fa-clock-rotate-left"></i> Evolução Temporal de Sessões</div>
           <div>
             ${data.consultas && data.consultas.length > 0
               ? data.consultas.map(c => `
                   <div class="history-line">
-                    <span class="history-date">
-                      ${new Date(c.data_agendamento.replace('T',' ').replace('Z','')).toLocaleDateString('pt-BR')}
-                    </span>
+                    <span class="history-date">${new Date(c.data_agendamento.replace('T',' ').replace('Z','')).toLocaleDateString('pt-BR')}</span>
                     <p class="history-therapy">${c.tipo_terapia}</p>
                     <p class="history-notes">${c.motivo_consulta || 'Sem notas complementares.'}</p>
                   </div>`).join('')
               : `<div class="empty-state" style="padding:28px 0">
                    <div class="empty-icon"><i class="fas fa-calendar-times"></i></div>
                    <p class="empty-title" style="font-size:14px">Sem sessões registradas</p>
-                   <p class="empty-sub">Nenhuma sessão pregressa localizada no banco.</p>
                  </div>`
             }
-          </div>
-        `;
+          </div>`;
       } catch (e) {
         conteudo.innerHTML = `
           <div class="modal-error">
             <i class="fas fa-exclamation-triangle fa-2x mb-3 d-block"></i>
-            <p style="font-weight:700;margin-bottom:4px">Falha ao recuperar prontuário</p>
-            <p style="font-size:12px;color:rgba(248,113,113,0.7);margin:0">Erro estrutural ao recuperar prontuário eletrônico.</p>
+            <p style="font-weight:700">Falha ao recuperar prontuário</p>
           </div>`;
       }
     }
 
-    // ─── FILTRO DE BUSCA (lógica original corrigida) ───
     function filtrarPacientes() {
       const termo = document.getElementById('inputBusca').value.toLowerCase();
-      const cards = document.querySelectorAll('.item-paciente');
-
-      cards.forEach(card => {
-        const texto = card.innerText.toLowerCase();
-        card.style.display = texto.includes(termo) ? '' : 'none';
+      document.querySelectorAll('.item-paciente').forEach(card => {
+        card.style.display = card.innerText.toLowerCase().includes(termo) ? '' : 'none';
       });
     }
 
-    // ─── Inicialização ───
+    (function () {
+      const btnOpen = document.getElementById('btnOpenDrawer');
+      const btnClose = document.getElementById('btnCloseDrawer');
+      const drawer = document.getElementById('mobileDrawer');
+      const overlay = document.getElementById('drawerOverlay');
+      function openDrawer() {
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeDrawer() {
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+      if (btnOpen) btnOpen.addEventListener('click', openDrawer);
+      if (btnClose) btnClose.addEventListener('click', closeDrawer);
+      if (overlay) overlay.addEventListener('click', closeDrawer);
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+    })();
+
     carregarPacientes();
   </script>
 
-  <!-- Scripts Globais do Ecossistema (preservados) -->
   <script src="../ScriptGlobal/FuncDataHora.js"></script>
   <script src="../ScriptGlobal/DarkMode.js"></script>
   <script src="../ScriptGlobal/verifiLog.js"></script>
