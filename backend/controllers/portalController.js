@@ -270,12 +270,9 @@ exports.criarAgendamento = async (req, res) => {
     if (!adminId) throw new Error("Clínica sem usuário administrador configurado.");
 
     // ── Define o status inicial do agendamento ──
-    // Sem sinal (fluxo atual): o agendamento já nasce 'confirmado' — o horário é
-    // reservado direto, sem nenhuma cobrança pendente, já que não há sinal a
-    // aguardar.
-    // Com plataforma (fluxo futuro): nasce 'aguardando_sinal' até o gateway
-    // confirmar o pagamento via webhook (esse valor já existe no ENUM do banco).
-    const statusInicial = pagamentoViaPlataforma ? 'aguardando_sinal' : 'confirmado';
+    // Fluxo atual (sem gateway): sempre 'aguardando_sinal'
+    // Fluxo futuro (com gateway): também 'aguardando_sinal' até o webhook confirmar
+    const statusInicial = 'aguardando_sinal';
 
     // CRIAR O AGENDAMENTO
     const dataAgendamentoCompleta = `${data} ${horario}`;
