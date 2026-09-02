@@ -50,4 +50,10 @@ router.patch(
 router.patch('/:id/arquivar', auth, pacientesController.arquivarPaciente);
 router.patch('/:id/restaurar', auth, pacientesController.restaurarPaciente);
 
+// Atualizar cadastro
+router.patch('/:id', auth, pacientesController.atualizarPaciente);
+
+// Enviar token de acesso ao portal
+router.post('/:id/enviar-token', auth, pacientesController.enviarTokenAcesso);
+
 module.exports = router;

@@ -15,6 +15,7 @@ const financeiroRoutes = require('./routes/financeiroRoutes');
 const financeiroLogger = require('./middleware/financeiroLogger');
 
 const pacienteRoutes = require('./routes/pacienteRoutes');
+const patientDocumentRoutes = require('./routes/PatienteDocumentRoutes');
 const prontuarioRoutes = require('./routes/prontuarioRoutes'); // 🌟 1. Importa as rotas de prontuário
 const usuarioRoutes = require('./routes/usuarioRoutes');
 const agendamentoRoutes = require('./routes/agendamentoRoutes');
@@ -73,7 +74,10 @@ app.use(session({
 app.use('/api/auth', authRoutes);
 app.use('/api/clinicas', cadastroClinicaRoutes);
 app.use('/api/pacientes', pacienteRoutes);
+app.use('/api/pacientes', patientDocumentRoutes);
+
 app.use('/api/prontuarios', prontuarioRoutes); // 🌟 2. Mapeia a API de prontuários
+
 app.use('/api/agendamentos', agendamentoRoutes);
 app.use('/api/equipe', equipeRoutes);
 app.use('/api/usuarios', usuarioRoutes);

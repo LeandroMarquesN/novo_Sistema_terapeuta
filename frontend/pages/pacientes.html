@@ -265,8 +265,17 @@
       color: var(--cyan); border-radius: 11px; width: 38px; height: 38px;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.22s; cursor: pointer; font-size: 13px;
+      flex-shrink: 0;
     }
     .btn-action-outline:hover { background: rgba(34,211,238,0.18); box-shadow: 0 0 14px rgba(34,211,238,0.2); }
+    .btn-action-purple {
+      background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.25);
+      color: var(--purple); border-radius: 11px; width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.22s; cursor: pointer; font-size: 13px;
+      flex-shrink: 0;
+    }
+    .btn-action-purple:hover { background: rgba(167,139,250,0.18); box-shadow: 0 0 14px rgba(167,139,250,0.2); }
     .btn-action-archive {
       background: rgba(251, 191, 36, 0.08);
       border: 1px solid rgba(251, 191, 36, 0.25);
@@ -275,6 +284,7 @@
       width: 38px; height: 38px;
       display: flex; align-items: center; justify-content: center;
       transition: all 0.22s; cursor: pointer; font-size: 13px;
+      flex-shrink: 0;
     }
     .btn-action-archive:hover {
       background: rgba(251, 191, 36, 0.18);
@@ -439,28 +449,43 @@
       color: #fbbf24; font-weight: 800; font-size: 13px; cursor: pointer;
     }
 
-    #modalProntuario .modal-content {
+    #modalProntuario .modal-content,
+    #modalEditarPaciente .modal-content,
+    #modalVisualizarDocumento .modal-content {
       background: rgba(2,12,18,0.97) !important; border: 1px solid var(--border) !important;
       border-radius: 22px !important; backdrop-filter: blur(28px); color: #e2e8f0 !important;
     }
-    #modalProntuario .modal-header {
+    #modalProntuario .modal-header,
+    #modalEditarPaciente .modal-header,
+    #modalVisualizarDocumento .modal-header {
       border-bottom: 1px solid var(--border) !important;
       background: rgba(52,211,153,0.04) !important;
       border-radius: 22px 22px 0 0 !important; padding: 20px 24px !important;
     }
-    #modalProntuario .modal-title {
+    #modalProntuario .modal-title,
+    #modalEditarPaciente .modal-title,
+    #modalVisualizarDocumento .modal-title {
       font-family: 'Space Grotesk', sans-serif; color: #f1f5f9 !important; font-weight: 800;
       display: flex; align-items: center; gap: 8px;
     }
-    #modalProntuario .modal-title i { color: var(--cyan) !important; }
-    #modalProntuario .btn-close { filter: invert(1) opacity(0.4); }
-    #modalProntuario .modal-body { padding: 24px !important; }
-    #modalProntuario .modal-footer {
+    #modalProntuario .modal-title i,
+    #modalEditarPaciente .modal-title i,
+    #modalVisualizarDocumento .modal-title i { color: var(--cyan) !important; }
+    #modalProntuario .btn-close,
+    #modalEditarPaciente .btn-close,
+    #modalVisualizarDocumento .btn-close { filter: invert(1) opacity(0.4); }
+    #modalProntuario .modal-body,
+    #modalEditarPaciente .modal-body { padding: 24px !important; }
+    #modalProntuario .modal-footer,
+    #modalEditarPaciente .modal-footer,
+    #modalVisualizarDocumento .modal-footer {
       border-top: 1px solid var(--border) !important;
       background: rgba(255,255,255,0.02) !important;
       border-radius: 0 0 22px 22px !important; padding: 16px 24px !important;
     }
-    #modalProntuario .btn-secondary {
+    #modalProntuario .btn-secondary,
+    #modalEditarPaciente .btn-secondary,
+    #modalVisualizarDocumento .btn-secondary {
       background: rgba(255,255,255,0.05) !important; border: 1px solid var(--border) !important;
       color: rgba(148,163,184,0.7) !important; border-radius: 11px !important; font-weight: 700;
     }
@@ -491,12 +516,38 @@
     }
     .modal-conditions { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 13px; padding: 14px; font-size: 13px; color: rgba(203,213,225,0.7); line-height: 1.6; }
     .modal-conditions-title { font-size: 10px; font-weight: 800; color: rgba(148,163,184,0.4); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
-    .modal-history-title { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--cyan); display: flex; align-items: center; gap: 7px; margin-bottom: 14px; margin-top: 20px; }
+    .modal-history-title {
+      font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: var(--cyan);
+      display: flex; align-items: center; justify-content: space-between; gap: 7px;
+      margin-bottom: 14px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .modal-history-title .title-left { display: flex; align-items: center; gap: 7px; }
     .history-line { background: rgba(255,255,255,0.02); border: 1px solid rgba(52,211,153,0.08); border-left: 2px solid rgba(52,211,153,0.3); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
     .history-date { display: inline-flex; align-items: center; background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.22); color: var(--cyan); font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 7px; }
     .history-therapy { font-size: 13px; font-weight: 700; color: #e2e8f0; margin: 8px 0 4px; }
     .history-notes { font-size: 12px; color: rgba(148,163,184,0.55); }
     .modal-error { background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.22); border-radius: 14px; padding: 28px; text-align: center; color: var(--red); }
+
+    /* Documentos & Exames */
+    .doc-line {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(167,139,250,0.12);
+      border-left: 2px solid rgba(167,139,250,0.35); border-radius: 12px;
+      padding: 12px 14px; margin-bottom: 10px; cursor: pointer;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      flex-wrap: wrap; transition: background 0.2s;
+    }
+    .doc-line:hover { background: rgba(167,139,250,0.06); }
+    .doc-line-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .doc-line-left i { color: var(--purple); font-size: 16px; flex-shrink: 0; }
+    .doc-name { font-size: 13px; font-weight: 700; color: #e2e8f0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .btn-add-doc {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.3);
+      color: var(--purple); font-size: 11px; font-weight: 800;
+      padding: 6px 12px; border-radius: 10px; cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif; transition: all 0.22s;
+    }
+    .btn-add-doc:hover { background: rgba(167,139,250,0.2); box-shadow: 0 0 12px rgba(167,139,250,0.2); }
 
     .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer, .mobile-only { display: none; }
 
@@ -610,6 +661,13 @@
       .btn-listar-arquivados { width: 100%; justify-content: center; }
       .archive-toolbar { flex-direction: column; }
       .archive-search { width: 100%; min-width: 0; }
+      .doc-name { max-width: 140px; }
+    }
+
+    /* Ajustes finos de responsividade para os novos modais em telas muito pequenas */
+    @media (max-width: 480px) {
+      .card-body .d-flex.align-items-center.gap-2 { row-gap: 8px !important; }
+      .btn-action-atender { flex-basis: 100%; }
     }
   </style>
 </head>
@@ -758,8 +816,9 @@
     </main>
   </div>
 
+  <!-- Modal: Prontuário / Histórico -->
   <div class="modal fade" id="modalProntuario" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-sm-down">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title"><i class="fas fa-folder-open"></i> Histórico Clínico Digital</h5>
@@ -772,6 +831,84 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal: Atualizar Cadastro -->
+  <div class="modal fade" id="modalEditarPaciente" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-fullscreen-sm-down">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="fas fa-user-edit"></i> Atualizar Cadastro</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="formEditarPaciente" class="row g-3">
+            <input type="hidden" id="editPacienteId">
+            <div class="col-md-8">
+              <label class="modal-info-label">Nome</label>
+              <input type="text" id="editNome" class="search-bar form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="modal-info-label">CPF</label>
+              <input type="text" id="editCpf" class="search-bar form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="modal-info-label">Telefone</label>
+              <input type="text" id="editTelefone" class="search-bar form-control">
+            </div>
+            <div class="col-md-6">
+              <label class="modal-info-label">E-mail</label>
+              <input type="email" id="editEmail" class="search-bar form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="modal-info-label">Tipo Sanguíneo</label>
+              <input type="text" id="editTipoSanguineo" class="search-bar form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="modal-info-label">Peso (kg)</label>
+              <input type="number" step="0.1" id="editPeso" class="search-bar form-control">
+            </div>
+            <div class="col-md-4">
+              <label class="modal-info-label">Altura (m)</label>
+              <input type="number" step="0.01" id="editAltura" class="search-bar form-control">
+            </div>
+            <div class="col-12">
+              <label class="modal-info-label">Condições Pré-existentes</label>
+              <textarea id="editCondicoes" class="search-bar form-control" rows="3" style="padding-top:11px;padding-left:16px;"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn-action-atender" style="flex:none" onclick="salvarEdicaoPaciente()">
+            <i class="fas fa-save"></i> Salvar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Visualizador de Documentos/Exames (responsivo) -->
+  <div class="modal fade" id="modalVisualizarDocumento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen-sm-down modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tituloDocumentoModal"><i class="fas fa-file-medical"></i> Documento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-0" style="min-height:60vh;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.25)">
+          <div id="corpoVisualizadorDocumento" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"></div>
+        </div>
+        <div class="modal-footer">
+          <a id="linkDownloadDocumento" href="#" target="_blank" rel="noopener" class="btn btn-secondary rounded-pill px-4">
+            <i class="fas fa-download"></i> Abrir em nova aba
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input de upload de documento (oculto, disparado pelo botão dentro do prontuário) -->
+  <input type="file" id="inputNovoDocumento" accept=".pdf,image/*" style="display:none" onchange="enviarDocumentoPaciente(this)">
 
   <div class="perm-modal-overlay" id="permModal">
     <div class="perm-modal">
@@ -821,9 +958,7 @@
 
     function urlFotoPaciente(foto) {
       if (!foto) return FOTO_PADRAO;
-      // URL completa do Cloudinary (ou qualquer https)
       if (/^https?:\/\//i.test(foto)) return foto;
-      // Compatibilidade com paths antigos em /uploads
       return '/uploads/' + String(foto).replace(/^\/+/, '');
     }
 
@@ -929,12 +1064,18 @@
                     <p class="patient-info-row" style="margin-bottom:0"><i class="fas fa-envelope"></i><span class="text-truncate">${p.email || '—'}</span></p>
                   </div>
                   <div class="card-divider"></div>
-                  <div class="d-flex align-items-center gap-2">
+                  <div class="d-flex align-items-center gap-2 flex-wrap">
                     <a href="/atendimento?pacienteId=${p.id}" class="btn-action-atender">
                       <i class="fas fa-user-md"></i> Atender
                     </a>
                     <button class="btn-action-outline" onclick="verProntuario(${p.id})" title="Ver Prontuário">
                       <i class="fas fa-file-medical"></i>
+                    </button>
+                    <button class="btn-action-outline" onclick="abrirEdicaoPaciente(${p.id})" title="Atualizar Cadastro">
+                      <i class="fas fa-user-edit"></i>
+                    </button>
+                    <button class="btn-action-purple" onclick="enviarTokenAcesso(${p.id}, '${nomeEsc}')" title="Enviar Token de Acesso">
+                      <i class="fas fa-key"></i>
                     </button>
                     <button class="btn-action-outline" onclick="abrirSeletorFoto(${p.id})" title="Foto do paciente">
                       <i class="fas fa-camera"></i>
@@ -1182,10 +1323,15 @@
       }
     });
 
+    // ── PRONTUÁRIO ─────────────────────────────────────────
+    let pacienteAtualProntuarioId = null;
+
     async function verProntuario(id) {
       const modalProntuarioEl = document.getElementById('modalProntuario');
       const conteudo = document.getElementById('corpoModalProntuario');
       if (!conteudo) return;
+
+      pacienteAtualProntuarioId = id;
 
       conteudo.innerHTML = `
         <div class="loading-state" style="padding:40px 0">
@@ -1242,13 +1388,210 @@
                    <p class="empty-title" style="font-size:14px">Sem sessões registradas</p>
                  </div>`
             }
-          </div>`;
+          </div>
+          <div class="modal-history-title">
+            <div class="title-left"><i class="fas fa-file-medical-alt"></i> Exames &amp; Documentos</div>
+            <button type="button" class="btn-add-doc" onclick="document.getElementById('inputNovoDocumento').click()">
+              <i class="fas fa-plus"></i> Adicionar
+            </button>
+          </div>
+          <div id="blocoDocumentosPaciente"></div>`;
+
+        carregarDocumentosPaciente(id);
       } catch (e) {
         conteudo.innerHTML = `
           <div class="modal-error">
             <i class="fas fa-exclamation-triangle fa-2x mb-3 d-block"></i>
             <p style="font-weight:700">Falha ao recuperar prontuário</p>
           </div>`;
+      }
+    }
+
+    // ── ATUALIZAR CADASTRO ────────────────────────────────
+    async function abrirEdicaoPaciente(id) {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/' + id + '/prontuario', {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json();
+        const p = data.dados;
+
+        document.getElementById('editPacienteId').value = p.id;
+        document.getElementById('editNome').value = p.nome || '';
+        document.getElementById('editCpf').value = p.cpf || '';
+        document.getElementById('editTelefone').value = p.telefone || '';
+        document.getElementById('editEmail').value = p.email || '';
+        document.getElementById('editTipoSanguineo').value = p.tipo_sanguineo || '';
+        document.getElementById('editPeso').value = p.peso || '';
+        document.getElementById('editAltura').value = p.altura || '';
+        document.getElementById('editCondicoes').value = p.condicoes_preexistentes || '';
+
+        new bootstrap.Modal(document.getElementById('modalEditarPaciente')).show();
+      } catch (e) {
+        console.error(e);
+        alert('Não foi possível carregar os dados do paciente.');
+      }
+    }
+
+    async function salvarEdicaoPaciente() {
+      const id = document.getElementById('editPacienteId').value;
+      const payload = {
+        nome: document.getElementById('editNome').value,
+        cpf: document.getElementById('editCpf').value,
+        telefone: document.getElementById('editTelefone').value,
+        email: document.getElementById('editEmail').value,
+        tipo_sanguineo: document.getElementById('editTipoSanguineo').value,
+        peso: document.getElementById('editPeso').value || null,
+        altura: document.getElementById('editAltura').value || null,
+        condicoes_preexistentes: document.getElementById('editCondicoes').value
+      };
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/' + id, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': 'Bearer ' + token,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert(data.message || 'Não foi possível atualizar o cadastro.');
+          return;
+        }
+
+        bootstrap.Modal.getInstance(document.getElementById('modalEditarPaciente')).hide();
+        await carregarPacientes();
+      } catch (e) {
+        console.error(e);
+        alert('Erro de conexão ao salvar cadastro.');
+      }
+    }
+
+    // ── ENVIAR TOKEN DE ACESSO ────────────────────────────
+    async function enviarTokenAcesso(id, nome) {
+      if (!confirm(`Enviar link de acesso ao portal para ${nome}?`)) return;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/' + id + '/enviar-token', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert(data.message || 'Não foi possível enviar o token.');
+          return;
+        }
+        alert(data.message);
+      } catch (e) {
+        console.error(e);
+        alert('Erro de conexão ao enviar token.');
+      }
+    }
+
+    // ── DOCUMENTOS / EXAMES ───────────────────────────────
+    async function carregarDocumentosPaciente(id) {
+      const wrap = document.getElementById('blocoDocumentosPaciente');
+      if (!wrap) return;
+
+      wrap.innerHTML = `<div class="loading-state" style="padding:20px 0"><div class="loading-ring"></div></div>`;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/pacientes/documentos/paciente/' + id, {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        const data = await res.json();
+        const docs = data.documentos || [];
+
+        if (docs.length === 0) {
+          wrap.innerHTML = `<p class="history-notes" style="padding:8px 0">Nenhum exame ou documento anexado.</p>`;
+          return;
+        }
+
+        wrap.innerHTML = docs.map(doc => {
+          const ehImagem = doc.mime_type?.startsWith('image/');
+          const ehPdf = doc.mime_type === 'application/pdf';
+          const icone = ehImagem ? 'fa-file-image' : ehPdf ? 'fa-file-pdf' : 'fa-file';
+          return `
+            <div class="doc-line" onclick='abrirVisualizadorDocumento(${JSON.stringify(doc.url)}, ${JSON.stringify(doc.mime_type)}, ${JSON.stringify(doc.nome_original)})'>
+              <div class="doc-line-left">
+                <i class="fas ${icone}"></i>
+                <span class="doc-name">${doc.nome_original}</span>
+              </div>
+              <span class="history-date">${new Date(doc.criado_em).toLocaleDateString('pt-BR')}</span>
+            </div>`;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        wrap.innerHTML = `<p class="history-notes" style="padding:8px 0;color:var(--red)">Erro ao carregar documentos.</p>`;
+      }
+    }
+
+    function abrirVisualizadorDocumento(url, mimeType, nome) {
+      document.getElementById('tituloDocumentoModal').innerHTML =
+        `<i class="fas fa-file-medical"></i> ${nome}`;
+      document.getElementById('linkDownloadDocumento').href = url;
+
+      const corpo = document.getElementById('corpoVisualizadorDocumento');
+      if (mimeType?.startsWith('image/')) {
+        corpo.innerHTML = `<img src="${url}" style="max-width:100%;max-height:75vh;object-fit:contain;">`;
+      } else if (mimeType === 'application/pdf') {
+        corpo.innerHTML = `<iframe src="${url}" style="width:100%;height:75vh;border:none;"></iframe>`;
+      } else {
+        corpo.innerHTML = `<p class="history-notes" style="padding:30px">Prévia não disponível para este tipo de arquivo. Use "Abrir em nova aba".</p>`;
+      }
+
+      new bootstrap.Modal(document.getElementById('modalVisualizarDocumento')).show();
+    }
+
+    async function enviarDocumentoPaciente(input) {
+      if (!input.files || !input.files[0] || !pacienteAtualProntuarioId) return;
+
+      const arquivo = input.files[0];
+      const permitido = arquivo.type === 'application/pdf' || arquivo.type.startsWith('image/');
+      if (!permitido) {
+        alert('Envie apenas arquivos PDF ou imagem.');
+        input.value = '';
+        return;
+      }
+      if (arquivo.size > 10 * 1024 * 1024) {
+        alert('O arquivo deve ter no máximo 10 MB.');
+        input.value = '';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('documento', arquivo);
+      formData.append('paciente_id', pacienteAtualProntuarioId);
+
+      const token = localStorage.getItem('token');
+
+      try {
+        const res = await fetch('/api/pacientes/documentos/upload', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + token },
+          body: formData
+        });
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          alert(data.message || data.error || 'Não foi possível enviar o documento.');
+          return;
+        }
+
+        await carregarDocumentosPaciente(pacienteAtualProntuarioId);
+      } catch (e) {
+        console.error(e);
+        alert('Erro de conexão ao enviar o documento.');
+      } finally {
+        input.value = '';
       }
     }
 

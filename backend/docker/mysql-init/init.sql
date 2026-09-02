@@ -135,7 +135,18 @@ CREATE TABLE IF NOT EXISTS pacientes (
   CONSTRAINT fk_paciente_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-
+CREATE TABLE IF NOT EXISTS paciente_documentos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    clinica_id INT NOT NULL,
+    paciente_id INT NOT NULL,
+    nome_original VARCHAR(255) NOT NULL,
+    storage_key VARCHAR(500) NOT NULL,
+    mime_type VARCHAR(50) NULL,
+    tamanho_bytes INT NULL,
+    criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_pac_doc_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
+    CONSTRAINT fk_pac_doc_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
 
 -- 6. AGENDAMENTOS
 CREATE TABLE IF NOT EXISTS agendamentos (

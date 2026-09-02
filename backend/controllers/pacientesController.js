@@ -1,5 +1,7 @@
 const db = require('../config/db');
 const cloudinary = require('../config/cloudinary');
+const crypto = require('crypto');
+const { sendTokenAcessoEmail } = require('../services/notificationService');
 
 const CARGOS_BLOQUEADOS = ['admin', 'recepcao'];
 
@@ -8,6 +10,8 @@ function podeArquivar(req) {
     if (!cargo) return false;
     return !CARGOS_BLOQUEADOS.includes(cargo);
 }
+
+
 
 // ─────────────────────────────────────────────
 exports.listarPacientes = async (req, res) => {
@@ -336,6 +340,126 @@ exports.atualizarFoto = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: error?.message || 'Erro ao salvar a foto.',
+        });
+    }
+};
+
+// ─────────────────────────────────────────────
+// Atualizar cadastro do paciente
+// ─────────────────────────────────────────────
+exports.atualizarPaciente = async (req, res) => {
+    if (!req.usuario) {
+        return res.status(401).json({ success: false, message: 'Não autenticado' });
+    }
+
+    const { id } = req.params;
+    const clinicaId = req.usuario.clinica_id;
+
+    // Whitelist de campos editáveis — evita que o cliente sobrescreva
+    // colunas sensíveis (clinica_id, ativo, token_acesso, etc.)
+    const camposPermitidos = [
+        'nome', 'cpf', 'telefone', 'email', 'data_nascimento',
+        'tipo_sanguineo', 'peso', 'altura', 'condicoes_preexistentes'
+    ];
+
+    const dados = {};
+    for (const campo of camposPermitidos) {
+        if (req.body[campo] !== undefined) dados[campo] = req.body[campo];
+    }
+
+    if (Object.keys(dados).length === 0) {
+        return res.status(400).json({ success: false, message: 'Nenhum campo válido para atualizar.' });
+    }
+
+    try {
+        const setClause = Object.keys(dados).map(campo => `${campo} = ?`).join(', ');
+        const valores = Object.values(dados);
+
+        const [result] = await db.query(
+            `UPDATE pacientes SET ${setClause} WHERE id = ? AND clinica_id = ?`,
+            [...valores, id, clinicaId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Paciente não encontrado ou fora da sua clínica.'
+            });
+        }
+
+        const [atualizado] = await db.query(
+            'SELECT * FROM pacientes WHERE id = ? AND clinica_id = ?',
+            [id, clinicaId]
+        );
+
+        return res.json({
+            success: true,
+            message: 'Cadastro atualizado com sucesso.',
+            paciente: atualizado[0]
+        });
+    } catch (err) {
+        console.error('Erro ao atualizar paciente:', err);
+        return res.status(500).json({
+            success: false,
+            message: err.message || 'Erro interno ao atualizar cadastro.'
+        });
+    }
+};
+
+// ─────────────────────────────────────────────
+// Gerar e enviar token de acesso ao portal
+// ─────────────────────────────────────────────
+exports.enviarTokenAcesso = async (req, res) => {
+    if (!req.usuario) {
+        return res.status(401).json({ success: false, message: 'Não autenticado' });
+    }
+
+    const { id } = req.params;
+    const clinicaId = req.usuario.clinica_id;
+
+    try {
+        const [pacienteRows] = await db.query(
+            'SELECT id, nome, email FROM pacientes WHERE id = ? AND clinica_id = ?',
+            [id, clinicaId]
+        );
+
+        if (pacienteRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Paciente não encontrado.' });
+        }
+        const paciente = pacienteRows[0];
+
+        if (!paciente.email) {
+            return res.status(400).json({
+                success: false,
+                message: 'Este paciente não possui e-mail cadastrado.'
+            });
+        }
+
+        const [clinicaRows] = await db.query(
+            'SELECT nome_clinica, slug, telefone_clinica FROM clinicas WHERE id = ?',
+            [clinicaId]
+        );
+        const clinica = clinicaRows[0];
+
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiraEm = new Date(Date.now() + 24 * 60 * 60 * 1000); // válido por 24h
+
+        await db.query(
+            'UPDATE pacientes SET token_acesso = ?, token_expira_em = ? WHERE id = ? AND clinica_id = ?',
+            [token, expiraEm, id, clinicaId]
+        );
+
+        await sendTokenAcessoEmail(clinica, { ...paciente, token_acesso: token });
+
+        return res.json({
+            success: true,
+            message: `Token de acesso enviado para ${paciente.email}.`
+        });
+    } catch (err) {
+        console.error('Erro ao enviar token de acesso:', err);
+        return res.status(500).json({
+            success: false,
+            message: err.message || 'Erro interno ao enviar o token.'
         });
     }
 };

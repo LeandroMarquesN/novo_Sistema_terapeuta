@@ -299,3 +299,39 @@ exports.sendPasswordResetEmail = async (usuario, resetUrl) => {
     throw new Error('Falha ao enviar e-mail de recuperação.');
   }
 };
+
+// =========================================================================
+// 8. TOKEN DE ACESSO AO PORTAL DO PACIENTE
+// =========================================================================
+exports.sendTokenAcessoEmail = async (clinica, paciente) => {
+  console.log(`[MED-LM] 📩 Enviando token de acesso ao portal para: ${paciente.email}`);
+  try {
+    const linkPortal = `${URL_PORTAL_BASE}${paciente.token_acesso}`;
+
+    const htmlContent = `
+      <div style="font-family: 'Inter', Arial, sans-serif; background-color: #020c12; color: #cbd5e1; padding: 40px; border-radius: 16px; max-width: 600px; margin: auto; border: 1px solid rgba(52,211,153,0.2);">
+        <h2 style="color: #34d399; font-family: 'Space Grotesk', sans-serif; margin-bottom: 20px;">🔑 Acesso ao Portal do Paciente</h2>
+        <p>Olá, <strong>${paciente.nome}</strong>,</p>
+        <p>Você recebeu um novo link de acesso ao seu portal na <strong>${clinica.nome_clinica}</strong>.</p>
+        <div style="text-align: center; margin: 35px 0;">
+            <a href="${linkPortal}" style="background: linear-gradient(135deg, #0891b2, #059669); color: #ffffff; padding: 14px 28px; text-decoration: none; border-radius: 12px; font-weight: bold; display: inline-block; box-shadow: 0 0 20px rgba(8,145,178,0.4);">Acessar Meu Portal</a>
+        </div>
+        <p style="font-size: 13px; color: #94a3b8;">Este link é pessoal, intransferível e expira em 24 horas. Se você não solicitou este acesso, ignore este e-mail${clinica.telefone_clinica ? ` ou entre em contato pelo telefone ${clinica.telefone_clinica}` : ''}.</p>
+        <p style="font-size: 11px; color: rgba(148,163,184,0.4); text-align: center; margin-top: 30px;">© ${new Date().getFullYear()} MedLM - Sistema Clínico Inteligente</p>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"MedLM - ${clinica.nome_clinica}" <${process.env.EMAIL_USER}>`,
+      to: paciente.email,
+      subject: `Seu acesso ao Portal — ${clinica.nome_clinica}`,
+      html: htmlContent
+    });
+
+    console.log(`[MED-LM] ✅ Token enviado com sucesso para: ${paciente.email}`);
+    return true;
+  } catch (error) {
+    console.error('[MED-LM] ❌ ERRO AO ENVIAR TOKEN:', error.message);
+    throw error;
+  }
+};
