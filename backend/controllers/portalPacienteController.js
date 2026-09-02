@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const { uploadDocumentoToR2, getUrlDocumentoR2 } = require('../services/documentosService');
 
 exports.validarAcessoPortal = async (req, res) => {
     const { token } = req.query;
@@ -42,7 +43,6 @@ exports.validarAcessoPortal = async (req, res) => {
 
 exports.getDadosPortal = async (req, res) => {
     try {
-        // Lê da chave isolada
         const sessao = req.session.pacientePortal;
 
         if (!sessao || !sessao.id) {
@@ -78,15 +78,117 @@ exports.getDadosPortal = async (req, res) => {
             [pId]
         );
 
+        // Documentos do paciente
+        const [documentos] = await db.query(
+            `SELECT id, nome_original, mime_type, tamanho_bytes, storage_key, criado_em 
+             FROM paciente_documentos 
+             WHERE paciente_id = ? AND clinica_id = ? 
+             ORDER BY criado_em DESC`,
+            [pId, cId]
+        );
+
+        // Gera URLs assinadas temporárias
+        const documentosComUrl = await Promise.all(
+            documentos.map(async (doc) => {
+                try {
+                    const url = await getUrlDocumentoR2(doc.storage_key);
+                    return { ...doc, url };
+                } catch (err) {
+                    console.error("Erro ao gerar URL assinada:", err);
+                    return { ...doc, url: null };
+                }
+            })
+        );
+
         res.json({
             paciente: paciente[0],
             config: config[0] || {},
             agendamentos,
-            prontuarios
+            prontuarios,
+            documentos: documentosComUrl
         });
 
     } catch (e) {
         console.error(e);
         res.status(500).json({ error: "Erro ao buscar dados" });
+    }
+};
+
+/**
+ * Upload de exames/documentos pelo paciente
+ */
+exports.uploadDocumentoPortal = async (req, res) => {
+    try {
+        const sessao = req.session.pacientePortal;
+
+        if (!sessao || !sessao.id) {
+            return res.status(401).json({ error: "Sessão inválida." });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ error: "Nenhum arquivo enviado." });
+        }
+
+        // Validações básicas de segurança
+        const allowedMimes = [
+            'application/pdf',
+            'image/jpeg',
+            'image/png',
+            'image/webp',
+            'image/jpg'
+        ];
+
+        if (!allowedMimes.includes(req.file.mimetype)) {
+            return res.status(400).json({
+                error: "Tipo de arquivo não permitido. Envie PDF, JPG ou PNG."
+            });
+        }
+
+        // Limite de 15MB
+        if (req.file.size > 15 * 1024 * 1024) {
+            return res.status(400).json({ error: "Arquivo muito grande. Máximo 15MB." });
+        }
+
+        const pacienteId = sessao.id;
+        const clinicaId = sessao.clinicaId;
+
+        // Upload para o R2
+        const resultado = await uploadDocumentoToR2(req.file, pacienteId);
+
+        // Salva no banco
+        const [insert] = await db.query(
+            `INSERT INTO paciente_documentos 
+             (clinica_id, paciente_id, nome_original, storage_key, mime_type, tamanho_bytes) 
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [
+                clinicaId,
+                pacienteId,
+                resultado.nomeOriginal,
+                resultado.storageKey,
+                resultado.mimetype,
+                resultado.tamanho
+            ]
+        );
+
+        // Gera URL assinada para retornar já utilizável
+        const urlAssinada = await getUrlDocumentoR2(resultado.storageKey);
+
+        res.status(201).json({
+            success: true,
+            message: "Documento enviado com sucesso!",
+            documento: {
+                id: insert.insertId,
+                nome_original: resultado.nomeOriginal,
+                mime_type: resultado.mimetype,
+                tamanho_bytes: resultado.tamanho,
+                storage_key: resultado.storageKey,
+                url: urlAssinada,
+                criado_em: new Date()
+            }
+        });
+
+    } catch (error) {
+        console.error("Erro no upload do portal:", error);
+        res.status(500).json({ error: "Erro ao enviar documento." });
     }
 };

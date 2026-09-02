@@ -1,16 +1,30 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const multer = require('multer');
 const portalPacienteController = require('../controllers/portalPacienteController');
 const verificarAcessoPortal = require('../middleware/portalPacienteMiddleware');
 
-// Define o caminho base do frontend (subindo 2 pastas para sair de backend/routes/)
+// Configuração do Multer (memória → buffer pro R2)
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 15 * 1024 * 1024 } // 15MB
+});
+
 const frontendPath = path.resolve(__dirname, '..', '..', 'frontend');
 
 router.get('/login', portalPacienteController.validarAcessoPortal);
 router.get('/api/dados', verificarAcessoPortal, portalPacienteController.getDadosPortal);
 
-// ROTA DO DASHBOARD
+// Nova rota de upload
+router.post(
+    '/api/upload-documento',
+    verificarAcessoPortal,
+    upload.single('arquivo'),
+    portalPacienteController.uploadDocumentoPortal
+);
+
+// Dashboard
 router.get('/dashboard', verificarAcessoPortal, (req, res) => {
     const filePath = path.join(frontendPath, 'pages', 'portalPacientesdash.html');
     res.sendFile(filePath);

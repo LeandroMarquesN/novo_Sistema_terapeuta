@@ -31,7 +31,6 @@
 
         .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* ---------- Atmosphere ---------- */
         .atmosphere {
             position: fixed;
             inset: 0;
@@ -68,7 +67,7 @@
             opacity: 0.35;
             animation: float 16s ease-in-out infinite;
         }
-        .orb-1 { width: 380px; height: 380px; background: var(--emerald); top: -120px; left: -100px; animation-delay: 0s; }
+        .orb-1 { width: 380px; height: 380px; background: var(--emerald); top: -120px; left: -100px; }
         .orb-2 { width: 320px; height: 320px; background: var(--cyan); bottom: -140px; right: -80px; animation-delay: -6s; }
         .orb-3 { width: 220px; height: 220px; background: var(--amber); top: 40%; right: 20%; opacity: 0.12; animation-delay: -10s; }
 
@@ -81,7 +80,6 @@
             .orb { animation: none; }
         }
 
-        /* ---------- Layout shell ---------- */
         .content { position: relative; z-index: 10; }
 
         .glass {
@@ -103,11 +101,8 @@
             box-shadow: 0 0 24px rgba(52, 211, 153, 0.35);
         }
 
-        .badge-tag {
-            letter-spacing: 0.18em;
-        }
+        .badge-tag { letter-spacing: 0.18em; }
 
-        /* ---------- Hero ---------- */
         .hero-card {
             background: linear-gradient(120deg, rgba(6, 30, 26, 0.9), rgba(7, 22, 36, 0.9));
             border: 1px solid rgba(52, 211, 153, 0.25);
@@ -121,14 +116,11 @@
             background: radial-gradient(circle at 90% 0%, rgba(34, 211, 238, 0.18), transparent 60%);
         }
 
-        /* ---------- Cards ---------- */
         .panel {
             border-radius: 1.25rem;
             transition: border-color 0.25s ease, transform 0.25s ease;
         }
-        .panel:hover {
-            border-color: rgba(52, 211, 153, 0.35);
-        }
+        .panel:hover { border-color: rgba(52, 211, 153, 0.35); }
 
         .icon-chip {
             width: 3.25rem;
@@ -140,12 +132,9 @@
             font-size: 1.5rem;
         }
 
-        .stat-row {
-            border-bottom: 1px dashed var(--line);
-        }
+        .stat-row { border-bottom: 1px dashed var(--line); }
         .stat-row:last-child { border-bottom: none; }
 
-        /* ---------- Agenda items ---------- */
         .agenda-item {
             border-left: 3px solid var(--cyan);
             background: rgba(34, 211, 238, 0.06);
@@ -165,7 +154,6 @@
         }
         .status-dot { width: 6px; height: 6px; border-radius: 9999px; background: currentColor; }
 
-        /* ---------- Prontuário timeline ---------- */
         .timeline-track {
             position: relative;
             padding-left: 1.75rem;
@@ -200,7 +188,6 @@
             word-break: break-word;
         }
 
-        /* ---------- CTA ---------- */
         .cta-card {
             background: linear-gradient(135deg, rgba(6, 30, 26, 0.85), rgba(7, 22, 36, 0.85));
             border: 1px solid rgba(52, 211, 153, 0.25);
@@ -218,6 +205,16 @@
         .empty-state {
             border: 1px dashed var(--line);
             border-radius: 1rem;
+        }
+
+        /* Upload zone */
+        .upload-zone {
+            border: 2px dashed rgba(52, 211, 153, 0.35);
+            transition: all 0.25s ease;
+        }
+        .upload-zone.dragover {
+            border-color: var(--emerald);
+            background: rgba(52, 211, 153, 0.08);
         }
 
         ::-webkit-scrollbar { width: 8px; }
@@ -250,14 +247,13 @@
                         <span class="badge-tag text-[9px] sm:text-[10px] uppercase text-emerald-400">Portal do Paciente</span>
                     </div>
                 </div>
-
                 <span id="boasVindas" class="mono font-medium text-xs sm:text-sm text-emerald-100/80 truncate ml-3">Olá, bem-vindo!</span>
             </div>
         </nav>
 
         <main class="max-w-6xl mx-auto pt-24 sm:pt-28 px-4 sm:px-6 pb-16">
 
-            <!-- Hero: horário -->
+            <!-- Hero -->
             <div class="hero-card rounded-2xl p-6 sm:p-8 mb-8 shadow-xl">
                 <div class="relative z-10">
                     <span class="badge-tag text-[10px] uppercase text-cyan-300/80">Status da clínica</span>
@@ -268,8 +264,6 @@
 
             <!-- Perfil + Agendamentos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-
-                <!-- Card Perfil -->
                 <div class="glass panel p-6 sm:p-7">
                     <div class="flex items-center gap-4 mb-5">
                         <div class="icon-chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">👤</div>
@@ -294,7 +288,6 @@
                     </div>
                 </div>
 
-                <!-- Card Agendamentos -->
                 <div class="glass panel p-6 sm:p-7">
                     <div class="flex items-center gap-4 mb-5">
                         <div class="icon-chip bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">📅</div>
@@ -307,7 +300,39 @@
                 </div>
             </div>
 
-            <!-- Prontuário - largura total, informações completas -->
+            <!-- ========== UPLOAD DE EXAMES / DOCUMENTOS ========== -->
+            <div class="glass panel p-6 sm:p-8 mb-8">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="icon-chip bg-amber-500/10 text-amber-300 border border-amber-400/20">📄</div>
+                    <div>
+                        <h3 class="font-bold text-lg text-white">Meus Exames e Documentos</h3>
+                        <p class="text-xs text-slate-400">Envie exames, laudos e documentos (PDF, JPG ou PNG)</p>
+                    </div>
+                </div>
+
+                <!-- Zona de Upload -->
+                <div id="uploadZone" class="upload-zone rounded-xl p-6 sm:p-8 text-center mb-6 cursor-pointer">
+                    <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.webp" class="hidden" />
+                    
+                    <div id="uploadIdle">
+                        <div class="text-4xl mb-3">☁️</div>
+                        <p class="text-white font-medium mb-1">Arraste o arquivo aqui ou clique para selecionar</p>
+                        <p class="text-xs text-slate-400">PDF, JPG ou PNG • Máximo 15MB</p>
+                    </div>
+
+                    <div id="uploadProgress" class="hidden">
+                        <div class="w-full bg-slate-700 rounded-full h-2 mb-3 overflow-hidden">
+                            <div id="progressBar" class="bg-emerald-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <p class="text-sm text-emerald-300" id="progressText">Enviando...</p>
+                    </div>
+                </div>
+
+                <!-- Lista de documentos -->
+                <div id="lista-documentos" class="space-y-3"></div>
+            </div>
+
+            <!-- ========== PRONTUÁRIO (ACORDEÃO) ========== -->
             <div class="glass panel p-6 sm:p-8 mb-8">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="icon-chip bg-purple-500/10 text-purple-300 border border-purple-400/20">📝</div>
@@ -316,30 +341,21 @@
                         <p class="text-xs text-slate-400">Histórico completo dos seus atendimentos</p>
                     </div>
                 </div>
-                <div id="timeline-prontuarios" class="timeline-track space-y-5"></div>
+                <div id="timeline-prontuarios" class="timeline-track space-y-3"></div>
             </div>
 
-            <!-- CTA reagendamento -->
+            <!-- CTA -->
             <div id="propaganda-carousel" class="cta-card rounded-2xl shadow-lg p-6 sm:p-8">
                 <div class="flex flex-col md:flex-row items-center gap-8">
                     <div class="flex-1">
                         <h3 class="text-xl sm:text-2xl font-bold text-white mb-4">Gerencie sua saúde com autonomia</h3>
                         <p class="text-slate-300 mb-6 text-sm sm:text-base">
                             Como você já possui acesso ao nosso portal exclusivo, reagendar sua consulta ficou muito mais rápido e prático.
-                            Esqueça filas e esperas telefônicas: tenha o controle total da sua agenda na palma da sua mão.
                         </p>
-                        <ul class="text-sm text-slate-400 space-y-2 mb-6">
-                            <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> <span><strong class="text-slate-200">Agendamento em segundos:</strong> escolha o melhor horário para você.</span></li>
-                            <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> <span><strong class="text-slate-200">Sem burocracia:</strong> disponível 24h por dia, 7 dias por semana.</span></li>
-                            <li class="flex items-start gap-2"><span class="text-emerald-400">✓</span> <span><strong class="text-slate-200">Segurança total:</strong> seus dados protegidos com criptografia.</span></li>
-                        </ul>
-
-                        <a id="btnAgendar" href="#"
-                        class="cta-btn inline-block text-slate-950 px-8 py-3 rounded-full font-bold">
+                        <a id="btnAgendar" href="#" class="cta-btn inline-block text-slate-950 px-8 py-3 rounded-full font-bold">
                             Reagendar Consulta Agora
                         </a>
                     </div>
-
                     <div class="hidden md:flex w-40 h-40 lg:w-48 lg:h-48 bg-emerald-500/10 rounded-full items-center justify-center border-4 border-emerald-500/20 shrink-0">
                         <span class="text-6xl lg:text-7xl">⚡</span>
                     </div>
@@ -349,6 +365,7 @@
     </div>
 
     <script>
+        // ========== Helpers ==========
         function statusStyle(status) {
             const s = (status || '').toLowerCase();
             if (s.includes('cancel')) return { color: '#fb7185' };
@@ -357,72 +374,241 @@
             return { color: '#22d3ee' };
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
+        function formatBytes(bytes) {
+            if (!bytes) return '—';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('pt-BR', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+        }
+
+        // ========== Toggle Prontuário (Acordeão) ==========
+        function toggleProntuario(id) {
+            const conteudo = document.getElementById(`${id}-conteudo`);
+            const icon = document.getElementById(`${id}-icon`);
+            const resumo = document.getElementById(`${id}-resumo`);
+            
+            if (!conteudo || !icon) return;
+
+            const isOpen = !conteudo.classList.contains('hidden');
+
+            // Fecha todos os outros
+            document.querySelectorAll('[id$="-conteudo"]').forEach(el => {
+                if (el.id !== `${id}-conteudo`) el.classList.add('hidden');
+            });
+            document.querySelectorAll('[id$="-icon"]').forEach(el => {
+                if (el.id !== `${id}-icon`) el.classList.remove('rotate-180');
+            });
+            document.querySelectorAll('[id$="-resumo"]').forEach(el => {
+                if (el.id !== `${id}-resumo`) el.classList.remove('hidden');
+            });
+
+            // Alterna o atual
+            if (isOpen) {
+                conteudo.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+                if (resumo) resumo.classList.remove('hidden');
+            } else {
+                conteudo.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+                if (resumo) resumo.classList.add('hidden');
+            }
+        }
+
+        // ========== Render Documentos ==========
+        function renderDocumentos(documentos) {
+            const container = document.getElementById('lista-documentos');
+            if (!container) return;
+
+            if (!documentos || documentos.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state p-5 text-center">
+                        <p class="text-sm text-slate-500">Nenhum documento enviado ainda.</p>
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = documentos.map(doc => {
+                const isPdf = (doc.mime_type || '').includes('pdf');
+                const icon = isPdf ? '📄' : '🖼️';
+                
+                return `
+                    <div class="flex items-center justify-between gap-3 p-3 sm:p-4 rounded-xl bg-white/5 border border-white/5 hover:border-emerald-500/30 transition-colors">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <span class="text-2xl shrink-0">${icon}</span>
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-white truncate">${doc.nome_original}</p>
+                                <p class="text-xs text-slate-400">${formatBytes(doc.tamanho_bytes)} • ${formatDate(doc.criado_em)}</p>
+                            </div>
+                        </div>
+                        ${doc.url ? `
+                            <a href="${doc.url}" target="_blank" rel="noopener"
+                               class="shrink-0 text-xs font-semibold text-emerald-400 hover:text-emerald-300 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                Abrir
+                            </a>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ========== Upload ==========
+        async function enviarArquivo(file) {
+            const zone = document.getElementById('uploadZone');
+            const idle = document.getElementById('uploadIdle');
+            const progress = document.getElementById('uploadProgress');
+            const bar = document.getElementById('progressBar');
+            const text = document.getElementById('progressText');
+
+            idle.classList.add('hidden');
+            progress.classList.remove('hidden');
+            bar.style.width = '30%';
+            text.innerText = 'Enviando...';
+
+            const formData = new FormData();
+            formData.append('arquivo', file);
+
+            try {
+                const res = await fetch('/portal_paciente/api/upload-documento', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || 'Erro no upload');
+                }
+
+                bar.style.width = '100%';
+                text.innerText = 'Enviado com sucesso!';
+
+                // Atualiza a lista
+                setTimeout(() => {
+                    // Recarrega os dados para pegar a lista atualizada
+                    carregarDados();
+                    idle.classList.remove('hidden');
+                    progress.classList.add('hidden');
+                    bar.style.width = '0%';
+                }, 800);
+
+            } catch (err) {
+                console.error(err);
+                text.innerText = err.message || 'Erro ao enviar';
+                text.classList.add('text-rose-400');
+                
+                setTimeout(() => {
+                    idle.classList.remove('hidden');
+                    progress.classList.add('hidden');
+                    bar.style.width = '0%';
+                    text.classList.remove('text-rose-400');
+                    text.innerText = 'Enviando...';
+                }, 2500);
+            }
+        }
+
+        // ========== Carregar Dados ==========
+        function carregarDados() {
             fetch('/portal_paciente/api/dados')
                 .then(r => r.json())
                 .then(data => {
                     if (!data || !data.paciente) throw new Error("Dados não encontrados");
 
-                    // Atualiza cabeçalho
+                    // Cabeçalho
                     document.getElementById('boasVindas').innerText = `Olá, ${data.paciente.nome}`;
                     document.getElementById('nomeClinica').innerText = data.paciente.nome_clinica || "Clínica MED-LM";
+                    document.title = `${data.paciente.nome_clinica} | Portal do Paciente`;
 
                     // Perfil
                     document.getElementById('nome').innerText = data.paciente.nome;
                     document.getElementById('idade').innerText = (data.paciente.idade || '--') + ' anos';
                     document.getElementById('sangue').innerText = data.paciente.tipo_sanguineo || 'N/A';
 
-                    // mudando o title par ao nome da clinica
-                    // Dentro do seu script, logo após receber os dados:
-                    document.title = `${data.paciente.nome_clinica} | Portal do Paciente`;
-                    // Injeta o slug no link do botão de agendamento
-                        const btnAgendar = document.getElementById('btnAgendar');
-                        if (btnAgendar && data.paciente.slug) {
-                            btnAgendar.href = `/agendar/${data.paciente.slug}`;
-                        } else {
-                            console.warn("Slug da clínica não encontrado ou botão inexistente.");
-                        }
+                    // Botão agendar
+                    const btnAgendar = document.getElementById('btnAgendar');
+                    if (btnAgendar && data.paciente.slug) {
+                        btnAgendar.href = `/agendar/${data.paciente.slug}`;
+                    }
 
                     // Horários
                     if (data.config && document.getElementById('horarioInfo')) {
-                        document.getElementById('horarioInfo').innerText =
-                            `Aberto de ${data.config.horario_abertura.substring(0,5)} às ${data.config.horario_fechamento.substring(0,5)}`;
+                        const abertura = data.config.horario_abertura?.substring(0,5) || '--:--';
+                        const fechamento = data.config.horario_fechamento?.substring(0,5) || '--:--';
+                        document.getElementById('horarioInfo').innerText = `Aberto de ${abertura} às ${fechamento}`;
                     }
 
                     // Agendamentos
                     const agendaDiv = document.getElementById('lista-agendamentos');
                     if (agendaDiv) {
-                        if (data.agendamentos.length === 0) {
+                        if (!data.agendamentos || data.agendamentos.length === 0) {
                             agendaDiv.innerHTML = "<div class='empty-state p-4 text-center'><p class='text-sm text-slate-500'>Nenhum agendamento.</p></div>";
                         } else {
-                            agendaDiv.innerHTML = "";
-                            data.agendamentos.forEach(a => {
+                            agendaDiv.innerHTML = data.agendamentos.map(a => {
                                 const st = statusStyle(a.status_agendamento);
-                                agendaDiv.innerHTML += `
+                                return `
                                     <div class="agenda-item p-3">
-                                        <p class="font-bold text-sm text-white">${new Date(a.data_agendamento).toLocaleDateString()}</p>
+                                        <p class="font-bold text-sm text-white">${new Date(a.data_agendamento).toLocaleDateString('pt-BR')}</p>
                                         <span class="status-pill mt-1" style="color:${st.color}; background:${st.color}1A;">
                                             <span class="status-dot"></span>${a.status_agendamento}
                                         </span>
                                     </div>`;
-                            });
+                            }).join('');
                         }
                     }
 
-                    // Prontuários — histórico completo e visível
+                    // Documentos
+                    renderDocumentos(data.documentos || []);
+
+                    // Prontuários (acordeão)
                     const timelineDiv = document.getElementById('timeline-prontuarios');
                     if (timelineDiv && data.prontuarios) {
                         if (data.prontuarios.length === 0) {
-                            timelineDiv.innerHTML = "<div class='empty-state p-6 text-center'><p class='text-sm text-slate-500'>Nenhum registro de prontuário ainda.</p></div>";
+                            timelineDiv.innerHTML = `
+                                <div class="empty-state p-6 text-center">
+                                    <p class="text-sm text-slate-500">Nenhum registro de prontuário ainda.</p>
+                                </div>`;
                         } else {
-                            timelineDiv.innerHTML = "";
-                            data.prontuarios.forEach(p => {
-                                timelineDiv.innerHTML += `
-                                    <div class="timeline-entry glass p-4 sm:p-5">
-                                        <p class="mono text-xs text-purple-300 mb-2">${new Date(p.data_atendimento).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
-                                        <p class="record-text text-sm text-slate-200 leading-relaxed">${p.texto_evolucao || ''}</p>
+                            timelineDiv.innerHTML = data.prontuarios.map((p, index) => {
+                                const dataFormatada = new Date(p.data_atendimento).toLocaleDateString('pt-BR', {
+                                    day: '2-digit', month: 'long', year: 'numeric'
+                                });
+                                const textoCompleto = p.texto_evolucao || '';
+                                const resumo = textoCompleto.length > 120 
+                                    ? textoCompleto.substring(0, 120).trim() + '...' 
+                                    : textoCompleto;
+                                const entryId = `prontuario-${index}`;
+
+                                return `
+                                    <div class="timeline-entry glass overflow-hidden">
+                                        <button type="button"
+                                            class="w-full text-left p-4 sm:p-5 flex items-start justify-between gap-3 hover:bg-white/5 transition-colors"
+                                            onclick="toggleProntuario('${entryId}')">
+                                            <div class="min-w-0 flex-1">
+                                                <p class="mono text-xs text-purple-300 mb-1">${dataFormatada}</p>
+                                                <p class="text-sm text-slate-300 leading-relaxed" id="${entryId}-resumo">
+                                                    ${resumo || '<span class="text-slate-500 italic">Sem evolução registrada</span>'}
+                                                </p>
+                                            </div>
+                                            <div class="shrink-0 mt-1">
+                                                <svg id="${entryId}-icon" class="w-5 h-5 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                                </svg>
+                                            </div>
+                                        </button>
+                                        <div id="${entryId}-conteudo" class="hidden px-4 sm:px-5 pb-4 sm:pb-5">
+                                            <div class="border-t border-white/10 pt-4">
+                                                <p class="record-text text-sm text-slate-200 leading-relaxed">
+                                                    ${textoCompleto || '<span class="text-slate-500 italic">Sem evolução registrada</span>'}
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>`;
-                            });
+                            }).join('');
                         }
                     }
                 })
@@ -431,6 +617,39 @@
                     const el = document.getElementById('boasVindas');
                     if (el) el.innerText = "Erro ao carregar.";
                 });
+        }
+
+        // ========== Eventos de Upload ==========
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarDados();
+
+            const zone = document.getElementById('uploadZone');
+            const fileInput = document.getElementById('fileInput');
+
+            zone.addEventListener('click', () => fileInput.click());
+
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) enviarArquivo(files[0]);
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files.length > 0) {
+                    enviarArquivo(fileInput.files[0]);
+                    fileInput.value = '';
+                }
+            });
         });
     </script>
 </body>
