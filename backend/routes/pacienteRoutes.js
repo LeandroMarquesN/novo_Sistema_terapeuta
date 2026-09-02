@@ -8,7 +8,6 @@ const portalPacientesDocumentosController = require('../controllers/portalPacien
 
 const auth = require('../middleware/authMiddleware');
 
-
 const uploadFoto = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB (fotos de celular)
@@ -41,13 +40,13 @@ router.get('/arquivados', auth, pacientesController.listarArquivados);
 router.get('/ficha-express/:id', auth, pacientesController.obterFichaExpressa);
 router.get('/:id/prontuario', auth, pacientesController.verProntuario);
 
-// ... suas outras rotas
-
+// Documentos do paciente (exames enviados pelo portal)
 router.get(
     '/:pacienteId/documentos',
-    authMiddleware,
-    pacienteDocumentosController.listarDocumentosPaciente
+    auth,
+    portalPacientesDocumentosController.listarDocumentosPaciente
 );
+
 // Foto (Cloudinary)
 router.patch(
     '/:id/foto',
