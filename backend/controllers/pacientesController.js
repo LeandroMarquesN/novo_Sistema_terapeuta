@@ -444,8 +444,9 @@ exports.enviarTokenAcesso = async (req, res) => {
         const token = crypto.randomBytes(32).toString('hex');
         const expiraEm = new Date(Date.now() + 24 * 60 * 60 * 1000); // válido por 24h
 
+
         await db.query(
-            'UPDATE pacientes SET token_acesso = ?, token_expira_em = ? WHERE id = ? AND clinica_id = ?',
+            'UPDATE pacientes SET token_acesso = ?, token_expiracao = ? WHERE id = ? AND clinica_id = ?',
             [token, expiraEm, id, clinicaId]
         );
 
