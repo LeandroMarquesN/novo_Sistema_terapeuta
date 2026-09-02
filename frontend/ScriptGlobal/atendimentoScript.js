@@ -3,6 +3,8 @@
  * + assinatura eletrônica por senha
  * + trava visual de prontuário finalizado
  * + CRM/UF e Cargo do profissional no cabeçalho
+ * + Documentos do paciente
+ * + Menu mobile
  */
 
 const token = localStorage.getItem('token');
@@ -10,8 +12,8 @@ const token = localStorage.getItem('token');
 const elementosFicha = {
   clinica: document.getElementById('nomeClinicaHeader'),
   usuario: document.getElementById('nomeUsuarioHeader'),
-  cargoUsuario: document.getElementById('cargoUsuarioHeader'), // Cargo
-  crmUsuario: document.getElementById('crmUsuarioHeader'),     // CRM
+  cargoUsuario: document.getElementById('cargoUsuarioHeader'),
+  crmUsuario: document.getElementById('crmUsuarioHeader'),
   pacienteHeader: document.getElementById('nomePacienteHeader'),
   cpf: document.getElementById('infoCpf'),
   email: document.getElementById('infoEmail'),
@@ -43,19 +45,20 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarDadosSessaoSaaS();
     carregarFichaPaciente(pacienteId);
     carregarTimelineProntuarios(pacienteId);
+    carregarDocumentosPaciente(pacienteId);
   } else {
     exibirAvisoSemPaciente();
   }
+
+  // Menu mobile
+  initMenuMobile();
 });
 
 // ─── CRM no cabeçalho ───────────────────────────────────────────
 function atualizarCrmNoHeader(crm, ufCrm) {
   if (!elementosFicha.crmUsuario) return;
-
   if (crm) {
-    elementosFicha.crmUsuario.innerText = ufCrm
-      ? `CRM ${crm}/${ufCrm}`
-      : `CRM ${crm}`;
+    elementosFicha.crmUsuario.innerText = ufCrm ? `CRM ${crm}/${ufCrm}` : `CRM ${crm}`;
   } else {
     elementosFicha.crmUsuario.innerText = '';
   }
@@ -64,10 +67,8 @@ function atualizarCrmNoHeader(crm, ufCrm) {
 // ─── Cargo no cabeçalho ─────────────────────────────────────────
 function atualizarCargoNoHeader(cargo) {
   if (!elementosFicha.cargoUsuario) return;
-
   if (cargo) {
-    const texto = cargo.charAt(0).toUpperCase() + cargo.slice(1);
-    elementosFicha.cargoUsuario.innerText = texto;
+    elementosFicha.cargoUsuario.innerText = cargo.charAt(0).toUpperCase() + cargo.slice(1);
   } else {
     elementosFicha.cargoUsuario.innerText = '';
   }
@@ -80,22 +81,14 @@ function carregarDadosSessaoSaaS() {
     if (!tokenLocal) return;
 
     const payload = JSON.parse(atob(tokenLocal.split('.')[1]));
-
     const nomeUsuario = payload.nome || 'Profissional';
     const nomeClinica = payload.nome_clinica || 'Clínica Vinculada';
 
-    if (elementosFicha.clinica) {
-      elementosFicha.clinica.innerText = nomeClinica;
-    }
-
-    // Só o nome (cargo vai em linha separada)
-    if (elementosFicha.usuario) {
-      elementosFicha.usuario.innerText = nomeUsuario;
-    }
+    if (elementosFicha.clinica) elementosFicha.clinica.innerText = nomeClinica;
+    if (elementosFicha.usuario) elementosFicha.usuario.innerText = nomeUsuario;
 
     atualizarCargoNoHeader(payload.cargo);
     atualizarCrmNoHeader(payload.crm, payload.uf_crm);
-
   } catch (error) {
     console.error('Erro ao carregar sessão:', error);
   }
@@ -147,7 +140,6 @@ async function carregarFichaPaciente(pacienteId) {
         elementosFicha.condicoes.style.color = '#34d399';
       }
     }
-
   } catch (error) {
     console.error('Erro ao carregar ficha:', error);
   }
@@ -183,7 +175,70 @@ async function carregarTimelineProntuarios(pacienteId) {
   }
 }
 
-// ─── 4. SALVAR / ASSINAR ────────────────────────────────────────
+// ─── 4. DOCUMENTOS DO PACIENTE ──────────────────────────────────
+async function carregarDocumentosPaciente(pacienteId) {
+  const container = document.getElementById('listaDocumentosPaciente');
+  if (!container) return;
+
+  try {
+    const response = await fetch(`/api/pacientes/${pacienteId}/documentos`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) throw new Error('Erro ao buscar documentos');
+
+    const documentos = await response.json();
+
+    if (!documentos || documentos.length === 0) {
+      container.innerHTML = `
+        <div class="text-center text-xs py-4" style="color: rgba(148,163,184,0.4)">
+          Nenhum documento enviado pelo paciente.
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = documentos.map(doc => {
+      const isPdf = (doc.mime_type || '').includes('pdf');
+      const icon = isPdf ? 'fa-file-pdf' : 'fa-file-image';
+      const cor = isPdf ? 'var(--red)' : 'var(--cyan)';
+      const tamanho = formatarTamanho(doc.tamanho_bytes);
+      const data = new Date(doc.criado_em).toLocaleDateString('pt-BR');
+
+      return `
+        <a href="${doc.url || '#'}" 
+           target="_blank" 
+           rel="noopener"
+           class="glass-card p-3 flex items-center gap-3 hover:border-emerald-500/40 transition group"
+           style="text-decoration:none;">
+          <div class="icon-wrap" style="background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: ${cor};">
+            <i class="fas ${icon} text-sm"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-xs font-bold text-white truncate group-hover:text-emerald-300 transition">${doc.nome_original}</p>
+            <p class="text-[10px]" style="color: rgba(148,163,184,0.55)">${tamanho} • ${data}</p>
+          </div>
+          <i class="fas fa-external-link-alt text-[10px] opacity-40 group-hover:opacity-100 transition" style="color: var(--emerald)"></i>
+        </a>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Erro ao carregar documentos:', err);
+    container.innerHTML = `
+      <div class="text-center text-xs py-4" style="color: rgba(248,113,113,0.7)">
+        Erro ao carregar documentos.
+      </div>`;
+  }
+}
+
+function formatarTamanho(bytes) {
+  if (!bytes) return '—';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// ─── 5. SALVAR / ASSINAR ────────────────────────────────────────
 function salvarEvolucao(event) {
   if (event) event.preventDefault();
   abrirModalAssinatura();
@@ -254,7 +309,7 @@ async function confirmarAssinatura(event) {
   }
 }
 
-// ─── 5. VISUALIZAR PRONTUÁRIO ANTIGO ────────────────────────────
+// ─── 6. VISUALIZAR PRONTUÁRIO ANTIGO ────────────────────────────
 async function visualizarEvolucaoAntiga(prontuarioId) {
   try {
     const response = await fetch(`/api/prontuarios/detalhe/${prontuarioId}`, {
@@ -272,28 +327,19 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
     quill.clipboard.dangerouslyPasteHTML(prontuario.texto_evolucao || '');
 
     const inputHidden = document.getElementById('idDoProntuarioAtual');
-    if (inputHidden) {
-      inputHidden.value = prontuarioId;
-    }
+    if (inputHidden) inputHidden.value = prontuarioId;
 
     if (typeof aplicarEstadoProntuario === 'function') {
       aplicarEstadoProntuario(prontuario.status_prontuario);
     }
 
-    // Nome + CRM do autor do prontuário
     if (elementosFicha.usuario && prontuario.nome_profissional) {
       elementosFicha.usuario.innerText = prontuario.nome_profissional;
     }
-    // Cargo do autor (se a API devolver cargo_profissional)
     if (prontuario.cargo_profissional) {
       atualizarCargoNoHeader(prontuario.cargo_profissional);
     }
-    atualizarCrmNoHeader(
-      prontuario.crm_profissional,
-      prontuario.uf_crm_profissional
-    );
-
-    console.log("Prontuário ID atualizado para:", prontuarioId);
+    atualizarCrmNoHeader(prontuario.crm_profissional, prontuario.uf_crm_profissional);
 
   } catch (err) {
     console.error('Erro ao visualizar evolução:', err);
@@ -301,7 +347,7 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
   }
 }
 
-// ─── 6. E-MAIL ──────────────────────────────────────────────────
+// ─── 7. E-MAIL ──────────────────────────────────────────────────
 async function enviarProntuarioEmail() {
   const inputId = document.getElementById('idDoProntuarioAtual');
   const btn = document.getElementById('btnEnviarEmail');
@@ -323,7 +369,7 @@ async function enviarProntuarioEmail() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ prontuarioId: prontuarioId })
+      body: JSON.stringify({ prontuarioId })
     });
 
     const data = await response.json();
@@ -342,7 +388,7 @@ async function enviarProntuarioEmail() {
   }
 }
 
-// ─── 7. AUDITORIA ───────────────────────────────────────────────
+// ─── 8. AUDITORIA ───────────────────────────────────────────────
 async function abrirModalAuditoria() {
   const prontuarioId = document.getElementById('idDoProntuarioAtual').value;
   if (!prontuarioId) {
@@ -380,10 +426,7 @@ async function abrirModalAuditoria() {
               <p class="text-[9px] mt-0.5" style="color: rgba(148,163,184,0.6)">
                   Por: <span style="color:#e2e8f0; font-weight:700">${log.usuario_nome || '—'}</span>
               </p>
-              ${crmTexto
-        ? `<p class="text-[9px] font-mono mt-0.5" style="color: var(--cyan)">${crmTexto}</p>`
-        : ''
-      }
+              ${crmTexto ? `<p class="text-[9px] font-mono mt-0.5" style="color: var(--cyan)">${crmTexto}</p>` : ''}
           </div>
           <span class="text-[10px] font-bold shrink-0" style="color: rgba(148,163,184,0.5)">
               ${new Date(log.data_acesso).toLocaleString('pt-BR')}
@@ -398,6 +441,42 @@ function fecharModalAuditoria() {
   document.getElementById('modalAuditoria').classList.remove('flex');
 }
 
+// ─── 9. MENU MOBILE ─────────────────────────────────────────────
+function initMenuMobile() {
+  const btnMenu = document.getElementById('btnMenuMobile');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlayMenu');
+  const iconMenu = document.getElementById('iconMenuMobile');
+
+  if (!btnMenu || !sidebar || !overlay) return;
+
+  function abrirMenu() {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+    if (iconMenu) iconMenu.classList.replace('fa-bars', 'fa-times');
+  }
+
+  function fecharMenu() {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+    if (iconMenu) iconMenu.classList.replace('fa-times', 'fa-bars');
+  }
+
+  btnMenu.addEventListener('click', () => {
+    const estaAberto = !sidebar.classList.contains('-translate-x-full');
+    estaAberto ? fecharMenu() : abrirMenu();
+  });
+
+  overlay.addEventListener('click', fecharMenu);
+
+  document.querySelectorAll('#sidebar a').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth < 1024) fecharMenu();
+    });
+  });
+}
+
+// ─── EXPORTS GLOBAIS ────────────────────────────────────────────
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;
 window.salvarEvolucao = salvarEvolucao;
 window.confirmarAssinatura = confirmarAssinatura;

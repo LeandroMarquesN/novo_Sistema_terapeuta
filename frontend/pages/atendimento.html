@@ -292,12 +292,6 @@
             .prontuario-container { border: none !important; box-shadow: none !important; }
         }
 
-        @media (max-width: 1023px) {
-            .app-sidebar {
-                width: 5rem !important;
-            }
-        }
-
         .glass-panel {
             box-shadow:
                 0 1px 0 rgba(255,255,255,0.05) inset,
@@ -389,6 +383,16 @@
 
 <body class="h-screen overflow-hidden font-sans antialiased transition-colors duration-300">
 
+    <!-- BOTÃO HAMBURGER (mobile/tablet) -->
+    <button id="btnMenuMobile" 
+            class="fixed bottom-5 right-5 z-[60] w-14 h-14 rounded-2xl flex items-center justify-center lg:hidden shadow-2xl"
+            style="background: linear-gradient(135deg, #0891b2, #059669); border: 1px solid rgba(52,211,153,0.4);">
+        <i class="fas fa-bars text-white text-xl" id="iconMenuMobile"></i>
+    </button>
+
+    <!-- OVERLAY -->
+    <div id="overlayMenu" class="fixed inset-0 bg-black/60 z-[55] hidden lg:hidden backdrop-blur-sm"></div>
+
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="hero-grid"></div>
@@ -396,7 +400,7 @@
     <div class="flex h-full w-full overflow-hidden">
 
         <!-- ASIDE MENU -->
-        <aside class="app-sidebar fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-xl flex flex-col justify-between">
+        <aside id="sidebar" class="app-sidebar fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-xl flex flex-col justify-between -translate-x-full lg:translate-x-0">
             <div>
                 <div class="h-20 flex items-center px-6 border-b overflow-hidden" style="border-color: var(--border)">
                     <div class="w-10 h-10 logo-badge rounded-xl flex-shrink-0 flex items-center justify-center text-white font-black" style="font-family:'Space Grotesk',sans-serif">M</div>
@@ -433,7 +437,7 @@
         </aside>
 
         <!-- MAIN -->
-        <main class="flex-1 ml-20 p-4 sm:p-6 lg:p-8 flex flex-col h-screen overflow-y-auto lg:overflow-hidden">
+        <main class="flex-1 ml-0 lg:ml-20 p-4 sm:p-6 lg:p-8 flex flex-col h-screen overflow-y-auto lg:overflow-hidden">
 
             <!-- TOP BAR HEADER -->
             <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 flex-shrink-0">
@@ -540,6 +544,19 @@
                                 CARREGANDO...
                             </div>
                         </div>
+
+                        <!-- DOCUMENTOS / EXAMES DO PACIENTE -->
+                        <div class="space-y-2 pt-2">
+                            <span class="form-label flex items-center gap-1.5">
+                                <i class="fas fa-file-medical-alt" style="color:var(--amber)"></i>
+                                Exames e Documentos
+                            </span>
+                            <div id="listaDocumentosPaciente" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                                <div class="text-center text-xs py-4" style="color: rgba(148,163,184,0.4)">
+                                    Carregando documentos...
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -591,31 +608,42 @@
                             </div>
                         </div>
 
-                        <div class="p-4 sm:p-5 glass-header flex flex-col sm:flex-row sm:flex-wrap justify-end gap-2 sm:gap-3">
-                            <button type="button" onclick="limparFormulario()" class="btn-secondary w-full sm:w-auto px-4 py-2.5 rounded-xl transition text-xs font-black uppercase tracking-wider">
-                                Limpar
-                            </button>
-
-                            <button type="submit" id="btnSalvarProntuario" class="btn-primary-gradient w-full sm:w-auto px-6 py-2.5 rounded-xl active:scale-95 transition-all duration-200 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
-                                <i class="fas fa-file-signature text-[11px]"></i> Finalizar e Assinar Atendimento
-                            </button>
-
-                            <div class="flex gap-2 w-full sm:w-auto">
-                                <button type="button" onclick="window.print()" class="btn-print flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center">
-                                    <i class="fas fa-print mr-2"></i> IMPRIMIR
+                        <!-- BOTÕES DE AÇÃO (sempre acessíveis) -->
+                        <div class="p-3 sm:p-4 glass-header flex flex-col gap-2 sticky bottom-0 z-10" style="background: rgba(2,12,18,0.95); backdrop-filter: blur(12px);">
+                            
+                            <!-- Linha 1: Ações principais -->
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <button type="button" onclick="limparFormulario()" 
+                                        class="btn-secondary flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider">
+                                    Limpar
                                 </button>
 
-                                <button type="button" onclick="enviarProntuarioEmail()" id="btnEnviarEmail" class="btn-email flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition flex items-center">
-                                    <i class="fas fa-paper-plane mr-2"></i> ENVIAR EMAIL
+                                <button type="submit" id="btnSalvarProntuario" 
+                                        class="btn-primary-gradient flex-1 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                                    <i class="fas fa-file-signature text-[11px]"></i>
+                                    <span>Finalizar e Assinar</span>
                                 </button>
-                                <input type="hidden" id="idDoProntuarioAtual" value="">
                             </div>
-                        </div>
 
-                        <div class="p-4 sm:p-5 glass-header flex flex-wrap items-center justify-end gap-3">
-                            <button type="button" onclick="abrirModalAuditoria()" class="btn-audit text-xs font-black px-3 py-1.5 rounded-xl transition-all flex items-center gap-2">
-                                <i class="fas fa-shield-alt"></i> AUDITORIA
-                            </button>
+                            <!-- Linha 2: Ações secundárias -->
+                            <div class="flex gap-2 overflow-x-auto pb-1">
+                                <button type="button" onclick="window.print()" 
+                                        class="btn-print flex-1 min-w-[90px] justify-center px-3 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fas fa-print"></i> Imprimir
+                                </button>
+
+                                <button type="button" onclick="enviarProntuarioEmail()" id="btnEnviarEmail" 
+                                        class="btn-email flex-1 min-w-[90px] justify-center px-3 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fas fa-paper-plane"></i> E-mail
+                                </button>
+
+                                <button type="button" onclick="abrirModalAuditoria()" 
+                                        class="btn-audit flex-1 min-w-[90px] justify-center px-3 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5">
+                                    <i class="fas fa-shield-alt"></i> Auditoria
+                                </button>
+                            </div>
+
+                            <input type="hidden" id="idDoProntuarioAtual" value="">
                         </div>
 
                     </form>

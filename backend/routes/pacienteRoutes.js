@@ -4,7 +4,10 @@ const multer = require('multer');
 
 // ⚠️ o nome do arquivo tem que bater com a pasta controllers/
 const pacientesController = require('../controllers/pacientesController');
+const portalPacientesDocumentosController = require('../controllers/portalPacientesDocumentosController');
+
 const auth = require('../middleware/authMiddleware');
+
 
 const uploadFoto = multer({
     storage: multer.memoryStorage(),
@@ -38,6 +41,13 @@ router.get('/arquivados', auth, pacientesController.listarArquivados);
 router.get('/ficha-express/:id', auth, pacientesController.obterFichaExpressa);
 router.get('/:id/prontuario', auth, pacientesController.verProntuario);
 
+// ... suas outras rotas
+
+router.get(
+    '/:pacienteId/documentos',
+    authMiddleware,
+    pacienteDocumentosController.listarDocumentosPaciente
+);
 // Foto (Cloudinary)
 router.patch(
     '/:id/foto',
