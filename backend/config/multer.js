@@ -24,7 +24,12 @@ const storage = multer.diskStorage({
 // --- AS LINHAS QUE ESTAVAM FALTANDO ABAIXO ---
 
 // 3. Criamos a instância do multer com a configuração de storage
-const upload = multer({ storage: storage });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024 // Aumenta para 50MB (ou o tamanho que preferir)
+  }
+});
 
 // 4. EXPORTAMOS para que o agendamentoRoutes consiga usar
 module.exports = upload;
