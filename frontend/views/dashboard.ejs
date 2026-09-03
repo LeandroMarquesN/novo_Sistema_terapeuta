@@ -2335,17 +2335,33 @@
     }
   }
 
-  function toggleDropdown(dropdownId) {
-    const dd = document.getElementById(dropdownId);
-    if (!dd) return;
-    const isOpen = dd.classList.contains('open');
-    // Fecha todos
-    document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('open'));
-    if (!isOpen) {
-      dd.classList.add('open');
-      carregarNotificacoes();
+  async function toggleDropdown(dropdownId) {
+  const dd = document.getElementById(dropdownId);
+  if (!dd) return;
+
+  const isOpen = dd.classList.contains('open');
+
+  // Fecha todos
+  document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('open'));
+
+  if (!isOpen) {
+    dd.classList.add('open');
+
+    // Carrega a lista
+    await carregarNotificacoes();
+
+    // Ao abrir, marca todas como lidas e zera a bolinha
+    try {
+      await fetch('/api/notificacoes/marcar-todas-lidas', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${tokenNotif}` }
+      });
+      atualizarBadge(0); // some a bolinha na hora
+    } catch (err) {
+      console.error('Erro ao marcar todas como lidas:', err);
     }
   }
+}
 
   document.addEventListener('DOMContentLoaded', () => {
     const btnMobile = document.getElementById('btnNotifMobile');
