@@ -335,6 +335,21 @@ exports.criarAgendamento = async (req, res) => {
 
     await connection.commit();
 
+    // Notificação interna no dashboard (sino)
+    try {
+      const { criarNotificacao } = require('../services/notificationServiceClientExterno');
+      await criarNotificacao({
+        clinicaId: clinica_id,
+        tipo: 'agendamento',
+        titulo: 'Novo agendamento',
+        mensagem: `${nome} agendou uma consulta para ${data} às ${horario}`,
+        referenciaId: agendamentoId,
+        pacienteId: pacienteId
+      });
+    } catch (notifErr) {
+      console.error('Erro ao criar notificação interna:', notifErr);
+    }
+
     // DISPARO DE NOTIFICAÇÃO
     const [clinicaResult] = await db.execute('SELECT * FROM clinicas WHERE id = ?', [clinica_id]);
 
