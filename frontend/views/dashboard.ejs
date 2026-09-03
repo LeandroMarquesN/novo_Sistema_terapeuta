@@ -1328,6 +1328,160 @@
                 font-size: 15px !important;
             }
         }
+
+        /* sino */
+        /* ─── Notificações (Sino) ─── */
+.notif-wrap {
+  position: relative;
+}
+.notif-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: rgba(148,163,184,0.7);
+  transition: all 0.25s;
+  cursor: pointer;
+}
+.notif-btn:hover {
+  color: var(--emerald);
+  border-color: rgba(52,211,153,0.35);
+}
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px var(--slate-bg);
+  line-height: 1;
+}
+.notif-badge.hidden { display: none !important; }
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  max-width: calc(100vw - 24px);
+  background: rgba(7, 18, 28, 0.98);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  z-index: 100;
+  overflow: hidden;
+  display: none;
+}
+.notif-dropdown.open { display: block; }
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(52,211,153,0.12);
+}
+.notif-header h4 {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0;
+}
+.notif-marcar-todas {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cyan);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.notif-marcar-todas:hover { text-decoration: underline; }
+
+.notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+.notif-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.notif-item:hover { background: rgba(52,211,153,0.06); }
+.notif-item.nao-lida { background: rgba(52,211,153,0.04); }
+.notif-item.nao-lida:hover { background: rgba(52,211,153,0.08); }
+
+.notif-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+}
+.notif-icon.agendamento {
+  background: rgba(34,211,238,0.12);
+  color: var(--cyan);
+  border: 1px solid rgba(34,211,238,0.25);
+}
+.notif-icon.documento {
+  background: rgba(251,191,36,0.12);
+  color: var(--amber);
+  border: 1px solid rgba(251,191,36,0.25);
+}
+.notif-icon.sistema {
+  background: rgba(148,163,184,0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148,163,184,0.2);
+}
+
+.notif-body { min-width: 0; flex: 1; }
+.notif-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 2px;
+}
+.notif-msg {
+  font-size: 11px;
+  color: rgba(148,163,184,0.75);
+  margin: 0;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notif-tempo {
+  font-size: 10px;
+  color: rgba(148,163,184,0.45);
+  margin-top: 3px;
+}
+
+.notif-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: rgba(148,163,184,0.4);
+  font-size: 12px;
+}
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -1353,9 +1507,21 @@
             <span class="logo-text">Med<span>LM</span></span>
         </div>
         <div class="actions">
-            <button class="icon-btn" aria-label="Notificações">
-                <i class="fas fa-bell"></i>
-            </button>
+            <div class="notif-wrap">
+                <button class="icon-btn notif-btn" id="btnNotifMobile" aria-label="Notificações">
+                  <i class="fas fa-bell"></i>
+                  <span class="notif-badge hidden" id="badgeNotifMobile">0</span>
+                </button>
+                <div class="notif-dropdown" id="dropdownNotifMobile">
+                  <div class="notif-header">
+                    <h4>Notificações</h4>
+                    <button class="notif-marcar-todas" onclick="marcarTodasLidas()">Marcar todas como lidas</button>
+                  </div>
+                  <div class="notif-list" id="listaNotifMobile">
+                    <div class="notif-empty">Nenhuma notificação</div>
+                  </div>
+                </div>
+              </div>
             <div class="avatar-btn">ML</div>
         </div>
     </div>
@@ -2017,6 +2183,144 @@
                 if (e.key === 'Escape') closeDrawer();
             });
         })();
+
+        
+  const tokenNotif = localStorage.getItem('token');
+
+  function tempoRelativo(dataStr) {
+    const diff = (Date.now() - new Date(dataStr).getTime()) / 1000;
+    if (diff < 60) return 'Agora';
+    if (diff < 3600) return Math.floor(diff / 60) + ' min';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' h';
+    return Math.floor(diff / 86400) + ' d';
+  }
+
+  function iconeTipo(tipo) {
+    if (tipo === 'agendamento') return { cls: 'agendamento', icon: 'fa-calendar-check' };
+    if (tipo === 'documento') return { cls: 'documento', icon: 'fa-file-medical' };
+    return { cls: 'sistema', icon: 'fa-info-circle' };
+  }
+
+  function renderNotificacoes(lista, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    if (!lista || lista.length === 0) {
+      el.innerHTML = '<div class="notif-empty">Nenhuma notificação</div>';
+      return;
+    }
+
+    el.innerHTML = lista.map(n => {
+      const ic = iconeTipo(n.tipo);
+      return `
+        <div class="notif-item ${n.lida ? '' : 'nao-lida'}" onclick="marcarLida(${n.id})">
+          <div class="notif-icon ${ic.cls}">
+            <i class="fas ${ic.icon}"></i>
+          </div>
+          <div class="notif-body">
+            <p class="notif-titulo">${n.titulo}</p>
+            <p class="notif-msg">${n.mensagem}</p>
+            <p class="notif-tempo">${tempoRelativo(n.criado_em)}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function atualizarBadge(total) {
+    ['badgeNotifMobile', 'badgeNotifDesktop'].forEach(id => {
+      const badge = document.getElementById(id);
+      if (!badge) return;
+      if (total > 0) {
+        badge.innerText = total > 99 ? '99+' : total;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    });
+  }
+
+  async function carregarNotificacoes() {
+    if (!tokenNotif) return;
+    try {
+      const [resLista, resContar] = await Promise.all([
+        fetch('/api/notificacoes', { headers: { Authorization: `Bearer ${tokenNotif}` } }),
+        fetch('/api/notificacoes/contar', { headers: { Authorization: `Bearer ${tokenNotif}` } })
+      ]);
+
+      if (resLista.ok) {
+        const lista = await resLista.json();
+        renderNotificacoes(lista, 'listaNotifMobile');
+        renderNotificacoes(lista, 'listaNotifDesktop');
+      }
+      if (resContar.ok) {
+        const { total } = await resContar.json();
+        atualizarBadge(total);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar notificações:', err);
+    }
+  }
+
+  async function marcarLida(id) {
+    try {
+      await fetch(`/api/notificacoes/${id}/lida`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${tokenNotif}` }
+      });
+      carregarNotificacoes();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function marcarTodasLidas() {
+    try {
+      await fetch('/api/notificacoes/marcar-todas-lidas', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${tokenNotif}` }
+      });
+      carregarNotificacoes();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function toggleDropdown(dropdownId) {
+    const dd = document.getElementById(dropdownId);
+    if (!dd) return;
+    const isOpen = dd.classList.contains('open');
+    // Fecha todos
+    document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('open'));
+    if (!isOpen) {
+      dd.classList.add('open');
+      carregarNotificacoes();
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnMobile = document.getElementById('btnNotifMobile');
+    const btnDesktop = document.getElementById('btnNotifDesktop');
+
+    if (btnMobile) btnMobile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown('dropdownNotifMobile');
+    });
+    if (btnDesktop) btnDesktop.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown('dropdownNotifDesktop');
+    });
+
+    // Fecha ao clicar fora
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('open'));
+    });
+
+    // Carrega na entrada + polling a cada 30s
+    carregarNotificacoes();
+    setInterval(carregarNotificacoes, 30000);
+  });
+
     </script>
 </body>
 </html>

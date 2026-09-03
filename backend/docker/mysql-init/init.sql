@@ -317,6 +317,24 @@ CREATE TABLE IF NOT EXISTS logs_auditoria (
   CONSTRAINT fk_log_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id)
 ) ENGINE=InnoDB;
 
+CREATE TABLE IF NOT EXISTS notificacoes (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  tipo ENUM('agendamento', 'documento', 'sistema') NOT NULL DEFAULT 'sistema',
+  titulo VARCHAR(150) NOT NULL,
+  mensagem VARCHAR(500) NOT NULL,
+  referencia_id INT NULL,          -- id do agendamento ou do documento
+  paciente_id INT NULL,
+  lida TINYINT(1) NOT NULL DEFAULT 0,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  INDEX idx_clinica_lida (clinica_id, lida),
+  INDEX idx_clinica_criado (clinica_id, criado_em DESC),
+  
+  CONSTRAINT fk_notif_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_notif_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
 -- INSERTS DE TESTE (Adicionado SLUG para não dar erro)
 INSERT IGNORE INTO clinicas (id, nome_clinica, slug, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao)
 VALUES (1, 'Clínica Experimental', 'clinica-experimental', 'Leandro Marques', '1199999999', '1188888888', 'admin@sistema.com', '123456', 1, '2026-12-31');

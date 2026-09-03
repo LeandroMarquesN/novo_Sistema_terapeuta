@@ -170,6 +170,21 @@ exports.uploadDocumentoPortal = async (req, res) => {
             ]
         );
 
+        const { criarNotificacao } = require('../services/notificationService');
+
+        // Busca o nome do paciente para a mensagem
+        const [pac] = await db.query('SELECT nome FROM pacientes WHERE id = ?', [paciente_Id]);
+        const nomePaciente = pac[0]?.nome || 'Paciente';
+
+        await criarNotificacao({
+            clinicaId,
+            tipo: 'documento',
+            titulo: 'Novo documento enviado',
+            mensagem: `${nomePaciente} enviou o arquivo "${resultado.nomeOriginal}"`,
+            referenciaId: insert.insertId,
+            paciente_Id
+        });
+
         // Gera URL assinada para retornar já utilizável
         const urlAssinada = await getUrlDocumentoR2(resultado.storageKey);
 
