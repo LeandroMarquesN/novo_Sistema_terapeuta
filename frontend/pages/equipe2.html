@@ -77,223 +77,19 @@
         ::-webkit-scrollbar-track { background: #020c12; }
         ::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.4); border-radius: 99px; }
 
-        /* ─── Mobile nav (topbar + tabbar) – espelhado do dashboard ─── */
-        .mobile-topbar,
-        .mobile-bottom-tabbar,
-        .mobile-drawer-overlay,
-        .mobile-drawer {
-            display: none;
-        }
-
         @media (max-width: 1023px) {
             #sidebarMenu {
+                width: 5rem !important;
+            }
+            #sidebarMenu .logo-text-brand,
+            #sidebarMenu nav span,
+            #sidebarMenu #data-hora,
+            #sidebarMenu button span,
+            #sidebarMenu a span {
                 display: none !important;
             }
             main {
-                padding-left: 0 !important;
-                padding-top: 80px !important;
-                padding-bottom: 110px !important;
-            }
-
-            .mobile-topbar,
-            .mobile-bottom-tabbar {
-                display: flex !important;
-            }
-
-            .mobile-topbar {
-                position: fixed;
-                top: 0; left: 0; right: 0;
-                z-index: 60;
-                height: 64px;
-                background: rgba(2, 12, 18, 0.95);
-                border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-                backdrop-filter: blur(20px);
-                -webkit-backdrop-filter: blur(20px);
-                align-items: center;
-                justify-content: space-between;
-                padding: 0 16px;
-            }
-            .mobile-topbar .logo-wrap {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .mobile-topbar .logo-icon {
-                width: 38px; height: 38px;
-                border-radius: 12px;
-                background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
-                box-shadow: 0 0 16px rgba(8,145,178,0.4);
-                display: flex; align-items: center; justify-content: center;
-                color: #fff; font-weight: 800; font-size: 15px;
-                font-family: 'Space Grotesk', sans-serif;
-            }
-            .mobile-topbar .logo-text {
-                font-family: 'Space Grotesk', sans-serif;
-                font-weight: 800; font-size: 18px; color: #e2e8f0;
-            }
-            .mobile-topbar .logo-text span {
-                color: #34d399;
-                text-shadow: 0 0 10px rgba(52,211,153,0.5);
-            }
-            .mobile-topbar .actions {
-                display: flex; align-items: center; gap: 8px;
-            }
-            .mobile-topbar .icon-btn {
-                width: 40px; height: 40px; border-radius: 12px;
-                background: rgba(255,255,255,0.04);
-                border: 1px solid rgba(52,211,153,0.15);
-                color: rgba(148,163,184,0.7);
-                display: flex; align-items: center; justify-content: center;
-                cursor: pointer; transition: all 0.2s;
-            }
-            .mobile-topbar .icon-btn:active {
-                color: #34d399;
-                transform: scale(0.94);
-            }
-
-            .mobile-drawer-overlay {
-                display: block;
-                position: fixed; inset: 0;
-                background: rgba(2,12,18,0.7);
-                backdrop-filter: blur(6px);
-                z-index: 70;
-                opacity: 0; pointer-events: none;
-                transition: opacity 0.3s;
-            }
-            .mobile-drawer-overlay.open {
-                opacity: 1; pointer-events: auto;
-            }
-            .mobile-drawer {
-                display: flex;
-                flex-direction: column;
-                position: fixed;
-                top: 0; left: 0; bottom: 0;
-                width: min(300px, 85vw);
-                background: rgba(4, 16, 24, 0.98);
-                border-right: 1px solid rgba(52,211,153,0.18);
-                z-index: 80;
-                transform: translateX(-105%);
-                transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-                padding: 0;
-            }
-            .mobile-drawer.open {
-                transform: translateX(0);
-            }
-            .mobile-drawer .drawer-header {
-                display: flex; align-items: center; justify-content: space-between;
-                padding: 20px 18px;
-                border-bottom: 1px solid rgba(52,211,153,0.12);
-            }
-            .mobile-drawer .drawer-logo {
-                display: flex; align-items: center; gap: 12px;
-            }
-            .mobile-drawer .drawer-logo .logo-icon {
-                width: 42px; height: 42px; border-radius: 12px;
-                background: linear-gradient(135deg, #0891b2, #059669);
-                display: flex; align-items: center; justify-content: center;
-                color: #fff; font-weight: 800; font-size: 16px;
-            }
-            .mobile-drawer .drawer-logo span {
-                font-family: 'Space Grotesk', sans-serif;
-                font-weight: 700; font-size: 18px; color: #e2e8f0;
-            }
-            .mobile-drawer .drawer-logo span b { color: #34d399; }
-            .mobile-drawer .close-drawer {
-                width: 36px; height: 36px; border-radius: 10px;
-                background: rgba(255,255,255,0.04);
-                border: 1px solid rgba(255,255,255,0.08);
-                color: rgba(148,163,184,0.7);
-                display: flex; align-items: center; justify-content: center;
-                cursor: pointer;
-            }
-            .mobile-drawer nav {
-                flex: 1; padding: 16px 12px;
-                display: flex; flex-direction: column; gap: 4px;
-                overflow-y: auto;
-            }
-            .mobile-drawer .nav-item {
-                display: flex; align-items: center; gap: 14px;
-                padding: 14px 16px; border-radius: 14px;
-                color: rgba(148,163,184,0.7);
-                font-weight: 600; font-size: 14px;
-                text-decoration: none;
-                transition: all 0.2s;
-                border: 1px solid transparent;
-            }
-            .mobile-drawer .nav-item i { width: 22px; text-align: center; font-size: 16px; }
-            .mobile-drawer .nav-item.active {
-                background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.2));
-                border-color: rgba(52,211,153,0.35);
-                color: #34d399;
-            }
-            .mobile-drawer .nav-item:active { color: #22d3ee; }
-            .mobile-drawer .drawer-footer {
-                padding: 12px;
-                border-top: 1px solid rgba(52,211,153,0.1);
-            }
-
-            .mobile-bottom-tabbar {
-                position: fixed;
-                bottom: calc(14px + env(safe-area-inset-bottom, 0));
-                left: 14px;
-                right: 14px;
-                z-index: 60;
-                height: 70px;
-                background: rgba(4, 16, 24, 0.92);
-                border: 1px solid rgba(52, 211, 153, 0.15);
-                border-radius: 26px;
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
-                align-items: center;
-                justify-content: space-around;
-                padding: 0 6px;
-                box-shadow:
-                    0 12px 34px rgba(0,0,0,0.55),
-                    0 0 0 1px rgba(255,255,255,0.02) inset,
-                    0 0 24px rgba(52,211,153,0.08);
-                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
-                transform: translateY(0);
-                opacity: 1;
-            }
-            .mobile-bottom-tabbar.tabbar-hidden {
-                transform: translateY(140%);
-                opacity: 0;
-            }
-            .mobile-bottom-tabbar .tab-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                gap: 4px;
-                flex: 1;
-                height: 100%;
-                color: rgba(148,163,184,0.55);
-                font-size: 11px;
-                font-weight: 700;
-                text-decoration: none;
-                transition: all 0.2s;
-                position: relative;
-            }
-            .mobile-bottom-tabbar .tab-item i {
-                font-size: 22px;
-                margin-bottom: 2px;
-            }
-            .mobile-bottom-tabbar .tab-item.active {
-                color: #34d399;
-            }
-            .mobile-bottom-tabbar .tab-item.active::before {
-                content: '';
-                position: absolute;
-                top: 6px;
-                width: 28px;
-                height: 3px;
-                background: #34d399;
-                border-radius: 99px;
-                box-shadow: 0 0 10px #34d399;
-            }
-            .mobile-bottom-tabbar .tab-item:active {
-                color: #22d3ee;
-                transform: scale(0.95);
+                padding-left: 5rem !important;
             }
         }
 
@@ -301,84 +97,10 @@
             #sidebarMenu:hover {
                 width: 16rem;
             }
-            .mobile-topbar,
-            .mobile-bottom-tabbar,
-            .mobile-drawer,
-            .mobile-drawer-overlay {
-                display: none !important;
-            }
         }
     </style>
 </head>
 <body class="font-sans antialiased flex overflow-x-hidden">
-
-    <!-- ─── Mobile Top Bar ─── -->
-    <div class="mobile-topbar">
-        <div class="logo-wrap">
-            <button class="icon-btn" id="btnOpenDrawer" aria-label="Abrir menu" type="button">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo-icon">M</div>
-            <span class="logo-text">Med<span>LM</span></span>
-        </div>
-        <div class="actions">
-            <a href="/dashboard" class="icon-btn" title="Dashboard" style="text-decoration:none">
-                <i class="fas fa-home"></i>
-            </a>
-        </div>
-    </div>
-
-    <!-- ─── Mobile Drawer ─── -->
-    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
-    <div class="mobile-drawer" id="mobileDrawer">
-        <div class="drawer-header">
-            <div class="drawer-logo">
-                <div class="logo-icon">M</div>
-                <span>Med<b>LM</b></span>
-            </div>
-            <button class="close-drawer" id="btnCloseDrawer" aria-label="Fechar menu" type="button">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <nav>
-            <a href="/dashboard" class="nav-item"><i class="fas fa-chart-line"></i> Dashboard</a>
-            <a href="/pacientes" class="nav-item"><i class="fas fa-user-injured"></i> Pacientes</a>
-            <a href="/financeiro" class="nav-item"><i class="fas fa-hand-holding-usd"></i> Financeiro</a>
-            <a href="/agendamento" class="nav-item"><i class="fas fa-calendar-check"></i> Agendamento</a>
-            <a href="/equipe" class="nav-item active"><i class="fas fa-users-cog"></i> Minha Equipe</a>
-            <a href="/dashboard/configuracoes" class="nav-item"><i class="fas fa-cogs"></i> Configurações</a>
-            <a href="javascript:void(0)" onclick="handleLogout(event)" class="nav-item" style="color:rgba(248,113,113,0.75)"><i class="fas fa-sign-out-alt"></i> Sair</a>
-        </nav>
-        <div class="drawer-footer">
-            <button type="button" id="theme-toggle-btn-mobile" class="nav-item" style="width:100%;background:transparent;border:none;cursor:pointer;text-align:left">
-                <i class="fas fa-moon"></i> Tema
-            </button>
-        </div>
-    </div>
-
-    <!-- ─── Mobile Bottom Tab Bar ─── -->
-    <nav class="mobile-bottom-tabbar">
-        <a href="/dashboard" class="tab-item">
-            <i class="fas fa-home"></i>
-            <span>Início</span>
-        </a>
-        <a href="/pacientes" class="tab-item">
-            <i class="fas fa-user-injured"></i>
-            <span>Pacientes</span>
-        </a>
-        <a href="/agendamento" class="tab-item">
-            <i class="fas fa-calendar-check"></i>
-            <span>Agenda</span>
-        </a>
-        <a href="/equipe" class="tab-item active">
-            <i class="fas fa-users-cog"></i>
-            <span>Equipe</span>
-        </a>
-        <a href="/dashboard/configuracoes" class="tab-item">
-            <i class="fas fa-user-cog"></i>
-            <span>Perfil</span>
-        </a>
-    </nav>
     
     <div class="flex w-full min-h-screen relative group">
 
@@ -872,61 +594,6 @@
             carregarStatusPlano();
             carregarEquipe();
         });
-    </script>
-
-    <!-- Mobile drawer + tabbar scroll hide -->
-    <script>
-        (function () {
-            const btnOpen = document.getElementById('btnOpenDrawer');
-            const btnClose = document.getElementById('btnCloseDrawer');
-            const drawer = document.getElementById('mobileDrawer');
-            const overlay = document.getElementById('drawerOverlay');
-
-            function openDrawer() {
-                if (!drawer) return;
-                drawer.classList.add('open');
-                if (overlay) overlay.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
-            function closeDrawer() {
-                if (!drawer) return;
-                drawer.classList.remove('open');
-                if (overlay) overlay.classList.remove('open');
-                document.body.style.overflow = '';
-            }
-
-            if (btnOpen) btnOpen.addEventListener('click', openDrawer);
-            if (btnClose) btnClose.addEventListener('click', closeDrawer);
-            if (overlay) overlay.addEventListener('click', closeDrawer);
-
-            document.addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') closeDrawer();
-            });
-        })();
-
-        // Tab bar some durante o scroll e volta quando parar
-        (function () {
-            const tabbar = document.querySelector('.mobile-bottom-tabbar');
-            if (!tabbar) return;
-
-            const scrollEl = document.querySelector('main');
-            let scrollTimer = null;
-
-            function esconderTabbar() {
-                tabbar.classList.add('tabbar-hidden');
-            }
-            function mostrarTabbar() {
-                tabbar.classList.remove('tabbar-hidden');
-            }
-            function aoRolar() {
-                esconderTabbar();
-                clearTimeout(scrollTimer);
-                scrollTimer = setTimeout(mostrarTabbar, 300);
-            }
-
-            if (scrollEl) scrollEl.addEventListener('scroll', aoRolar, { passive: true });
-            window.addEventListener('scroll', aoRolar, { passive: true });
-        })();
     </script>
 
     <script src="../ScriptGlobal/FuncDataHora.js"></script>
