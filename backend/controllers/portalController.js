@@ -59,7 +59,7 @@ exports.renderPortal = async (req, res) => {
     const clinicaAtual = clinica[0];
 
     const [config] = await db.execute(
-      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ?',
+      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ? ORDER BY id DESC LIMIT 1',
       [clinicaAtual.id]
     );
 
@@ -89,7 +89,7 @@ exports.getHorariosLivres = async (req, res) => {
   const connection = await db.getConnection();
   try {
     const [config] = await connection.execute(
-      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ?',
+      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ? ORDER BY id DESC LIMIT 1',
       [clinica_id]
     );
 
@@ -195,7 +195,7 @@ exports.criarAgendamento = async (req, res) => {
     await connection.beginTransaction();
 
     const [configuracoes] = await connection.execute(
-      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ?',
+      'SELECT * FROM clinica_configuracoes WHERE clinica_id = ? ORDER BY id DESC LIMIT 1',
       [clinica_id]
     );
 
@@ -234,6 +234,42 @@ exports.criarAgendamento = async (req, res) => {
     if (emRecesso) {
       await connection.rollback();
       return res.status(400).json({ success: false, message: "A clínica está fechada nesta data (recesso/feriado)." });
+    }
+
+    // ── Validação: horário não cai em intervalo de pausa (almoço etc.) ──
+    let intervalosPausa = [];
+    try {
+      intervalosPausa = typeof config.intervalos_pausa === 'string'
+        ? JSON.parse(config.intervalos_pausa || '[]')
+        : (config.intervalos_pausa || []);
+    } catch (e) {
+      intervalosPausa = [];
+    }
+
+    const horaParaMinutos = (horaStr) => {
+      if (!horaStr) return null;
+      const [h, m] = String(horaStr).slice(0, 5).split(':').map(Number);
+      if (Number.isNaN(h) || Number.isNaN(m)) return null;
+      return h * 60 + m;
+    };
+
+    const duracaoAtend = parseInt(config.duracao_atendimento, 10) || 30;
+    const inicioSlot = horaParaMinutos(horario);
+    if (inicioSlot !== null && Array.isArray(intervalosPausa)) {
+      const fimSlot = inicioSlot + duracaoAtend;
+      const emPausa = intervalosPausa.some((p) => {
+        const iniP = horaParaMinutos(p.inicio);
+        const fimP = horaParaMinutos(p.fim);
+        if (iniP === null || fimP === null) return false;
+        return inicioSlot < fimP && fimSlot > iniP;
+      });
+      if (emPausa) {
+        await connection.rollback();
+        return res.status(400).json({
+          success: false,
+          message: "Este horário está em um intervalo de pausa da clínica (ex.: almoço)."
+        });
+      }
     }
 
     // Converte para float para garantir cálculos matemáticos corretos

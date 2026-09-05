@@ -40,14 +40,35 @@ exports.gerarSlotsDisponiveis = (config, agendamentosOcupados, dataConsulta) => 
         return [];
     }
 
-    // ─── 3. Lógica original de geração de slots ───
-    const slots = [];
+    // ─── 3. Intervalos de pausa diários (almoço, reunião, etc.) ───
+    let intervalosPausa = [];
+    try {
+        intervalosPausa = typeof config.intervalos_pausa === 'string'
+            ? JSON.parse(config.intervalos_pausa || '[]')
+            : (config.intervalos_pausa || []);
+        if (!Array.isArray(intervalosPausa)) intervalosPausa = [];
+    } catch (e) {
+        console.error('[AgendaService] intervalos_pausa inválido:', e.message);
+        intervalosPausa = [];
+    }
 
     const paraMinutos = (time) => {
         if (!time) return 0;
-        const [h, m] = time.substring(0, 5).split(':').map(Number);
+        const [h, m] = String(time).substring(0, 5).split(':').map(Number);
         return h * 60 + m;
     };
+
+    const slotCaiEmPausa = (inicioMin, fimMin) => {
+        return intervalosPausa.some(p => {
+            const iniP = paraMinutos(p.inicio);
+            const fimP = paraMinutos(p.fim);
+            // sobreposição: [inicioMin, fimMin) com [iniP, fimP)
+            return inicioMin < fimP && fimMin > iniP;
+        });
+    };
+
+    // ─── 4. Geração de slots ───
+    const slots = [];
 
     const aberturaMin = paraMinutos(config.horario_abertura);
     const fechamentoMin = paraMinutos(config.horario_fechamento);
@@ -65,12 +86,20 @@ exports.gerarSlotsDisponiveis = (config, agendamentosOcupados, dataConsulta) => 
     });
 
     console.log("[AgendaService] Minutos ocupados:", minutosOcupados);
+    if (intervalosPausa.length) {
+        console.log("[AgendaService] Pausas diárias:", intervalosPausa.map(p => `${p.inicio}-${p.fim}`).join(', '));
+    }
 
-    for (let m = aberturaMin; m < fechamentoMin; m += duracao) {
-        if (!minutosOcupados.includes(m)) {
-            const horaFormatada = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-            slots.push(horaFormatada);
-        }
+    // Só gera slot se o atendimento inteiro cabe antes do fechamento
+    for (let m = aberturaMin; m + duracao <= fechamentoMin; m += duracao) {
+        // Já tem consulta neste horário?
+        if (minutosOcupados.includes(m)) continue;
+
+        // Cai em pausa (ex.: almoço)?
+        if (slotCaiEmPausa(m, m + duracao)) continue;
+
+        const horaFormatada = `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+        slots.push(horaFormatada);
     }
 
     return slots;

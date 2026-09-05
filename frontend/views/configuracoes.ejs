@@ -454,6 +454,92 @@
         }
         .btn-modal-ok:hover { box-shadow: 0 0 30px rgba(52,211,153,0.4); transform: translateY(-1px); }
 
+
+        /* ─── Intervalos de pausa (almoço etc.) ─── */
+        .pausa-form-grid {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr auto;
+            gap: 14px;
+            align-items: end;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            .pausa-form-grid { grid-template-columns: 1fr 1fr; }
+            .pausa-form-grid .pausa-span-full { grid-column: span 2; }
+        }
+        @media (max-width: 560px) {
+            .pausa-form-grid { grid-template-columns: 1fr; }
+            .pausa-form-grid .pausa-span-full { grid-column: span 1; }
+        }
+        .btn-add-pausa {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            background: linear-gradient(135deg, rgba(34,211,238,0.22), rgba(8,145,178,0.18));
+            border: 1px solid rgba(34,211,238,0.35);
+            color: var(--cyan);
+            font-weight: 800; font-size: 13px;
+            padding: 13px 20px; border-radius: 14px;
+            cursor: pointer; transition: all 0.25s;
+            font-family: 'Space Grotesk', sans-serif;
+            white-space: nowrap;
+            height: 52px;
+        }
+        .btn-add-pausa:hover {
+            background: linear-gradient(135deg, rgba(34,211,238,0.32), rgba(8,145,178,0.26));
+            box-shadow: 0 0 18px rgba(34,211,238,0.25);
+            transform: translateY(-2px);
+        }
+        .pausa-list {
+            margin-top: 26px;
+            display: flex; flex-direction: column; gap: 10px;
+            max-width: 760px;
+            margin-left: auto; margin-right: auto;
+        }
+        .pausa-item {
+            display: flex; align-items: center; gap: 14px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(34,211,238,0.18);
+            border-radius: 16px;
+            padding: 14px 18px;
+            position: relative;
+            overflow: hidden;
+            animation: slideInFade 0.4s cubic-bezier(0.4,0,0.2,1);
+            transition: all 0.25s;
+        }
+        .pausa-item::before {
+            content: '';
+            position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+            background: linear-gradient(180deg, var(--cyan), #0891b2);
+        }
+        .pausa-item:hover {
+            border-color: rgba(34,211,238,0.35);
+            box-shadow: 0 4px 20px rgba(34,211,238,0.08);
+            transform: translateX(2px);
+        }
+        .pausa-item.removing {
+            animation: slideOutFade 0.3s ease forwards;
+        }
+        .pausa-icon {
+            width: 38px; height: 38px; border-radius: 11px;
+            background: rgba(34,211,238,0.12);
+            border: 1px solid rgba(34,211,238,0.25);
+            color: var(--cyan);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; font-size: 14px;
+        }
+        .pausa-info { flex: 1; min-width: 0; }
+        .pausa-titulo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px; font-weight: 700; color: #f1f5f9;
+            margin-bottom: 2px;
+        }
+        .pausa-horario {
+            font-size: 11px; color: rgba(34,211,238,0.75);
+            font-weight: 600;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .pausa-horario i { font-size: 9px; }
+
         /* ─── Mobile nav (topbar + drawer + tabbar) – igual ao dashboard ─── */
         .mobile-topbar,
         .mobile-bottom-tabbar,
@@ -913,6 +999,48 @@
                     <input type="hidden" id="periodos_fechados" name="periodos_fechados" value="[]">
                 </div>
 
+
+                <!-- ─── Card de Intervalos de Pausa (almoço / bloqueios diários) ─── -->
+                <div class="glass-card p-8">
+                    <div class="card-center-head">
+                        <div class="card-icon-wrap card-icon-cyan"><i class="fas fa-coffee"></i></div>
+                        <h2 class="card-title">Intervalos de Pausa</h2>
+                        <p class="card-desc">Defina janelas diárias em que a clínica não atende — almoço, reunião, deslocamento etc. Esses horários ficam bloqueados no portal de agendamento todos os dias de expediente.</p>
+                    </div>
+
+                    <div class="pausa-form-grid">
+                        <div class="pausa-span-full">
+                            <label class="form-label">Motivo / Descrição</label>
+                            <input type="text" id="pausa_titulo" class="input-premium w-full p-4 font-medium" placeholder="Ex: Horário de Almoço">
+                        </div>
+                        <div>
+                            <label class="form-label">Início</label>
+                            <input type="time" id="pausa_inicio" class="input-premium w-full p-4 font-semibold">
+                        </div>
+                        <div>
+                            <label class="form-label">Fim</label>
+                            <input type="time" id="pausa_fim" class="input-premium w-full p-4 font-semibold">
+                        </div>
+                        <button type="button" id="btnAddPausa" class="btn-add-pausa">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+
+                    <p id="pausaErrorMsg" class="weekday-hint" style="display:none;color:#f87171">
+                        <i class="fas fa-exclamation-circle" style="color:#f87171"></i>
+                        <span></span>
+                    </p>
+
+                    <div class="pausa-list" id="pausaList">
+                        <div class="recesso-empty" id="pausaEmptyState">
+                            <i class="fas fa-mug-hot" style="color:rgba(34,211,238,0.35)"></i>
+                            Nenhum intervalo de pausa cadastrado.<br>Ex.: 12:00–13:00 para almoço.
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="intervalos_pausa" name="intervalos_pausa" value="[]">
+                </div>
+
                 <!-- ─── Card de Pagamento ─── -->
                 <div class="glass-card p-8">
                     <div class="card-center-head">
@@ -1164,6 +1292,157 @@
         // Render inicial (estado vazio)
         renderizarRecessos();
 
+
+        // ─── Intervalos de Pausa diários (almoço etc.) ───
+        const intervalosPausaInput = document.getElementById('intervalos_pausa');
+        const pausaList = document.getElementById('pausaList');
+        const pausaEmptyState = document.getElementById('pausaEmptyState');
+        const pausaErrorMsg = document.getElementById('pausaErrorMsg');
+        const btnAddPausa = document.getElementById('btnAddPausa');
+        const inputPausaTitulo = document.getElementById('pausa_titulo');
+        const inputPausaInicio = document.getElementById('pausa_inicio');
+        const inputPausaFim = document.getElementById('pausa_fim');
+
+        let intervalosPausa = []; // [{ id, titulo, inicio, fim }] HH:mm
+
+        function gerarIdPausa() {
+            return 'p_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+        }
+
+        function mostrarErroPausa(msg) {
+            if (!pausaErrorMsg) return;
+            pausaErrorMsg.querySelector('span').textContent = msg;
+            pausaErrorMsg.style.display = 'flex';
+            setTimeout(() => { pausaErrorMsg.style.display = 'none'; }, 4000);
+        }
+
+        function sincronizarPausasHidden() {
+            if (intervalosPausaInput) {
+                intervalosPausaInput.value = JSON.stringify(intervalosPausa);
+            }
+        }
+
+        function formatarHoraDisplay(hhmm) {
+            if (!hhmm) return '—';
+            return String(hhmm).slice(0, 5);
+        }
+
+        function renderizarPausas() {
+            if (!pausaList) return;
+            pausaList.innerHTML = '';
+
+            if (intervalosPausa.length === 0) {
+                if (pausaEmptyState) {
+                    pausaList.appendChild(pausaEmptyState);
+                    pausaEmptyState.style.display = 'block';
+                }
+                return;
+            }
+
+            const ordenados = [...intervalosPausa].sort((a, b) => String(a.inicio).localeCompare(String(b.inicio)));
+
+            ordenados.forEach(pausa => {
+                const item = document.createElement('div');
+                item.className = 'pausa-item';
+                item.dataset.id = pausa.id;
+                item.innerHTML = `
+                    <div class="pausa-icon"><i class="fas fa-coffee"></i></div>
+                    <div class="pausa-info">
+                        <div class="pausa-titulo">${pausa.titulo}</div>
+                        <div class="pausa-horario">
+                            <i class="fas fa-clock"></i>
+                            ${formatarHoraDisplay(pausa.inicio)} <i class="fas fa-arrow-right"></i> ${formatarHoraDisplay(pausa.fim)}
+                        </div>
+                    </div>
+                    <button type="button" class="btn-remove-recesso btn-remove-pausa" data-id="${pausa.id}" title="Remover intervalo">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                pausaList.appendChild(item);
+            });
+
+            pausaList.querySelectorAll('.btn-remove-pausa').forEach(btn => {
+                btn.addEventListener('click', () => removerPausa(btn.dataset.id));
+            });
+        }
+
+        function adicionarPausa() {
+            const titulo = (inputPausaTitulo?.value || '').trim();
+            const inicio = inputPausaInicio?.value || '';
+            const fim = inputPausaFim?.value || '';
+
+            if (!titulo) { mostrarErroPausa('Informe um motivo (ex.: Almoço).'); return; }
+            if (!inicio || !fim) { mostrarErroPausa('Selecione horário de início e fim.'); return; }
+            if (fim <= inicio) { mostrarErroPausa('O fim deve ser depois do início.'); return; }
+
+            // evita sobreposição simples com pausas já cadastradas
+            const iniM = inicio.split(':').map(Number);
+            const fimM = fim.split(':').map(Number);
+            const iniMin = iniM[0] * 60 + iniM[1];
+            const fimMin = fimM[0] * 60 + fimM[1];
+            const overlap = intervalosPausa.some(p => {
+                const [aH, aM] = String(p.inicio).split(':').map(Number);
+                const [bH, bM] = String(p.fim).split(':').map(Number);
+                const a = aH * 60 + aM;
+                const b = bH * 60 + bM;
+                return iniMin < b && fimMin > a;
+            });
+            if (overlap) { mostrarErroPausa('Este intervalo sobrepõe outra pausa já cadastrada.'); return; }
+
+            intervalosPausa.push({ id: gerarIdPausa(), titulo, inicio, fim });
+            sincronizarPausasHidden();
+            renderizarPausas();
+
+            if (inputPausaTitulo) inputPausaTitulo.value = '';
+            if (inputPausaInicio) inputPausaInicio.value = '';
+            if (inputPausaFim) inputPausaFim.value = '';
+            inputPausaTitulo?.focus();
+        }
+
+        function removerPausa(id) {
+            const item = pausaList?.querySelector(`.pausa-item[data-id="${id}"]`);
+            if (item) {
+                item.classList.add('removing');
+                setTimeout(() => {
+                    intervalosPausa = intervalosPausa.filter(p => p.id !== id);
+                    sincronizarPausasHidden();
+                    renderizarPausas();
+                }, 280);
+            } else {
+                intervalosPausa = intervalosPausa.filter(p => p.id !== id);
+                sincronizarPausasHidden();
+                renderizarPausas();
+            }
+        }
+
+        function carregarIntervalosPausa(valor) {
+            try {
+                const dados = typeof valor === 'string' ? JSON.parse(valor || '[]') : valor;
+                if (Array.isArray(dados)) {
+                    intervalosPausa = dados.map(p => ({
+                        id: p.id || gerarIdPausa(),
+                        titulo: p.titulo || p.descricao || 'Pausa',
+                        inicio: String(p.inicio || '').slice(0, 5),
+                        fim: String(p.fim || '').slice(0, 5)
+                    })).filter(p => p.inicio && p.fim);
+                    sincronizarPausasHidden();
+                    renderizarPausas();
+                }
+            } catch (e) {
+                console.error('Erro ao carregar intervalos de pausa:', e);
+            }
+        }
+
+        if (btnAddPausa) btnAddPausa.addEventListener('click', adicionarPausa);
+        [inputPausaTitulo, inputPausaInicio, inputPausaFim].forEach(input => {
+            if (!input) return;
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') { e.preventDefault(); adicionarPausa(); }
+            });
+        });
+        renderizarPausas();
+
+
         // ─── Carregar configurações (lógica original preservada + dias_semana + recessos) ───
         async function carregarConfiguracoes() {
             try {
@@ -1185,6 +1464,9 @@
                         if (data.periodos_fechados) {
                             carregarPeriodosFechados(data.periodos_fechados);
                         }
+                        if (data.intervalos_pausa) {
+                            carregarIntervalosPausa(data.intervalos_pausa);
+                        }
                     }
                 }
             } catch (error) { console.error('Erro ao carregar:', error); }
@@ -1196,6 +1478,7 @@
 
             atualizarDiasSemanaHidden();
             sincronizarPeriodosHidden();
+            sincronizarPausasHidden();
 
             const formData = {
                 horario_abertura: document.getElementById('horario_abertura').value,
@@ -1203,7 +1486,8 @@
                 duracao_atendimento: document.getElementById('duracao_atendimento').value,
                 valor_sinal: document.getElementById('valor_sinal').value,
                 dias_semana: document.getElementById('dias_semana').value || '1,2,3,4,5',
-                periodos_fechados: document.getElementById('periodos_fechados').value || '[]'
+                periodos_fechados: document.getElementById('periodos_fechados').value || '[]',
+                intervalos_pausa: document.getElementById('intervalos_pausa')?.value || '[]'
             };
 
             try {

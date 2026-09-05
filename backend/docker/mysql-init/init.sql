@@ -194,6 +194,7 @@ CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   duracao_atendimento INT DEFAULT 30,
   valor_sinal DECIMAL(10,2) DEFAULT 0.00,
   dias_semana VARCHAR(50) DEFAULT '1,2,3,4,5',
+  intervalos_pausa JSON DEFAULT NULL,
   periodos_fechados JSON DEFAULT NULL,
   UNIQUE KEY uq_config_clinica (clinica_id),
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
