@@ -156,6 +156,22 @@ exports.processarCampanha = async (campanhaId) => {
   );
 };
 
+/**
+ * Busca leve para autocomplete — nome ou CPF, até 8 resultados.
+ */
+exports.buscarPacientesPorTermo = async (clinicaId, termo) => {
+  const termoBusca = `%${termo}%`;
+  const [rows] = await db.query(
+    `SELECT id, nome, cpf, email FROM pacientes
+     WHERE clinica_id = ? AND ativo = 1 AND email IS NOT NULL AND email <> ''
+       AND (nome LIKE ? OR cpf LIKE ?)
+     ORDER BY nome ASC
+     LIMIT 8`,
+    [clinicaId, termoBusca, termoBusca]
+  );
+  return rows;
+};
+
 exports.listarCampanhas = async (clinicaId, opcoes = {}) => {
   const pagina = Math.max(1, Number(opcoes.pagina) || 1);
   const porPagina = Math.min(50, Number(opcoes.porPagina) || 10);

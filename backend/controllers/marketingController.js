@@ -1,6 +1,20 @@
 // controllers/marketingController.js
 const marketingService = require('../services/marketingService');
 
+// GET /api/marketing/pacientes/buscar?q=maria
+exports.buscarPacientes = async (req, res) => {
+  try {
+    const clinicaId = req.usuario.clinica_id;
+    const termo = (req.query.q || '').trim();
+    if (termo.length < 2) return res.json([]);
+    const pacientes = await marketingService.buscarPacientesPorTermo(clinicaId, termo);
+    res.json(pacientes);
+  } catch (err) {
+    console.error('[MARKETING] Erro ao buscar pacientes:', err);
+    res.status(500).json({ erro: 'Erro ao buscar pacientes.' });
+  }
+};
+
 // GET /api/marketing/publico-alvo?tipoPublico=todos
 // Usado pela tela pra mostrar "Esta campanha será enviada para X pacientes" ANTES de confirmar.
 exports.previaPublicoAlvo = async (req, res) => {

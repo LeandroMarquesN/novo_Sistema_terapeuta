@@ -131,6 +131,47 @@
             background: rgba(52,211,153,0.06);
         }
 
+        /* ─── Autocomplete de pacientes ─── */
+        .autocomplete-wrap { position: relative; }
+        .autocomplete-lista {
+            position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+            background: #06131c; border: 1px solid rgba(34,211,238,0.25);
+            border-radius: 12px; box-shadow: 0 12px 30px -8px rgba(0,0,0,0.7);
+            max-height: 240px; overflow-y: auto; z-index: 30;
+            display: none;
+        }
+        .autocomplete-lista.open { display: block; }
+        .autocomplete-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s;
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item.highlight { background: rgba(34,211,238,0.08); }
+        .autocomplete-item .avatar {
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(34,211,238,0.25), rgba(52,211,153,0.15));
+            display: flex; align-items: center; justify-content: center;
+            color: #22d3ee; font-weight: 800; font-size: 11px; text-transform: uppercase;
+        }
+        .autocomplete-item .info { min-width: 0; }
+        .autocomplete-item .nome { color: #e2e8f0; font-size: 12px; font-weight: 700; display: block; truncate: true; }
+        .autocomplete-item .cpf { color: #64748b; font-size: 10px; font-family: monospace; }
+        .autocomplete-vazio { padding: 14px; text-align: center; color: #64748b; font-size: 11px; }
+
+        .chip-paciente {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 10px 5px 6px; border-radius: 999px;
+            background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+            color: #34d399; font-size: 11px; font-weight: 700;
+        }
+        .chip-paciente button {
+            background: none; border: none; color: rgba(52,211,153,0.6);
+            cursor: pointer; font-size: 10px; padding: 2px;
+        }
+        .chip-paciente button:hover { color: #f87171; }
+
         .badge-status {
             padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
             text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
@@ -465,10 +506,11 @@
                                 </div>
 
                                 <div id="areaPacientesEspecificos" class="hidden mt-3 space-y-2">
-                                    <div class="relative">
-                                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                                        <input id="campoBuscaPaciente" type="text" placeholder="Buscar paciente por nome..."
+                                    <div class="autocomplete-wrap">
+                                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs" style="z-index:1"></i>
+                                        <input id="campoBuscaPaciente" type="text" placeholder="Digite o nome ou CPF do paciente..." autocomplete="off"
                                             class="w-full pl-9 pr-3 py-2.5 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs">
+                                        <div id="autocompleteLista" class="autocomplete-lista"></div>
                                     </div>
                                     <div id="listaPacientesSelecionados" class="flex flex-wrap gap-2"></div>
                                 </div>
@@ -645,6 +687,83 @@
                 atualizarContadorPublico();
             });
         });
+
+        // ─── Autocomplete de pacientes (nome ou CPF) ───
+        window.pacientesSelecionados = [];
+        let debounceBuscaPaciente = null;
+        const campoBuscaPaciente = document.getElementById('campoBuscaPaciente');
+        const autocompleteLista = document.getElementById('autocompleteLista');
+
+        campoBuscaPaciente.addEventListener('input', () => {
+            clearTimeout(debounceBuscaPaciente);
+            const termo = campoBuscaPaciente.value.trim();
+            if (termo.length < 2) { autocompleteLista.classList.remove('open'); return; }
+            debounceBuscaPaciente = setTimeout(() => buscarPacientesAutocomplete(termo), 300);
+        });
+
+        campoBuscaPaciente.addEventListener('focus', () => {
+            if (autocompleteLista.innerHTML.trim()) autocompleteLista.classList.add('open');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.autocomplete-wrap')) autocompleteLista.classList.remove('open');
+        });
+
+        function iniciais(nome) {
+            return nome.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+        }
+
+        async function buscarPacientesAutocomplete(termo) {
+            try {
+                const res = await fetch(`/api/marketing/pacientes/buscar?q=${encodeURIComponent(termo)}`, { headers });
+                const pacientes = await res.json();
+                const jaSelecionadosIds = window.pacientesSelecionados.map((p) => p.id);
+                const disponiveis = pacientes.filter((p) => !jaSelecionadosIds.includes(p.id));
+
+                if (!disponiveis.length) {
+                    autocompleteLista.innerHTML = '<div class="autocomplete-vazio">Nenhum paciente encontrado</div>';
+                } else {
+                    autocompleteLista.innerHTML = disponiveis.map((p) => `
+                        <div class="autocomplete-item" onclick='selecionarPaciente(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+                            <div class="avatar">${iniciais(p.nome)}</div>
+                            <div class="info">
+                                <span class="nome">${p.nome}</span>
+                                ${p.cpf ? `<span class="cpf">${p.cpf}</span>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+                autocompleteLista.classList.add('open');
+            } catch (err) {
+                autocompleteLista.innerHTML = '<div class="autocomplete-vazio">Erro ao buscar pacientes</div>';
+                autocompleteLista.classList.add('open');
+            }
+        }
+
+        function selecionarPaciente(paciente) {
+            if (window.pacientesSelecionados.some((p) => p.id === paciente.id)) return;
+            window.pacientesSelecionados.push(paciente);
+            renderizarChipsPacientes();
+            campoBuscaPaciente.value = '';
+            autocompleteLista.classList.remove('open');
+            atualizarContadorPublico();
+        }
+
+        function removerPaciente(id) {
+            window.pacientesSelecionados = window.pacientesSelecionados.filter((p) => p.id !== id);
+            renderizarChipsPacientes();
+            atualizarContadorPublico();
+        }
+
+        function renderizarChipsPacientes() {
+            const container = document.getElementById('listaPacientesSelecionados');
+            container.innerHTML = window.pacientesSelecionados.map((p) => `
+                <span class="chip-paciente">
+                    ${p.nome}
+                    <button type="button" onclick="removerPaciente(${p.id})" title="Remover"><i class="fas fa-times"></i></button>
+                </span>
+            `).join('');
+        }
 
         function opcoesPublicoAtuais() {
             const radio = document.querySelector('input[name="tipoPublico"]:checked');
