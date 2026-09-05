@@ -93,7 +93,7 @@ app.use('/api/auth', recuperarSenhaRoutes);
 app.use('/agendar', portalRoutes);
 app.use('/api/notificacoes', notificacoesRoutes);
 app.use('/api/marketing', marketingRoutes);
-app.use('/api/marketing', require('./routes/marketingRoutes'));
+
 
 app.use('/portal_paciente', portalPacientelroutes); // Aqui mapeamos o prefixo
 app.use('/programa-fundadores', landingPageRoutes)
@@ -160,7 +160,6 @@ app.get('/financeiro', (req, res) => {
 app.get('/marketing', authMiddleware, (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'marketing.html'));
 });
-app.get('/marketing', auth, (req, res) => res.render('marketing'));
 
 // 🏎️ CORRIDA PURA: Rota oficial do Módulo de Atendimento Clínico
 // 🏎️ ROTA PROTEGIDA DA PISTA DE ATENDIMENTO
