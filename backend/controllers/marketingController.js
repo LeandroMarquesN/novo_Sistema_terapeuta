@@ -53,12 +53,13 @@ exports.criarCampanha = async (req, res) => {
   }
 };
 
-// GET /api/marketing/campanhas
+// GET /api/marketing/campanhas?pagina=1&porPagina=10&status=&busca=
 exports.listarCampanhas = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
-    const campanhas = await marketingService.listarCampanhas(clinicaId);
-    res.json(campanhas);
+    const { pagina, porPagina, status, busca } = req.query;
+    const resultado = await marketingService.listarCampanhas(clinicaId, { pagina, porPagina, status, busca });
+    res.json(resultado);
   } catch (err) {
     console.error('[MARKETING] Erro ao listar campanhas:', err);
     res.status(500).json({ erro: 'Erro ao listar campanhas.' });

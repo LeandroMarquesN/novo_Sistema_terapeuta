@@ -156,11 +156,42 @@ exports.processarCampanha = async (campanhaId) => {
   );
 };
 
-exports.listarCampanhas = async (clinicaId) => {
+exports.listarCampanhas = async (clinicaId, opcoes = {}) => {
+  const pagina = Math.max(1, Number(opcoes.pagina) || 1);
+  const porPagina = Math.min(50, Number(opcoes.porPagina) || 10);
+  const offset = (pagina - 1) * porPagina;
+
+  const condicoes = ['clinica_id = ?'];
+  const params = [clinicaId];
+
+  if (opcoes.status) {
+    condicoes.push('status = ?');
+    params.push(opcoes.status);
+  }
+  if (opcoes.busca) {
+    condicoes.push('(titulo LIKE ? OR assunto LIKE ?)');
+    params.push(`%${opcoes.busca}%`, `%${opcoes.busca}%`);
+  }
+
+  const whereClause = condicoes.join(' AND ');
+
+  const [[{ total }]] = await db.query(
+    `SELECT COUNT(*) AS total FROM marketing_campanhas WHERE ${whereClause}`,
+    params
+  );
+
   const [rows] = await db.query(
     `SELECT id, titulo, assunto, tipo_publico, status, total_destinatarios, total_enviados, total_falhas, criado_em
-     FROM marketing_campanhas WHERE clinica_id = ? ORDER BY criado_em DESC`,
-    [clinicaId]
+     FROM marketing_campanhas WHERE ${whereClause}
+     ORDER BY criado_em DESC
+     LIMIT ? OFFSET ?`,
+    [...params, porPagina, offset]
   );
-  return rows;
+
+  return {
+    campanhas: rows,
+    total,
+    pagina,
+    totalPaginas: Math.max(1, Math.ceil(total / porPagina)),
+  };
 };
