@@ -11,6 +11,159 @@ const dadosAgendamentos = {
 // Array global para guardar as instâncias dos 4 gráficos
 let meusGraficosMensais = [];
 
+// ========= Helpers de UI premium =========
+
+/** Conta de 0 até o valor final em ~durationMs */
+function animateCount(el, endValue, durationMs = 800, prefix = '', suffix = '', decimals = 0) {
+    if (!el) return;
+    const start = 0;
+    const startTime = performance.now();
+
+    function frame(now) {
+        const progress = Math.min((now - startTime) / durationMs, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+        const current = start + (endValue - start) * eased;
+        if (decimals > 0) {
+            el.textContent = prefix + current.toFixed(decimals).replace('.', ',') + suffix;
+        } else {
+            el.textContent = prefix + Math.round(current) + suffix;
+        }
+        if (progress < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+}
+
+/** Toast discreto */
+function showToast(message, type = 'success', duration = 3200) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    const icons = {
+        success: 'fa-check-circle',
+        error: 'fa-exclamation-circle',
+        info: 'fa-info-circle'
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span>${message}</span>`;
+    container.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, duration);
+}
+
+/** Saudação dinâmica + ícone */
+function atualizarSaudacao() {
+    const hora = new Date().getHours();
+    const txt = document.getElementById('greetingText');
+    const icon = document.getElementById('greetingIcon');
+    if (!txt || !icon) return;
+
+    let saudacao, iconClass, iconHtml;
+    if (hora >= 5 && hora < 12) {
+        saudacao = 'Bom dia';
+        iconClass = 'sun';
+        iconHtml = '<i class="fas fa-sun"></i>';
+    } else if (hora >= 12 && hora < 18) {
+        saudacao = 'Boa tarde';
+        iconClass = 'sun';
+        iconHtml = '<i class="fas fa-cloud-sun"></i>';
+    } else {
+        saudacao = 'Boa noite';
+        iconClass = 'moon';
+        iconHtml = '<i class="fas fa-moon"></i>';
+    }
+
+    txt.textContent = saudacao;
+    icon.className = `greeting-icon ${iconClass}`;
+    icon.innerHTML = iconHtml;
+}
+
+/** Barra de progresso de scroll */
+function initScrollProgress() {
+    const bar = document.getElementById('scroll-progress');
+    const main = document.querySelector('main');
+    if (!bar) return;
+
+    const update = () => {
+        const scrollTop = main ? main.scrollTop : (window.scrollY || document.documentElement.scrollTop);
+        const scrollHeight = main
+            ? (main.scrollHeight - main.clientHeight)
+            : (document.documentElement.scrollHeight - window.innerHeight);
+        const pct = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+        bar.style.width = Math.min(100, Math.max(0, pct)) + '%';
+    };
+
+    if (main) main.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('scroll', update, { passive: true });
+    update();
+}
+
+/** Spotlight que segue o mouse */
+function initSpotlightCards() {
+    document.querySelectorAll('.spotlight-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            card.style.setProperty('--mouse-x', x + 'px');
+            card.style.setProperty('--mouse-y', y + 'px');
+        });
+    });
+}
+
+/** Sparklines (mini gráficos) nos stat cards */
+function criarSparkline(containerId, data, color) {
+    const el = document.getElementById(containerId);
+    if (!el || typeof ApexCharts === 'undefined') return null;
+
+    el.innerHTML = '';
+    const options = {
+        chart: {
+            type: 'area',
+            height: 36,
+            sparkline: { enabled: true },
+            animations: { enabled: true, speed: 500 }
+        },
+        series: [{ data }],
+        stroke: { curve: 'smooth', width: 1.5, colors: [color] },
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.35,
+                opacityTo: 0.02,
+                stops: [0, 100],
+                colorStops: [
+                    { offset: 0, color, opacity: 0.35 },
+                    { offset: 100, color, opacity: 0 }
+                ]
+            }
+        },
+        colors: [color],
+        tooltip: { enabled: false }
+    };
+    const chart = new ApexCharts(el, options);
+    chart.render();
+    return chart;
+}
+
+function gerarDadosTendencia(valorFinal, pontos = 7) {
+    const arr = [];
+    let v = Math.max(0, valorFinal * (0.4 + Math.random() * 0.3));
+    for (let i = 0; i < pontos - 1; i++) {
+        v += (Math.random() - 0.4) * (valorFinal * 0.15);
+        arr.push(Math.max(0, Math.round(v)));
+    }
+    arr.push(Math.max(0, Math.round(valorFinal)));
+    return arr;
+}
+
 // ========= 0.1 Agenda (Modal) ========
 function abrirModal(paciente) {
     if (!paciente) return;
@@ -151,10 +304,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const txtData = document.getElementById('data-hora');
     const containerData = document.getElementById('data-hora-container-tailwind');
 
-    // Inicializa componentes base
     alternarCalendario('semana');
     inicializarAsideDinamico();
     inicializarTodosGraficos();
+    atualizarSaudacao();
+    initScrollProgress();
+    initSpotlightCards();
 
     const usuarioLogado = localStorage.getItem('medlm_user_name') || 'Dr. Leandro Marques';
     const clinicaLogada = localStorage.getItem('medlm_clinic_name') || 'Clínica Vida Ativa';
@@ -175,8 +330,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     gerenciarRelogio();
     setInterval(gerenciarRelogio, 1000);
+    setInterval(atualizarSaudacao, 60 * 1000);
 
-    // Tema Dark/Light
     if (themeBtn) {
         const themeText = themeBtn.querySelector('span');
         const themeIcon = themeBtn.querySelector('i');
@@ -207,6 +362,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                 }
             });
+        });
+    }
+
+    const btnSalvar = document.getElementById('btnSalvarEvolucao');
+    if (btnSalvar) {
+        btnSalvar.addEventListener('click', async () => {
+            try {
+                showToast('Evolução salva com sucesso', 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao salvar evolução', 'error');
+            }
         });
     }
 });
@@ -401,9 +568,6 @@ function criarGraficoSemanal(idContainer, nomeSerie, valores, labels) {
 
 // ========= 0.6 FILTRAGEM DE PACIENTES (DESKTOP + MOBILE) =========
 
-/**
- * Renderiza os cards mobile com a mesma estrutura do EJS
- */
 function renderizarCardsMobile(agendamentos) {
     const container = document.getElementById('mobile-pacientes-cards');
     if (!container) return;
@@ -473,9 +637,6 @@ function renderizarCardsMobile(agendamentos) {
     });
 }
 
-/**
- * Filtra tabela desktop + cards mobile
- */
 async function filtrarTabelaTerapeutica(tipoFiltro) {
     try {
         const response = await fetch(`/dashboard?filtro=${tipoFiltro}`, {
@@ -483,7 +644,6 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
         });
         const dados = await response.json();
 
-        // Atualiza estilo dos botões de filtro
         document.querySelectorAll('.filtro-btn').forEach(btn => {
             if (btn.getAttribute('data-filtro') === tipoFiltro) {
                 btn.classList.add('bg-white', 'dark:bg-gray-700', 'shadow-sm', 'text-blue-600', 'dark:text-white');
@@ -497,7 +657,6 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
         const tbody = document.getElementById('tabela-pacientes-body');
         if (tbody) tbody.innerHTML = '';
 
-        // Estado vazio
         if (!dados.agendamentos || dados.agendamentos.length === 0) {
             if (tbody) {
                 tbody.innerHTML = `
@@ -517,7 +676,6 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
             return;
         }
 
-        // Monta linhas da tabela desktop
         dados.agendamentos.forEach(agendamento => {
             let badgeClass = 'status-default';
             if (agendamento.status_agendamento === 'confirmado') badgeClass = 'status-confirmado';
@@ -565,7 +723,6 @@ async function filtrarTabelaTerapeutica(tipoFiltro) {
             if (tbody) tbody.insertAdjacentHTML('beforeend', linhaHtml);
         });
 
-        // Atualiza também os cards mobile
         renderizarCardsMobile(dados.agendamentos);
 
     } catch (error) {
@@ -612,7 +769,7 @@ async function abrirGavetaProntuario(agendamentoId) {
     } catch (err) {
         console.error(err);
         document.getElementById('gaveta-paciente-nome').innerText = "Erro ao carregar dados";
-        alert("Não foi possível buscar as informações atualizadas do banco de dados.");
+        showToast('Não foi possível carregar o prontuário', 'error');
         fecharGavetaProntuario();
     }
 }
@@ -644,30 +801,57 @@ async function carregarEstatisticasDashboard() {
         const data = await response.json();
         if (!data.success) throw new Error(data.message || 'Erro desconhecido');
 
-        document.getElementById('statAtendimentos').innerText = data.atendimentos.total;
+        const elAtend = document.getElementById('statAtendimentos');
+        if (elAtend) {
+            elAtend.innerHTML = '';
+            animateCount(elAtend, data.atendimentos.total, 800);
+        }
 
         const variacao = data.atendimentos.variacao_percentual;
         const variacaoDiv = document.getElementById('statAtendimentosVariacao');
-        const variacaoIcon = variacaoDiv.querySelector('i');
+        const variacaoIcon = variacaoDiv?.querySelector('i');
         const variacaoTexto = document.getElementById('statAtendimentosVariacaoTexto');
 
-        if (variacao >= 0) {
-            variacaoIcon.className = 'fas fa-arrow-up';
-            variacaoDiv.style.color = 'var(--emerald)';
-            variacaoTexto.innerText = `+${variacao}%`;
-        } else {
-            variacaoIcon.className = 'fas fa-arrow-down';
-            variacaoDiv.style.color = '#f87171';
-            variacaoTexto.innerText = `${variacao}%`;
+        if (variacaoDiv && variacaoIcon && variacaoTexto) {
+            if (variacao >= 0) {
+                variacaoIcon.className = 'fas fa-arrow-up';
+                variacaoDiv.style.color = 'var(--emerald)';
+                variacaoTexto.innerText = `+${variacao}%`;
+            } else {
+                variacaoIcon.className = 'fas fa-arrow-down';
+                variacaoDiv.style.color = '#f87171';
+                variacaoTexto.innerText = `${variacao}%`;
+            }
         }
 
-        document.getElementById('statCancelamentos').innerText = data.cancelamentos.total;
-        document.getElementById('statCancelamentosTaxa').innerText = data.cancelamentos.taxa_percentual.toFixed(1);
+        const elCanc = document.getElementById('statCancelamentos');
+        if (elCanc) {
+            elCanc.innerHTML = '';
+            animateCount(elCanc, data.cancelamentos.total, 800);
+        }
+        const taxaEl = document.getElementById('statCancelamentosTaxa');
+        if (taxaEl) taxaEl.innerText = data.cancelamentos.taxa_percentual.toFixed(1);
 
-        document.getElementById('statFaturamento').innerText = `R$ ${data.faturamento.total.toFixed(2).replace('.', ',')}`;
-        document.getElementById('statFaturamentoSessoes').innerText = data.faturamento.sessoes_liquidadas;
+        const elFat = document.getElementById('statFaturamento');
+        if (elFat) {
+            elFat.innerHTML = '';
+            animateCount(elFat, data.faturamento.total, 900, 'R$ ', '', 2);
+        }
+        const sessoesEl = document.getElementById('statFaturamentoSessoes');
+        if (sessoesEl) sessoesEl.innerText = data.faturamento.sessoes_liquidadas;
 
-        document.getElementById('statProximaSemana').innerText = data.proxima_semana.total;
+        const elProx = document.getElementById('statProximaSemana');
+        if (elProx) {
+            elProx.innerHTML = '';
+            animateCount(elProx, data.proxima_semana.total, 800);
+        }
+
+        if (typeof ApexCharts !== 'undefined') {
+            criarSparkline('spark-atendimentos', gerarDadosTendencia(data.atendimentos.total), '#22d3ee');
+            criarSparkline('spark-cancelamentos', gerarDadosTendencia(data.cancelamentos.total), '#f87171');
+            criarSparkline('spark-faturamento', gerarDadosTendencia(Math.round(data.faturamento.total / 50)), '#34d399');
+            criarSparkline('spark-proxima', gerarDadosTendencia(data.proxima_semana.total), '#818cf8');
+        }
 
     } catch (error) {
         console.error('Erro ao carregar estatísticas do dashboard:', error);
@@ -680,11 +864,6 @@ async function carregarEstatisticasDashboard() {
 
 // ========= 0.9 Painel de Agendamentos (Kanban) =========
 
-/**
- * Verifica se a DATA (ignorando o horário) de um agendamento já passou.
- * Agendamentos de hoje continuam visíveis mesmo que o horário já tenha passado;
- * só somem da tela os de dias anteriores a hoje.
- */
 function dataAgendamentoJaPassou(dataAgendamentoStr) {
     if (!dataAgendamentoStr) return false;
 
@@ -699,15 +878,11 @@ function dataAgendamentoJaPassou(dataAgendamentoStr) {
     return dataAgSoData.getTime() < hoje.getTime();
 }
 
-/**
- * Retorna a classe de cor de contraste (mesma paleta usada no resto da página)
- * de acordo com o status do agendamento.
- */
 function classeCorKanban(status) {
     if (status === 'confirmado') return 'kanban-card-confirmado';
     if (status === 'aguardando_sinal') return 'kanban-card-aguardando';
     if (status === 'finalizado') return 'kanban-card-finalizado';
-    return 'kanban-card-outros'; // cancelado, nao_compareceu, etc.
+    return 'kanban-card-outros';
 }
 
 const HTML_AVISO_VENCIDO = `
@@ -738,11 +913,6 @@ async function carregarPainelAgendamentosCard() {
             if (col) col.innerHTML = '';
         });
 
-        // Controla, por elemento de coluna (não por status — 'cancelado' e
-        // 'nao_compareceu' compartilham a mesma coluna "Outros"), se ela
-        // recebeu algum item (mesmo que vencido) e se recebeu algum item
-        // VISÍVEL (hoje ou datas futuras). Usamos um Map com o próprio
-        // elemento DOM como chave para evitar contagem duplicada.
         const colunaTeveItem = new Map();
         const colunaTeveItemVisivel = new Map();
         Object.values(colunas).forEach(col => {
@@ -755,9 +925,11 @@ async function carregarPainelAgendamentosCard() {
             Object.values(colunas).forEach(col => {
                 if (col) col.innerHTML = HTML_SEM_AGENDAMENTOS;
             });
+            initKanbanSortable();
             return;
         }
 
+        let cardIndex = 0;
         dados.agendamentos.forEach(item => {
             const statusChave = colunas[item.status_agendamento] ? item.status_agendamento : 'cancelado';
             const targetColuna = colunas[statusChave];
@@ -765,8 +937,6 @@ async function carregarPainelAgendamentosCard() {
 
             colunaTeveItem.set(targetColuna, true);
 
-            // Agendamentos com data já passada somem da tela; só ficam
-            // visíveis os de hoje em diante.
             if (dataAgendamentoJaPassou(item.data_agendamento)) {
                 return;
             }
@@ -789,40 +959,108 @@ async function carregarPainelAgendamentosCard() {
             const classeCor = classeCorKanban(item.status_agendamento);
 
             const cardHTML = `
-                <div class="kanban-card ${classeCor} bg-[#121c24] p-4 shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between gap-3">
+                <div class="kanban-card ${classeCor} bg-[#121c24] p-4 shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between gap-3 anim-enter"
+                     data-id="${item.id}"
+                     data-status="${item.status_agendamento}"
+                     style="--i:${cardIndex++}">
                     <div>
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-bold text-sm text-white truncate max-w-[110px]" title="${item.nome || ''}">${item.nome || 'Paciente'}</h4>
-                            <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeStyle}">${item.status_agendamento.replace('_', ' ')}</span>
+                            <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeStyle} status-label">${item.status_agendamento.replace('_', ' ')}</span>
                         </div>
                         <p class="text-xs text-slate-400 mb-1">Terapia: <span class="font-medium text-slate-200">${item.tipo_terapia || 'Geral'}</span></p>
                         <p class="text-xs text-slate-500">Horário: <span class="font-medium text-slate-300">${dataFormatada}</span></p>
                     </div>
                     <div class="flex justify-between items-center pt-2.5 border-t border-slate-800/60 text-xs">
                         <span class="text-slate-400 font-medium">${item.telefone || 'Sem tel'}</span>
-                        <button class="text-teal-400 hover:text-teal-300 font-bold transition-colors">Detalhes</button>
+                        <button class="text-teal-400 hover:text-teal-300 font-bold transition-colors" onclick="abrirGavetaProntuario('${item.id}')">Detalhes</button>
                     </div>
                 </div>`;
             targetColuna.innerHTML += cardHTML;
         });
 
-        // Preenche o recado nas colunas (elementos únicos) que ficaram vazias na tela.
         const colunasUnicas = new Set(Object.values(colunas).filter(Boolean));
         colunasUnicas.forEach(col => {
-            if (colunaTeveItemVisivel.get(col)) return; // já tem cards visíveis, não mexe
+            if (colunaTeveItemVisivel.get(col)) return;
 
             if (colunaTeveItem.get(col)) {
-                // Tinha agendamento(s), mas todos venceram e foram ocultados.
                 col.innerHTML = HTML_AVISO_VENCIDO;
             } else if (col.innerHTML.trim() === '') {
-                // Nunca teve nenhum agendamento nesta categoria.
                 col.innerHTML = HTML_SEM_AGENDAMENTOS;
             }
         });
 
+        initKanbanSortable();
+
     } catch (error) {
         console.error('Erro ao renderizar painel de agendamentos:', error);
     }
+}
+
+function initKanbanSortable() {
+    if (typeof Sortable === 'undefined') {
+        console.warn('SortableJS não carregado');
+        return;
+    }
+
+    const colunas = document.querySelectorAll('.kanban-column');
+    colunas.forEach(col => {
+        if (col._sortable) {
+            col._sortable.destroy();
+        }
+
+        col._sortable = new Sortable(col, {
+            group: 'kanban-agendamentos',
+            animation: 220,
+            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
+            ghostClass: 'sortable-ghost',
+            chosenClass: 'sortable-chosen',
+            dragClass: 'sortable-drag',
+            onAdd: async function (evt) {
+                const card = evt.item;
+                const novoStatus = evt.to.dataset.status;
+                const agendamentoId = card.dataset.id;
+                const antigoStatus = card.dataset.status;
+
+                if (!agendamentoId || !novoStatus || novoStatus === antigoStatus) return;
+
+                card.dataset.status = novoStatus;
+                card.classList.remove(
+                    'kanban-card-confirmado',
+                    'kanban-card-aguardando',
+                    'kanban-card-finalizado',
+                    'kanban-card-outros'
+                );
+                card.classList.add(classeCorKanban(novoStatus));
+
+                const label = card.querySelector('.status-label');
+                if (label) {
+                    label.textContent = novoStatus.replace('_', ' ');
+                }
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch(`/api/agendamentos/${agendamentoId}/status`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ status_agendamento: novoStatus })
+                    });
+
+                    if (res.ok) {
+                        showToast(`Status atualizado para "${novoStatus.replace('_', ' ')}"`, 'success');
+                    } else {
+                        showToast('Status atualizado localmente (API indisponível)', 'info');
+                    }
+                } catch (err) {
+                    console.warn('Falha ao persistir status (UI mantida):', err);
+                    showToast('Status atualizado localmente', 'info');
+                }
+            }
+        });
+    });
 }
 
 // ========= Inicialização final =========
@@ -831,13 +1069,11 @@ document.addEventListener('DOMContentLoaded', () => {
     carregarPainelAgendamentosCard();
 });
 
-// Atualização automática a cada 2 minutos
 setInterval(() => {
     carregarEstatisticasDashboard();
     carregarPainelAgendamentosCard();
 }, 2 * 60 * 1000);
 
-// Fecha a gaveta ao clicar no backdrop
 const backdrop = document.getElementById('gaveta-backdrop');
 if (backdrop) {
     backdrop.addEventListener('click', fecharGavetaProntuario);

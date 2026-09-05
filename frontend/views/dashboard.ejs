@@ -132,8 +132,17 @@
                 radial-gradient(ellipse 80% 60% at 10% 0%,   rgba(8,145,178,0.20) 0%, transparent 60%),
                 radial-gradient(ellipse 60% 50% at 90% 100%, rgba(5,150,105,0.18) 0%, transparent 60%),
                 radial-gradient(ellipse 40% 40% at 50% 50%,  rgba(251,191,36,0.04) 0%, transparent 70%);
+            background-size: 120% 120%, 120% 120%, 100% 100%;
+            background-position: 0% 0%, 100% 100%, 50% 50%;
+            animation: ambient-breathe 18s ease-in-out infinite alternate;
             color: #cbd5e1;
             font-family: 'Inter', sans-serif;
+        }
+
+        @keyframes ambient-breathe {
+            0%   { background-position: 0% 0%, 100% 100%, 50% 50%; }
+            50%  { background-position: 15% 10%, 85% 90%, 45% 55%; }
+            100% { background-position: 5% 15%, 95% 85%, 55% 45%; }
         }
 
         body::before {
@@ -151,9 +160,192 @@
             z-index: 0;
         }
 
+        /* ─── Scroll Progress Bar ─── */
+        #scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            z-index: 9999;
+            box-shadow: 0 0 12px rgba(34,211,238,0.5), 0 0 4px rgba(52,211,153,0.4);
+            transition: width 0.1s linear;
+            pointer-events: none;
+        }
+
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+        /* ─── Micro-animations de entrada ─── */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .anim-enter {
+            opacity: 0;
+            animation: fadeSlideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .stat-card.anim-enter:nth-child(1) { animation-delay: 0.05s; }
+        .stat-card.anim-enter:nth-child(2) { animation-delay: 0.12s; }
+        .stat-card.anim-enter:nth-child(3) { animation-delay: 0.19s; }
+        .stat-card.anim-enter:nth-child(4) { animation-delay: 0.26s; }
+
+        .chart-card.anim-enter:nth-child(1) { animation-delay: 0.08s; }
+        .chart-card.anim-enter:nth-child(2) { animation-delay: 0.16s; }
+        .chart-card.anim-enter:nth-child(3) { animation-delay: 0.24s; }
+        .chart-card.anim-enter:nth-child(4) { animation-delay: 0.32s; }
+
+        .kanban-card.anim-enter {
+            animation-delay: calc(var(--i, 0) * 0.06s);
+        }
+
+        /* ─── Skeleton Loading ─── */
+        .skeleton {
+            background: linear-gradient(
+                90deg,
+                rgba(255,255,255,0.04) 25%,
+                rgba(255,255,255,0.09) 50%,
+                rgba(255,255,255,0.04) 75%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 1.4s ease-in-out infinite;
+            border-radius: 8px;
+            color: transparent !important;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton-value {
+            display: inline-block;
+            height: 2.2rem;
+            width: 4.5rem;
+            border-radius: 8px;
+        }
+        .skeleton-label {
+            display: inline-block;
+            height: 0.7rem;
+            width: 3.5rem;
+            border-radius: 4px;
+        }
+
+        /* ─── Spotlight hover ─── */
+        .spotlight-card {
+            position: relative;
+            overflow: hidden;
+        }
+        .spotlight-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(
+                600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+                rgba(52,211,153,0.12),
+                transparent 40%
+            );
+            opacity: 0;
+            transition: opacity 0.35s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .spotlight-card:hover::after {
+            opacity: 1;
+        }
+        .spotlight-card > * {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ─── Toast ─── */
+        #toast-container {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 280px;
+            max-width: 360px;
+            padding: 14px 18px;
+            background: rgba(7, 18, 28, 0.96);
+            border: 1px solid rgba(52,211,153,0.35);
+            border-radius: 14px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.45), 0 0 20px rgba(52,211,153,0.12);
+            color: #e2e8f0;
+            font-size: 13px;
+            font-weight: 600;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), opacity 0.35s ease;
+        }
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        .toast.success i { color: var(--emerald); }
+        .toast.error i { color: #f87171; }
+        .toast.info i { color: var(--cyan); }
+
+        /* ─── Greeting icon ─── */
+        .greeting-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            margin-right: 6px;
+            font-size: 14px;
+            transition: all 0.4s ease;
+        }
+        .greeting-icon.sun {
+            background: rgba(251,191,36,0.15);
+            color: var(--amber);
+            box-shadow: 0 0 12px rgba(251,191,36,0.25);
+        }
+        .greeting-icon.moon {
+            background: rgba(34,211,238,0.12);
+            color: var(--cyan);
+            box-shadow: 0 0 12px rgba(34,211,238,0.2);
+        }
+
+        /* ─── Sparkline containers ─── */
+        .sparkline-wrap {
+            position: absolute;
+            bottom: 8px;
+            left: 12px;
+            right: 12px;
+            height: 36px;
+            opacity: 0.55;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .stat-card {
+            position: relative;
+        }
+        .stat-card .card-value,
+        .stat-card h3 {
+            position: relative;
+            z-index: 1;
+        }
 
         /* ─── Sidebar (Desktop) ─── */
         aside.sidebar-desktop {
@@ -1328,6 +1520,16 @@
             .col-span-12.xl\:col-span-3 {
                 grid-column: span 12 / span 12 !important;
             }
+
+            #toast-container {
+                bottom: 100px;
+                right: 14px;
+                left: 14px;
+            }
+            .toast {
+                min-width: auto;
+                max-width: none;
+            }
         }
 
         /* Extra small phones */
@@ -1551,6 +1753,16 @@
     border-width: 1px;
     border-style: solid;
     overflow: hidden;
+    cursor: grab;
+}
+.kanban-card:active {
+    cursor: grabbing;
+}
+.kanban-card.sortable-ghost {
+    opacity: 0.4;
+}
+.kanban-card.sortable-chosen {
+    box-shadow: 0 8px 30px rgba(52,211,153,0.25);
 }
 .kanban-card::before {
     content: '';
@@ -1613,9 +1825,16 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales-all.min.js"></script>
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/tippy.js@6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 
 <body class="text-gray-300 min-h-screen font-sans antialiased">
+
+    <!-- Scroll Progress Bar -->
+    <div id="scroll-progress"></div>
+
+    <!-- Toast container -->
+    <div id="toast-container"></div>
 
     <!-- ═══════════════════════════════════════════════════════════════
          MOBILE TOP BAR (só aparece ≤ 1024px)
@@ -1785,7 +2004,8 @@
             <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 pb-6 gap-4" style="border-bottom:1px solid var(--border)">
                 <div>
                     <h1 id="boasVindas" class="text-3xl xl:text-4xl font-extrabold tracking-tighter">
-                        Olá, <span id="usuarioNome">Professor</span>
+                        <span class="greeting-icon sun" id="greetingIcon"><i class="fas fa-sun"></i></span>
+                        <span id="greetingText">Bom dia</span>, <span id="usuarioNome">Professor</span>
                         <span class="text-xl font-normal mx-2 separator" style="color:rgba(52,211,153,0.3)">|</span>
                         <span id="clinicaNome" class="text-xl xl:text-2xl font-bold">Espaço Saúde</span>
                     </h1>
@@ -1836,45 +2056,57 @@
             </header>
 
             <!-- Stat Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" id="stat-cards-grid">
                 <!-- Atendimentos -->
-                <div class="stat-card stat-card-cyan p-6 card-hover-effect">
+                <div class="stat-card stat-card-cyan p-6 card-hover-effect spotlight-card anim-enter">
                     <div class="flex justify-between items-center">
                         <p class="card-label">Atendimentos Dia</p>
                         <i class="fas fa-user-check text-base" style="color:var(--cyan)"></i>
                     </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statAtendimentos">–</h3>
+                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statAtendimentos">
+                        <span class="skeleton skeleton-value"></span>
+                    </h3>
                     <div class="mt-2 text-xs font-bold flex items-center gap-1" id="statAtendimentosVariacao" style="color:var(--emerald)">
                         <i class="fas fa-arrow-up"></i> <span id="statAtendimentosVariacaoTexto">--</span>
                     </div>
+                    <div class="sparkline-wrap" id="spark-atendimentos"></div>
                 </div>
                 <!-- Cancelamentos -->
-                <div class="stat-card stat-card-red p-6 card-hover-effect">
+                <div class="stat-card stat-card-red p-6 card-hover-effect spotlight-card anim-enter">
                     <div class="flex justify-between items-center">
                         <p class="card-label">Cancelamentos de Hoje</p>
                         <i class="fas fa-user-times text-base" style="color:#f87171"></i>
                     </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statCancelamentos">–</h3>
+                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statCancelamentos">
+                        <span class="skeleton skeleton-value"></span>
+                    </h3>
                     <span class="text-xs font-bold block mt-1" style="color:#f87171">Taxa de <span id="statCancelamentosTaxa">--</span>%</span>
+                    <div class="sparkline-wrap" id="spark-cancelamentos"></div>
                 </div>
                 <!-- Faturamento -->
-                <div class="stat-card p-6 card-hover-effect">
+                <div class="stat-card p-6 card-hover-effect spotlight-card anim-enter">
                     <p class="card-label">Faturamento</p>
-                    <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent" id="statFaturamento">R$ –</h3>
+                    <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent" id="statFaturamento">
+                        <span class="skeleton skeleton-value"></span>
+                    </h3>
                     <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
                         <span id="statFaturamentoSessoes">0</span> sessões liquidadas
                     </span>
+                    <div class="sparkline-wrap" id="spark-faturamento"></div>
                 </div>
                 <!-- Sessões Próximos 7 Dias -->
-                <div class="stat-card p-6 card-hover-effect">
+                <div class="stat-card p-6 card-hover-effect spotlight-card anim-enter">
                     <div class="flex justify-between items-center">
                         <p class="card-label">Próximos 7 Dias</p>
                         <i class="fas fa-calendar-week text-base" style="color:#818cf8"></i>
                     </div>
-                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statProximaSemana">–</h3>
+                    <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statProximaSemana">
+                        <span class="skeleton skeleton-value"></span>
+                    </h3>
                     <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
                         sessões agendadas
                     </span>
+                    <div class="sparkline-wrap" id="spark-proxima"></div>
                 </div>
             </div>
 
@@ -2070,7 +2302,7 @@
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                         <div>
                             <h3 class="text-xl font-bold tracking-tight text-white">Painel de Agendamentos</h3>
-                            <p class="text-xs font-medium text-slate-400 mt-0.5">Gerenciamento em tempo real por status</p>
+                            <p class="text-xs font-medium text-slate-400 mt-0.5">Arraste os cards entre colunas para atualizar o status</p>
                         </div>
                     </div>
                 
@@ -2078,22 +2310,22 @@
                         
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Confirmados</div>
-                            <div id="coluna-confirmados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                            <div id="coluna-confirmados" class="flex flex-col gap-4 min-h-[100px] p-1 kanban-column" data-status="confirmado"></div>
                         </div>
                 
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Aguardando Sinal</div>
-                            <div id="coluna-aguardando" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                            <div id="coluna-aguardando" class="flex flex-col gap-4 min-h-[100px] p-1 kanban-column" data-status="aguardando_sinal"></div>
                         </div>
                 
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Finalizados</div>
-                            <div id="coluna-finalizados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                            <div id="coluna-finalizados" class="flex flex-col gap-4 min-h-[100px] p-1 kanban-column" data-status="finalizado"></div>
                         </div>
                 
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Outros / Cancel.</div>
-                            <div id="coluna-outros" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
+                            <div id="coluna-outros" class="flex flex-col gap-4 min-h-[100px] p-1 kanban-column" data-status="cancelado"></div>
                         </div>
                 
                     </div>
@@ -2168,7 +2400,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                    <div class="chart-card p-6">
+                    <div class="chart-card p-6 anim-enter spotlight-card">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="chart-card-title">Volume de Atendimentos — Semana 1</h3>
@@ -2178,7 +2410,7 @@
                         <div id="chart-semana-1" class="min-h-[280px]"></div>
                     </div>
 
-                    <div class="chart-card p-6">
+                    <div class="chart-card p-6 anim-enter spotlight-card">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="chart-card-title">Volume de Atendimentos — Semana 2</h3>
@@ -2188,7 +2420,7 @@
                         <div id="chart-semana-2" class="min-h-[280px]"></div>
                     </div>
 
-                    <div class="chart-card p-6">
+                    <div class="chart-card p-6 anim-enter spotlight-card">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="chart-card-title">Volume de Atendimentos — Semana 3</h3>
@@ -2198,7 +2430,7 @@
                         <div id="chart-semana-3" class="min-h-[280px]"></div>
                     </div>
 
-                    <div class="chart-card p-6">
+                    <div class="chart-card p-6 anim-enter spotlight-card">
                         <div class="flex justify-between items-center mb-4">
                             <div>
                                 <h3 class="chart-card-title">Volume de Atendimentos — Semana 4</h3>
@@ -2283,7 +2515,7 @@
             </div>
 
             <div class="gaveta-footer p-4 flex gap-3">
-                <button class="btn-salvar flex-1">Salvar Evolução</button>
+                <button class="btn-salvar flex-1" id="btnSalvarEvolucao">Salvar Evolução</button>
             </div>
         </div>
     </div>
