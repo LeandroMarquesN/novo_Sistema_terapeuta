@@ -126,7 +126,10 @@ CREATE TABLE IF NOT EXISTS pacientes (
   -- Novas colunas para o Portal do Paciente
   token_acesso VARCHAR(128) DEFAULT NULL,
   token_expiracao DATETIME DEFAULT NULL,
-  
+
+  -- Preferência de marketing por email (LGPD)
+  aceita_marketing TINYINT(1) NOT NULL DEFAULT 1,
+
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   
   -- Índice para busca rápida de tokens
@@ -335,6 +338,40 @@ CREATE TABLE IF NOT EXISTS notificacoes (
   
   CONSTRAINT fk_notif_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_notif_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- 11. MARKETING — Campanhas de email (individuais ou em massa)
+CREATE TABLE IF NOT EXISTS marketing_campanhas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  criado_por_usuario_id INT NOT NULL,
+  titulo VARCHAR(150) NOT NULL,
+  assunto VARCHAR(200) NOT NULL,
+  corpo_html LONGTEXT NOT NULL,
+  tipo_publico ENUM('todos', 'individual', 'filtro') NOT NULL DEFAULT 'todos',
+  filtro_json JSON NULL,
+  status ENUM('rascunho', 'processando', 'concluida', 'concluida_com_falhas', 'falhou') NOT NULL DEFAULT 'rascunho',
+  total_destinatarios INT NOT NULL DEFAULT 0,
+  total_enviados INT NOT NULL DEFAULT 0,
+  total_falhas INT NOT NULL DEFAULT 0,
+  criado_em DATETIME DEFAULT CURRENT_TIMESTAMP,
+  iniciado_em DATETIME NULL,
+  concluido_em DATETIME NULL,
+  CONSTRAINT fk_mkt_camp_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_mkt_camp_usuario FOREIGN KEY (criado_por_usuario_id) REFERENCES usuarios(id)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS marketing_envios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  campanha_id INT NOT NULL,
+  paciente_id INT NOT NULL,
+  email_destino VARCHAR(150) NOT NULL,
+  status ENUM('pendente', 'enviado', 'falhou', 'pulado_optout') NOT NULL DEFAULT 'pendente',
+  erro TEXT NULL,
+  enviado_em DATETIME NULL,
+  INDEX idx_campanha_status (campanha_id, status),
+  CONSTRAINT fk_mkt_envio_campanha FOREIGN KEY (campanha_id) REFERENCES marketing_campanhas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_mkt_envio_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- INSERTS DE TESTE (Adicionado SLUG para não dar erro)
