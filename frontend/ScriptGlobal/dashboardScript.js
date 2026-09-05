@@ -925,7 +925,6 @@ async function carregarPainelAgendamentosCard() {
             Object.values(colunas).forEach(col => {
                 if (col) col.innerHTML = HTML_SEM_AGENDAMENTOS;
             });
-            initKanbanSortable();
             return;
         }
 
@@ -960,13 +959,11 @@ async function carregarPainelAgendamentosCard() {
 
             const cardHTML = `
                 <div class="kanban-card ${classeCor} bg-[#121c24] p-4 shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between gap-3 anim-enter"
-                     data-id="${item.id}"
-                     data-status="${item.status_agendamento}"
                      style="--i:${cardIndex++}">
                     <div>
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-bold text-sm text-white truncate max-w-[110px]" title="${item.nome || ''}">${item.nome || 'Paciente'}</h4>
-                            <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeStyle} status-label">${item.status_agendamento.replace('_', ' ')}</span>
+                            <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded-full ${badgeStyle}">${item.status_agendamento.replace('_', ' ')}</span>
                         </div>
                         <p class="text-xs text-slate-400 mb-1">Terapia: <span class="font-medium text-slate-200">${item.tipo_terapia || 'Geral'}</span></p>
                         <p class="text-xs text-slate-500">Horário: <span class="font-medium text-slate-300">${dataFormatada}</span></p>
@@ -990,77 +987,9 @@ async function carregarPainelAgendamentosCard() {
             }
         });
 
-        initKanbanSortable();
-
     } catch (error) {
         console.error('Erro ao renderizar painel de agendamentos:', error);
     }
-}
-
-function initKanbanSortable() {
-    if (typeof Sortable === 'undefined') {
-        console.warn('SortableJS não carregado');
-        return;
-    }
-
-    const colunas = document.querySelectorAll('.kanban-column');
-    colunas.forEach(col => {
-        if (col._sortable) {
-            col._sortable.destroy();
-        }
-
-        col._sortable = new Sortable(col, {
-            group: 'kanban-agendamentos',
-            animation: 220,
-            easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'sortable-chosen',
-            dragClass: 'sortable-drag',
-            onAdd: async function (evt) {
-                const card = evt.item;
-                const novoStatus = evt.to.dataset.status;
-                const agendamentoId = card.dataset.id;
-                const antigoStatus = card.dataset.status;
-
-                if (!agendamentoId || !novoStatus || novoStatus === antigoStatus) return;
-
-                card.dataset.status = novoStatus;
-                card.classList.remove(
-                    'kanban-card-confirmado',
-                    'kanban-card-aguardando',
-                    'kanban-card-finalizado',
-                    'kanban-card-outros'
-                );
-                card.classList.add(classeCorKanban(novoStatus));
-
-                const label = card.querySelector('.status-label');
-                if (label) {
-                    label.textContent = novoStatus.replace('_', ' ');
-                }
-
-                try {
-                    const token = localStorage.getItem('token');
-                    const res = await fetch(`/api/agendamentos/${agendamentoId}/status`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify({ status_agendamento: novoStatus })
-                    });
-
-                    if (res.ok) {
-                        showToast(`Status atualizado para "${novoStatus.replace('_', ' ')}"`, 'success');
-                    } else {
-                        showToast('Status atualizado localmente (API indisponível)', 'info');
-                    }
-                } catch (err) {
-                    console.warn('Falha ao persistir status (UI mantida):', err);
-                    showToast('Status atualizado localmente', 'info');
-                }
-            }
-        });
-    });
 }
 
 // ========= Inicialização final =========
