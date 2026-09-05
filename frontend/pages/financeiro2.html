@@ -382,42 +382,21 @@
             }
             .mobile-drawer .drawer-footer { padding-top: 16px; border-top: 1px solid var(--border); }
 
-            /* Bottom tab bar – flutuante, arredondada, some no scroll */
+            /* Bottom tab bar */
             .mobile-bottom-tabbar {
-                position: fixed;
-                bottom: calc(14px + env(safe-area-inset-bottom, 0));
-                left: 14px;
-                right: 14px;
-                z-index: 60;
-                height: 70px;
-                background: rgba(4, 16, 24, 0.92);
-                border: 1px solid var(--border);
-                border-radius: 26px;
-                backdrop-filter: blur(24px);
-                -webkit-backdrop-filter: blur(24px);
-                display: flex;
-                align-items: center;
-                justify-content: space-around;
-                padding: 0 6px;
-                box-shadow:
-                    0 12px 34px rgba(0,0,0,0.55),
-                    0 0 0 1px rgba(255,255,255,0.02) inset,
-                    0 0 24px rgba(52,211,153,0.08);
-                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
-                transform: translateY(0);
-                opacity: 1;
-            }
-            .mobile-bottom-tabbar.tabbar-hidden {
-                transform: translateY(140%);
-                opacity: 0;
-                pointer-events: none;
+                position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+                height: 76px;
+                background: rgba(2,12,18,0.97);
+                border-top: 1px solid var(--border);
+                backdrop-filter: blur(20px);
+                display: flex; align-items: center; justify-content: space-around;
+                padding: 0 8px; padding-bottom: env(safe-area-inset-bottom, 0);
             }
             .mobile-bottom-tabbar .tab-item {
                 display: flex; flex-direction: column; align-items: center; justify-content: center;
                 gap: 4px; flex: 1; height: 100%;
                 color: rgba(148,163,184,0.55); font-size: 11px; font-weight: 700;
                 text-decoration: none; position: relative;
-                transition: all 0.2s;
             }
             .mobile-bottom-tabbar .tab-item i { font-size: 22px; margin-bottom: 2px; }
             .mobile-bottom-tabbar .tab-item.active { color: var(--emerald); }
@@ -426,11 +405,6 @@
                 width: 28px; height: 3px; background: var(--emerald);
                 border-radius: 99px; box-shadow: 0 0 10px var(--emerald);
             }
-            .mobile-bottom-tabbar .tab-item:active {
-                color: var(--cyan);
-                transform: scale(0.95);
-            }
-            body { padding-bottom: 108px !important; }
 
             /* Main content */
             main {
@@ -527,9 +501,9 @@
         <span class="logo-text">Med<span>LM</span></span>
     </div>
     <div class="actions">
-        <a href="/dashboard" class="icon-btn" aria-label="Ir para o Dashboard" title="Dashboard" style="text-decoration:none">
-            <i class="fas fa-home"></i>
-        </a>
+        <button class="icon-btn" aria-label="Notificações">
+            <i class="fas fa-bell"></i>
+        </button>
         <div class="avatar-btn">ML</div>
     </div>
 </div>
@@ -760,76 +734,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- ═══ Fluxo de Caixa ═══ -->
-        <section id="secao-fluxo-caixa" class="mt-8 mb-8">
-            <div class="table-card p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-                    <div>
-                        <h2 class="text-lg font-black text-slate-100 font-['Space_Grotesk'] flex items-center gap-2">
-                            <i class="fas fa-chart-line text-cyan-400"></i> Fluxo de Caixa
-                        </h2>
-                        <p class="text-xs text-slate-500 font-semibold mt-1">Entradas × saídas do período · visualização e envio por e-mail</p>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select id="fluxoMes" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-bold outline-none">
-                            <option value="1">Jan</option><option value="2">Fev</option><option value="3">Mar</option>
-                            <option value="4">Abr</option><option value="5">Mai</option><option value="6">Jun</option>
-                            <option value="7">Jul</option><option value="8">Ago</option><option value="9">Set</option>
-                            <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
-                        </select>
-                        <select id="fluxoAno" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-bold outline-none"></select>
-                        <button type="button" onclick="carregarFluxoCaixa()" class="px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-wider hover:bg-cyan-500/25 transition">
-                            <i class="fas fa-sync-alt"></i> Atualizar
-                        </button>
-                        <button type="button" onclick="enviarFluxoCaixaEmail()" id="btnEmailFluxo" class="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider hover:bg-emerald-500/25 transition">
-                            <i class="fas fa-paper-plane"></i> Enviar por E-mail
-                        </button>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                    <div class="stat-card p-4">
-                        <div class="stat-label">Entradas</div>
-                        <div id="fluxoTotalEntradas" class="stat-value text-xl val-revenue">R$ 0,00</div>
-                    </div>
-                    <div class="stat-card stat-card-red p-4">
-                        <div class="stat-label">Saídas</div>
-                        <div id="fluxoTotalSaidas" class="stat-value text-xl val-debtors">R$ 0,00</div>
-                    </div>
-                    <div class="stat-card p-4">
-                        <div class="stat-label">Saldo do período</div>
-                        <div id="fluxoSaldo" class="stat-value text-xl val-profit">R$ 0,00</div>
-                    </div>
-                    <div class="stat-card stat-card-cyan p-4">
-                        <div class="stat-label">Margem</div>
-                        <div id="fluxoMargem" class="stat-value text-xl val-ltv">0%</div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                    <div class="lg:col-span-3 min-h-[200px]">
-                        <canvas id="graficoFluxoCaixa" height="140"></canvas>
-                    </div>
-                    <div class="lg:col-span-2 overflow-x-auto max-h-[320px] overflow-y-auto">
-                        <table class="fin-table text-xs w-full">
-                            <thead>
-                                <tr>
-                                    <th class="text-left">Dia</th>
-                                    <th class="text-right">Entradas</th>
-                                    <th class="text-right">Saídas</th>
-                                    <th class="text-right">Acumulado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaFluxoCaixa">
-                                <tr><td colspan="4" class="text-center py-6 text-slate-500">Carregando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-
     </main>
 </div>
 
@@ -1167,139 +1071,6 @@
       });
   })();
 </script>
-
-<script>
-/* Tab bar: some no scroll, volta ao parar */
-(function () {
-  const tabbar = document.querySelector('.mobile-bottom-tabbar');
-  if (!tabbar) return;
-  let scrollTimer = null;
-  function esconder() { tabbar.classList.add('tabbar-hidden'); }
-  function mostrar() { tabbar.classList.remove('tabbar-hidden'); }
-  function aoRolar() {
-    esconder();
-    clearTimeout(scrollTimer);
-    scrollTimer = setTimeout(mostrar, 300);
-  }
-  const mainEl = document.querySelector('main');
-  if (mainEl) mainEl.addEventListener('scroll', aoRolar, { passive: true });
-  window.addEventListener('scroll', aoRolar, { passive: true });
-})();
-
-/* Fluxo de Caixa */
-(function () {
-  const agora = new Date();
-  const selMes = document.getElementById('fluxoMes');
-  const selAno = document.getElementById('fluxoAno');
-  if (!selMes || !selAno) return;
-
-  selMes.value = String(agora.getMonth() + 1);
-  const anoAtual = agora.getFullYear();
-  for (let a = anoAtual; a >= anoAtual - 4; a--) {
-    const opt = document.createElement('option');
-    opt.value = a;
-    opt.textContent = a;
-    if (a === anoAtual) opt.selected = true;
-    selAno.appendChild(opt);
-  }
-
-  let chartFluxo = null;
-  const fmt = (v) => 'R$ ' + parseFloat(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
-
-  window.carregarFluxoCaixa = async function () {
-    const mes = selMes.value;
-    const ano = selAno.value;
-    const token = localStorage.getItem('token');
-    try {
-      const res = await fetch('/api/financeiro/fluxo-caixa?mes=' + mes + '&ano=' + ano, {
-        headers: { Authorization: 'Bearer ' + token }
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro ao carregar');
-
-      document.getElementById('fluxoTotalEntradas').innerText = fmt(data.resumo.total_entradas);
-      document.getElementById('fluxoTotalSaidas').innerText = fmt(data.resumo.total_saidas);
-      document.getElementById('fluxoSaldo').innerText = fmt(data.resumo.saldo_periodo);
-      document.getElementById('fluxoMargem').innerText = Math.round(data.resumo.margem || 0) + '%';
-
-      const tbody = document.getElementById('tabelaFluxoCaixa');
-      if (!data.fluxo || data.fluxo.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-500">Sem movimentos neste período</td></tr>';
-      } else {
-        tbody.innerHTML = data.fluxo.map(function (f) {
-          var parts = f.dia.split('-');
-          var d = parts[2], m = parts[1];
-          return '<tr><td>' + d + '/' + m + '</td>' +
-            '<td class="text-right text-emerald-400 font-bold">' + fmt(f.entradas) + '</td>' +
-            '<td class="text-right text-red-400 font-bold">' + fmt(f.saidas) + '</td>' +
-            '<td class="text-right font-black ' + (f.saldo_acumulado >= 0 ? 'text-cyan-400' : 'text-red-400') + '">' + fmt(f.saldo_acumulado) + '</td></tr>';
-        }).join('');
-      }
-
-      var canvas = document.getElementById('graficoFluxoCaixa');
-      if (canvas && typeof Chart !== 'undefined') {
-        if (chartFluxo) chartFluxo.destroy();
-        chartFluxo = new Chart(canvas.getContext('2d'), {
-          type: 'line',
-          data: {
-            labels: data.labels || [],
-            datasets: [
-              { label: 'Entradas', data: data.serie_entradas || [], borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.12)', tension: 0.3, fill: true },
-              { label: 'Saídas', data: data.serie_saidas || [], borderColor: '#f87171', backgroundColor: 'rgba(248,113,113,0.08)', tension: 0.3, fill: true },
-              { label: 'Acumulado', data: data.serie_acumulado || [], borderColor: '#22d3ee', borderDash: [6, 4], tension: 0.3, fill: false }
-            ]
-          },
-          options: {
-            responsive: true,
-            plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
-            scales: {
-              x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.04)' } },
-              y: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.04)' } }
-            }
-          }
-        });
-      }
-    } catch (e) {
-      console.error(e);
-      var tbody = document.getElementById('tabelaFluxoCaixa');
-      if (tbody) tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-red-400">Erro ao carregar fluxo. Verifique a API.</td></tr>';
-    }
-  };
-
-  window.enviarFluxoCaixaEmail = async function () {
-    var btn = document.getElementById('btnEmailFluxo');
-    var mes = Number(selMes.value);
-    var ano = Number(selAno.value);
-    var token = localStorage.getItem('token');
-    var original = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-    try {
-      var res = await fetch('/api/financeiro/fluxo-caixa/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-        body: JSON.stringify({ mes: mes, ano: ano })
-      });
-      var data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.error || 'Falha no envio');
-      alert(data.message || 'Relatório enviado!');
-    } catch (e) {
-      console.error(e);
-      alert('Erro ao enviar: ' + e.message);
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = original;
-    }
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { carregarFluxoCaixa(); });
-  } else {
-    carregarFluxoCaixa();
-  }
-})();
-</script>
-
 <script src="../ScriptGlobal/logout.js"></script>
 <script src="../ScriptGlobal/verifiLog.js"></script>
 <script src="../ScriptGlobal/darkMOdeFinanceiro.js"></script>
