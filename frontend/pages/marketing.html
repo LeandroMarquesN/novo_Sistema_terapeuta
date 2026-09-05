@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>MedLM - Marketing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --emerald:   #34d399;
+      --emerald-d: #059669;
+      --cyan:      #22d3ee;
+      --amber:     #fbbf24;
+      --slate-bg:  #020c12;
+      --card-bg:   rgba(255,255,255,0.035);
+      --border:    rgba(52,211,153,0.15);
+    }
+    body {
+      background-color: var(--slate-bg);
+      background-image:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(8,145,178,0.20) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(5,150,105,0.18) 0%, transparent 60%);
+      color: #cbd5e1;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 32px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      backdrop-filter: blur(6px);
+    }
+    .input-field {
+      background: rgba(2,12,18,0.5);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: #e2e8f0;
+      padding: 10px 14px;
+      width: 100%;
+    }
+    .input-field:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(52,211,153,0.15); }
+    .btn-primary {
+      background: linear-gradient(135deg, #0891b2, #059669);
+      color: #fff; font-weight: 700; padding: 12px 24px; border-radius: 10px;
+      transition: all .2s;
+    }
+    .btn-primary:hover { box-shadow: 0 0 20px rgba(52,211,153,0.35); }
+    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+    .badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-rascunho { background: rgba(148,163,184,0.15); color: #94a3b8; }
+    .badge-processando { background: rgba(251,191,36,0.15); color: var(--amber); }
+    .badge-concluida { background: rgba(52,211,153,0.15); color: var(--emerald); }
+    .badge-concluida_com_falhas { background: rgba(251,146,60,0.15); color: #fb923c; }
+    .badge-falhou { background: rgba(248,113,113,0.15); color: #f87171; }
+  </style>
+</head>
+<body>
+
+  <div class="max-w-5xl mx-auto space-y-8">
+    <div>
+      <h1 class="text-3xl font-bold text-white font-display flex items-center gap-3">
+        <i class="fas fa-bullhorn text-emerald-400"></i> Marketing
+      </h1>
+      <p class="text-slate-400 mt-1">Envie lembretes e comunicados por email — para um paciente específico ou para toda a base.</p>
+    </div>
+
+    <!-- ── Nova Campanha ── -->
+    <div class="card p-6 space-y-5">
+      <h2 class="text-lg font-semibold text-white">Nova campanha</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="text-sm text-slate-400 mb-1 block">Título interno da campanha</label>
+          <input id="campoTitulo" class="input-field" placeholder="Ex: Aviso de feriado prolongado" />
+        </div>
+        <div>
+          <label class="text-sm text-slate-400 mb-1 block">Assunto do email</label>
+          <input id="campoAssunto" class="input-field" placeholder="Ex: Estaremos fechados nesta sexta" />
+        </div>
+      </div>
+
+      <div>
+        <label class="text-sm text-slate-400 mb-1 block">Mensagem (HTML permitido — use {{nome_paciente}} para personalizar)</label>
+        <textarea id="campoCorpo" rows="8" class="input-field" placeholder="Olá {{nome_paciente}}, ..."></textarea>
+      </div>
+
+      <div>
+        <label class="text-sm text-slate-400 mb-2 block">Público-alvo</label>
+        <div class="flex flex-wrap gap-3">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="tipoPublico" value="todos" checked class="accent-emerald-400"> Todos os pacientes
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="tipoPublico" value="filtro" class="accent-emerald-400"> Sem retorno há 90+ dias
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="tipoPublico" value="individual" class="accent-emerald-400"> Pacientes específicos
+          </label>
+        </div>
+        <div id="areaPacientesEspecificos" class="hidden mt-3">
+          <input id="campoBuscaPaciente" class="input-field" placeholder="Buscar paciente por nome (integrar com sua API de pacientes)..." />
+          <div id="listaPacientesSelecionados" class="flex flex-wrap gap-2 mt-2"></div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between border-t border-white/5 pt-5">
+        <span id="contadorPublico" class="text-sm text-slate-400">
+          <i class="fas fa-users mr-1"></i> Calculando público-alvo...
+        </span>
+        <button id="btnEnviarCampanha" class="btn-primary">
+          <i class="fas fa-paper-plane mr-2"></i> Enviar campanha
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Histórico ── -->
+    <div class="card p-6">
+      <h2 class="text-lg font-semibold text-white mb-4">Campanhas enviadas</h2>
+      <div id="listaCampanhas" class="space-y-3">
+        <p class="text-slate-500 text-sm">Carregando...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+    let pacientesSelecionados = []; // [{id, nome}]
+
+    document.querySelectorAll('input[name="tipoPublico"]').forEach((radio) => {
+      radio.addEventListener('change', () => {
+        document.getElementById('areaPacientesEspecificos').classList.toggle('hidden', radio.value !== 'individual' || !radio.checked);
+        atualizarContadorPublico();
+      });
+    });
+
+    function tipoPublicoSelecionado() {
+      return document.querySelector('input[name="tipoPublico"]:checked').value;
+    }
+
+    async function atualizarContadorPublico() {
+      const tipoPublico = tipoPublicoSelecionado();
+      const el = document.getElementById('contadorPublico');
+      el.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Calculando público-alvo...';
+
+      const params = new URLSearchParams({ tipoPublico });
+      if (tipoPublico === 'individual') {
+        params.set('pacienteIds', JSON.stringify(pacientesSelecionados.map((p) => p.id)));
+      }
+      if (tipoPublico === 'filtro') {
+        params.set('filtro', JSON.stringify({ statusConsulta: 'sem_retorno_90d' }));
+      }
+
+      try {
+        const res = await fetch(`/api/marketing/publico-alvo?${params}`, { headers });
+        const data = await res.json();
+        el.innerHTML = `<i class="fas fa-users mr-1"></i> Esta campanha será enviada para <strong class="text-emerald-400">${data.total}</strong> paciente(s)`;
+      } catch (err) {
+        el.textContent = 'Não foi possível calcular o público-alvo.';
+      }
+    }
+
+    document.getElementById('btnEnviarCampanha').addEventListener('click', async () => {
+      const titulo = document.getElementById('campoTitulo').value.trim();
+      const assunto = document.getElementById('campoAssunto').value.trim();
+      const corpoHtml = document.getElementById('campoCorpo').value.trim();
+      const tipoPublico = tipoPublicoSelecionado();
+
+      if (!titulo || !assunto || !corpoHtml) {
+        alert('Preencha título, assunto e mensagem.');
+        return;
+      }
+      if (!confirm('Confirma o envio desta campanha? Essa ação não pode ser desfeita.')) return;
+
+      const opcoesPublico = {};
+      if (tipoPublico === 'individual') opcoesPublico.pacienteIds = pacientesSelecionados.map((p) => p.id);
+      if (tipoPublico === 'filtro') opcoesPublico.filtro = { statusConsulta: 'sem_retorno_90d' };
+
+      const btn = document.getElementById('btnEnviarCampanha');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Enviando...';
+
+      try {
+        const res = await fetch('/api/marketing/campanhas', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ titulo, assunto, corpoHtml, tipoPublico, opcoesPublico }),
+        });
+        if (!res.ok) throw new Error('Falha ao criar campanha');
+        carregarCampanhas();
+        document.getElementById('campoTitulo').value = '';
+        document.getElementById('campoAssunto').value = '';
+        document.getElementById('campoCorpo').value = '';
+      } catch (err) {
+        alert('Erro ao enviar campanha. Tente novamente.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Enviar campanha';
+      }
+    });
+
+    async function carregarCampanhas() {
+      const el = document.getElementById('listaCampanhas');
+      try {
+        const res = await fetch('/api/marketing/campanhas', { headers });
+        const campanhas = await res.json();
+        if (!campanhas.length) {
+          el.innerHTML = '<p class="text-slate-500 text-sm">Nenhuma campanha enviada ainda.</p>';
+          return;
+        }
+        el.innerHTML = campanhas.map((c) => `
+          <div class="flex items-center justify-between border-b border-white/5 pb-3">
+            <div>
+              <p class="text-white font-medium">${c.titulo}</p>
+              <p class="text-xs text-slate-500">${c.assunto} · ${new Date(c.criado_em).toLocaleString('pt-BR')}</p>
+            </div>
+            <div class="text-right">
+              <span class="badge badge-${c.status}">${c.status.replace(/_/g, ' ')}</span>
+              <p class="text-xs text-slate-500 mt-1">${c.total_enviados}/${c.total_destinatarios} enviados${c.total_falhas ? ` · ${c.total_falhas} falhas` : ''}</p>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        el.innerHTML = '<p class="text-red-400 text-sm">Erro ao carregar campanhas.</p>';
+      }
+    }
+
+    atualizarContadorPublico();
+    carregarCampanhas();
+  </script>
+</body>
+</html>

@@ -31,6 +31,7 @@ const landingPageRoutes = require('./routes/lading_pageRoutes');
 
 const recuperarSenhaRoutes = require('./routes/recuperarSenhaRoutes')
 const notificacoesRoutes = require('./routes/notificacoesRoutes');
+const marketingRoutes = require('./routes/marketingRoutes');
 // ...
 
 // importação Middleware
@@ -91,6 +92,7 @@ app.use('/api/auth', recuperarSenhaRoutes);
 
 app.use('/agendar', portalRoutes);
 app.use('/api/notificacoes', notificacoesRoutes);
+app.use('/api/marketing', marketingRoutes);
 
 app.use('/portal_paciente', portalPacientelroutes); // Aqui mapeamos o prefixo
 app.use('/programa-fundadores', landingPageRoutes)
@@ -152,6 +154,10 @@ app.get('/equipe', (req, res) => {
 
 app.get('/financeiro', (req, res) => {
   res.sendFile(path.join(frontendPath, 'pages', 'financeiro.html'));
+});
+
+app.get('/marketing', authMiddleware, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'pages', 'marketing.html'));
 });
 
 // 🏎️ CORRIDA PURA: Rota oficial do Módulo de Atendimento Clínico
