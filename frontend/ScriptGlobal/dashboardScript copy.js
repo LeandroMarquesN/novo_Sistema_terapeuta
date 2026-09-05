@@ -679,46 +679,6 @@ async function carregarEstatisticasDashboard() {
 }
 
 // ========= 0.9 Painel de Agendamentos (Kanban) =========
-
-/**
- * Verifica se a DATA (ignorando o horário) de um agendamento já passou.
- * Agendamentos de hoje continuam visíveis mesmo que o horário já tenha passado;
- * só somem da tela os de dias anteriores a hoje.
- */
-function dataAgendamentoJaPassou(dataAgendamentoStr) {
-    if (!dataAgendamentoStr) return false;
-
-    const dataAg = new Date(dataAgendamentoStr);
-    if (isNaN(dataAg.getTime())) return false;
-
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    const dataAgSoData = new Date(dataAg.getFullYear(), dataAg.getMonth(), dataAg.getDate());
-
-    return dataAgSoData.getTime() < hoje.getTime();
-}
-
-/**
- * Retorna a classe de cor de contraste (mesma paleta usada no resto da página)
- * de acordo com o status do agendamento.
- */
-function classeCorKanban(status) {
-    if (status === 'confirmado') return 'kanban-card-confirmado';
-    if (status === 'aguardando_sinal') return 'kanban-card-aguardando';
-    if (status === 'finalizado') return 'kanban-card-finalizado';
-    return 'kanban-card-outros'; // cancelado, nao_compareceu, etc.
-}
-
-const HTML_AVISO_VENCIDO = `
-    <div class="kanban-aviso-vencido">
-        <i class="fas fa-calendar-check"></i>
-        <span>Os agendamentos desta categoria já passaram da data e foram ocultados. Só ficam visíveis os de hoje e datas futuras.</span>
-    </div>`;
-
-const HTML_SEM_AGENDAMENTOS = `
-    <p class="text-xs text-slate-500 font-medium p-2">Nenhum agendamento nesta categoria.</p>`;
-
 async function carregarPainelAgendamentosCard() {
     try {
         const response = await fetch('/dashboard?filtro=todos', {
@@ -738,40 +698,15 @@ async function carregarPainelAgendamentosCard() {
             if (col) col.innerHTML = '';
         });
 
-        // Controla, por elemento de coluna (não por status — 'cancelado' e
-        // 'nao_compareceu' compartilham a mesma coluna "Outros"), se ela
-        // recebeu algum item (mesmo que vencido) e se recebeu algum item
-        // VISÍVEL (hoje ou datas futuras). Usamos um Map com o próprio
-        // elemento DOM como chave para evitar contagem duplicada.
-        const colunaTeveItem = new Map();
-        const colunaTeveItemVisivel = new Map();
-        Object.values(colunas).forEach(col => {
-            if (!col) return;
-            if (!colunaTeveItem.has(col)) colunaTeveItem.set(col, false);
-            if (!colunaTeveItemVisivel.has(col)) colunaTeveItemVisivel.set(col, false);
-        });
-
         if (!dados.agendamentos || dados.agendamentos.length === 0) {
-            Object.values(colunas).forEach(col => {
-                if (col) col.innerHTML = HTML_SEM_AGENDAMENTOS;
-            });
+            const primeiraColuna = document.getElementById('coluna-confirmados');
+            if (primeiraColuna) primeiraColuna.innerHTML = '<p class="text-xs text-slate-500 font-medium p-2">Nenhum agendamento encontrado.</p>';
             return;
         }
 
         dados.agendamentos.forEach(item => {
-            const statusChave = colunas[item.status_agendamento] ? item.status_agendamento : 'cancelado';
-            const targetColuna = colunas[statusChave];
+            const targetColuna = colunas[item.status_agendamento] || colunas['cancelado'];
             if (!targetColuna) return;
-
-            colunaTeveItem.set(targetColuna, true);
-
-            // Agendamentos com data já passada somem da tela; só ficam
-            // visíveis os de hoje em diante.
-            if (dataAgendamentoJaPassou(item.data_agendamento)) {
-                return;
-            }
-
-            colunaTeveItemVisivel.set(targetColuna, true);
 
             let badgeStyle = 'bg-slate-800 text-slate-300 border border-slate-700';
             if (item.status_agendamento === 'confirmado') {
@@ -786,10 +721,8 @@ async function carregarPainelAgendamentosCard() {
                 day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit'
             }) : 'Hora não definida';
 
-            const classeCor = classeCorKanban(item.status_agendamento);
-
             const cardHTML = `
-                <div class="kanban-card ${classeCor} bg-[#121c24] p-4 shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between gap-3">
+                <div class="bg-[#121c24] border border-slate-800/90 p-4 rounded-2xl shadow-sm hover:border-slate-700 transition-all flex flex-col justify-between gap-3">
                     <div>
                         <div class="flex justify-between items-start mb-2">
                             <h4 class="font-bold text-sm text-white truncate max-w-[110px]" title="${item.nome || ''}">${item.nome || 'Paciente'}</h4>
@@ -804,20 +737,6 @@ async function carregarPainelAgendamentosCard() {
                     </div>
                 </div>`;
             targetColuna.innerHTML += cardHTML;
-        });
-
-        // Preenche o recado nas colunas (elementos únicos) que ficaram vazias na tela.
-        const colunasUnicas = new Set(Object.values(colunas).filter(Boolean));
-        colunasUnicas.forEach(col => {
-            if (colunaTeveItemVisivel.get(col)) return; // já tem cards visíveis, não mexe
-
-            if (colunaTeveItem.get(col)) {
-                // Tinha agendamento(s), mas todos venceram e foram ocultados.
-                col.innerHTML = HTML_AVISO_VENCIDO;
-            } else if (col.innerHTML.trim() === '') {
-                // Nunca teve nenhum agendamento nesta categoria.
-                col.innerHTML = HTML_SEM_AGENDAMENTOS;
-            }
         });
 
     } catch (error) {

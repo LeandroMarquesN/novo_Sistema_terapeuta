@@ -46,59 +46,66 @@
           }
       }
     </script>
-
+    
     <!-- botao da openAi para falar a agenda -->
     <style>
         .neon-btn {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 16px;
-            background: rgba(2, 12, 18, 0.4);
-            border: 1px solid var(--border-cyan);
-            color: var(--cyan);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            backdrop-filter: blur(4px);
-        }
-        .wave-icon { width: 18px; height: 18px; transition: stroke 0.3s; }
-        .neon-btn:hover {
-            border-color: var(--emerald);
-            color: var(--emerald);
-            box-shadow: 0 0 15px var(--glow-em);
-        }
-        .falando {
-            border-color: var(--emerald);
-            color: var(--emerald);
-            box-shadow: 0 0 20px var(--glow-em);
-        }
-        .falando::before, .falando::after {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border: 1px solid var(--emerald);
-            border-radius: 6px;
-            animation: ripple 1.5s infinite;
-        }
-        .falando::after { animation-delay: 0.5s; }
-        @keyframes ripple {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.2); opacity: 0; }
-        }
-        .falando .wave-icon { stroke: var(--emerald); animation: pulse-icon 0.5s infinite; }
-        @keyframes pulse-icon {
-            0%, 100% { transform: scaleY(1); }
-            50% { transform: scaleY(1.5); }
-        }
-    </style>
-    <!-- ----- fim do botao fala openAi -->
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background: rgba(2, 12, 18, 0.4);
+    border: 1px solid var(--border-cyan);
+    color: var(--cyan);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    backdrop-filter: blur(4px);
+}
 
+.wave-icon { width: 18px; height: 18px; transition: stroke 0.3s; }
+
+.neon-btn:hover {
+    border-color: var(--emerald);
+    color: var(--emerald);
+    box-shadow: 0 0 15px var(--glow-em);
+}
+
+.falando {
+    border-color: var(--emerald);
+    color: var(--emerald);
+    box-shadow: 0 0 20px var(--glow-em);
+}
+
+.falando::before, .falando::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 1px solid var(--emerald);
+    border-radius: 6px;
+    animation: ripple 1.5s infinite;
+}
+
+.falando::after { animation-delay: 0.5s; }
+
+@keyframes ripple {
+    0% { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.2); opacity: 0; }
+}
+
+.falando .wave-icon { stroke: var(--emerald); animation: pulse-icon 0.5s infinite; }
+
+@keyframes pulse-icon {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(1.5); }
+}
+    </style>
+<!-- ----- fimdo botao fala  openAi -->
     <style>
         /* ─── Design Tokens ─── */
         :root {
@@ -116,6 +123,7 @@
             --glow-cy:   rgba(34,211,238,0.25);
         }
 
+        /* ─── Base ─── */
         *, *::before, *::after { box-sizing: border-box; }
 
         body {
@@ -133,8 +141,11 @@
             position: fixed;
             inset: 0;
             background: repeating-linear-gradient(
-                0deg, transparent, transparent 2px,
-                rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.08) 2px,
+                rgba(0,0,0,0.08) 4px
             );
             pointer-events: none;
             z-index: 0;
@@ -150,6 +161,7 @@
             border-right: 1px solid var(--border) !important;
             backdrop-filter: blur(20px);
         }
+
         .logo-block { border-bottom: 1px solid var(--border); }
         .logo-icon {
             background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
@@ -239,15 +251,6 @@
         }
 
         /* ─── Stat Cards ─── */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(1, minmax(0, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-        @media (min-width: 640px) { .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (min-width: 1024px) { .stats-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-
         .stat-card {
             background: var(--card-bg);
             border: 1px solid var(--border);
@@ -275,8 +278,10 @@
 
         .stat-card-cyan::before { background: linear-gradient(90deg, transparent, rgba(34,211,238,0.5), transparent); }
         .stat-card-cyan:hover { border-color: rgba(34,211,238,0.35); box-shadow: 0 8px 40px rgba(34,211,238,0.12); }
+
         .stat-card-amber::before { background: linear-gradient(90deg, transparent, rgba(251,191,36,0.5), transparent); }
         .stat-card-amber:hover { border-color: rgba(251,191,36,0.35); box-shadow: 0 8px 40px rgba(251,191,36,0.12); }
+
         .stat-card-red::before { background: linear-gradient(90deg, transparent, rgba(248,113,113,0.5), transparent); }
         .stat-card-red:hover { border-color: rgba(248,113,113,0.35); box-shadow: 0 8px 40px rgba(248,113,113,0.12); }
 
@@ -435,6 +440,7 @@
             border-radius: 24px;
         }
         .calendar-panel .panel-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; }
+
         #calendario-mes-ano { color: rgba(52,211,153,0.6); font-size: 11px; font-weight: 600; }
 
         .cal-toggle-wrap {
@@ -624,15 +630,6 @@
         .chart-card-title { font-family: 'Space Grotesk', sans-serif; color: #e2e8f0; font-size: 14px; font-weight: 700; }
         .chart-card-sub { color: rgba(148,163,184,0.4); font-size: 11px; }
 
-        /* Painel de Agendamentos (kanban) — classe própria, isolada dos stat cards */
-        .kanban-columns-grid {
-            display: grid;
-            grid-template-columns: repeat(1, minmax(0, 1fr));
-            gap: 1.5rem;
-        }
-        @media (min-width: 640px) { .kanban-columns-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-        @media (min-width: 1024px) { .kanban-columns-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-
         /* Gaveta */
         #gaveta-painel {
             background: rgba(2,12,18,0.96) !important;
@@ -722,7 +719,10 @@
         .apexcharts-tooltip { background: rgba(2,12,18,0.95) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; color: #e2e8f0 !important; }
         .apexcharts-tooltip-title { background: rgba(52,211,153,0.08) !important; border-bottom: 1px solid var(--border) !important; color: var(--emerald) !important; }
 
-        .card-hover-effect { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); cursor: pointer; }
+        .card-hover-effect {
+            transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+            cursor: pointer;
+        }
         .card-hover-effect:hover { transform: translateY(-4px); }
 
         .bg-white { background: rgba(255,255,255,0.03) !important; }
@@ -744,17 +744,17 @@
         .text-red-500 { color: #f87171 !important; }
         .text-orange-600 { color: var(--amber) !important; }
 
-        .bg-gradient-to-r.from-blue-600.to-emerald-500.bg-clip-text {
+        .bg-gradient-to-r.from-blue-600.to-emerald-500.bg-clip-text { 
             background: linear-gradient(90deg, var(--cyan), var(--emerald)) !important;
             -webkit-background-clip: text !important;
             -webkit-text-fill-color: transparent !important;
         }
 
         /* ============================================================
-           MOBILE / TABLET  (≤ 1024px) — só ícones nas ações,
-           listagem principal vira cards compactos
+           MOBILE FIRST – Telas pequenas e médias (≤ 1024px)
            ============================================================ */
 
+        /* Elementos mobile (escondidos no desktop) */
         .mobile-topbar,
         .mobile-bottom-tabbar,
         .mobile-drawer-overlay,
@@ -762,20 +762,25 @@
         .mobile-patient-cards,
         .mobile-only { display: none; }
 
+        /* Desktop only */
         .desktop-only { display: block; }
 
         @media (max-width: 1024px) {
 
+            /* Esconde sidebar desktop e elementos desktop */
             aside.sidebar-desktop,
             .desktop-only,
             .data-table-wrap { display: none !important; }
 
+            /* Mostra elementos mobile */
             .mobile-topbar,
             .mobile-bottom-tabbar,
             .mobile-patient-cards,
             .mobile-only { display: flex !important; }
 
-            body { padding-bottom: 88px; }
+            body {
+                padding-bottom: 88px; /* espaço para tab bar */
+            }
 
             /* ─── TOP BAR FIXA ─── */
             .mobile-topbar {
@@ -791,259 +796,722 @@
                 justify-content: space-between;
                 padding: 0 16px;
             }
-            .mobile-topbar .logo-wrap { display: flex; align-items: center; gap: 10px; }
-            .mobile-topbar .logo-icon { width: 38px; height: 38px; border-radius: 12px; font-size: 16px; }
+
+            .mobile-topbar .logo-wrap {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .mobile-topbar .logo-icon {
+                width: 38px; height: 38px;
+                border-radius: 12px;
+                font-size: 16px;
+            }
+
             .mobile-topbar .logo-text {
                 font-family: 'Space Grotesk', sans-serif;
-                font-size: 20px; font-weight: 700; color: #e2e8f0;
+                font-size: 20px;
+                font-weight: 700;
+                color: #e2e8f0;
             }
-            .mobile-topbar .logo-text span { color: var(--emerald); text-shadow: 0 0 10px rgba(52,211,153,0.5); }
-            .mobile-topbar .actions { display: flex; align-items: center; gap: 10px; }
+            .mobile-topbar .logo-text span {
+                color: var(--emerald);
+                text-shadow: 0 0 10px rgba(52,211,153,0.5);
+            }
+
+            .mobile-topbar .actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
             .mobile-topbar .icon-btn {
-                width: 42px; height: 42px; border-radius: 12px;
+                width: 44px; height: 44px;
+                border-radius: 12px;
                 background: rgba(255,255,255,0.05);
                 border: 1px solid var(--border);
                 color: rgba(148,163,184,0.8);
-                display: flex; align-items: center; justify-content: center;
-                font-size: 17px; transition: all 0.2s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                transition: all 0.2s;
             }
             .mobile-topbar .icon-btn:active {
-                background: rgba(52,211,153,0.15); color: var(--emerald); border-color: rgba(52,211,153,0.35);
+                background: rgba(52,211,153,0.15);
+                color: var(--emerald);
+                border-color: rgba(52,211,153,0.35);
             }
+
             .mobile-topbar .avatar-btn {
-                width: 40px; height: 40px; border-radius: 50%;
+                width: 42px; height: 42px;
+                border-radius: 50%;
                 background: linear-gradient(135deg, #0891b2, #059669);
-                color: #fff; font-family: 'Space Grotesk', sans-serif;
-                font-size: 12px; font-weight: 800;
-                display: flex; align-items: center; justify-content: center;
+                color: #fff;
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 13px;
+                font-weight: 800;
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 border: 2px solid rgba(52,211,153,0.4);
                 box-shadow: 0 0 12px rgba(8,145,178,0.35);
             }
 
-            /* ─── DRAWER LATERAL ─── */
+            /* ─── DRAWER LATERAL (Menu hambúrguer) ─── */
             .mobile-drawer-overlay {
-                position: fixed; inset: 0;
+                position: fixed;
+                inset: 0;
                 background: rgba(2,12,18,0.75);
                 backdrop-filter: blur(6px);
-                z-index: 70; opacity: 0; pointer-events: none;
+                z-index: 70;
+                opacity: 0;
+                pointer-events: none;
                 transition: opacity 0.3s ease;
             }
-            .mobile-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+            .mobile-drawer-overlay.open {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
             .mobile-drawer {
-                position: fixed; top: 0; left: 0; bottom: 0;
-                width: 82%; max-width: 320px;
+                position: fixed;
+                top: 0; left: 0; bottom: 0;
+                width: 82%;
+                max-width: 320px;
                 background: rgba(2,12,18,0.98);
                 border-right: 1px solid var(--border);
                 z-index: 80;
                 transform: translateX(-100%);
                 transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-                display: flex; flex-direction: column;
+                display: flex;
+                flex-direction: column;
                 padding: 24px 16px;
             }
-            .mobile-drawer.open { transform: translateX(0); }
+            .mobile-drawer.open {
+                transform: translateX(0);
+            }
+
             .mobile-drawer .drawer-header {
-                display: flex; align-items: center; justify-content: space-between;
-                margin-bottom: 28px; padding-bottom: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 28px;
+                padding-bottom: 16px;
                 border-bottom: 1px solid var(--border);
             }
-            .mobile-drawer .drawer-logo { display: flex; align-items: center; gap: 12px; }
-            .mobile-drawer .drawer-logo .logo-icon { width: 44px; height: 44px; border-radius: 14px; font-size: 18px; }
-            .mobile-drawer .drawer-logo span { font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 700; color: #e2e8f0; }
-            .mobile-drawer .drawer-logo span b { color: var(--emerald); }
+
+            .mobile-drawer .drawer-logo {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .mobile-drawer .drawer-logo .logo-icon {
+                width: 44px; height: 44px;
+                border-radius: 14px;
+                font-size: 18px;
+            }
+            .mobile-drawer .drawer-logo span {
+                font-family: 'Space Grotesk', sans-serif;
+                font-size: 22px;
+                font-weight: 700;
+                color: #e2e8f0;
+            }
+            .mobile-drawer .drawer-logo span b {
+                color: var(--emerald);
+            }
+
             .mobile-drawer .close-drawer {
-                width: 40px; height: 40px; border-radius: 12px;
-                background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25);
-                color: #f87171; display: flex; align-items: center; justify-content: center; font-size: 16px;
+                width: 40px; height: 40px;
+                border-radius: 12px;
+                background: rgba(248,113,113,0.1);
+                border: 1px solid rgba(248,113,113,0.25);
+                color: #f87171;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
             }
-            .mobile-drawer nav { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+            .mobile-drawer nav {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+
             .mobile-drawer .nav-item {
-                display: flex; align-items: center; gap: 14px;
-                padding: 14px 16px; border-radius: 14px;
-                color: rgba(148,163,184,0.75); font-size: 16px; font-weight: 600;
-                transition: all 0.2s; border: 1px solid transparent; text-decoration: none;
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                padding: 14px 16px;
+                border-radius: 14px;
+                color: rgba(148,163,184,0.75);
+                font-size: 16px;
+                font-weight: 600;
+                transition: all 0.2s;
+                border: 1px solid transparent;
+                text-decoration: none;
             }
-            .mobile-drawer .nav-item i { width: 28px; font-size: 20px; text-align: center; }
+            .mobile-drawer .nav-item i {
+                width: 28px;
+                font-size: 20px;
+                text-align: center;
+            }
             .mobile-drawer .nav-item.active {
                 background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.2));
-                border-color: rgba(52,211,153,0.35); color: var(--emerald);
+                border-color: rgba(52,211,153,0.35);
+                color: var(--emerald);
             }
-            .mobile-drawer .nav-item:active { background: rgba(52,211,153,0.1); color: var(--emerald); }
-            .mobile-drawer .drawer-footer { padding-top: 16px; border-top: 1px solid var(--border); }
+            .mobile-drawer .nav-item:active {
+                background: rgba(52,211,153,0.1);
+                color: var(--emerald);
+            }
 
-            /* ─── BOTTOM TAB BAR (só ícone + rótulo curto) ─── */
+            .mobile-drawer .drawer-footer {
+                padding-top: 16px;
+                border-top: 1px solid var(--border);
+            }
+
+            /* ─── BOTTOM TAB BAR ─── */
             .mobile-bottom-tabbar {
-                position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
-                height: 72px;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                z-index: 60;
+                height: 76px;
                 background: rgba(2, 12, 18, 0.97);
                 border-top: 1px solid var(--border);
                 backdrop-filter: blur(20px);
-                display: flex; align-items: center; justify-content: space-around;
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
                 padding: 0 8px;
                 padding-bottom: env(safe-area-inset-bottom, 0);
             }
+
             .mobile-bottom-tabbar .tab-item {
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
-                gap: 3px; flex: 1; height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                flex: 1;
+                height: 100%;
                 color: rgba(148,163,184,0.55);
-                font-size: 10px; font-weight: 700; text-decoration: none;
-                transition: all 0.2s; position: relative;
+                font-size: 11px;
+                font-weight: 700;
+                text-decoration: none;
+                transition: all 0.2s;
+                position: relative;
             }
-            .mobile-bottom-tabbar .tab-item i { font-size: 21px; }
-            .mobile-bottom-tabbar .tab-item.active { color: var(--emerald); }
+            .mobile-bottom-tabbar .tab-item i {
+                font-size: 22px;
+                margin-bottom: 2px;
+            }
+            .mobile-bottom-tabbar .tab-item.active {
+                color: var(--emerald);
+            }
             .mobile-bottom-tabbar .tab-item.active::before {
-                content: ''; position: absolute; top: 4px; width: 26px; height: 3px;
-                background: var(--emerald); border-radius: 99px; box-shadow: 0 0 10px var(--emerald);
+                content: '';
+                position: absolute;
+                top: 6px;
+                width: 28px;
+                height: 3px;
+                background: var(--emerald);
+                border-radius: 99px;
+                box-shadow: 0 0 10px var(--emerald);
             }
-            .mobile-bottom-tabbar .tab-item:active { color: var(--cyan); transform: scale(0.95); }
+            .mobile-bottom-tabbar .tab-item:active {
+                color: var(--cyan);
+                transform: scale(0.95);
+            }
 
             /* ─── MAIN CONTENT ─── */
-            main { margin-left: 0 !important; padding: 80px 14px 24px !important; overflow-x: hidden; }
-
-            header {
-                flex-direction: column !important; align-items: flex-start !important;
-                gap: 12px !important; margin-bottom: 20px !important; padding-bottom: 16px !important;
+            main {
+                margin-left: 0 !important;
+                padding: 80px 14px 24px !important;
+                overflow-x: hidden;
             }
-            #boasVindas { font-size: 22px !important; line-height: 1.25 !important; }
+
+            /* Header mobile */
+            header {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 12px !important;
+                margin-bottom: 20px !important;
+                padding-bottom: 16px !important;
+            }
+
+            #boasVindas {
+                font-size: 22px !important;
+                line-height: 1.25 !important;
+            }
             #boasVindas .separator { display: none; }
-            #clinicaNome { display: block; font-size: 16px !important; margin-top: 4px; }
-            header p { font-size: 13px !important; }
-            header .flex.items-center.flex-wrap { width: 100%; justify-content: space-between; gap: 10px; }
+            #clinicaNome {
+                display: block;
+                font-size: 16px !important;
+                margin-top: 4px;
+            }
 
-            /* Botão "Ouvir Agenda" vira ícone-only no mobile */
-            #btnFalarAgenda { padding: 10px !important; }
-            #btnFalarAgenda .btn-text { display: none; }
-            #btnFalarAgenda .wave-icon { width: 18px; height: 18px; margin: 0; }
+            header p {
+                font-size: 13px !important;
+            }
 
-            #data-hora-container-tailwind { display: none !important; }
+            /* Esconde botões desktop no header */
+            header .flex.items-center.flex-wrap {
+                width: 100%;
+                justify-content: space-between;
+                gap: 10px;
+            }
 
-            /* Botão "Novo Agendamento" vira ícone-only no mobile */
-            .btn-new-appt { padding: 12px !important; border-radius: 14px !important; }
-            .btn-new-appt .btn-new-appt-text { display: none; }
-            .btn-new-appt i { margin: 0 !important; font-size: 16px; }
+            #btnFalarAgenda {
+                padding: 10px 14px !important;
+                font-size: 12px !important;
+            }
+            #btnFalarAgenda .wave-icon { width: 16px; height: 16px; }
+
+            #data-hora-container-tailwind {
+                display: none !important;
+            }
+
+            .btn-new-appt {
+                padding: 10px 16px !important;
+                font-size: 13px !important;
+                border-radius: 14px !important;
+            }
 
             .header-avatar { display: none !important; }
 
-            /* ─── STAT CARDS – 2 colunas ─── */
-            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; margin-bottom: 24px !important; }
-            .stat-card { padding: 18px 14px !important; border-radius: 18px !important; }
-            .stat-card .card-label { font-size: 11px !important; letter-spacing: 0.08em !important; }
-            .stat-card .card-value, .stat-card h3 { font-size: 26px !important; margin-top: 8px !important; }
-            .stat-card .text-xs { font-size: 12px !important; }
-            .stat-card i { font-size: 18px !important; }
+            /* ─── STAT CARDS – 2 colunas, maiores e legíveis ─── */
+            .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+                margin-bottom: 24px !important;
+            }
+
+            .stat-card {
+                padding: 18px 14px !important;
+                border-radius: 18px !important;
+            }
+            .stat-card .card-label {
+                font-size: 11px !important;
+                letter-spacing: 0.08em !important;
+            }
+            .stat-card .card-value,
+            .stat-card h3 {
+                font-size: 28px !important;
+                margin-top: 8px !important;
+            }
+            .stat-card .text-xs {
+                font-size: 12px !important;
+            }
+            .stat-card i {
+                font-size: 18px !important;
+            }
 
             /* ─── FLOW PANEL ─── */
-            .flow-panel { padding: 18px 14px !important; border-radius: 20px !important; }
-            .panel-title { font-size: 20px !important; }
-            .panel-subtitle { font-size: 13px !important; }
-
-            #filtro-container { width: 100%; margin-top: 12px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-            .filtro-btn { font-size: 13px !important; padding: 10px 14px !important; white-space: nowrap; }
-
-            /* Botão imprimir vira ícone-only (fica junto dos filtros) */
-            .btn-print {
-                display: flex !important; width: 40px; height: 40px; padding: 0 !important;
-                align-items: center; justify-content: center; flex-shrink: 0;
+            .flow-panel {
+                padding: 18px 14px !important;
+                border-radius: 20px !important;
             }
-            .btn-print span { display: none; }
+            .panel-title {
+                font-size: 20px !important;
+            }
+            .panel-subtitle {
+                font-size: 13px !important;
+            }
 
-            /* ─── PATIENT CARDS (substitui a tabela) ─── */
-            .mobile-patient-cards { flex-direction: column; gap: 12px; width: 100%; }
+            #filtro-container {
+                width: 100%;
+                margin-top: 12px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .filtro-btn {
+                font-size: 13px !important;
+                padding: 10px 14px !important;
+                white-space: nowrap;
+            }
+
+            .btn-print {
+                display: none !important; /* esconde no mobile */
+            }
+
+            /* ─── PATIENT CARDS (substitui tabela) ─── */
+            .mobile-patient-cards {
+                flex-direction: column;
+                gap: 14px;
+                width: 100%;
+            }
 
             .patient-card-mobile {
                 background: rgba(255,255,255,0.03);
                 border: 1px solid var(--border);
                 border-radius: 18px;
-                padding: 14px;
+                padding: 16px;
                 position: relative;
                 overflow: hidden;
                 transition: all 0.2s;
             }
             .patient-card-mobile::before {
-                content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 1px;
                 background: linear-gradient(90deg, transparent, rgba(52,211,153,0.4), transparent);
             }
-            .patient-card-mobile:active { border-color: rgba(52,211,153,0.4); background: rgba(52,211,153,0.05); }
+            .patient-card-mobile:active {
+                border-color: rgba(52,211,153,0.4);
+                background: rgba(52,211,153,0.05);
+            }
 
-            .patient-card-mobile .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
-            .patient-card-mobile .patient-id { font-size: 11px; font-weight: 700; color: rgba(52,211,153,0.5); }
+            .patient-card-mobile .card-top {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 12px;
+            }
+
+            .patient-card-mobile .patient-id {
+                font-size: 12px;
+                font-weight: 700;
+                color: rgba(52,211,153,0.5);
+            }
+
             .patient-card-mobile .patient-name {
-                font-size: 16px !important; font-weight: 800; color: #f1f5f9;
-                font-family: 'Space Grotesk', sans-serif; margin-bottom: 3px;
+                font-size: 17px !important;
+                font-weight: 800;
+                color: #f1f5f9;
+                font-family: 'Space Grotesk', sans-serif;
+                margin-bottom: 4px;
             }
-            .patient-card-mobile .patient-phone {
-                font-size: 12px !important; color: rgba(148,163,184,0.7);
-                display: flex; align-items: center; gap: 6px;
-            }
-            .patient-card-mobile .patient-phone i { color: var(--emerald); font-size: 13px; }
 
-            .patient-card-mobile .card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
-            .patient-card-mobile .meta-item {
-                display: inline-flex; align-items: center; gap: 5px;
-                background: rgba(8,145,178,0.12); border: 1px solid rgba(8,145,178,0.2);
-                color: var(--cyan); padding: 5px 9px; border-radius: 10px;
-                font-size: 12px; font-weight: 700;
+            .patient-card-mobile .patient-phone {
+                font-size: 13px !important;
+                color: rgba(148,163,184,0.7);
+                display: flex;
+                align-items: center;
+                gap: 6px;
             }
-            .patient-card-mobile .meta-item i { font-size: 11px; }
-            .patient-card-mobile .therapy-badge { font-size: 12px !important; padding: 5px 10px !important; }
-            .patient-card-mobile .status-badge { font-size: 11px !important; padding: 5px 10px !important; }
+            .patient-card-mobile .patient-phone i {
+                color: var(--emerald);
+                font-size: 14px;
+            }
+
+            .patient-card-mobile .card-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin: 12px 0;
+            }
+
+            .patient-card-mobile .meta-item {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                background: rgba(8,145,178,0.12);
+                border: 1px solid rgba(8,145,178,0.2);
+                color: var(--cyan);
+                padding: 6px 10px;
+                border-radius: 10px;
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+            .patient-card-mobile .therapy-badge {
+                font-size: 13px !important;
+                padding: 6px 12px !important;
+            }
+
+            .patient-card-mobile .status-badge {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+            }
 
             .patient-card-mobile .card-actions {
-                display: flex; gap: 8px; margin-top: 10px; padding-top: 10px;
+                margin-top: 12px;
+                padding-top: 12px;
                 border-top: 1px solid rgba(52,211,153,0.1);
             }
-            .icon-action-btn {
-                flex: 1;
-                display: flex; align-items: center; justify-content: center;
-                height: 42px; border-radius: 12px;
-                background: rgba(255,255,255,0.04);
-                border: 1px solid var(--border);
-                color: rgba(148,163,184,0.75);
-                font-size: 17px;
-                transition: all 0.2s;
-                text-decoration: none;
-            }
-            .icon-action-btn.whats { color: #25D366; border-color: rgba(37,211,102,0.25); }
-            .icon-action-btn:active {
-                transform: scale(0.96);
-                background: rgba(52,211,153,0.1);
-                border-color: rgba(52,211,153,0.35);
-                color: var(--emerald);
-            }
-            .icon-action-btn.whats:active { color: #25D366; }
 
-            .empty-state-mobile { text-align: center; padding: 36px 20px; }
-            .empty-state-mobile .empty-icon-wrap { width: 60px; height: 60px; font-size: 22px; }
-            .empty-state-mobile p { font-size: 15px !important; }
+            .patient-card-mobile .btn-prontuario {
+                width: 100%;
+                justify-content: center;
+                font-size: 14px !important;
+                padding: 12px 16px !important;
+                border-radius: 12px !important;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            /* Empty state mobile */
+            .empty-state-mobile {
+                text-align: center;
+                padding: 40px 20px;
+            }
+            .empty-state-mobile .empty-icon-wrap {
+                width: 64px; height: 64px;
+                font-size: 24px;
+            }
+            .empty-state-mobile p {
+                font-size: 16px !important;
+            }
 
             /* ─── CALENDAR + PAINEL AGENDAMENTOS ─── */
-            .calendar-panel { padding: 16px 14px !important; border-radius: 20px !important; margin-bottom: 16px; }
-            .calendar-panel .panel-title { font-size: 18px !important; }
+            .calendar-panel,
+            .col-span-12.xl\:col-span-8 {
+                padding: 16px 14px !important;
+                border-radius: 20px !important;
+                margin-bottom: 16px;
+            }
 
-            .kanban-panel { padding: 16px 14px !important; border-radius: 20px !important; }
-            .kanban-panel h3 { font-size: 18px !important; }
-            .kanban-columns-grid { grid-template-columns: 1fr !important; }
+            .calendar-panel .panel-title,
+            .col-span-12.xl\:col-span-8 h3 {
+                font-size: 18px !important;
+            }
 
-            #asidePaciente { margin-top: 16px; }
+            /* Painel de Agendamentos – vira 1 coluna no mobile */
+            .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-4 {
+                grid-template-columns: 1fr !important;
+            }
 
-            .charts-section { margin-top: 24px !important; padding-top: 20px !important; }
-            .charts-section-title { font-size: 20px !important; }
-            .chart-card { padding: 16px 12px !important; }
-            .chart-card-title { font-size: 15px !important; }
+            /* Aside patient – full width no mobile */
+            #asidePaciente {
+                margin-top: 16px;
+            }
 
-            #gaveta-painel { max-width: 100% !important; width: 100% !important; }
+            /* Charts */
+            .charts-section {
+                margin-top: 24px !important;
+                padding-top: 20px !important;
+            }
+            .charts-section-title {
+                font-size: 20px !important;
+            }
+            .chart-card {
+                padding: 16px 12px !important;
+            }
+            .chart-card-title {
+                font-size: 15px !important;
+            }
 
-            .grid.grid-cols-12 { grid-template-columns: 1fr !important; gap: 16px !important; }
+            /* Gaveta full width no mobile */
+            #gaveta-painel {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+
+            /* Grid principal vira 1 coluna */
+            .grid.grid-cols-12 {
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+            }
             .col-span-12.xl\:col-span-9,
             .col-span-12.xl\:col-span-8,
-            .col-span-12.xl\:col-span-3 { grid-column: span 12 / span 12 !important; }
+            .col-span-12.xl\:col-span-3 {
+                grid-column: span 12 / span 12 !important;
+            }
         }
 
+        /* Extra small phones */
         @media (max-width: 380px) {
-            .stat-card .card-value, .stat-card h3 { font-size: 22px !important; }
-            .mobile-topbar .logo-text { font-size: 17px; }
-            .patient-card-mobile .patient-name { font-size: 14px !important; }
+            .stat-card .card-value,
+            .stat-card h3 {
+                font-size: 24px !important;
+            }
+            .mobile-topbar .logo-text {
+                font-size: 17px;
+            }
+            .patient-card-mobile .patient-name {
+                font-size: 15px !important;
+            }
         }
-    </style>
+
+        /* sino */
+        /* ─── Notificações (Sino) ─── */
+.notif-wrap {
+  position: relative;
+}
+
+.notif-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: rgba(148,163,184,0.7);
+  transition: all 0.25s;
+  cursor: pointer;
+}
+.notif-btn:hover {
+  color: var(--emerald);
+  border-color: rgba(52,211,153,0.35);
+}
+
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px var(--slate-bg);
+  line-height: 1;
+}
+.notif-badge.hidden { display: none !important; }
+
+/* Dropdown — desktop */
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 360px;
+  max-width: calc(100vw - 24px);
+  background: rgba(7, 18, 28, 0.98);
+  border: 1px solid rgba(52,211,153,0.2);
+  border-radius: 14px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  z-index: 200;
+  overflow: hidden;
+  display: none;
+}
+.notif-dropdown.open { display: block; }
+
+/* Mobile: popup mais retangular, centralizado e dentro da tela */
+@media (max-width: 1023px) {
+  .notif-dropdown {
+    position: fixed;
+    top: 64px;                 /* abaixo da topbar */
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-width: none;
+    border-radius: 12px;
+    max-height: min(70vh, 420px);
+    display: none;
+  }
+  .notif-dropdown.open {
+    display: flex;
+    flex-direction: column;
+  }
+  .notif-list {
+    max-height: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+}
+
+.notif-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(52,211,153,0.12);
+  flex-shrink: 0;
+}
+.notif-header h4 {
+  font-size: 13px;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0;
+}
+.notif-marcar-todas {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--cyan);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.notif-marcar-todas:hover { text-decoration: underline; }
+
+.notif-list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.notif-item:hover { background: rgba(52,211,153,0.06); }
+.notif-item.nao-lida { background: rgba(52,211,153,0.04); }
+
+.notif-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 13px;
+}
+.notif-icon.agendamento {
+  background: rgba(34,211,238,0.12);
+  color: var(--cyan);
+  border: 1px solid rgba(34,211,238,0.25);
+}
+.notif-icon.documento {
+  background: rgba(251,191,36,0.12);
+  color: var(--amber);
+  border: 1px solid rgba(251,191,36,0.25);
+}
+.notif-icon.sistema {
+  background: rgba(148,163,184,0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148,163,184,0.2);
+}
+
+.notif-body { min-width: 0; flex: 1; }
+.notif-titulo {
+  font-size: 12px;
+  font-weight: 700;
+  color: #e2e8f0;
+  margin: 0 0 2px;
+}
+.notif-msg {
+  font-size: 11px;
+  color: rgba(148,163,184,0.8);
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notif-tempo {
+  font-size: 10px;
+  color: rgba(148,163,184,0.45);
+  margin-top: 3px;
+}
+
+.notif-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: rgba(148,163,184,0.45);
+  font-size: 12px;
+}
+      </style>
 
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
@@ -1054,22 +1522,45 @@
 
 <body class="text-gray-300 min-h-screen font-sans antialiased">
 
-    <!-- ═══════ MOBILE TOP BAR (≤ 1024px) ═══════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         MOBILE TOP BAR (só aparece ≤ 1024px)
+         ═══════════════════════════════════════════════════════════════ -->
     <div class="mobile-topbar">
         <div class="logo-wrap">
             <button class="icon-btn" id="btnOpenDrawer" aria-label="Abrir menu">
                 <i class="fas fa-bars"></i>
             </button>
-            <div class="logo-icon w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold">M</div>
+            <div class="logo-icon w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold">
+                M
+            </div>
             <span class="logo-text">Med<span>LM</span></span>
         </div>
-        <div class="actions">
-            <button class="icon-btn" aria-label="Notificações"><i class="fas fa-bell"></i></button>
-            <div class="avatar-btn">ML</div>
-        </div>
+    <div class="actions">
+
+            <!-- ta aqui o botao do sino errado -->
+            <div class="notif-wrap">
+                <button class="icon-btn notif-btn" id="btnNotifMobile" aria-label="Notificações">
+                  <i class="fas fa-bell"></i>
+                  <span class="notif-badge hidden" id="badgeNotifMobile">0</span>
+                </button>
+                <div class="notif-dropdown" id="dropdownNotifMobile">
+                  <div class="notif-header">
+                    <h4>Notificações</h4>
+                    <button class="notif-marcar-todas" onclick="marcarTodasLidas()">Marcar todas como lidas</button>
+                  </div>
+                  <div class="notif-list" id="listaNotifMobile">
+                    <div class="notif-empty">Nenhuma notificação</div>
+                  </div>
+                </div>
+            </div>
+            <!-- fim do sino -->
+        <div class="avatar-btn">ML</div>
+    </div>
     </div>
 
-    <!-- ═══════ MOBILE DRAWER ═══════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         MOBILE DRAWER (menu lateral deslizante)
+         ═══════════════════════════════════════════════════════════════ -->
     <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
     <div class="mobile-drawer" id="mobileDrawer">
         <div class="drawer-header">
@@ -1077,29 +1568,64 @@
                 <div class="logo-icon w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold text-lg">M</div>
                 <span>Med<b>LM</b></span>
             </div>
-            <button class="close-drawer" id="btnCloseDrawer" aria-label="Fechar menu"><i class="fas fa-times"></i></button>
+            <button class="close-drawer" id="btnCloseDrawer" aria-label="Fechar menu">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         <nav>
-            <a href="/dashboard" class="nav-item active"><i class="fas fa-chart-line"></i> Dashboard</a>
-            <a href="/pacientes" class="nav-item"><i class="fas fa-user-injured"></i> Pacientes</a>
-            <a href="/financeiro" class="nav-item"><i class="fas fa-hand-holding-usd"></i> Financeiro</a>
-            <a href="/agendamento" class="nav-item"><i class="fas fa-calendar-check"></i> Agendamento</a>
-            <a href="/equipe" class="nav-item"><i class="fas fa-users-cog"></i> Minha Equipe</a>
-            <a href="/dashboard/configuracoes" class="nav-item"><i class="fas fa-cogs"></i> Configurações</a>
-            <a href="#" onclick="handleLogout()" class="nav-item" style="color:rgba(248,113,113,0.7)"><i class="fas fa-sign-out-alt"></i> Sair</a>
+            <a href="/dashboard" class="nav-item active">
+                <i class="fas fa-chart-line"></i> Dashboard
+            </a>
+            <a href="/pacientes" class="nav-item">
+                <i class="fas fa-user-injured"></i> Pacientes
+            </a>
+            <a href="/financeiro" class="nav-item">
+                <i class="fas fa-hand-holding-usd"></i> Financeiro
+            </a>
+            <a href="/agendamento" class="nav-item">
+                <i class="fas fa-calendar-check"></i> Agendamento
+            </a>
+            <a href="/equipe" class="nav-item">
+                <i class="fas fa-users-cog"></i> Minha Equipe
+            </a>
+            <a href="/dashboard/configuracoes" class="nav-item">
+                <i class="fas fa-cogs"></i> Configurações
+            </a>
+            <a href="#" onclick="handleLogout()" class="nav-item" style="color:rgba(248,113,113,0.7)">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
         </nav>
         <div class="drawer-footer">
-            <button id="theme-toggle-btn-mobile" class="nav-item" style="width:100%"><i class="fas fa-moon"></i> Tema</button>
+            <button id="theme-toggle-btn-mobile" class="nav-item" style="width:100%">
+                <i class="fas fa-moon"></i> Tema
+            </button>
         </div>
     </div>
 
-    <!-- ═══════ MOBILE BOTTOM TAB BAR ═══════ -->
+    <!-- ═══════════════════════════════════════════════════════════════
+         MOBILE BOTTOM TAB BAR
+         ═══════════════════════════════════════════════════════════════ -->
     <nav class="mobile-bottom-tabbar">
-        <a href="/dashboard" class="tab-item active"><i class="fas fa-home"></i><span>Início</span></a>
-        <a href="/pacientes" class="tab-item"><i class="fas fa-user-injured"></i><span>Pacientes</span></a>
-        <a href="/agendamento" class="tab-item"><i class="fas fa-calendar-check"></i><span>Agenda</span></a>
-        <a href="/financeiro" class="tab-item"><i class="fas fa-hand-holding-usd"></i><span>Financeiro</span></a>
-        <a href="/dashboard/configuracoes" class="tab-item"><i class="fas fa-user-cog"></i><span>Perfil</span></a>
+        <a href="/dashboard" class="tab-item active">
+            <i class="fas fa-home"></i>
+            <span>Início</span>
+        </a>
+        <a href="/pacientes" class="tab-item">
+            <i class="fas fa-user-injured"></i>
+            <span>Pacientes</span>
+        </a>
+        <a href="/agendamento" class="tab-item">
+            <i class="fas fa-calendar-check"></i>
+            <span>Agenda</span>
+        </a>
+        <a href="/financeiro" class="tab-item">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>Financeiro</span>
+        </a>
+        <a href="/dashboard/configuracoes" class="tab-item">
+            <i class="fas fa-user-cog"></i>
+            <span>Perfil</span>
+        </a>
     </nav>
 
     <div class="flex h-screen overflow-hidden">
@@ -1108,11 +1634,14 @@
         <aside class="sidebar-desktop fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
             <div class="flex flex-col">
                 <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
-                    <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">M</div>
+                    <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">
+                        M
+                    </div>
                     <span class="logo-text-brand ml-4 font-bold text-xl opacity-0 group-hover:opacity-100 transition-all duration-300 whitespace-nowrap tracking-tight">
                         Med<span class="logo-text-accent font-extrabold">LM</span>
                     </span>
                 </div>
+
                 <nav class="px-3 pt-6 space-y-1.5">
                     <a href="/dashboard" class="nav-link nav-link-active flex items-center p-3.5">
                         <i class="fas fa-chart-line w-6 text-lg"></i>
@@ -1130,6 +1659,7 @@
                         <i class="fas fa-calendar-check w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Agendamento</span>
                     </a>
+                    
                     <a href="/equipe" class="nav-link flex items-center p-3.5">
                         <i class="fas fa-users-cog w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Minha Equipe</span>
@@ -1144,6 +1674,7 @@
                     </a>
                 </nav>
             </div>
+
             <div class="p-4" style="border-top:1px solid var(--border)">
                 <button id="theme-toggle-btn" class="flex items-center w-full p-3 transition">
                     <i class="fas fa-moon w-6"></i>
@@ -1181,17 +1712,37 @@
                         <i class="fas fa-calendar-alt mr-3" style="color:var(--emerald)"></i>
                         <span id="data-hora"></span>
                     </div>
+                    <!-- Botao do sino -->
+                    <div class="notif-wrap hidden md:block relative">
+                        <button class="notif-btn" id="btnNotifDesktop" aria-label="Notificações">
+                          <i class="fas fa-bell"></i>
+                          <span class="notif-badge hidden" id="badgeNotifDesktop">0</span>
+                        </button>
+                        <div class="notif-dropdown" id="dropdownNotifDesktop">
+                          <div class="notif-header">
+                            <h4>Notificações</h4>
+                            <button class="notif-marcar-todas" onclick="marcarTodasLidas()">Marcar todas como lidas</button>
+                          </div>
+                          <div class="notif-list" id="listaNotifDesktop">
+                            <div class="notif-empty">Nenhuma notificação</div>
+                          </div>
+                        </div>
+                      </div>
+                    <!-- Fim do botao sino -->
 
                     <a href="/agendamento" class="btn-new-appt flex items-center px-5 py-2.5 rounded-full font-bold text-xs xl:text-sm">
-                        <i class="fas fa-plus mr-2"></i> <span class="btn-new-appt-text">Novo Agendamento</span>
+                        <i class="fas fa-plus mr-2"></i> Novo Agendamento 
                     </a>
 
-                    <div class="header-avatar w-12 h-12 rounded-full flex items-center justify-center font-black shadow-md">MedLM</div>
+                    <div class="header-avatar w-12 h-12 rounded-full flex items-center justify-center font-black shadow-md">
+                        MedLM
+                    </div>
                 </div>
             </header>
 
             <!-- Stat Cards -->
-            <div class="stats-grid">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                <!-- Atendimentos -->
                 <div class="stat-card stat-card-cyan p-6 card-hover-effect">
                     <div class="flex justify-between items-center">
                         <p class="card-label">Atendimentos Dia</p>
@@ -1202,6 +1753,7 @@
                         <i class="fas fa-arrow-up"></i> <span id="statAtendimentosVariacaoTexto">--</span>
                     </div>
                 </div>
+                <!-- Cancelamentos -->
                 <div class="stat-card stat-card-red p-6 card-hover-effect">
                     <div class="flex justify-between items-center">
                         <p class="card-label">Cancelamentos de Hoje</p>
@@ -1210,6 +1762,7 @@
                     <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statCancelamentos">–</h3>
                     <span class="text-xs font-bold block mt-1" style="color:#f87171">Taxa de <span id="statCancelamentosTaxa">--</span>%</span>
                 </div>
+                <!-- Faturamento -->
                 <div class="stat-card p-6 card-hover-effect">
                     <p class="card-label">Faturamento</p>
                     <h3 class="text-4xl font-extrabold mt-2 tracking-tight bg-gradient-to-r from-blue-600 to-emerald-500 bg-clip-text text-transparent" id="statFaturamento">R$ –</h3>
@@ -1217,13 +1770,16 @@
                         <span id="statFaturamentoSessoes">0</span> sessões liquidadas
                     </span>
                 </div>
+                <!-- Sessões Próximos 7 Dias -->
                 <div class="stat-card p-6 card-hover-effect">
                     <div class="flex justify-between items-center">
                         <p class="card-label">Próximos 7 Dias</p>
                         <i class="fas fa-calendar-week text-base" style="color:#818cf8"></i>
                     </div>
                     <h3 class="card-value text-4xl font-extrabold mt-2 tracking-tight" id="statProximaSemana">–</h3>
-                    <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">sessões agendadas</span>
+                    <span class="text-xs font-medium block mt-1" style="color:rgba(148,163,184,0.4)">
+                        sessões agendadas
+                    </span>
                 </div>
             </div>
 
@@ -1241,19 +1797,19 @@
                                 <p class="panel-subtitle mt-0.5">Gerenciamento em tempo real dos prontuários e pacientes ativos.</p>
                             </div>
 
-                            <div class="flex p-1" id="filtro-container">
+                            <div class="flex p-1" id="filtro-container" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px">
                                 <button onclick="filtrarTabelaTerapeutica('dia')" data-filtro="dia" class="filtro-btn px-4 py-2">Hoje</button>
                                 <button onclick="filtrarTabelaTerapeutica('semana')" data-filtro="semana" class="filtro-btn px-4 py-2">Semana</button>
                                 <button onclick="filtrarTabelaTerapeutica('mes')" data-filtro="mes" class="filtro-btn px-4 py-2">Mês</button>
                                 <button onclick="filtrarTabelaTerapeutica('ano')" data-filtro="ano" class="filtro-btn px-4 py-2">Ano</button>
                             </div>
 
-                            <button onclick="window.print()" class="btn-print flex items-center gap-2 px-4 py-2.5" aria-label="Imprimir lista">
-                                <i class="fas fa-print" style="color:var(--cyan)"></i> <span>Imprimir Lista</span>
+                            <button onclick="window.print()" class="btn-print flex items-center gap-2 px-4 py-2.5">
+                                <i class="fas fa-print" style="color:var(--cyan)"></i> Imprimir Lista
                             </button>
                         </div>
 
-                        <!-- Tabela Desktop -->
+                        <!-- Tabela Desktop (escondida no mobile) -->
                         <div class="data-table-wrap overflow-x-auto w-full desktop-only">
                             <table class="w-full text-left border-collapse min-w-[750px]">
                                 <thead>
@@ -1271,12 +1827,14 @@
                                         <% agendamentos.forEach(agendamento => { %>
                                             <tr class="border-b border-slate-800/60 hover:bg-slate-900/40 transition-colors">
                                                 <td class="px-4 py-4 text-xs font-semibold whitespace-nowrap" style="color:rgba(52,211,153,0.4)">#<%= agendamento.id %></td>
+                                                
                                                 <td class="px-4 py-4">
                                                     <div class="patient-name font-bold text-white text-xs truncate max-w-[180px]" title="<%= agendamento.nome %>"><%= agendamento.nome %></div>
                                                     <div class="patient-phone mt-0.5 flex items-center gap-1 text-[11px] text-slate-400 whitespace-nowrap">
                                                         <i class="fab fa-whatsapp text-teal-400"></i> <%= agendamento.telefone %>
                                                     </div>
                                                 </td>
+                                
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <div class="date-val text-xs text-slate-200"><%= new Date(agendamento.data_agendamento).toLocaleDateString('pt-BR') %></div>
                                                     <div class="time-badge mt-1 inline-flex items-center gap-1 text-[11px] text-teal-300 bg-teal-950/40 px-2 py-0.5 rounded-md">
@@ -1284,9 +1842,11 @@
                                                         <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %> hs
                                                     </div>
                                                 </td>
+                                
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <span class="therapy-badge text-xs text-slate-300"><%= agendamento.tipo_terapia %></span>
                                                 </td>
+                                
                                                 <td class="px-4 py-4 whitespace-nowrap">
                                                     <%
                                                         let badgeClass = 'status-default';
@@ -1299,6 +1859,7 @@
                                                         <%= agendamento.status_agendamento %>
                                                     </span>
                                                 </td>
+                                
                                                 <td class="px-4 py-4 text-right whitespace-nowrap">
                                                     <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="btn-prontuario text-xs bg-teal-950/60 hover:bg-teal-900/80 text-teal-300 border border-teal-800/50 px-3 py-1.5 rounded-xl transition-all font-bold">
                                                         Ver Prontuário
@@ -1310,7 +1871,9 @@
                                         <tr>
                                             <td colspan="6" class="px-6 py-12 text-center">
                                                 <div class="flex flex-col items-center justify-center">
-                                                    <div class="empty-icon-wrap mb-2 text-slate-500"><i class="fas fa-calendar-times text-lg"></i></div>
+                                                    <div class="empty-icon-wrap mb-2 text-slate-500">
+                                                        <i class="fas fa-calendar-times text-lg"></i>
+                                                    </div>
                                                     <p class="font-semibold text-sm text-slate-200">Nenhum atendimento cadastrado</p>
                                                     <p class="text-xs mt-0.5 text-slate-500">Sua agenda está livre para este período.</p>
                                                 </div>
@@ -1321,7 +1884,7 @@
                             </table>
                         </div>
 
-                        <!-- Cards Mobile (ícone-first) -->
+                        <!-- Cards Mobile (substitui a tabela) -->
                         <div class="mobile-patient-cards mobile-only" id="mobile-pacientes-cards">
                             <% if (locals.agendamentos && agendamentos.length > 0) { %>
                                 <% agendamentos.forEach(agendamento => { %>
@@ -1330,14 +1893,15 @@
                                         if(agendamento.status_agendamento === 'confirmado') badgeClassM = 'status-confirmado';
                                         else if(agendamento.status_agendamento === 'pendente') badgeClassM = 'status-pendente';
                                         else if(agendamento.status_agendamento === 'cancelado') badgeClassM = 'status-cancelado';
-                                        const foneDigits = (agendamento.telefone || '').replace(/\D/g, '');
                                     %>
                                     <div class="patient-card-mobile">
                                         <div class="card-top">
                                             <div>
                                                 <div class="patient-id">#<%= agendamento.id %></div>
                                                 <div class="patient-name"><%= agendamento.nome %></div>
-                                                <div class="patient-phone"><i class="fab fa-whatsapp"></i> <%= agendamento.telefone %></div>
+                                                <div class="patient-phone">
+                                                    <i class="fab fa-whatsapp"></i> <%= agendamento.telefone %>
+                                                </div>
                                             </div>
                                             <span class="status-badge <%= badgeClassM %>">
                                                 <span class="status-dot"></span>
@@ -1352,24 +1916,23 @@
                                             </span>
                                             <span class="meta-item">
                                                 <i class="far fa-clock"></i>
-                                                <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %>
+                                                <%= new Date(agendamento.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) %> hs
                                             </span>
                                             <span class="therapy-badge"><%= agendamento.tipo_terapia %></span>
                                         </div>
 
                                         <div class="card-actions">
-                                            <a class="icon-action-btn whats" href="https://wa.me/<%= foneDigits %>" target="_blank" rel="noopener" aria-label="Abrir WhatsApp">
-                                                <i class="fab fa-whatsapp"></i>
-                                            </a>
-                                            <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="icon-action-btn" aria-label="Ver prontuário">
-                                                <i class="fas fa-folder-open"></i>
+                                            <button onclick="abrirGavetaProntuario('<%= agendamento.id %>')" class="btn-prontuario">
+                                                <i class="fas fa-folder-open"></i> Ver Prontuário
                                             </button>
                                         </div>
                                     </div>
                                 <% }); %>
                             <% } else { %>
                                 <div class="empty-state-mobile">
-                                    <div class="empty-icon-wrap"><i class="fas fa-calendar-times"></i></div>
+                                    <div class="empty-icon-wrap">
+                                        <i class="fas fa-calendar-times"></i>
+                                    </div>
                                     <p class="font-semibold text-slate-200">Nenhum atendimento cadastrado</p>
                                     <p class="text-sm mt-1 text-slate-500">Sua agenda está livre para este período.</p>
                                 </div>
@@ -1389,6 +1952,7 @@
                                 <button onclick="alternarCalendario('mes')" id="btn-mes" class="px-4 py-2 rounded-xl text-xs font-bold transition-all">Mês Inteiro</button>
                             </div>
                         </div>
+
                         <div id="view-calendario">
                             <div class="grid grid-cols-7 gap-2 mb-3">
                                 <div class="cal-day-label">Dom</div>
@@ -1404,39 +1968,46 @@
                     </div>
 
                 </div>
+                <!-- ====== painel de agendamentos ====== -->
 
-                <!-- ====== painel de agendamentos (kanban) ====== -->
-                <div class="col-span-12 xl:col-span-8 kanban-panel bg-[#0b131a] border border-slate-800/80 p-6 xl:p-8 rounded-3xl shadow-lg">
+                <div class="col-span-12 xl:col-span-8 bg-[#0b131a] border border-slate-800/80 p-6 xl:p-8 rounded-3xl shadow-lg">
+    
                     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                         <div>
                             <h3 class="text-xl font-bold tracking-tight text-white">Painel de Agendamentos</h3>
                             <p class="text-xs font-medium text-slate-400 mt-0.5">Gerenciamento em tempo real por status</p>
                         </div>
                     </div>
-
-                    <div class="kanban-columns-grid">
+                
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+                        
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Confirmados</div>
                             <div id="coluna-confirmados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
                         </div>
+                
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Aguardando Sinal</div>
                             <div id="coluna-aguardando" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
                         </div>
+                
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Finalizados</div>
                             <div id="coluna-finalizados" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
                         </div>
+                
                         <div class="flex flex-col gap-4">
                             <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 border-b border-slate-800 pb-2">Outros / Cancel.</div>
                             <div id="coluna-outros" class="flex flex-col gap-4 min-h-[100px] p-1"></div>
                         </div>
+                
                     </div>
                 </div>
-                <!-- ====== fim do painel de agendamentos ====== -->
 
+                <!-- ====== fim do painel de agendamentos -->
                 <!-- ─── Right Aside ─── -->
                 <div class="col-span-12 xl:col-span-3 space-y-6">
+
                     <div id="asidePaciente" class="p-6 transition-all duration-300" style="position:relative">
                         <div class="glow-circle-blue"></div>
                         <div class="glow-circle-green"></div>
@@ -1485,9 +2056,12 @@
                             </div>
                             <h3 class="admin-card-title">Med<span style="opacity:0.6">LM</span></h3>
                             <p class="admin-card-sub mt-1">Painel de Administração</p>
-                            <div class="admin-card-btn mt-4"><i class="fas fa-sliders-h"></i> Configurações</div>
+                            <div class="admin-card-btn mt-4">
+                                <i class="fas fa-sliders-h"></i> Configurações
+                            </div>
                         </div>
                     </a>
+
                 </div>
             </div>
 
@@ -1497,6 +2071,7 @@
                     <h2 class="charts-section-title text-2xl font-extrabold tracking-tight">Análise Comparativa Mensal</h2>
                     <p class="charts-section-sub mt-0.5">Visão isolada do comportamento e volume de consultas divididas por semanas cheias.</p>
                 </div>
+
                 <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
                     <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
@@ -1507,6 +2082,7 @@
                         </div>
                         <div id="chart-semana-1" class="min-h-[280px]"></div>
                     </div>
+
                     <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
                             <div>
@@ -1516,6 +2092,7 @@
                         </div>
                         <div id="chart-semana-2" class="min-h-[280px]"></div>
                     </div>
+
                     <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
                             <div>
@@ -1525,6 +2102,7 @@
                         </div>
                         <div id="chart-semana-3" class="min-h-[280px]"></div>
                     </div>
+
                     <div class="chart-card p-6">
                         <div class="flex justify-between items-center mb-4">
                             <div>
@@ -1543,34 +2121,64 @@
     <!-- ─── Drawer / Gaveta ─── -->
     <div id="gaveta-prontuario" class="fixed inset-0 z-50 invisible transition-all duration-300">
         <div id="gaveta-backdrop" class="absolute inset-0 opacity-0 transition-opacity duration-300" style="background:rgba(2,12,18,0.7);backdrop-filter:blur(6px)"></div>
+
         <div id="gaveta-painel" class="absolute inset-y-0 left-0 w-full max-w-lg shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
+
             <div class="gaveta-header p-6 flex justify-between items-center">
                 <div>
                     <span class="gaveta-tag">Ficha Clínica</span>
                     <h3 id="gaveta-paciente-nome" class="mt-1">Carregando...</h3>
                 </div>
-                <button onclick="fecharGavetaProntuario()" class="gaveta-close-btn"><i class="fas fa-times"></i></button>
+                <button onclick="fecharGavetaProntuario()" class="gaveta-close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+
             <div class="p-6 overflow-y-auto flex-1 space-y-5">
                 <div class="gaveta-info-grid grid grid-cols-2 gap-4">
-                    <div><span class="gaveta-info-label">Data e Hora</span><span id="gaveta-paciente-data" class="gaveta-info-val">-</span></div>
-                    <div><span class="gaveta-info-label">Terapia</span><span id="gaveta-paciente-terapia" class="gaveta-info-val gaveta-info-val-accent">-</span></div>
-                    <div><span class="gaveta-info-label">WhatsApp</span><span id="gaveta-paciente-whats" class="gaveta-info-val">-</span></div>
-                    <div><span class="gaveta-info-label">CPF</span><span id="gaveta-paciente-cpf" class="gaveta-info-val">-</span></div>
+                    <div>
+                        <span class="gaveta-info-label">Data e Hora</span>
+                        <span id="gaveta-paciente-data" class="gaveta-info-val">-</span>
+                    </div>
+                    <div>
+                        <span class="gaveta-info-label">Terapia</span>
+                        <span id="gaveta-paciente-terapia" class="gaveta-info-val gaveta-info-val-accent">-</span>
+                    </div>
+                    <div>
+                        <span class="gaveta-info-label">WhatsApp</span>
+                        <span id="gaveta-paciente-whats" class="gaveta-info-val">-</span>
+                    </div>
+                    <div>
+                        <span class="gaveta-info-label">CPF</span>
+                        <span id="gaveta-paciente-cpf" class="gaveta-info-val">-</span>
+                    </div>
                 </div>
+
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="gaveta-stat-box"><span class="gaveta-stat-label">Idade</span><strong id="gaveta-paciente-idade" class="gaveta-stat-val">-</strong></div>
-                    <div class="gaveta-stat-box"><span class="gaveta-stat-label">Peso</span><strong id="gaveta-paciente-peso" class="gaveta-stat-val">-</strong></div>
-                    <div class="gaveta-stat-box"><span class="gaveta-stat-label">Altura</span><strong id="gaveta-paciente-altura" class="gaveta-stat-val">-</strong></div>
+                    <div class="gaveta-stat-box">
+                        <span class="gaveta-stat-label">Idade</span>
+                        <strong id="gaveta-paciente-idade" class="gaveta-stat-val">-</strong>
+                    </div>
+                    <div class="gaveta-stat-box">
+                        <span class="gaveta-stat-label">Peso</span>
+                        <strong id="gaveta-paciente-peso" class="gaveta-stat-val">-</strong>
+                    </div>
+                    <div class="gaveta-stat-box">
+                        <span class="gaveta-stat-label">Altura</span>
+                        <strong id="gaveta-paciente-altura" class="gaveta-stat-val">-</strong>
+                    </div>
                 </div>
+
                 <div class="space-y-1.5">
                     <label class="gaveta-section-label">Queixa Principal / Motivo</label>
                     <div id="gaveta-paciente-motivo" class="gaveta-text-block italic"></div>
                 </div>
+
                 <div class="space-y-1.5">
                     <label class="gaveta-section-label">Condições Pré-existentes</label>
                     <div id="gaveta-paciente-condicoes" class="gaveta-text-block"></div>
                 </div>
+
                 <div class="space-y-1.5 pt-1">
                     <label class="gaveta-section-label flex items-center gap-1.5">
                         <i class="fas fa-pen" style="color:var(--cyan)"></i> Observações / Evolução do Atendimento
@@ -1578,6 +2186,7 @@
                     <textarea id="gaveta-paciente-obs" class="gaveta-textarea" placeholder="Digite as anotações desta sessão clínica..."></textarea>
                 </div>
             </div>
+
             <div class="gaveta-footer p-4 flex gap-3">
                 <button class="btn-salvar flex-1">Salvar Evolução</button>
             </div>
@@ -1618,10 +2227,165 @@
             if (btnClose) btnClose.addEventListener('click', closeDrawer);
             if (overlay) overlay.addEventListener('click', closeDrawer);
 
+            // Fecha com Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') closeDrawer();
             });
         })();
+
+        
+  const tokenNotif = localStorage.getItem('token');
+
+  function tempoRelativo(dataStr) {
+    const diff = (Date.now() - new Date(dataStr).getTime()) / 1000;
+    if (diff < 60) return 'Agora';
+    if (diff < 3600) return Math.floor(diff / 60) + ' min';
+    if (diff < 86400) return Math.floor(diff / 3600) + ' h';
+    return Math.floor(diff / 86400) + ' d';
+  }
+
+  function iconeTipo(tipo) {
+    if (tipo === 'agendamento') return { cls: 'agendamento', icon: 'fa-calendar-check' };
+    if (tipo === 'documento') return { cls: 'documento', icon: 'fa-file-medical' };
+    return { cls: 'sistema', icon: 'fa-info-circle' };
+  }
+
+  function renderNotificacoes(lista, containerId) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+
+    if (!lista || lista.length === 0) {
+      el.innerHTML = '<div class="notif-empty">Nenhuma notificação</div>';
+      return;
+    }
+
+    el.innerHTML = lista.map(n => {
+      const ic = iconeTipo(n.tipo);
+      return `
+        <div class="notif-item ${n.lida ? '' : 'nao-lida'}" onclick="marcarLida(${n.id})">
+          <div class="notif-icon ${ic.cls}">
+            <i class="fas ${ic.icon}"></i>
+          </div>
+          <div class="notif-body">
+            <p class="notif-titulo">${n.titulo}</p>
+            <p class="notif-msg">${n.mensagem}</p>
+            <p class="notif-tempo">${tempoRelativo(n.criado_em)}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function atualizarBadge(total) {
+    ['badgeNotifMobile', 'badgeNotifDesktop'].forEach(id => {
+      const badge = document.getElementById(id);
+      if (!badge) return;
+      if (total > 0) {
+        badge.innerText = total > 99 ? '99+' : total;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    });
+  }
+
+  async function carregarNotificacoes() {
+    if (!tokenNotif) return;
+    try {
+      const [resLista, resContar] = await Promise.all([
+        fetch('/api/notificacoes', { headers: { Authorization: `Bearer ${tokenNotif}` } }),
+        fetch('/api/notificacoes/contar', { headers: { Authorization: `Bearer ${tokenNotif}` } })
+      ]);
+
+      if (resLista.ok) {
+        const lista = await resLista.json();
+        renderNotificacoes(lista, 'listaNotifMobile');
+        renderNotificacoes(lista, 'listaNotifDesktop');
+      }
+      if (resContar.ok) {
+        const { total } = await resContar.json();
+        atualizarBadge(total);
+      }
+    } catch (err) {
+      console.error('Erro ao carregar notificações:', err);
+    }
+  }
+
+  async function marcarLida(id) {
+    try {
+      await fetch(`/api/notificacoes/${id}/lida`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${tokenNotif}` }
+      });
+      carregarNotificacoes();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function marcarTodasLidas() {
+    try {
+      await fetch('/api/notificacoes/marcar-todas-lidas', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${tokenNotif}` }
+      });
+      carregarNotificacoes();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function toggleDropdown(dropdownId) {
+  const dd = document.getElementById(dropdownId);
+  if (!dd) return;
+
+  const isOpen = dd.classList.contains('open');
+
+  // Fecha todos
+  document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('open'));
+
+  if (!isOpen) {
+    dd.classList.add('open');
+
+    // Carrega a lista
+    await carregarNotificacoes();
+
+    // Ao abrir, marca todas como lidas e zera a bolinha
+    try {
+      await fetch('/api/notificacoes/marcar-todas-lidas', {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${tokenNotif}` }
+      });
+      atualizarBadge(0); // some a bolinha na hora
+    } catch (err) {
+      console.error('Erro ao marcar todas como lidas:', err);
+    }
+  }
+}
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const btnMobile = document.getElementById('btnNotifMobile');
+    const btnDesktop = document.getElementById('btnNotifDesktop');
+
+    if (btnMobile) btnMobile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown('dropdownNotifMobile');
+    });
+    if (btnDesktop) btnDesktop.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleDropdown('dropdownNotifDesktop');
+    });
+
+    // Fecha ao clicar fora
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.notif-dropdown').forEach(d => d.classList.remove('open'));
+    });
+
+    // Carrega na entrada + polling a cada 30s
+    carregarNotificacoes();
+    setInterval(carregarNotificacoes, 30000);
+  });
+
     </script>
 </body>
 </html>

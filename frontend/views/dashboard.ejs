@@ -779,7 +779,7 @@
             .mobile-only { display: flex !important; }
 
             body {
-                padding-bottom: 88px; /* espaço para tab bar */
+                padding-bottom: 108px; /* espaço para tab bar flutuante */
             }
 
             /* ─── TOP BAR FIXA ─── */
@@ -974,20 +974,35 @@
                 border-top: 1px solid var(--border);
             }
 
-            /* ─── BOTTOM TAB BAR ─── */
+            /* ─── BOTTOM TAB BAR (flutuante, estilo "pill") ─── */
             .mobile-bottom-tabbar {
                 position: fixed;
-                bottom: 0; left: 0; right: 0;
+                bottom: calc(14px + env(safe-area-inset-bottom, 0));
+                left: 14px;
+                right: 14px;
                 z-index: 60;
-                height: 76px;
-                background: rgba(2, 12, 18, 0.97);
-                border-top: 1px solid var(--border);
-                backdrop-filter: blur(20px);
+                height: 70px;
+                background: rgba(4, 16, 24, 0.92);
+                border: 1px solid var(--border);
+                border-radius: 26px;
+                backdrop-filter: blur(24px);
+                -webkit-backdrop-filter: blur(24px);
                 display: flex;
                 align-items: center;
                 justify-content: space-around;
-                padding: 0 8px;
-                padding-bottom: env(safe-area-inset-bottom, 0);
+                padding: 0 6px;
+                box-shadow:
+                    0 12px 34px rgba(0,0,0,0.55),
+                    0 0 0 1px rgba(255,255,255,0.02) inset,
+                    0 0 24px rgba(52,211,153,0.08);
+                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+                transform: translateY(0);
+                opacity: 1;
+            }
+            /* Estado escondido: some suavemente para baixo enquanto o usuário rola a tela */
+            .mobile-bottom-tabbar.tabbar-hidden {
+                transform: translateY(140%);
+                opacity: 0;
             }
 
             .mobile-bottom-tabbar .tab-item {
@@ -1354,6 +1369,22 @@
   border-color: rgba(52,211,153,0.35);
 }
 
+/* Tremor do sino ao chegar uma notificação nova */
+@keyframes notifShake {
+    0%, 100% { transform: rotate(0deg); }
+    10%, 30%, 50%, 70% { transform: rotate(-15deg); }
+    20%, 40%, 60%, 80% { transform: rotate(15deg); }
+    90% { transform: rotate(-8deg); }
+}
+.notif-shake {
+    animation: notifShake 0.6s ease-in-out;
+    color: var(--emerald) !important;
+    border-color: rgba(52,211,153,0.4) !important;
+}
+.notif-shake i {
+    transform-origin: center 30%;
+}
+
 .notif-badge {
   position: absolute;
   top: -4px;
@@ -1510,6 +1541,70 @@
   text-align: center;
   color: rgba(148,163,184,0.45);
   font-size: 12px;
+}
+
+/* ─── Painel de Agendamentos (Kanban) — contraste por status ─── */
+.kanban-card {
+    position: relative;
+    border-radius: 16px;
+    padding-left: 18px !important;
+    border-width: 1px;
+    border-style: solid;
+    overflow: hidden;
+}
+.kanban-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 4px;
+}
+
+/* Confirmados — verde esmeralda (mesma cor usada em "confirmado" no resto da página) */
+.kanban-card-confirmado {
+    background: rgba(52,211,153,0.07);
+    border-color: rgba(52,211,153,0.28);
+}
+.kanban-card-confirmado::before { background: var(--emerald); box-shadow: 0 0 10px rgba(52,211,153,0.6); }
+
+/* Aguardando sinal — âmbar, mesma cor usada nos status "pendente" */
+.kanban-card-aguardando {
+    background: rgba(251,191,36,0.06);
+    border-color: rgba(251,191,36,0.25);
+}
+.kanban-card-aguardando::before { background: var(--amber); box-shadow: 0 0 10px rgba(251,191,36,0.55); }
+
+/* Finalizados — ciano, cor secundária de destaque já usada na marca e nos badges de terapia */
+.kanban-card-finalizado {
+    background: rgba(34,211,238,0.06);
+    border-color: rgba(34,211,238,0.25);
+}
+.kanban-card-finalizado::before { background: var(--cyan); box-shadow: 0 0 10px rgba(34,211,238,0.5); }
+
+/* Outros / Cancelados — vermelho suave, mesma cor do status "cancelado" */
+.kanban-card-outros {
+    background: rgba(248,113,113,0.06);
+    border-color: rgba(248,113,113,0.22);
+}
+.kanban-card-outros::before { background: #f87171; box-shadow: 0 0 10px rgba(248,113,113,0.5); }
+
+/* Aviso exibido quando uma coluna fica vazia por conter só agendamentos com data já passada */
+.kanban-aviso-vencido {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.03);
+    border: 1px dashed rgba(148,163,184,0.25);
+    border-radius: 14px;
+    padding: 14px;
+    color: rgba(148,163,184,0.55);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+.kanban-aviso-vencido i {
+    color: rgba(148,163,184,0.4);
+    font-size: 16px;
+    flex-shrink: 0;
 }
       </style>
 
@@ -2233,6 +2328,32 @@
             });
         })();
 
+        // ─── Tab bar flutuante: some durante o scroll, volta quando parar ───
+        (function () {
+            const tabbar = document.querySelector('.mobile-bottom-tabbar');
+            if (!tabbar) return;
+
+            // "main" é o elemento que realmente rola o conteúdo do dashboard
+            const scrollEl = document.querySelector('main');
+            let scrollTimer = null;
+
+            function esconderTabbar() {
+                tabbar.classList.add('tabbar-hidden');
+            }
+            function mostrarTabbar() {
+                tabbar.classList.remove('tabbar-hidden');
+            }
+            function aoRolar() {
+                esconderTabbar();
+                clearTimeout(scrollTimer);
+                scrollTimer = setTimeout(mostrarTabbar, 300); // tempo parado até reaparecer
+            }
+
+            if (scrollEl) scrollEl.addEventListener('scroll', aoRolar, { passive: true });
+            // fallback para o caso de o scroll acontecer na janela
+            window.addEventListener('scroll', aoRolar, { passive: true });
+        })();
+
         
   const tokenNotif = localStorage.getItem('token');
 
@@ -2276,6 +2397,20 @@
     }).join('');
   }
 
+  let totalNotifAnterior = 0;
+  let primeiraChecagemNotif = true;
+
+  function tremerSino() {
+    ['btnNotifMobile', 'btnNotifDesktop'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (!btn) return;
+      btn.classList.remove('notif-shake');
+      void btn.offsetWidth; // reinicia a animação mesmo se já tiver rodado antes
+      btn.classList.add('notif-shake');
+      setTimeout(() => btn.classList.remove('notif-shake'), 650);
+    });
+  }
+
   function atualizarBadge(total) {
     ['badgeNotifMobile', 'badgeNotifDesktop'].forEach(id => {
       const badge = document.getElementById(id);
@@ -2287,6 +2422,14 @@
         badge.classList.add('hidden');
       }
     });
+
+    // Treme o sino somente quando o total sobe (nova notificação chegou),
+    // nunca na primeira checagem ao carregar a página.
+    if (!primeiraChecagemNotif && total > totalNotifAnterior) {
+      tremerSino();
+    }
+    primeiraChecagemNotif = false;
+    totalNotifAnterior = total;
   }
 
   async function carregarNotificacoes() {
