@@ -1,236 +1,761 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <title>MedLM - Marketing</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    :root {
-      --emerald:   #34d399;
-      --emerald-d: #059669;
-      --cyan:      #22d3ee;
-      --amber:     #fbbf24;
-      --slate-bg:  #020c12;
-      --card-bg:   rgba(255,255,255,0.035);
-      --border:    rgba(52,211,153,0.15);
-    }
-    body {
-      background-color: var(--slate-bg);
-      background-image:
-        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(8,145,178,0.20) 0%, transparent 60%),
-        radial-gradient(ellipse 60% 50% at 90% 100%, rgba(5,150,105,0.18) 0%, transparent 60%);
-      color: #cbd5e1;
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      padding: 32px;
-    }
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      backdrop-filter: blur(6px);
-    }
-    .input-field {
-      background: rgba(2,12,18,0.5);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      color: #e2e8f0;
-      padding: 10px 14px;
-      width: 100%;
-    }
-    .input-field:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(52,211,153,0.15); }
-    .btn-primary {
-      background: linear-gradient(135deg, #0891b2, #059669);
-      color: #fff; font-weight: 700; padding: 12px 24px; border-radius: 10px;
-      transition: all .2s;
-    }
-    .btn-primary:hover { box-shadow: 0 0 20px rgba(52,211,153,0.35); }
-    .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
-    .badge { padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-    .badge-rascunho { background: rgba(148,163,184,0.15); color: #94a3b8; }
-    .badge-processando { background: rgba(251,191,36,0.15); color: var(--amber); }
-    .badge-concluida { background: rgba(52,211,153,0.15); color: var(--emerald); }
-    .badge-concluida_com_falhas { background: rgba(251,146,60,0.15); color: #fb923c; }
-    .badge-falhou { background: rgba(248,113,113,0.15); color: #f87171; }
-  </style>
-</head>
-<body>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketing | MedLM</title>
 
-  <div class="max-w-5xl mx-auto space-y-8">
-    <div>
-      <h1 class="text-3xl font-bold text-white font-display flex items-center gap-3">
-        <i class="fas fa-bullhorn text-emerald-400"></i> Marketing
-      </h1>
-      <p class="text-slate-400 mt-1">Envie lembretes e comunicados por email — para um paciente específico ou para toda a base.</p>
-    </div>
+    <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
 
-    <!-- ── Nova Campanha ── -->
-    <div class="card p-6 space-y-5">
-      <h2 class="text-lg font-semibold text-white">Nova campanha</h2>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="text-sm text-slate-400 mb-1 block">Título interno da campanha</label>
-          <input id="campoTitulo" class="input-field" placeholder="Ex: Aviso de feriado prolongado" />
-        </div>
-        <div>
-          <label class="text-sm text-slate-400 mb-1 block">Assunto do email</label>
-          <input id="campoAssunto" class="input-field" placeholder="Ex: Estaremos fechados nesta sexta" />
-        </div>
-      </div>
-
-      <div>
-        <label class="text-sm text-slate-400 mb-1 block">Mensagem (HTML permitido — use {{nome_paciente}} para personalizar)</label>
-        <textarea id="campoCorpo" rows="8" class="input-field" placeholder="Olá {{nome_paciente}}, ..."></textarea>
-      </div>
-
-      <div>
-        <label class="text-sm text-slate-400 mb-2 block">Público-alvo</label>
-        <div class="flex flex-wrap gap-3">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="tipoPublico" value="todos" checked class="accent-emerald-400"> Todos os pacientes
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="tipoPublico" value="filtro" class="accent-emerald-400"> Sem retorno há 90+ dias
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="tipoPublico" value="individual" class="accent-emerald-400"> Pacientes específicos
-          </label>
-        </div>
-        <div id="areaPacientesEspecificos" class="hidden mt-3">
-          <input id="campoBuscaPaciente" class="input-field" placeholder="Buscar paciente por nome (integrar com sua API de pacientes)..." />
-          <div id="listaPacientesSelecionados" class="flex flex-wrap gap-2 mt-2"></div>
-        </div>
-      </div>
-
-      <div class="flex items-center justify-between border-t border-white/5 pt-5">
-        <span id="contadorPublico" class="text-sm text-slate-400">
-          <i class="fas fa-users mr-1"></i> Calculando público-alvo...
-        </span>
-        <button id="btnEnviarCampanha" class="btn-primary">
-          <i class="fas fa-paper-plane mr-2"></i> Enviar campanha
-        </button>
-      </div>
-    </div>
-
-    <!-- ── Histórico ── -->
-    <div class="card p-6">
-      <h2 class="text-lg font-semibold text-white mb-4">Campanhas enviadas</h2>
-      <div id="listaCampanhas" class="space-y-3">
-        <p class="text-slate-500 text-sm">Carregando...</p>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const token = localStorage.getItem('token');
-    const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
-
-    let pacientesSelecionados = []; // [{id, nome}]
-
-    document.querySelectorAll('input[name="tipoPublico"]').forEach((radio) => {
-      radio.addEventListener('change', () => {
-        document.getElementById('areaPacientesEspecificos').classList.toggle('hidden', radio.value !== 'individual' || !radio.checked);
-        atualizarContadorPublico();
-      });
-    });
-
-    function tipoPublicoSelecionado() {
-      return document.querySelector('input[name="tipoPublico"]:checked').value;
-    }
-
-    async function atualizarContadorPublico() {
-      const tipoPublico = tipoPublicoSelecionado();
-      const el = document.getElementById('contadorPublico');
-      el.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Calculando público-alvo...';
-
-      const params = new URLSearchParams({ tipoPublico });
-      if (tipoPublico === 'individual') {
-        params.set('pacienteIds', JSON.stringify(pacientesSelecionados.map((p) => p.id)));
-      }
-      if (tipoPublico === 'filtro') {
-        params.set('filtro', JSON.stringify({ statusConsulta: 'sem_retorno_90d' }));
-      }
-
-      try {
-        const res = await fetch(`/api/marketing/publico-alvo?${params}`, { headers });
-        const data = await res.json();
-        el.innerHTML = `<i class="fas fa-users mr-1"></i> Esta campanha será enviada para <strong class="text-emerald-400">${data.total}</strong> paciente(s)`;
-      } catch (err) {
-        el.textContent = 'Não foi possível calcular o público-alvo.';
-      }
-    }
-
-    document.getElementById('btnEnviarCampanha').addEventListener('click', async () => {
-      const titulo = document.getElementById('campoTitulo').value.trim();
-      const assunto = document.getElementById('campoAssunto').value.trim();
-      const corpoHtml = document.getElementById('campoCorpo').value.trim();
-      const tipoPublico = tipoPublicoSelecionado();
-
-      if (!titulo || !assunto || !corpoHtml) {
-        alert('Preencha título, assunto e mensagem.');
-        return;
-      }
-      if (!confirm('Confirma o envio desta campanha? Essa ação não pode ser desfeita.')) return;
-
-      const opcoesPublico = {};
-      if (tipoPublico === 'individual') opcoesPublico.pacienteIds = pacientesSelecionados.map((p) => p.id);
-      if (tipoPublico === 'filtro') opcoesPublico.filtro = { statusConsulta: 'sem_retorno_90d' };
-
-      const btn = document.getElementById('btnEnviarCampanha');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Enviando...';
-
-      try {
-        const res = await fetch('/api/marketing/campanhas', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ titulo, assunto, corpoHtml, tipoPublico, opcoesPublico }),
-        });
-        if (!res.ok) throw new Error('Falha ao criar campanha');
-        carregarCampanhas();
-        document.getElementById('campoTitulo').value = '';
-        document.getElementById('campoAssunto').value = '';
-        document.getElementById('campoCorpo').value = '';
-      } catch (err) {
-        alert('Erro ao enviar campanha. Tente novamente.');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Enviar campanha';
-      }
-    });
-
-    async function carregarCampanhas() {
-      const el = document.getElementById('listaCampanhas');
-      try {
-        const res = await fetch('/api/marketing/campanhas', { headers });
-        const campanhas = await res.json();
-        if (!campanhas.length) {
-          el.innerHTML = '<p class="text-slate-500 text-sm">Nenhuma campanha enviada ainda.</p>';
-          return;
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        space: ['Space Grotesk', 'sans-serif']
+                    }
+                }
+            }
         }
-        el.innerHTML = campanhas.map((c) => `
-          <div class="flex items-center justify-between border-b border-white/5 pb-3">
-            <div>
-              <p class="text-white font-medium">${c.titulo}</p>
-              <p class="text-xs text-slate-500">${c.assunto} · ${new Date(c.criado_em).toLocaleString('pt-BR')}</p>
-            </div>
-            <div class="text-right">
-              <span class="badge badge-${c.status}">${c.status.replace(/_/g, ' ')}</span>
-              <p class="text-xs text-slate-500 mt-1">${c.total_enviados}/${c.total_destinatarios} enviados${c.total_falhas ? ` · ${c.total_falhas} falhas` : ''}</p>
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        el.innerHTML = '<p class="text-red-400 text-sm">Erro ao carregar campanhas.</p>';
-      }
-    }
+    </script>
 
-    atualizarContadorPublico();
-    carregarCampanhas();
-  </script>
+    <style>
+        body {
+            background-color: #020c12 !important;
+            background-image:
+                radial-gradient(circle at -10% -10%, rgba(34, 211, 238, 0.22) 0%, transparent 40%),
+                radial-gradient(circle at 110% 110%, rgba(52, 211, 153, 0.18) 0%, transparent 45%) !important;
+            background-attachment: fixed !important;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .cyber-panel {
+            background: #06131c !important;
+            border: 1px solid rgba(34, 211, 238, 0.18) !important;
+            box-shadow: 0 20px 40px -15px rgba(2, 12, 18, 0.9);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-card-premium {
+            background: #081924 !important;
+            border: 1px solid rgba(52, 211, 153, 0.15) !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cyber-card-premium:hover {
+            border-color: rgba(34, 211, 238, 0.4) !important;
+            box-shadow: 0 0 25px -5px rgba(34, 211, 238, 0.2);
+        }
+
+        .glow-line::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #34d399, #22d3ee, transparent);
+            z-index: 10;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #020c12; }
+        ::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.4); border-radius: 99px; }
+
+        /* ─── Template chip ─── */
+        .template-chip {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px; border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            cursor: pointer; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .template-chip:hover, .template-chip.active {
+            border-color: rgba(34,211,238,0.45);
+            color: #22d3ee;
+            background: rgba(34,211,238,0.06);
+        }
+
+        /* ─── Toolbar de formatação ─── */
+        .toolbar-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8; cursor: pointer; transition: all 0.15s;
+            font-size: 12px;
+        }
+        .toolbar-btn:hover { color: #34d399; border-color: rgba(52,211,153,0.35); }
+
+        /* ─── Preview do email (mockup) ─── */
+        .email-preview-frame {
+            background: #f4f4f5;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 6px solid #0b0b0d;
+        }
+        .email-preview-body {
+            background: #ffffff;
+            color: #1e293b;
+            padding: 22px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            line-height: 1.6;
+            min-height: 220px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .radio-audience {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .radio-audience:hover { border-color: rgba(52,211,153,0.3); }
+        .radio-audience.selected {
+            border-color: rgba(52,211,153,0.5);
+            background: rgba(52,211,153,0.06);
+        }
+
+        .badge-status {
+            padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+        }
+        .badge-rascunho { background: rgba(148,163,184,0.15); color: #94a3b8; }
+        .badge-processando { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .badge-concluida { background: rgba(52,211,153,0.15); color: #34d399; }
+        .badge-concluida_com_falhas { background: rgba(251,146,60,0.15); color: #fb923c; }
+        .badge-falhou { background: rgba(248,113,113,0.15); color: #f87171; }
+
+        /* ─── Mobile nav (mesmo padrão do equipe.html) ─── */
+        .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer { display: none; }
+
+        @media (max-width: 1023px) {
+            #sidebarMenu { display: none !important; }
+            main { padding-left: 0 !important; padding-top: 80px !important; padding-bottom: 110px !important; }
+            .mobile-topbar, .mobile-bottom-tabbar { display: flex !important; }
+            .mobile-topbar {
+                position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 64px;
+                background: rgba(2, 12, 18, 0.95);
+                border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+                backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                align-items: center; justify-content: space-between; padding: 0 16px;
+            }
+            .mobile-topbar .logo-wrap { display: flex; align-items: center; gap: 10px; }
+            .mobile-topbar .logo-icon {
+                width: 38px; height: 38px; border-radius: 12px;
+                background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+                box-shadow: 0 0 16px rgba(8,145,178,0.4);
+                display: flex; align-items: center; justify-content: center;
+                color: #fff; font-weight: 800; font-size: 15px; font-family: 'Space Grotesk', sans-serif;
+            }
+            .mobile-topbar .logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 18px; color: #e2e8f0; }
+            .mobile-topbar .logo-text span { color: #34d399; text-shadow: 0 0 10px rgba(52,211,153,0.5); }
+            .mobile-topbar .actions { display: flex; align-items: center; gap: 8px; }
+            .mobile-topbar .icon-btn {
+                width: 40px; height: 40px; border-radius: 12px;
+                background: rgba(255,255,255,0.04); border: 1px solid rgba(52,211,153,0.15);
+                color: rgba(148,163,184,0.7); display: flex; align-items: center; justify-content: center;
+                cursor: pointer; transition: all 0.2s;
+            }
+            .mobile-topbar .icon-btn:active { color: #34d399; transform: scale(0.94); }
+
+            .mobile-drawer-overlay {
+                display: block; position: fixed; inset: 0;
+                background: rgba(2,12,18,0.7); backdrop-filter: blur(6px);
+                z-index: 70; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            }
+            .mobile-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+            .mobile-drawer {
+                display: flex; flex-direction: column; position: fixed;
+                top: 0; left: 0; bottom: 0; width: min(300px, 85vw);
+                background: rgba(4, 16, 24, 0.98);
+                border-right: 1px solid rgba(52,211,153,0.18);
+                z-index: 80; transform: translateX(-105%);
+                transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); padding: 0;
+            }
+            .mobile-drawer.open { transform: translateX(0); }
+            .mobile-drawer .drawer-header {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 20px 18px; border-bottom: 1px solid rgba(52,211,153,0.12);
+            }
+            .mobile-drawer .drawer-logo { display: flex; align-items: center; gap: 12px; }
+            .mobile-drawer .drawer-logo .logo-icon {
+                width: 42px; height: 42px; border-radius: 12px;
+                background: linear-gradient(135deg, #0891b2, #059669);
+                display: flex; align-items: center; justify-content: center;
+                color: #fff; font-weight: 800; font-size: 16px;
+            }
+            .mobile-drawer .drawer-logo span { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; color: #e2e8f0; }
+            .mobile-drawer .drawer-logo span b { color: #34d399; }
+            .mobile-drawer .close-drawer {
+                width: 36px; height: 36px; border-radius: 10px;
+                background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+                color: rgba(148,163,184,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer;
+            }
+            .mobile-drawer nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+            .mobile-drawer .nav-item {
+                display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px;
+                color: rgba(148,163,184,0.7); font-weight: 600; font-size: 14px;
+                text-decoration: none; transition: all 0.2s; border: 1px solid transparent;
+            }
+            .mobile-drawer .nav-item i { width: 22px; text-align: center; font-size: 16px; }
+            .mobile-drawer .nav-item.active {
+                background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.2));
+                border-color: rgba(52,211,153,0.35); color: #34d399;
+            }
+            .mobile-drawer .drawer-footer { padding: 12px; border-top: 1px solid rgba(52,211,153,0.1); }
+
+            .mobile-bottom-tabbar {
+                position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0));
+                left: 14px; right: 14px; z-index: 60; height: 70px;
+                background: rgba(4, 16, 24, 0.92); border: 1px solid rgba(52, 211, 153, 0.15);
+                border-radius: 26px; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+                align-items: center; justify-content: space-around; padding: 0 6px;
+                box-shadow: 0 12px 34px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02) inset, 0 0 24px rgba(52,211,153,0.08);
+                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+                transform: translateY(0); opacity: 1;
+            }
+            .mobile-bottom-tabbar.tabbar-hidden { transform: translateY(140%); opacity: 0; }
+            .mobile-bottom-tabbar .tab-item {
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                gap: 4px; flex: 1; height: 100%; color: rgba(148,163,184,0.55);
+                font-size: 11px; font-weight: 700; text-decoration: none; transition: all 0.2s; position: relative;
+            }
+            .mobile-bottom-tabbar .tab-item i { font-size: 22px; margin-bottom: 2px; }
+            .mobile-bottom-tabbar .tab-item.active { color: #34d399; }
+            .mobile-bottom-tabbar .tab-item.active::before {
+                content: ''; position: absolute; top: 6px; width: 28px; height: 3px;
+                background: #34d399; border-radius: 99px; box-shadow: 0 0 10px #34d399;
+            }
+            .mobile-bottom-tabbar .tab-item:active { color: #22d3ee; transform: scale(0.95); }
+        }
+
+        @media (min-width: 1024px) {
+            #sidebarMenu:hover { width: 16rem; }
+            .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer, .mobile-drawer-overlay { display: none !important; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased flex overflow-x-hidden">
+
+    <!-- ─── Mobile Top Bar ─── -->
+    <div class="mobile-topbar">
+        <div class="logo-wrap">
+            <button class="icon-btn" id="btnOpenDrawer" aria-label="Abrir menu" type="button"><i class="fas fa-bars"></i></button>
+            <div class="logo-icon">M</div>
+            <span class="logo-text">Med<span>LM</span></span>
+        </div>
+        <div class="actions">
+            <a href="/dashboard" class="icon-btn" title="Dashboard" style="text-decoration:none"><i class="fas fa-home"></i></a>
+        </div>
+    </div>
+
+    <!-- ─── Mobile Drawer ─── -->
+    <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
+    <div class="mobile-drawer" id="mobileDrawer">
+        <div class="drawer-header">
+            <div class="drawer-logo"><div class="logo-icon">M</div><span>Med<b>LM</b></span></div>
+            <button class="close-drawer" id="btnCloseDrawer" aria-label="Fechar menu" type="button"><i class="fas fa-times"></i></button>
+        </div>
+        <nav>
+            <a href="/dashboard" class="nav-item"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="/pacientes" class="nav-item"><i class="fas fa-user-injured"></i> Pacientes</a>
+            <a href="/financeiro" class="nav-item"><i class="fas fa-hand-holding-usd"></i> Financeiro</a>
+            <a href="/agendamento" class="nav-item"><i class="fas fa-calendar-check"></i> Agendamento</a>
+            <a href="/equipe" class="nav-item"><i class="fas fa-users-cog"></i> Minha Equipe</a>
+            <a href="/marketing" class="nav-item active"><i class="fas fa-bullhorn"></i> Marketing</a>
+            <a href="/dashboard/configuracoes" class="nav-item"><i class="fas fa-cogs"></i> Configurações</a>
+            <a href="javascript:void(0)" onclick="handleLogout(event)" class="nav-item" style="color:rgba(248,113,113,0.75)"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </nav>
+        <div class="drawer-footer">
+            <button type="button" id="theme-toggle-btn-mobile" class="nav-item" style="width:100%;background:transparent;border:none;cursor:pointer;text-align:left">
+                <i class="fas fa-moon"></i> Tema
+            </button>
+        </div>
+    </div>
+
+    <!-- ─── Mobile Bottom Tab Bar ─── -->
+    <nav class="mobile-bottom-tabbar">
+        <a href="/dashboard" class="tab-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/pacientes" class="tab-item"><i class="fas fa-user-injured"></i><span>Pacientes</span></a>
+        <a href="/agendamento" class="tab-item"><i class="fas fa-calendar-check"></i><span>Agenda</span></a>
+        <a href="/marketing" class="tab-item active"><i class="fas fa-bullhorn"></i><span>Marketing</span></a>
+        <a href="/dashboard/configuracoes" class="tab-item"><i class="fas fa-user-cog"></i><span>Perfil</span></a>
+    </nav>
+
+    <div class="flex w-full min-h-screen relative group">
+
+        <!-- Sidebar -->
+        <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden bg-slate-950/95 group flex flex-col justify-between cyber-panel border-r border-white/5" id="sidebarMenu">
+            <div class="flex flex-col">
+                <div class="h-24 flex items-center justify-between px-6 logo-block overflow-hidden">
+                    <div class="flex items-center">
+                        <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg bg-gradient-to-br from-cyan-500 to-emerald-500 shadow-lg shadow-cyan-500/20">M</div>
+                        <span class="logo-text-brand ml-4 font-bold text-xl hidden group-hover:inline-block transition-all duration-300 whitespace-nowrap tracking-tight text-white font-['Space_Grotesk']">
+                            Med<span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400 font-extrabold">LM</span>
+                        </span>
+                    </div>
+                </div>
+
+                <nav class="px-3 pt-6 space-y-1.5">
+                    <a href="/dashboard" class="nav-link flex items-center p-3.5 text-slate-400 hover:text-white hover:bg-white/[0.03] rounded-xl transition text-sm font-semibold tracking-wide">
+                        <i class="fas fa-chart-pie w-6 text-lg text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0"></i>
+                        <span class="ml-4 hidden group-hover:inline-block whitespace-nowrap transition-all duration-300">Dashboard</span>
+                    </a>
+                    <a href="/pacientes" class="nav-link flex items-center p-3.5 text-slate-400 hover:text-white hover:bg-white/[0.03] rounded-xl transition text-sm font-semibold tracking-wide">
+                        <i class="fas fa-user-injured w-6 text-lg text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0"></i>
+                        <span class="ml-4 hidden group-hover:inline-block whitespace-nowrap transition-all duration-300">Pacientes</span>
+                    </a>
+                    <a href="/financeiro" class="nav-link flex items-center p-3.5 text-slate-400 hover:text-white hover:bg-white/[0.03] rounded-xl transition text-sm font-semibold tracking-wide">
+                        <i class="fas fa-hand-holding-usd w-6 text-lg text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0"></i>
+                        <span class="ml-4 hidden group-hover:inline-block whitespace-nowrap transition-all duration-300">Financeiro</span>
+                    </a>
+                    <a href="/agendamento" class="nav-link flex items-center p-3.5 text-slate-400 hover:text-white hover:bg-white/[0.03] rounded-xl transition text-sm font-semibold tracking-wide">
+                        <i class="fas fa-calendar-alt w-6 text-lg text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0"></i>
+                        <span class="ml-4 hidden group-hover:inline-block whitespace-nowrap transition-all duration-300">Agendar Atendimento</span>
+                    </a>
+                    <a href="/equipe" class="nav-link flex items-center p-3.5 text-slate-400 hover:text-white hover:bg-white/[0.03] rounded-xl transition text-sm font-semibold tracking-wide">
+                        <i class="fas fa-users-cog w-6 text-lg text-slate-500 group-hover:text-cyan-400 transition-colors flex-shrink-0"></i>
+                        <span class="ml-4 hidden group-hover:inline-block whitespace-nowrap transition-all duration-300">Minha Equipe</span>
+                    </a>
+                    <a href="/marketing" class="nav-link flex items-center p-3.5 bg-gradient-to-r from-cyan-500/15 to-emerald-500/5 border border-cyan-500/30 text-cyan-400 rounded-xl font-bold tracking-wide transition">
+                        <i class="fas fa-bullhorn w-6 text-lg text-cyan-400 flex-shrink-0"></i>
+                        <span class="ml-4 hidden group-hover:inline-block whitespace-nowrap transition-all duration-300">Marketing</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="pt-4 pb-4 border-t border-white/5 space-y-3 bg-slate-950/20">
+                <div class="px-3">
+                    <a href="javascript:void(0)" onclick="handleLogout(event)" class="flex items-center p-3.5 rounded-xl bg-red-500/5 hover:bg-red-500/10 border border-red-500/20 text-red-400 hover:text-red-300 font-black transition text-xs uppercase tracking-widest no-underline">
+                        <i class="fas fa-sign-out-alt w-6 text-lg flex-shrink-0"></i>
+                        <span class="ml-4 hidden group-hover:inline-block whitespace-nowrap">Encerrar Sessão</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 min-h-screen pl-20 lg:group-hover:pl-64 flex flex-col transition-all duration-300 w-full">
+            <div class="container-fluid p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-[1600px] mx-auto w-full">
+
+                <!-- Cabeçalho -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div class="min-w-0">
+                        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2 sm:gap-3 font-['Space_Grotesk']">
+                            <i class="fas fa-bullhorn text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)] shrink-0"></i>
+                            <span class="truncate">Marketing</span>
+                        </h1>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">
+                            Envie lembretes e campanhas por email — individuais ou em massa.
+                        </p>
+                    </div>
+                    <button onclick="document.getElementById('painelHistorico').scrollIntoView({behavior:'smooth'})" class="w-full sm:w-auto shrink-0 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-slate-300 font-bold py-3 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                        <i class="fas fa-history"></i> Ver histórico
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 sm:gap-6">
+
+                    <!-- ═══ COLUNA ESQUERDA: CONSTRUTOR ═══ -->
+                    <div class="xl:col-span-3 space-y-5 sm:space-y-6">
+
+                        <!-- Templates rápidos -->
+                        <div class="cyber-panel rounded-2xl p-4 sm:p-5">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                <i class="fas fa-bolt text-amber-400 mr-1"></i> Começar com um modelo
+                            </p>
+                            <div class="flex gap-2.5 overflow-x-auto pb-1">
+                                <div class="template-chip" data-template="lembrete"><i class="fas fa-calendar-check"></i> Lembrete de consulta</div>
+                                <div class="template-chip" data-template="feriado"><i class="fas fa-store-slash"></i> Feriado / Recesso</div>
+                                <div class="template-chip" data-template="promocao"><i class="fas fa-percent"></i> Promoção</div>
+                                <div class="template-chip" data-template="aniversario"><i class="fas fa-birthday-cake"></i> Aniversário</div>
+                                <div class="template-chip" data-template="retorno"><i class="fas fa-user-clock"></i> Convite de retorno</div>
+                                <div class="template-chip" data-template=""><i class="fas fa-file"></i> Em branco</div>
+                            </div>
+                        </div>
+
+                        <!-- Construtor -->
+                        <div class="cyber-panel glow-line rounded-2xl p-4 sm:p-6 space-y-5">
+                            <h2 class="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+                                <i class="fas fa-pen-nib text-emerald-400"></i> Nova campanha
+                            </h2>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Título interno</label>
+                                    <input id="campoTitulo" type="text" placeholder="Ex: Aviso de feriado prolongado"
+                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                                        Assunto do email <span id="contadorAssunto" class="text-slate-600 normal-case font-medium">0/60</span>
+                                    </label>
+                                    <input id="campoAssunto" type="text" maxlength="60" placeholder="Ex: Estaremos fechados nesta sexta"
+                                        oninput="document.getElementById('contadorAssunto').textContent = this.value.length + '/60'"
+                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-semibold">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                                    Mensagem <span class="text-slate-600 normal-case font-medium">— use {{nome_paciente}} para personalizar</span>
+                                </label>
+                                <div class="flex items-center gap-1.5 mb-2">
+                                    <button type="button" class="toolbar-btn" onclick="formatarTexto('bold')" title="Negrito"><i class="fas fa-bold"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="formatarTexto('italic')" title="Itálico"><i class="fas fa-italic"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="formatarTexto('insertUnorderedList')" title="Lista"><i class="fas fa-list-ul"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="inserirLink()" title="Link"><i class="fas fa-link"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="inserirVariavel('{{nome_paciente}}')" title="Inserir nome do paciente"><i class="fas fa-user-tag"></i></button>
+                                    <span class="text-[10px] text-slate-600 ml-2 hidden sm:inline">Selecione o texto e aplique a formatação</span>
+                                </div>
+                                <div id="campoCorpo" contenteditable="true"
+                                    class="w-full min-h-[180px] p-4 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-medium leading-relaxed"
+                                    oninput="atualizarPreview()"
+                                    data-placeholder="Olá {{nome_paciente}}, ..."></div>
+                            </div>
+
+                            <!-- Agendamento de envio -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="flex items-center gap-3 cyber-card-premium rounded-xl p-3.5">
+                                    <input type="checkbox" id="chkAgendar" class="w-4 h-4 accent-cyan-400" onchange="document.getElementById('campoDataAgendada').classList.toggle('hidden', !this.checked)">
+                                    <label for="chkAgendar" class="text-xs font-bold text-slate-300 cursor-pointer flex-1">Agendar para depois</label>
+                                </div>
+                                <input id="campoDataAgendada" type="datetime-local" class="hidden w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition text-xs font-semibold">
+                            </div>
+                            <p id="avisoAgendamento" class="hidden text-[10px] text-amber-400 font-semibold -mt-2">
+                                <i class="fas fa-triangle-exclamation mr-1"></i> Agendamento de envio para data futura ainda não está disponível — a campanha será enviada assim que você confirmar.
+                            </p>
+
+                            <!-- Público-alvo -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Público-alvo</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <label class="radio-audience selected">
+                                        <input type="radio" name="tipoPublico" value="todos" checked class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Todos os pacientes</strong><span class="text-slate-500 text-[10px]">Toda a base ativa</span></span>
+                                    </label>
+                                    <label class="radio-audience">
+                                        <input type="radio" name="tipoPublico" value="filtro" data-filtro="sem_retorno_90d" class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Sem retorno há 90+ dias</strong><span class="text-slate-500 text-[10px]">Reengajamento</span></span>
+                                    </label>
+                                    <label class="radio-audience">
+                                        <input type="radio" name="tipoPublico" value="filtro" data-filtro="aniversariantes_mes" class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Aniversariantes do mês</strong><span class="text-slate-500 text-[10px]">Data de nascimento</span></span>
+                                    </label>
+                                    <label class="radio-audience">
+                                        <input type="radio" name="tipoPublico" value="individual" class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Pacientes específicos</strong><span class="text-slate-500 text-[10px]">Escolha manual</span></span>
+                                    </label>
+                                </div>
+
+                                <div id="areaPacientesEspecificos" class="hidden mt-3 space-y-2">
+                                    <div class="relative">
+                                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+                                        <input id="campoBuscaPaciente" type="text" placeholder="Buscar paciente por nome..."
+                                            class="w-full pl-9 pr-3 py-2.5 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs">
+                                    </div>
+                                    <div id="listaPacientesSelecionados" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ação -->
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-white/5 pt-5">
+                                <span id="contadorPublico" class="text-xs text-slate-400 font-semibold">
+                                    <i class="fas fa-users mr-1 text-cyan-400"></i> Calculando público-alvo...
+                                </span>
+                                <div class="flex gap-2.5">
+                                    <button id="btnSalvarRascunho" class="bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-slate-300 font-bold py-3 px-4 rounded-xl transition text-xs uppercase tracking-wider whitespace-nowrap">
+                                        <i class="fas fa-save mr-1"></i> Rascunho
+                                    </button>
+                                    <button id="btnEnviarCampanha" class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg shadow-cyan-950/60 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                                        <i class="fas fa-paper-plane"></i> Enviar campanha
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══ COLUNA DIREITA: PREVIEW ═══ -->
+                    <div class="xl:col-span-2 space-y-5 sm:space-y-6">
+                        <div class="cyber-panel rounded-2xl p-4 sm:p-5 xl:sticky xl:top-6">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                <i class="fas fa-eye text-cyan-400 mr-1"></i> Preview do email
+                            </p>
+                            <div class="email-preview-frame">
+                                <div class="bg-[#e2e2e5] px-4 py-2 flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                                </div>
+                                <div class="email-preview-body">
+                                    <p class="text-[11px] text-slate-400 mb-1">De: <strong id="previewRemetente" class="text-slate-600">Sua Clínica</strong></p>
+                                    <p class="text-[11px] text-slate-400 mb-3 pb-3 border-b border-slate-200">Assunto: <strong id="previewAssunto" class="text-slate-800">(sem assunto)</strong></p>
+                                    <div id="previewCorpo">Olá <strong>Maria</strong>, ...</div>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">
+                                <i class="fas fa-circle-info mr-1"></i> O nome real do paciente substitui {{nome_paciente}} automaticamente no envio.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ HISTÓRICO ═══ -->
+                <div id="painelHistorico" class="cyber-panel glow-line rounded-2xl overflow-hidden">
+                    <div class="p-4 sm:p-5 border-b border-white/5 flex items-center justify-between">
+                        <h2 class="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fas fa-clock-rotate-left text-cyan-400"></i> Campanhas enviadas
+                        </h2>
+                        <button onclick="carregarCampanhas()" class="toolbar-btn" title="Atualizar"><i class="fas fa-rotate"></i></button>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="min-w-full divide-y divide-white/5">
+                            <thead>
+                                <tr class="bg-[#030e17] text-cyan-400 uppercase text-[10px] font-black tracking-widest border-b border-white/5">
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Campanha</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Público</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Status</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Progresso</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaCampanhas" class="divide-y divide-white/5 text-xs text-slate-300 font-medium">
+                                <tr><td colspan="5" class="py-6 px-6 text-center text-slate-500">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+
+        // ─── Templates prontos ───
+        const TEMPLATES = {
+            lembrete: {
+                assunto: 'Lembrete: sua consulta está chegando',
+                corpo: 'Olá {{nome_paciente}}, <br><br>Passando para lembrar da sua consulta agendada. Qualquer imprevisto, entre em contato conosco.<br><br>Até breve!'
+            },
+            feriado: {
+                assunto: 'Aviso: horário especial de atendimento',
+                corpo: 'Olá {{nome_paciente}}, <br><br>Informamos que nossa clínica estará com horário especial de atendimento no próximo feriado. Consulte a recepção para reagendar caso necessário.<br><br>Obrigado pela compreensão.'
+            },
+            promocao: {
+                assunto: 'Uma novidade especial para você',
+                corpo: 'Olá {{nome_paciente}}, <br><br>Preparamos uma condição especial para nossos pacientes este mês. Entre em contato para saber mais!'
+            },
+            aniversario: {
+                assunto: 'Feliz aniversário! 🎉',
+                corpo: 'Olá {{nome_paciente}}, <br><br>Toda a nossa equipe deseja um feliz aniversário! Que seu novo ciclo seja repleto de saúde e conquistas.'
+            },
+            retorno: {
+                assunto: 'Sentimos sua falta por aqui',
+                corpo: 'Olá {{nome_paciente}}, <br><br>Notamos que faz um tempo desde sua última consulta. Que tal agendar um retorno para dar continuidade ao seu cuidado?'
+            }
+        };
+
+        document.querySelectorAll('.template-chip').forEach((chip) => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.template-chip').forEach((c) => c.classList.remove('active'));
+                chip.classList.add('active');
+                const key = chip.dataset.template;
+                const t = TEMPLATES[key];
+                if (t) {
+                    document.getElementById('campoAssunto').value = t.assunto;
+                    document.getElementById('campoAssunto').dispatchEvent(new Event('input'));
+                    document.getElementById('campoCorpo').innerHTML = t.corpo;
+                } else {
+                    document.getElementById('campoAssunto').value = '';
+                    document.getElementById('campoCorpo').innerHTML = '';
+                }
+                atualizarPreview();
+            });
+        });
+
+        function formatarTexto(comando) { document.execCommand(comando, false, null); document.getElementById('campoCorpo').focus(); }
+        function inserirLink() {
+            const url = prompt('Cole o link (https://...)');
+            if (url) document.execCommand('createLink', false, url);
+        }
+        function inserirVariavel(v) {
+            document.getElementById('campoCorpo').focus();
+            document.execCommand('insertText', false, v);
+            atualizarPreview();
+        }
+
+        function atualizarPreview() {
+            const corpo = document.getElementById('campoCorpo').innerHTML || '<span style="color:#94a3b8">Comece a escrever sua mensagem...</span>';
+            const assunto = document.getElementById('campoAssunto').value || '(sem assunto)';
+            document.getElementById('previewCorpo').innerHTML = corpo.replace(/{{\s*nome_paciente\s*}}/g, '<strong>Maria</strong>');
+            document.getElementById('previewAssunto').textContent = assunto;
+        }
+        document.getElementById('campoAssunto').addEventListener('input', atualizarPreview);
+
+        // ─── Público-alvo ───
+        document.querySelectorAll('input[name="tipoPublico"]').forEach((radio) => {
+            radio.addEventListener('change', () => {
+                document.querySelectorAll('.radio-audience').forEach((el) => el.classList.remove('selected'));
+                radio.closest('.radio-audience').classList.add('selected');
+                document.getElementById('areaPacientesEspecificos').classList.toggle('hidden', radio.value !== 'individual');
+                atualizarContadorPublico();
+            });
+        });
+
+        function opcoesPublicoAtuais() {
+            const radio = document.querySelector('input[name="tipoPublico"]:checked');
+            const tipoPublico = radio.value;
+            const opcoes = {};
+            if (tipoPublico === 'filtro') opcoes.filtro = { statusConsulta: radio.dataset.filtro };
+            if (tipoPublico === 'individual') opcoes.pacienteIds = window.pacientesSelecionados?.map((p) => p.id) || [];
+            return { tipoPublico, opcoes };
+        }
+
+        async function atualizarContadorPublico() {
+            const { tipoPublico, opcoes } = opcoesPublicoAtuais();
+            const el = document.getElementById('contadorPublico');
+            el.innerHTML = '<i class="fas fa-spinner fa-spin mr-1 text-cyan-400"></i> Calculando público-alvo...';
+            const params = new URLSearchParams({ tipoPublico });
+            if (opcoes.filtro) params.set('filtro', JSON.stringify(opcoes.filtro));
+            if (opcoes.pacienteIds) params.set('pacienteIds', JSON.stringify(opcoes.pacienteIds));
+            try {
+                const res = await fetch(`/api/marketing/publico-alvo?${params}`, { headers });
+                const data = await res.json();
+                el.innerHTML = `<i class="fas fa-users mr-1 text-cyan-400"></i> Enviando para <strong class="text-emerald-400">${data.total}</strong> paciente(s)`;
+            } catch (err) {
+                el.textContent = 'Não foi possível calcular o público-alvo.';
+            }
+        }
+
+        // ─── Envio ───
+        document.getElementById('btnEnviarCampanha').addEventListener('click', () => enviarCampanha(false));
+        document.getElementById('btnSalvarRascunho').addEventListener('click', () => alert('Salvar como rascunho ainda não está disponível nesta versão — em breve!'));
+
+        async function enviarCampanha() {
+            const titulo = document.getElementById('campoTitulo').value.trim();
+            const assunto = document.getElementById('campoAssunto').value.trim();
+            const corpoHtml = document.getElementById('campoCorpo').innerHTML.trim();
+            const { tipoPublico, opcoes } = opcoesPublicoAtuais();
+
+            if (!titulo || !assunto || !corpoHtml) { alert('Preencha título, assunto e mensagem.'); return; }
+            if (!confirm('Confirma o envio desta campanha? Essa ação não pode ser desfeita.')) return;
+
+            const btn = document.getElementById('btnEnviarCampanha');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            try {
+                const res = await fetch('/api/marketing/campanhas', {
+                    method: 'POST', headers,
+                    body: JSON.stringify({ titulo, assunto, corpoHtml, tipoPublico, opcoesPublico: opcoes })
+                });
+                if (!res.ok) throw new Error('Falha ao criar campanha');
+                carregarCampanhas();
+                document.getElementById('campoTitulo').value = '';
+                document.getElementById('campoAssunto').value = '';
+                document.getElementById('campoCorpo').innerHTML = '';
+                atualizarPreview();
+            } catch (err) {
+                alert('Erro ao enviar campanha. Tente novamente.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar campanha';
+            }
+        }
+
+        // ─── Histórico ───
+        async function carregarCampanhas() {
+            const el = document.getElementById('listaCampanhas');
+            try {
+                const res = await fetch('/api/marketing/campanhas', { headers });
+                const campanhas = await res.json();
+                if (!campanhas.length) {
+                    el.innerHTML = '<tr><td colspan="5" class="py-6 px-6 text-center text-slate-500">Nenhuma campanha enviada ainda.</td></tr>';
+                    return;
+                }
+                el.innerHTML = campanhas.map((c) => {
+                    const pct = c.total_destinatarios ? Math.round((c.total_enviados / c.total_destinatarios) * 100) : 0;
+                    return `
+                    <tr>
+                        <td class="py-3.5 px-4 sm:px-6">
+                            <span class="block text-slate-200 font-bold">${c.titulo}</span>
+                            <span class="text-[10px] text-slate-500">${c.assunto}</span>
+                        </td>
+                        <td class="py-3.5 px-4 sm:px-6 text-slate-400">${c.tipo_publico}</td>
+                        <td class="py-3.5 px-4 sm:px-6"><span class="badge-status badge-${c.status}">${c.status.replace(/_/g, ' ')}</span></td>
+                        <td class="py-3.5 px-4 sm:px-6">
+                            <div class="flex items-center gap-2">
+                                <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                                    <div class="h-full bg-emerald-400" style="width:${pct}%"></div>
+                                </div>
+                                <span class="text-[10px] text-slate-500">${c.total_enviados}/${c.total_destinatarios}</span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 sm:px-6 text-slate-500 whitespace-nowrap">${new Date(c.criado_em).toLocaleString('pt-BR')}</td>
+                    </tr>`;
+                }).join('');
+            } catch (err) {
+                el.innerHTML = '<tr><td colspan="5" class="py-6 px-6 text-center text-red-400">Erro ao carregar campanhas.</td></tr>';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            atualizarContadorPublico();
+            carregarCampanhas();
+            atualizarPreview();
+        });
+    </script>
+
+    <!-- Mobile drawer + tabbar scroll hide (mesmo padrão do equipe.html) -->
+    <script>
+        (function () {
+            const btnOpen = document.getElementById('btnOpenDrawer');
+            const btnClose = document.getElementById('btnCloseDrawer');
+            const drawer = document.getElementById('mobileDrawer');
+            const overlay = document.getElementById('drawerOverlay');
+            function openDrawer() { if (!drawer) return; drawer.classList.add('open'); if (overlay) overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+            function closeDrawer() { if (!drawer) return; drawer.classList.remove('open'); if (overlay) overlay.classList.remove('open'); document.body.style.overflow = ''; }
+            if (btnOpen) btnOpen.addEventListener('click', openDrawer);
+            if (btnClose) btnClose.addEventListener('click', closeDrawer);
+            if (overlay) overlay.addEventListener('click', closeDrawer);
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
+        })();
+
+        (function () {
+            const tabbar = document.querySelector('.mobile-bottom-tabbar');
+            if (!tabbar) return;
+            const scrollEl = document.querySelector('main');
+            let scrollTimer = null;
+            function esconderTabbar() { tabbar.classList.add('tabbar-hidden'); }
+            function mostrarTabbar() { tabbar.classList.remove('tabbar-hidden'); }
+            function aoRolar() { esconderTabbar(); clearTimeout(scrollTimer); scrollTimer = setTimeout(mostrarTabbar, 300); }
+            if (scrollEl) scrollEl.addEventListener('scroll', aoRolar, { passive: true });
+            window.addEventListener('scroll', aoRolar, { passive: true });
+        })();
+    </script>
+
+    <script src="../ScriptGlobal/FuncDataHora.js"></script>
+    <script src="../ScriptGlobal/DarkMode.js"></script>
+    <script src="../ScriptGlobal/verifiLog.js"></script>
+    <script src="../ScriptGlobal/logout.js"></script>
 </body>
 </html>

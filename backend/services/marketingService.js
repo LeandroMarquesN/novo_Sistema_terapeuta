@@ -45,6 +45,17 @@ exports.listarPublicoAlvo = async (clinicaId, tipoPublico, opcoes = {}) => {
     return rows;
   }
 
+  if (tipoPublico === 'filtro' && opcoes.filtro?.statusConsulta === 'aniversariantes_mes') {
+    const [rows] = await db.query(
+      `SELECT id, nome, email FROM pacientes
+       WHERE clinica_id = ? AND email IS NOT NULL AND email <> '' AND aceita_marketing = 1
+         AND data_nascimento IS NOT NULL
+         AND MONTH(data_nascimento) = MONTH(CURDATE())`,
+      [clinicaId]
+    );
+    return rows;
+  }
+
   // 'todos' (default)
   const [rows] = await db.query(
     `SELECT id, nome, email FROM pacientes
