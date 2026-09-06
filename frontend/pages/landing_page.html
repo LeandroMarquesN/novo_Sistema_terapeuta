@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedLM | Gestão clínica inteligente</title>
+  <meta name="description" content="Agenda, prontuário, portal do paciente e financeiro avançado em uma plataforma multi-clínica. Programa Fundadores com 3 meses grátis.">
+  <link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #020c12;
+      --emerald: #34d399;
+      --emerald-d: #059669;
+      --cyan: #22d3ee;
+      --blue: #3b82f6;
+      --border: rgba(52, 211, 153, 0.18);
+      --card: rgba(255, 255, 255, 0.03);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .font-display {
+      font-family: 'Space Grotesk', 'Inter', sans-serif;
+    }
+
+    /* ── Fundo dinâmico ── */
+    .dynamic-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% -10%, rgba(8, 145, 178, 0.28), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 90% 20%, rgba(5, 150, 105, 0.22), transparent 50%),
+        radial-gradient(ellipse 50% 50% at 50% 100%, rgba(59, 130, 246, 0.12), transparent 55%),
+        linear-gradient(180deg, #020617 0%, #04151c 40%, #06251f 70%, #020c12 100%);
+      background-size: 100% 100%, 100% 100%, 100% 100%, 200% 200%;
+      animation: bgShift 22s ease-in-out infinite alternate;
+    }
+    @keyframes bgShift {
+      from { background-position: 0% 0%, 100% 0%, 50% 100%, 0% 0%; }
+      to   { background-position: 10% 20%, 80% 30%, 40% 80%, 100% 50%; }
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.4;
+      will-change: transform;
+    }
+    .orb-1 {
+      width: min(480px, 70vw); height: min(480px, 70vw);
+      background: #34d399;
+      top: -12%; left: -8%;
+      animation: floatA 16s ease-in-out infinite alternate;
+    }
+    .orb-2 {
+      width: min(400px, 60vw); height: min(400px, 60vw);
+      background: #22d3ee;
+      bottom: 5%; right: -10%;
+      animation: floatB 18s ease-in-out infinite alternate;
+      opacity: 0.32;
+    }
+    .orb-3 {
+      width: min(320px, 50vw); height: min(320px, 50vw);
+      background: #3b82f6;
+      top: 42%; left: 38%;
+      animation: floatC 20s ease-in-out infinite alternate;
+      opacity: 0.18;
+    }
+    @keyframes floatA {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(50px, 40px) scale(1.08); }
+    }
+    @keyframes floatB {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(-40px, -50px) scale(1.1); }
+    }
+    @keyframes floatC {
+      from { transform: translate(0, 0); }
+      to   { transform: translate(30px, -25px); }
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 64px 64px;
+      mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+      opacity: 0.5;
+    }
+
+    .page { position: relative; z-index: 1; }
+
+    /* ── Design tokens UI ── */
+    .glass {
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      position: relative;
+      overflow: hidden;
+    }
+    .glass::before {
+      content: "";
+      position: absolute;
+      top: var(--y, 50%);
+      left: var(--x, 50%);
+      width: 280px;
+      height: 280px;
+      background: radial-gradient(circle, rgba(52, 211, 153, 0.14) 0%, transparent 70%);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: opacity 0.3s;
+      opacity: 0;
+    }
+    .glass:hover::before { opacity: 1; }
+
+    .gradient-text {
+      background: linear-gradient(90deg, #34d399, #22d3ee, #60a5fa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.9rem 1.5rem;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      background: linear-gradient(135deg, #0891b2, #059669);
+      border: 1px solid rgba(52, 211, 153, 0.45);
+      box-shadow: 0 0 24px rgba(8, 145, 178, 0.25);
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 36px rgba(52, 211, 153, 0.4);
+      filter: brightness(1.05);
+    }
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.9rem 1.5rem;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(52, 211, 153, 0.35);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(52, 211, 153, 0.1);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: var(--emerald);
+    }
+
+    .section-title {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.6;
+      max-width: 36rem;
+    }
+
+    .nav-blur {
+      background: rgba(2, 12, 18, 0.75);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(52, 211, 153, 0.12);
+    }
+
+    .input-field {
+      width: 100%;
+      padding: 0.9rem 1rem;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #f1f5f9;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-field::placeholder { color: #64748b; }
+    .input-field:focus {
+      border-color: rgba(52, 211, 153, 0.5);
+      box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.12);
+    }
+
+    .feature-icon {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+
+    details summary { list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+
+    .fab-cta {
+      position: fixed;
+      bottom: 1.25rem;
+      right: 1.25rem;
+      z-index: 40;
+      box-shadow: 0 8px 32px rgba(5, 150, 105, 0.45);
+    }
+
+    @media (max-width: 640px) {
+      .fab-cta span { display: none; }
+      .fab-cta { border-radius: 999px; padding: 1rem; }
+    }
+
+    /* reduce motion */
+    @media (prefers-reduced-motion: reduce) {
+      .orb, .dynamic-bg { animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Fundo dinâmico -->
+  <div class="dynamic-bg" aria-hidden="true">
+    <div class="grid-overlay"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="page">
+    <!-- Nav -->
+    <nav class="fixed top-0 inset-x-0 z-50 nav-blur">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <a href="#inicio" class="flex items-center gap-2">
+          <img src="../logo/LogoTop2.png" alt="MedLM" class="h-9 w-auto" onerror="this.style.display='none'">
+          <span class="font-display font-bold text-lg tracking-tight">Med<span class="text-emerald-400">LM</span></span>
+        </a>
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-300">
+          <a href="#solucao" class="hover:text-emerald-400 transition">Solução</a>
+          <a href="#modulos" class="hover:text-emerald-400 transition">Módulos</a>
+          <a href="#fundadores" class="hover:text-emerald-400 transition">Fundadores</a>
+          <a href="#faq" class="hover:text-emerald-400 transition">FAQ</a>
+        </div>
+        <a href="#cadastro" class="btn-primary text-sm py-2.5 px-4">
+          Programa Fundadores
+        </a>
+      </div>
+    </nav>
+
+    <!-- Hero -->
+    <header id="inicio" class="min-h-screen flex flex-col justify-center pt-24 pb-16 px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <div class="badge mb-6 mx-auto reveal">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          Plataforma alinhada à LGPD
+        </div>
+
+        <h1 class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] mb-6 reveal">
+          A gestão clínica que coloca o
+          <span class="gradient-text">paciente no centro</span>
+        </h1>
+
+        <p class="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10 leading-relaxed reveal">
+          Agenda inteligente, prontuário, portal do paciente e
+          <strong class="text-white font-semibold">financeiro avançado</strong>
+          em um só lugar. Mais tempo para atender — menos tempo com burocracia.
+        </p>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center reveal">
+          <a href="#cadastro" class="btn-primary">
+            <i data-lucide="rocket" class="w-5 h-5"></i>
+            Quero ser fundador
+          </a>
+          <a href="#solucao" class="btn-ghost">
+            <i data-lucide="play-circle" class="w-5 h-5"></i>
+            Ver como funciona
+          </a>
+        </div>
+
+        <p class="mt-6 text-sm text-slate-500 reveal">
+          Sem números inventados. Produto real, em evolução com clínicas fundadoras.
+        </p>
+      </div>
+
+      <!-- Product preview -->
+      <div class="max-w-5xl mx-auto mt-14 reveal">
+        <div class="glass rounded-2xl md:rounded-3xl p-1.5 md:p-2 border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.45)]">
+          <div class="relative h-52 sm:h-72 md:h-[420px] rounded-xl md:rounded-2xl overflow-hidden bg-slate-900/50">
+            <img src="../logo/logoChamadaAcao.png" alt="MedLM" class="carousel-item absolute inset-0 w-full h-full object-cover opacity-100 transition-opacity duration-700">
+            <img src="../logo/atendimentoimagen.png" alt="Atendimento" class="carousel-item absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700">
+            <img src="../logo/atendimento2.png" alt="Clínica" class="carousel-item absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-[#020c12]/80 via-transparent to-transparent pointer-events-none"></div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dores -->
+    <section class="py-20 px-4" id="dores">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-12 reveal">
+          <h2 class="section-title mb-4">Sua clínica enfrenta estes <span class="gradient-text">desafios?</span></h2>
+          <p class="section-sub mx-auto">Problemas reais do dia a dia — e o que o MedLM foi feito para resolver.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+          <article class="glass rounded-2xl p-6 border-l-4 border-l-red-500/40 reveal">
+            <i data-lucide="calendar-x" class="w-8 h-8 text-red-400 mb-4"></i>
+            <h3 class="font-display font-bold text-lg mb-2">Agenda desorganizada</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Faltas, horários sobrepostos e buracos que custam faturamento no fim do mês.</p>
+          </article>
+          <article class="glass rounded-2xl p-6 border-l-4 border-l-red-500/40 reveal">
+            <i data-lucide="file-warning" class="w-8 h-8 text-red-400 mb-4"></i>
+            <h3 class="font-display font-bold text-lg mb-2">Prontuário espalhado</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Histórico difícil de achar na hora do atendimento — papel ou planilhas.</p>
+          </article>
+          <article class="glass rounded-2xl p-6 border-l-4 border-l-red-500/40 reveal">
+            <i data-lucide="trending-down" class="w-8 h-8 text-red-400 mb-4"></i>
+            <h3 class="font-display font-bold text-lg mb-2">Financeiro nublado</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Sem clareza de lucro real, inadimplência e fluxo de caixa do período.</p>
+          </article>
+          <article class="glass rounded-2xl p-6 border-l-4 border-l-red-500/40 reveal">
+            <i data-lucide="user-x" class="w-8 h-8 text-red-400 mb-4"></i>
+            <h3 class="font-display font-bold text-lg mb-2">Paciente some</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Pouco acompanhamento pós-consulta e retorno frágil.</p>
+          </article>
+          <article class="glass rounded-2xl p-6 border-l-4 border-l-red-500/40 reveal">
+            <i data-lucide="shield-alert" class="w-8 h-8 text-red-400 mb-4"></i>
+            <h3 class="font-display font-bold text-lg mb-2">Risco de dados</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Sistemas antigos ou e-mail sem controle adequado à LGPD.</p>
+          </article>
+          <article class="glass rounded-2xl p-6 border-l-4 border-l-emerald-500 bg-emerald-950/20 flex flex-col justify-center reveal">
+            <h3 class="font-display font-bold text-lg mb-2 text-emerald-400">Há outro caminho</h3>
+            <p class="text-slate-300 text-sm mb-4 leading-relaxed">O MedLM centraliza operação clínica e gestão num fluxo só.</p>
+            <a href="#solucao" class="text-emerald-400 font-bold text-sm inline-flex items-center gap-2 hover:underline">
+              Ver a solução <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Solução / como funciona -->
+    <section class="py-20 px-4" id="solucao">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-14 reveal">
+          <h2 class="section-title mb-4">Como o MedLM <span class="gradient-text">funciona</span></h2>
+          <p class="section-sub mx-auto">Três passos simples. Sem instalação. Acesso pelo navegador.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+          <div class="glass rounded-2xl p-8 text-center reveal">
+            <div class="w-12 h-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center mx-auto mb-5 font-display font-bold text-emerald-400">1</div>
+            <h3 class="font-display font-bold text-lg mb-2">Cadastre a clínica</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Crie a conta, equipe e configurações de agenda (dias, pausas, recessos).</p>
+          </div>
+          <div class="glass rounded-2xl p-8 text-center reveal">
+            <div class="w-12 h-12 rounded-full bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center mx-auto mb-5 font-display font-bold text-cyan-400">2</div>
+            <h3 class="font-display font-bold text-lg mb-2">Ative o portal</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Pacientes agendam pelo link da clínica. Você confirma e organiza o dia.</p>
+          </div>
+          <div class="glass rounded-2xl p-8 text-center reveal">
+            <div class="w-12 h-12 rounded-full bg-blue-500/15 border border-blue-500/30 flex items-center justify-center mx-auto mb-5 font-display font-bold text-blue-400">3</div>
+            <h3 class="font-display font-bold text-lg mb-2">Gerencie e cresça</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Prontuário, financeiro avançado e indicadores para decidir com dados reais.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Módulos -->
+    <section class="py-20 px-4" id="modulos">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center mb-14 reveal">
+          <h2 class="section-title mb-4">Módulos que <span class="gradient-text">sustentam a operação</span></h2>
+          <p class="section-sub mx-auto">O que existe de fato no produto — sem lista genérica de “IA mágica”.</p>
+        </div>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <article class="glass rounded-2xl p-7 reveal group hover:border-cyan-500/40 transition-colors">
+            <div class="feature-icon bg-cyan-500/10 text-cyan-400">
+              <i data-lucide="calendar-check" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Agenda inteligente</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Horários livres respeitam duração do atendimento, recessos e intervalos de pausa configurados por você.</p>
+          </article>
+          <article class="glass rounded-2xl p-7 reveal group hover:border-emerald-500/40 transition-colors">
+            <div class="feature-icon bg-emerald-500/10 text-emerald-400">
+              <i data-lucide="file-text" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Prontuário eletrônico</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Histórico do paciente acessível no atendimento, com evolução e controle de acesso por cargo.</p>
+          </article>
+          <article class="glass rounded-2xl p-7 reveal group hover:border-emerald-500/40 transition-colors">
+            <div class="feature-icon bg-emerald-500/10 text-emerald-400">
+              <i data-lucide="wallet" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Financeiro avançado</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Recebíveis, despesas, KPIs (LTV, CAC, conversão), fluxo de caixa com descrição e relatório por e-mail.</p>
+          </article>
+          <article class="glass rounded-2xl p-7 reveal group hover:border-pink-500/40 transition-colors">
+            <div class="feature-icon bg-pink-500/10 text-pink-400">
+              <i data-lucide="globe" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Portal do paciente</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Agendamento online pelo link da clínica, com regras de disponibilidade e confirmação no sistema.</p>
+          </article>
+          <article class="glass rounded-2xl p-7 reveal group hover:border-blue-500/40 transition-colors">
+            <div class="feature-icon bg-blue-500/10 text-blue-400">
+              <i data-lucide="building-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Multi-clínica</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Arquitetura multi-tenant: cada clínica isolada, com equipe, dados e configurações próprias.</p>
+          </article>
+          <article class="glass rounded-2xl p-7 reveal group hover:border-purple-500/40 transition-colors">
+            <div class="feature-icon bg-purple-500/10 text-purple-400">
+              <i data-lucide="shield-check" class="w-6 h-6"></i>
+            </div>
+            <h3 class="font-display font-bold text-lg mb-2">Segurança e LGPD</h3>
+            <p class="text-slate-400 text-sm leading-relaxed">Sessão controlada, permissões por cargo e cuidado com dados sensíveis de saúde.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Fundadores -->
+    <section class="py-20 px-4" id="fundadores">
+      <div class="max-w-3xl mx-auto">
+        <div class="glass rounded-3xl p-8 md:p-12 border border-emerald-500/25 text-center reveal">
+          <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500 text-slate-900 text-xs font-bold mb-6">
+            PROGRAMA FUNDADORES
+          </div>
+          <h2 class="section-title mb-4">Entre no começo — e ajude a moldar o produto</h2>
+          <p class="text-slate-300 leading-relaxed mb-8 max-w-xl mx-auto">
+            Vagas limitadas para clínicas que querem usar o MedLM desde cedo,
+            com suporte próximo e influência nas próximas funcionalidades.
+            <strong class="text-emerald-400">3 meses grátis</strong> no período de fundadores.
+          </p>
+          <ul class="grid sm:grid-cols-2 gap-3 text-left max-w-lg mx-auto mb-8">
+            <li class="flex items-center gap-2 text-sm text-slate-300"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i> 3 meses sem cobrança</li>
+            <li class="flex items-center gap-2 text-sm text-slate-300"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i> Suporte prioritário</li>
+            <li class="flex items-center gap-2 text-sm text-slate-300"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i> Onboarding assistido</li>
+            <li class="flex items-center gap-2 text-sm text-slate-300"><i data-lucide="check-circle" class="w-4 h-4 text-emerald-400 shrink-0"></i> Canal direto com o time</li>
+          </ul>
+          <div class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-sm mb-8">
+            <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-emerald-400"></i>
+            Depois: a partir de <strong class="text-white">R$ 89,90</strong>/mês
+          </div>
+          <div>
+            <a href="#cadastro" class="btn-primary">
+              <i data-lucide="rocket" class="w-5 h-5"></i>
+              Quero garantir minha vaga
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cadastro -->
+    <section class="py-20 px-4" id="cadastro">
+      <div class="max-w-lg mx-auto glass rounded-3xl p-8 md:p-10 reveal">
+        <div class="text-center mb-8">
+          <h2 class="font-display text-2xl md:text-3xl font-bold mb-2">Interessado no Programa Fundadores?</h2>
+          <p class="text-slate-400 text-sm">Preencha — retornamos por e-mail ou WhatsApp. Sem compromisso automático de cobrança.</p>
+        </div>
+        <form id="formFundador" class="space-y-4" novalidate>
+          <div>
+            <label for="nomeClinica" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Nome da clínica</label>
+            <input id="nomeClinica" name="nome_clinica" type="text" required autocomplete="organization" class="input-field" placeholder="Ex.: Clínica Equilíbrio">
+          </div>
+          <div>
+            <label for="nomeResponsavel" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Responsável</label>
+            <input id="nomeResponsavel" name="responsavel" type="text" required autocomplete="name" class="input-field" placeholder="Seu nome">
+          </div>
+          <div>
+            <label for="whatsapp" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">WhatsApp</label>
+            <input id="whatsapp" name="whatsapp" type="tel" required autocomplete="tel" class="input-field" placeholder="(11) 90000-0000">
+          </div>
+          <div>
+            <label for="email" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">E-mail</label>
+            <input id="email" name="email" type="email" required autocomplete="email" class="input-field" placeholder="voce@clinica.com.br">
+          </div>
+          <button type="submit" id="btnSubmit" class="btn-primary w-full mt-2">
+            Quero garantir minha vaga
+          </button>
+          <p class="text-[11px] text-slate-500 text-center leading-relaxed">
+            Ao enviar, você autoriza contato sobre o MedLM. Não vendemos sua lista.
+          </p>
+        </form>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-20 px-4" id="faq">
+      <div class="max-w-3xl mx-auto">
+        <div class="text-center mb-12 reveal">
+          <h2 class="section-title mb-3">Perguntas frequentes</h2>
+          <p class="section-sub mx-auto">Respostas diretas — sem marketing vazio.</p>
+        </div>
+        <div class="space-y-3">
+          <div class="glass rounded-2xl overflow-hidden reveal">
+            <details class="group">
+              <summary class="p-5 cursor-pointer font-semibold flex justify-between items-center gap-4">
+                Para quem é o MedLM?
+                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform shrink-0"></i>
+              </summary>
+              <div class="px-5 pb-5 text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                Clínicas e consultórios multidisciplinares — psicologia, fisioterapia, nutrição, terapias e demais profissionais de saúde que precisam de agenda, prontuário e gestão financeira.
+              </div>
+            </details>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden reveal">
+            <details class="group">
+              <summary class="p-5 cursor-pointer font-semibold flex justify-between items-center gap-4">
+                Preciso instalar algo?
+                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform shrink-0"></i>
+              </summary>
+              <div class="px-5 pb-5 text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                Não. É 100% web (SaaS). Basta navegador e internet.
+              </div>
+            </details>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden reveal">
+            <details class="group">
+              <summary class="p-5 cursor-pointer font-semibold flex justify-between items-center gap-4">
+                O que é o financeiro avançado?
+                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform shrink-0"></i>
+              </summary>
+              <div class="px-5 pb-5 text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                Além de baixas e extratos: indicadores (LTV, CAC, conversão do portal), lucro, fluxo de caixa com descrição de cada movimento e envio de relatório por e-mail para a clínica.
+              </div>
+            </details>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden reveal">
+            <details class="group">
+              <summary class="p-5 cursor-pointer font-semibold flex justify-between items-center gap-4">
+                Como funciona a segurança dos dados?
+                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform shrink-0"></i>
+              </summary>
+              <div class="px-5 pb-5 text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                Acesso por autenticação, isolamento por clínica (multi-tenant), permissões por cargo e práticas alinhadas à LGPD. Continuamos evoluindo auditoria e controles.
+              </div>
+            </details>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden reveal">
+            <details class="group">
+              <summary class="p-5 cursor-pointer font-semibold flex justify-between items-center gap-4">
+                Existe fidelidade de contrato?
+                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform shrink-0"></i>
+              </summary>
+              <div class="px-5 pb-5 text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                Modelo de assinatura flexível. O Programa Fundadores é o melhor momento para conhecer o produto com suporte próximo.
+              </div>
+            </details>
+          </div>
+          <div class="glass rounded-2xl overflow-hidden reveal">
+            <details class="group">
+              <summary class="p-5 cursor-pointer font-semibold flex justify-between items-center gap-4">
+                Posso testar antes?
+                <i data-lucide="chevron-down" class="w-5 h-5 text-slate-500 group-open:rotate-180 transition-transform shrink-0"></i>
+              </summary>
+              <div class="px-5 pb-5 text-slate-400 text-sm leading-relaxed border-t border-white/5 pt-4">
+                Sim. No Programa Fundadores você tem 3 meses grátis para usar e validar na rotina real da clínica.
+              </div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Honest social proof -->
+    <section class="py-16 px-4">
+      <div class="max-w-3xl mx-auto text-center glass rounded-2xl p-8 reveal">
+        <i data-lucide="users" class="w-8 h-8 text-emerald-400 mx-auto mb-4"></i>
+        <h2 class="font-display text-xl font-bold mb-3">Construído com quem usa de verdade</h2>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          Não listamos depoimentos inventados. Estamos formando o grupo de clínicas fundadoras
+          que usam o sistema no dia a dia e ajudam a priorizar o roadmap.
+          Quando houver cases reais, eles aparecem aqui — com nome e especialidade.
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-emerald-900/40 pt-14 pb-10 px-4">
+      <div class="max-w-6xl mx-auto grid md:grid-cols-3 gap-10 text-center md:text-left">
+        <div>
+          <div class="font-display font-bold text-xl mb-3">Med<span class="text-emerald-400">LM</span></div>
+          <p class="text-sm text-slate-500 max-w-xs mx-auto md:mx-0 leading-relaxed">
+            Sistema clínico inteligente: agenda, prontuário, portal e financeiro avançado.
+          </p>
+        </div>
+        <div>
+          <h4 class="text-emerald-500 font-bold text-xs uppercase tracking-widest mb-4">Contato</h4>
+          <a href="https://wa.me/5511970166621" class="flex items-center justify-center md:justify-start gap-2 text-slate-300 hover:text-emerald-400 text-sm mb-2">
+            <i data-lucide="phone" class="w-4 h-4"></i> (11) 97016-6621
+          </a>
+          <a href="mailto:lenadrommarquess.n@gmail.com" class="flex items-center justify-center md:justify-start gap-2 text-slate-300 hover:text-emerald-400 text-sm">
+            <i data-lucide="mail" class="w-4 h-4"></i> lenadrommarquess.n@gmail.com
+          </a>
+        </div>
+        <div class="md:text-right">
+          <h4 class="text-emerald-500 font-bold text-xs uppercase tracking-widest mb-4">Navegação</h4>
+          <div class="flex flex-col gap-2 text-sm text-slate-400">
+            <a href="#inicio" class="hover:text-white">Início</a>
+            <a href="#modulos" class="hover:text-white">Módulos</a>
+            <a href="#cadastro" class="hover:text-white">Fundadores</a>
+          </div>
+        </div>
+      </div>
+      <p class="text-center text-slate-600 text-xs mt-12">
+        © <span id="year"></span> MedLM — Sistema Clínico Inteligente. Todos os direitos reservados.
+      </p>
+    </footer>
+  </div>
+
+  <!-- FAB -->
+  <a href="#cadastro" class="fab-cta btn-primary">
+    <i data-lucide="rocket" class="w-5 h-5"></i>
+    <span>Garantir vaga</span>
+  </a>
+
+  <!-- Modal sucesso -->
+  <div id="modalSucesso" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div id="modalContent" class="glass border border-emerald-500/30 p-8 rounded-3xl max-w-md w-full text-center">
+      <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-5">
+        <i data-lucide="check-circle-2" class="w-8 h-8 text-emerald-400"></i>
+      </div>
+      <h2 class="font-display text-2xl font-bold mb-3">Recebemos seu interesse</h2>
+      <p class="text-slate-400 text-sm mb-6 leading-relaxed">
+        Obrigado por considerar o MedLM. Nossa equipe entrará em contato em breve pelo e-mail ou WhatsApp informados.
+      </p>
+      <button type="button" onclick="fecharModal()" class="btn-primary w-full">Entendido</button>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    lucide.createIcons();
+
+    if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+      gsap.registerPlugin(ScrollTrigger);
+      document.querySelectorAll('.reveal').forEach((el) => {
+        gsap.from(el, {
+          opacity: 0,
+          y: 36,
+          duration: 0.7,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: el,
+            start: 'top 88%',
+            toggleActions: 'play none none none'
+          }
+        });
+      });
+    }
+
+    document.querySelectorAll('.glass').forEach((card) => {
+      card.addEventListener('mousemove', (e) => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--x', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--y', (e.clientY - r.top) + 'px');
+      });
+    });
+
+    let currentIndex = 0;
+    const items = document.querySelectorAll('.carousel-item');
+    if (items.length > 1) {
+      setInterval(() => {
+        items[currentIndex].classList.remove('opacity-100');
+        items[currentIndex].classList.add('opacity-0');
+        currentIndex = (currentIndex + 1) % items.length;
+        items[currentIndex].classList.remove('opacity-0');
+        items[currentIndex].classList.add('opacity-100');
+      }, 4500);
+    }
+
+    document.getElementById('formFundador').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmit');
+      const dados = {
+        nome_clinica: document.getElementById('nomeClinica').value.trim(),
+        responsavel: document.getElementById('nomeResponsavel').value.trim(),
+        whatsapp: document.getElementById('whatsapp').value.replace(/\D/g, ''),
+        email: document.getElementById('email').value.toLowerCase().trim()
+      };
+
+      if (dados.nome_clinica.length < 3) return alert('Informe um nome de clínica válido.');
+      if (dados.whatsapp.length < 10) return alert('WhatsApp inválido. Inclua o DDD.');
+      if (!dados.email.includes('@') || !dados.email.includes('.')) return alert('E-mail inválido.');
+
+      btn.disabled = true;
+      const original = btn.innerHTML;
+      btn.innerHTML = 'Enviando...';
+
+      try {
+        const response = await fetch('/programa-fundadores/salvar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.ok) {
+          e.target.reset();
+          const modal = document.getElementById('modalSucesso');
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+          if (typeof gsap !== 'undefined') {
+            gsap.fromTo('#modalContent', { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.35, ease: 'back.out(1.4)' });
+          }
+        } else {
+          alert(result.error || 'Não foi possível enviar. Tente novamente.');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Falha de conexão. Verifique a internet e tente de novo.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = original;
+        lucide.createIcons();
+      }
+    });
+
+    function fecharModal() {
+      const modal = document.getElementById('modalSucesso');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+    window.fecharModal = fecharModal;
+  </script>
+</body>
+</html>
