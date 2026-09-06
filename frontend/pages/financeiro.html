@@ -492,13 +492,21 @@
                 pointer-events: none;
             }
 
-            /* Gaveta extrato acima da tabbar + esconde tabbar quando aberta */
-            #gavetaExtrato {
-                z-index: 100 !important;
+            /* Modal recibo / impressão acima da tabbar */
+            #modalImpressaoRecibo {
+                z-index: 110 !important;
             }
-            #backdropExtrato {
-                z-index: 90 !important;
+            body.modal-recibo-open .mobile-bottom-tabbar {
+                transform: translateY(140%) !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
             }
+            body.modal-recibo-open {
+                overflow: hidden !important;
+            }
+            /* Gaveta extrato também acima da tabbar */
+            #gavetaExtrato { z-index: 100 !important; }
+            #backdropExtrato { z-index: 90 !important; }
             body.gaveta-extrato-open .mobile-bottom-tabbar {
                 transform: translateY(140%) !important;
                 opacity: 0 !important;
@@ -506,33 +514,6 @@
             }
             body.gaveta-extrato-open {
                 overflow: hidden !important;
-            }
-            .gaveta-swipe-handle {
-                display: block;
-                width: 40px;
-                height: 4px;
-                border-radius: 99px;
-                background: rgba(148,163,184,0.35);
-                margin: 0 auto 10px;
-            }
-            #gavetaExtrato .gaveta-close-btn {
-                width: 40px;
-                height: 40px;
-                border-radius: 12px;
-                background: rgba(248,113,113,0.1);
-                border: 1px solid rgba(248,113,113,0.25);
-                color: #f87171;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-shrink: 0;
-            }
-            #gavetaExtrato .gaveta-close-btn:active {
-                transform: scale(0.94);
-            }
-            /* Form avulso: botões com respiro no mobile */
-            #formGastoAvulso .form-actions-mobile {
-                padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
             }
             .mobile-bottom-tabbar .tab-item {
                 display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -1097,23 +1078,20 @@
 </div>
 
 <!-- Gaveta Extrato -->
-<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-full sm:w-[420px] md:w-[500px] lg:w-[600px] max-w-full bg-[#020c12] border-l border-[rgba(52,211,153,0.15)] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[100] flex flex-col hidden">
-    <div class="p-4 sm:p-6 border-b border-[rgba(52,211,153,0.15)] bg-white/[0.02] backdrop-blur-md flex-shrink-0">
-        <div class="gaveta-swipe-handle sm:hidden" aria-hidden="true"></div>
-        <div class="flex justify-between items-center gap-3">
-            <div class="min-w-0">
-                <h3 class="text-base sm:text-lg font-black text-slate-100 tracking-tight font-['Space_Grotesk'] truncate">Extrato Financeiro</h3>
-                <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
-                    <p id="extratoPacienteNome" class="text-xs text-cyan-400 font-bold uppercase tracking-wider truncate">Paciente: -</p>
-                    <button type="button" onclick="prepararImpressaoExtrato()" class="self-start px-2.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20 text-[10px] font-black hover:bg-cyan-600 hover:text-white transition flex items-center gap-1 uppercase tracking-wider whitespace-nowrap">
-                        <i class="fas fa-print"></i> Imprimir Extrato
-                    </button>
-                </div>
+<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-full sm:w-[420px] md:w-[500px] lg:w-[600px] max-w-full bg-[#020c12] border-l border-[rgba(52,211,153,0.15)] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
+    <div class="p-4 sm:p-6 border-b border-[rgba(52,211,153,0.15)] flex justify-between items-center bg-white/[0.02] backdrop-blur-md">
+        <div class="min-w-0">
+            <h3 class="text-base sm:text-lg font-black text-slate-100 tracking-tight font-['Space_Grotesk'] truncate">Extrato Financeiro</h3>
+            <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 mt-1">
+                <p id="extratoPacienteNome" class="text-xs text-cyan-400 font-bold uppercase tracking-wider truncate">Paciente: -</p>
+                <button onclick="prepararImpressaoExtrato()" class="self-start px-2.5 py-0.5 bg-cyan-500/10 text-cyan-400 rounded border border-cyan-500/20 text-[10px] font-black hover:bg-cyan-600 hover:text-white transition flex items-center gap-1 uppercase tracking-wider whitespace-nowrap">
+                    <i class="fas fa-print"></i> Imprimir Extrato
+                </button>
             </div>
-            <button type="button" onclick="fecharGavetaExtrato()" class="gaveta-close-btn" aria-label="Fechar extrato" title="Fechar">
-                <i class="fas fa-times"></i>
-            </button>
         </div>
+        <button onclick="fecharGavetaExtrato()" class="flex-shrink-0 w-8 h-8 rounded-full bg-white/5 text-slate-400 hover:bg-red-500/20 hover:text-red-400 transition flex items-center justify-center">
+            <i class="fas fa-times text-xs"></i>
+        </button>
     </div>
     <div class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6">
         <div class="grid grid-cols-3 gap-2 sm:gap-3">
@@ -1171,9 +1149,9 @@
                         <option value="pago">Já Pago</option>
                     </select>
                 </div>
-                <div class="col-span-1 sm:col-span-2 flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2 form-actions-mobile">
-                    <button type="button" onclick="fecharFormGastoAvulso()" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-white/5 text-slate-400 rounded-lg font-bold hover:bg-white/10 transition text-[11px] uppercase tracking-wider">Cancelar</button>
-                    <button type="submit" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-500 transition shadow-md shadow-emerald-950/50 text-[11px] uppercase tracking-wider">Salvar Registro</button>
+                <div class="col-span-1 sm:col-span-2 flex flex-col-reverse sm:flex-row justify-end gap-2 pt-2">
+                    <button type="button" onclick="fecharFormGastoAvulso()" class="px-4 py-2 bg-white/5 text-slate-400 rounded-lg font-bold hover:bg-white/10 transition text-[11px] uppercase tracking-wider">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-500 transition shadow-md shadow-emerald-950/50 text-[11px] uppercase tracking-wider">Salvar Registro</button>
                 </div>
             </form>
         </div>
@@ -1196,24 +1174,26 @@
 <div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[90] hidden transition-opacity duration-300"></div>
 
 <!-- Modal Impressão Recibo -->
-<div id="modalImpressaoRecibo" class="hidden fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-sm no-print">
-    <div class="bg-gray-100 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
-        <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-gray-100 flex items-center justify-between no-print">
-            <div class="flex items-center gap-2 text-gray-800 font-bold text-sm sm:text-base">
-                <i class="fas fa-file-invoice-dollar text-indigo-600"></i>
-                <span>Visualizar Recibo de Extrato</span>
+<div id="modalImpressaoRecibo" class="hidden fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm no-print">
+    <div class="bg-gray-100 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[92vh] sm:max-h-[90vh] flex flex-col overflow-hidden border border-gray-100">
+        <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-gray-100 flex items-center justify-between no-print flex-shrink-0">
+            <div class="flex items-center gap-2 text-gray-800 font-bold text-sm sm:text-base min-w-0">
+                <i class="fas fa-file-invoice-dollar text-indigo-600 shrink-0"></i>
+                <span class="truncate">Visualizar Recibo de Extrato</span>
             </div>
-            <button onclick="fecharModalImpressao()" class="text-gray-400 hover:text-gray-600 transition">
+            <button type="button" onclick="fecharModalImpressao()" class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition shrink-0" aria-label="Fechar">
                 <i class="fas fa-times text-lg"></i>
             </button>
         </div>
-        <div id="conteudoRecibo" class="overflow-auto bg-[#f4f7f6] p-2 sm:p-4 flex justify-center"></div>
-        <div class="px-4 sm:px-6 py-3 sm:py-4 bg-white border-t border-gray-100 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 no-print">
-            <button onclick="fecharModalImpressao()" class="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition text-sm font-semibold">Fechar</button>
-            <button id="btnEnviarEmailRecibo" onclick="dispararReciboEmail()" class="px-5 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
+        <div id="conteudoRecibo" class="overflow-auto bg-[#f4f7f6] p-2 sm:p-4 flex justify-center flex-1 min-h-0"></div>
+        <div class="px-4 sm:px-6 pt-3 pb-[calc(16px+env(safe-area-inset-bottom,0px))] sm:py-4 bg-white border-t border-gray-100 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 no-print flex-shrink-0">
+            <button type="button" onclick="fecharModalImpressao()" class="w-full sm:w-auto px-4 py-3 sm:py-2 bg-white border border-gray-200 text-gray-700 rounded-xl hover:bg-gray-50 transition text-sm font-semibold">
+                Fechar
+            </button>
+            <button type="button" id="btnEnviarEmailRecibo" onclick="dispararReciboEmail()" class="w-full sm:w-auto px-5 py-3 sm:py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 transition text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
                 <i class="fas fa-paper-plane"></i> Enviar por E-mail
             </button>
-            <button onclick="window.print()" class="px-5 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
+            <button type="button" onclick="window.print()" class="w-full sm:w-auto px-5 py-3 sm:py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition text-sm font-semibold flex items-center justify-center gap-2 shadow-sm">
                 <i class="fas fa-print"></i> Imprimir / Salvar PDF
             </button>
         </div>
@@ -1357,7 +1337,50 @@
   window.addEventListener('scroll', aoRolar, { passive: true });
 })();
 
-/* Gaveta Extrato: esconde tabbar + swipe para fechar (arrastar para a direita) */
+/* Modal recibo: esconde tabbar e trava scroll enquanto aberto */
+(function () {
+  function setReciboOpen(open) {
+    if (open) document.body.classList.add('modal-recibo-open');
+    else document.body.classList.remove('modal-recibo-open');
+  }
+
+  function wrapReciboFns() {
+    if (typeof window.prepararImpressaoExtrato === 'function' && !window.prepararImpressaoExtrato._wrapped) {
+      const orig = window.prepararImpressaoExtrato;
+      window.prepararImpressaoExtrato = function () {
+        const r = orig.apply(this, arguments);
+        setReciboOpen(true);
+        return r;
+      };
+      window.prepararImpressaoExtrato._wrapped = true;
+    }
+    if (typeof window.fecharModalImpressao === 'function' && !window.fecharModalImpressao._wrapped) {
+      const orig = window.fecharModalImpressao;
+      window.fecharModalImpressao = function () {
+        const r = orig.apply(this, arguments);
+        setReciboOpen(false);
+        return r;
+      };
+      window.fecharModalImpressao._wrapped = true;
+    }
+  }
+
+  wrapReciboFns();
+  document.addEventListener('DOMContentLoaded', wrapReciboFns);
+  window.addEventListener('load', wrapReciboFns);
+  setTimeout(wrapReciboFns, 400);
+  setTimeout(wrapReciboFns, 1200);
+
+  const modal = document.getElementById('modalImpressaoRecibo');
+  if (modal) {
+    const obs = new MutationObserver(function () {
+      setReciboOpen(!modal.classList.contains('hidden'));
+    });
+    obs.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  }
+})();
+
+/* Gaveta Extrato: esconde tabbar + swipe para fechar (direita) */
 (function () {
   function setOpen(open) {
     if (open) document.body.classList.add('gaveta-extrato-open');
@@ -1379,11 +1402,6 @@
       window.fecharGavetaExtrato = function () {
         const r = orig.apply(this, arguments);
         setOpen(false);
-        const painel = document.getElementById('gavetaExtrato');
-        if (painel) {
-          painel.style.transition = '';
-          // não força transform vazio se a função original já controla classes
-        }
         return r;
       };
       window.fecharGavetaExtrato._wrapped = true;
@@ -1396,37 +1414,22 @@
   setTimeout(wrapFns, 400);
   setTimeout(wrapFns, 1200);
 
-  // Observa classes da gaveta (hidden / translate)
   const gaveta = document.getElementById('gavetaExtrato');
-  if (gaveta) {
-    const obs = new MutationObserver(function () {
-      const aberta = !gaveta.classList.contains('hidden') && !gaveta.classList.contains('translate-x-full');
-      // alguns scripts só removem hidden e usam transform
-      const styleTransform = (gaveta.style.transform || '').replace(/\s/g, '');
-      const pareceAberta = !gaveta.classList.contains('hidden') &&
-        (styleTransform === '' || styleTransform === 'none' || styleTransform.includes('translateX(0'));
-      setOpen(aberta || pareceAberta);
-    });
-    obs.observe(gaveta, { attributes: true, attributeFilter: ['class', 'style'] });
-  }
-
-  // Swipe: gaveta abre da direita → arrastar para a direita fecha
   if (!gaveta) return;
 
-  let startX = 0;
-  let startY = 0;
-  let currentX = 0;
-  let dragging = false;
-  let locked = false;
+  const obs = new MutationObserver(function () {
+    const aberta = !gaveta.classList.contains('hidden');
+    setOpen(aberta);
+  });
+  obs.observe(gaveta, { attributes: true, attributeFilter: ['class', 'style'] });
+
+  let startX = 0, startY = 0, currentX = 0, dragging = false, locked = false;
 
   gaveta.addEventListener('touchstart', function (e) {
     if (gaveta.classList.contains('hidden')) return;
     const t = e.touches[0];
-    startX = t.clientX;
-    startY = t.clientY;
-    currentX = 0;
-    dragging = true;
-    locked = false;
+    startX = t.clientX; startY = t.clientY; currentX = 0;
+    dragging = true; locked = false;
     gaveta.style.transition = 'none';
   }, { passive: true });
 
@@ -1435,19 +1438,15 @@
     const t = e.touches[0];
     const dx = t.clientX - startX;
     const dy = t.clientY - startY;
-
     if (!locked) {
       if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
-        locked = true;
-        dragging = false;
+        locked = true; dragging = false;
         gaveta.style.transition = '';
         gaveta.style.transform = '';
         return;
       }
       if (Math.abs(dx) > 10) locked = true;
     }
-
-    // Só arraste para a direita (dx > 0) fecha
     if (dx > 0) {
       currentX = dx;
       gaveta.style.transform = 'translateX(' + dx + 'px)';
@@ -1460,16 +1459,13 @@
     dragging = false;
     gaveta.style.transition = 'transform 0.28s cubic-bezier(0.4,0,0.2,1)';
     const threshold = Math.min(gaveta.offsetWidth * 0.28, 140);
-    if (currentX > threshold) {
-      if (typeof window.fecharGavetaExtrato === 'function') {
-        window.fecharGavetaExtrato();
-      }
+    if (currentX > threshold && typeof window.fecharGavetaExtrato === 'function') {
+      window.fecharGavetaExtrato();
     } else {
       gaveta.style.transform = '';
     }
     currentX = 0;
   }
-
   gaveta.addEventListener('touchend', endSwipe, { passive: true });
   gaveta.addEventListener('touchcancel', endSwipe, { passive: true });
 })();
