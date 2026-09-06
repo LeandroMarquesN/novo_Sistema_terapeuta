@@ -2,7 +2,7 @@ const db = require('../config/db');
 const notificationService = require('../services/notificationService');
 
 // =============================================================================
-// 1. GET DASHBOARD AVANÇADO (LTV, Conversão, CAC, Lucro Acumulado)
+// 1. GET DASHBOARD AVANÇADO
 // =============================================================================
 exports.getDashboardAvancado = async (req, res) => {
   try {
@@ -53,7 +53,6 @@ exports.getDashboardAvancado = async (req, res) => {
 exports.getLucroReal = async (req, res) => {
   try {
     const { clinica_id } = req.usuario;
-
     const dataLocal = new Date();
     const anoAtual = dataLocal.getFullYear();
     const mesAtual = dataLocal.getMonth() + 1;
@@ -63,7 +62,6 @@ exports.getLucroReal = async (req, res) => {
               (SELECT COALESCE(SUM(valor), 0) FROM financeiro
                WHERE clinica_id = ? AND status_pagamento = 'pago'
                AND YEAR(data_pagamento) = ? AND MONTH(data_pagamento) = ?) as total_receita,
-
               (SELECT COALESCE(SUM(valor), 0) FROM financeiro_despesas
                WHERE clinica_id = ? AND status_pagamento = 'pago'
                AND YEAR(data_vencimento) = ? AND MONTH(data_vencimento) = ?) as total_despesa
@@ -89,9 +87,17 @@ exports.getLucroReal = async (req, res) => {
   }
 };
 
+function keyDia(d) {
+  if (d instanceof Date) return d.toISOString().slice(0, 10);
+  return String(d).slice(0, 10);
+}
+
+function fmtBR(n) {
+  return parseFloat(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+}
+
 // =============================================================================
-// 3. FLUXO DE CAIXA (visualização na tela)
-// Query: ?mes=3&ano=2026  (padrão = mês/ano atuais)
+// 3. FLUXO DE CAIXA — detalhado (descrição de cada entrada/saída)
 // =============================================================================
 exports.getFluxoCaixa = async (req, res) => {
   try {
@@ -104,57 +110,89 @@ exports.getFluxoCaixa = async (req, res) => {
       return res.status(400).json({ error: 'Mês ou ano inválido.' });
     }
 
-    // Receitas pagas no período (por data_pagamento)
-    const [receitas] = await db.execute(
+    // Entradas detalhadas (receitas pagas)
+    const [entradasRows] = await db.execute(
       `SELECT
-          DATE(data_pagamento) AS dia,
-          SUM(valor) AS total,
-          COUNT(*) AS qtd
-       FROM financeiro
-       WHERE clinica_id = ?
-         AND status_pagamento = 'pago'
-         AND data_pagamento IS NOT NULL
-         AND YEAR(data_pagamento) = ?
-         AND MONTH(data_pagamento) = ?
-       GROUP BY DATE(data_pagamento)
-       ORDER BY dia ASC`,
+          f.id,
+          DATE(f.data_pagamento) AS dia,
+          f.valor,
+          f.descricao,
+          f.categoria,
+          f.metodo_pagamento,
+          p.nome AS paciente_nome
+       FROM financeiro f
+       LEFT JOIN pacientes p ON p.id = f.paciente_id
+       WHERE f.clinica_id = ?
+         AND f.status_pagamento = 'pago'
+         AND f.data_pagamento IS NOT NULL
+         AND YEAR(f.data_pagamento) = ?
+         AND MONTH(f.data_pagamento) = ?
+       ORDER BY f.data_pagamento ASC, f.id ASC`,
       [clinica_id, ano, mes]
     );
 
-    // Despesas pagas no período (por data_vencimento — padrão atual da tabela)
-    const [despesas] = await db.execute(
+    // Saídas detalhadas (despesas pagas)
+    const [saidasRows] = await db.execute(
       `SELECT
+          id,
           DATE(data_vencimento) AS dia,
-          SUM(valor) AS total,
-          COUNT(*) AS qtd,
+          valor,
+          descricao,
           categoria
        FROM financeiro_despesas
        WHERE clinica_id = ?
          AND status_pagamento = 'pago'
          AND YEAR(data_vencimento) = ?
          AND MONTH(data_vencimento) = ?
-       GROUP BY DATE(data_vencimento), categoria
-       ORDER BY dia ASC`,
+       ORDER BY data_vencimento ASC, id ASC`,
       [clinica_id, ano, mes]
     );
 
-    // Detalhe dia a dia (para tabela)
-    const mapa = {};
-    const addDia = (diaRaw, tipo, valor, extra = {}) => {
-      const key = diaRaw instanceof Date
-        ? diaRaw.toISOString().slice(0, 10)
-        : String(diaRaw).slice(0, 10);
-      if (!mapa[key]) {
-        mapa[key] = { dia: key, entradas: 0, saidas: 0, saldo_dia: 0 };
-      }
-      if (tipo === 'entrada') mapa[key].entradas += parseFloat(valor) || 0;
-      if (tipo === 'saida') mapa[key].saidas += parseFloat(valor) || 0;
-      mapa[key].saldo_dia = mapa[key].entradas - mapa[key].saidas;
-      Object.assign(mapa[key], extra);
-    };
+    // Lista unificada de movimentos (para tabela)
+    const movimentos = [];
 
-    receitas.forEach((r) => addDia(r.dia, 'entrada', r.total));
-    despesas.forEach((d) => addDia(d.dia, 'saida', d.total));
+    entradasRows.forEach((r) => {
+      const dia = keyDia(r.dia);
+      const descBase = r.descricao || r.categoria || 'Receita';
+      const paciente = r.paciente_nome ? ` — ${r.paciente_nome}` : '';
+      movimentos.push({
+        id: `e-${r.id}`,
+        dia,
+        tipo: 'entrada',
+        descricao: `${descBase}${paciente}`,
+        categoria: r.categoria || 'Consulta',
+        metodo: r.metodo_pagamento || null,
+        valor: parseFloat(r.valor) || 0
+      });
+    });
+
+    saidasRows.forEach((r) => {
+      const dia = keyDia(r.dia);
+      movimentos.push({
+        id: `s-${r.id}`,
+        dia,
+        tipo: 'saida',
+        descricao: r.descricao || r.categoria || 'Despesa',
+        categoria: r.categoria || 'outros',
+        metodo: null,
+        valor: parseFloat(r.valor) || 0
+      });
+    });
+
+    movimentos.sort((a, b) => {
+      if (a.dia !== b.dia) return a.dia < b.dia ? -1 : 1;
+      if (a.tipo !== b.tipo) return a.tipo === 'entrada' ? -1 : 1;
+      return 0;
+    });
+
+    // Agregado por dia (gráfico)
+    const mapa = {};
+    movimentos.forEach((m) => {
+      if (!mapa[m.dia]) mapa[m.dia] = { dia: m.dia, entradas: 0, saidas: 0, saldo_dia: 0 };
+      if (m.tipo === 'entrada') mapa[m.dia].entradas += m.valor;
+      else mapa[m.dia].saidas += m.valor;
+      mapa[m.dia].saldo_dia = mapa[m.dia].entradas - mapa[m.dia].saidas;
+    });
 
     const dias = Object.keys(mapa).sort();
     let acumulado = 0;
@@ -163,14 +201,13 @@ exports.getFluxoCaixa = async (req, res) => {
       return { ...mapa[d], saldo_acumulado: acumulado };
     });
 
-    const totalEntradas = fluxo.reduce((s, x) => s + x.entradas, 0);
-    const totalSaidas = fluxo.reduce((s, x) => s + x.saidas, 0);
+    const totalEntradas = movimentos.filter((m) => m.tipo === 'entrada').reduce((s, m) => s + m.valor, 0);
+    const totalSaidas = movimentos.filter((m) => m.tipo === 'saida').reduce((s, m) => s + m.valor, 0);
 
-    // Despesas por categoria (pizza / breakdown)
     const porCategoria = {};
-    despesas.forEach((d) => {
+    saidasRows.forEach((d) => {
       const cat = d.categoria || 'outros';
-      porCategoria[cat] = (porCategoria[cat] || 0) + parseFloat(d.total || 0);
+      porCategoria[cat] = (porCategoria[cat] || 0) + (parseFloat(d.valor) || 0);
     });
 
     res.json({
@@ -180,14 +217,16 @@ exports.getFluxoCaixa = async (req, res) => {
         total_entradas: totalEntradas,
         total_saidas: totalSaidas,
         saldo_periodo: totalEntradas - totalSaidas,
-        margem: totalEntradas > 0 ? ((totalEntradas - totalSaidas) / totalEntradas) * 100 : 0
+        margem: totalEntradas > 0 ? ((totalEntradas - totalSaidas) / totalEntradas) * 100 : 0,
+        qtd_entradas: entradasRows.length,
+        qtd_saidas: saidasRows.length
       },
+      movimentos,
       fluxo,
       despesas_por_categoria: porCategoria,
-      // séries prontas para Chart.js
       labels: fluxo.map((f) => {
-        const [y, m, d] = f.dia.split('-');
-        return `${d}/${m}`;
+        const parts = f.dia.split('-');
+        return `${parts[2]}/${parts[1]}`;
       }),
       serie_entradas: fluxo.map((f) => f.entradas),
       serie_saidas: fluxo.map((f) => f.saidas),
@@ -200,8 +239,7 @@ exports.getFluxoCaixa = async (req, res) => {
 };
 
 // =============================================================================
-// 4. ENVIAR RELATÓRIO DE FLUXO DE CAIXA POR E-MAIL (e-mail da clínica)
-// Body opcional: { mes, ano }  — senão usa mês atual
+// 4. E-MAIL FLUXO DE CAIXA — template completo com descrições
 // =============================================================================
 exports.enviarFluxoCaixaEmail = async (req, res) => {
   try {
@@ -225,58 +263,64 @@ exports.enviarFluxoCaixaEmail = async (req, res) => {
       });
     }
 
-    // Reutiliza a mesma lógica do getFluxoCaixa (chamada interna via query)
-    const [receitas] = await db.execute(
-      `SELECT DATE(data_pagamento) AS dia, SUM(valor) AS total
-       FROM financeiro
-       WHERE clinica_id = ? AND status_pagamento = 'pago' AND data_pagamento IS NOT NULL
-         AND YEAR(data_pagamento) = ? AND MONTH(data_pagamento) = ?
-       GROUP BY DATE(data_pagamento) ORDER BY dia`,
+    const [entradasRows] = await db.execute(
+      `SELECT DATE(f.data_pagamento) AS dia, f.valor, f.descricao, f.categoria, p.nome AS paciente_nome
+       FROM financeiro f
+       LEFT JOIN pacientes p ON p.id = f.paciente_id
+       WHERE f.clinica_id = ? AND f.status_pagamento = 'pago' AND f.data_pagamento IS NOT NULL
+         AND YEAR(f.data_pagamento) = ? AND MONTH(f.data_pagamento) = ?
+       ORDER BY f.data_pagamento ASC`,
       [clinica_id, ano, mes]
     );
-    const [despesas] = await db.execute(
-      `SELECT DATE(data_vencimento) AS dia, SUM(valor) AS total, categoria
+
+    const [saidasRows] = await db.execute(
+      `SELECT DATE(data_vencimento) AS dia, valor, descricao, categoria
        FROM financeiro_despesas
        WHERE clinica_id = ? AND status_pagamento = 'pago'
          AND YEAR(data_vencimento) = ? AND MONTH(data_vencimento) = ?
-       GROUP BY DATE(data_vencimento), categoria ORDER BY dia`,
+       ORDER BY data_vencimento ASC`,
       [clinica_id, ano, mes]
     );
 
-    const mapa = {};
-    const keyDia = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10));
-    receitas.forEach((r) => {
-      const k = keyDia(r.dia);
-      if (!mapa[k]) mapa[k] = { entradas: 0, saidas: 0 };
-      mapa[k].entradas += parseFloat(r.total) || 0;
-    });
-    despesas.forEach((d) => {
-      const k = keyDia(d.dia);
-      if (!mapa[k]) mapa[k] = { entradas: 0, saidas: 0 };
-      mapa[k].saidas += parseFloat(d.total) || 0;
-    });
-
-    const dias = Object.keys(mapa).sort();
     let totalE = 0;
     let totalS = 0;
-    let linhasHTML = '';
-    dias.forEach((dia) => {
-      const e = mapa[dia].entradas;
-      const s = mapa[dia].saidas;
-      totalE += e;
-      totalS += s;
+    let linhasEntrada = '';
+    let linhasSaida = '';
+
+    entradasRows.forEach((r) => {
+      const v = parseFloat(r.valor) || 0;
+      totalE += v;
+      const dia = keyDia(r.dia);
       const [y, m, d] = dia.split('-');
-      linhasHTML += `
-        <tr style="border-bottom:1px solid #eaf2f8;">
-          <td style="padding:8px;font-size:13px;">${d}/${m}/${y}</td>
-          <td style="padding:8px;font-size:13px;color:#10b981;text-align:right;">R$ ${e.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-          <td style="padding:8px;font-size:13px;color:#ef4444;text-align:right;">R$ ${s.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-          <td style="padding:8px;font-size:13px;font-weight:700;text-align:right;">R$ ${(e - s).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+      const desc = (r.descricao || r.categoria || 'Receita') + (r.paciente_nome ? ` — ${r.paciente_nome}` : '');
+      linhasEntrada += `
+        <tr>
+          <td style="padding:10px 8px;border-bottom:1px solid #e8eef5;font-size:13px;color:#475569;">${d}/${m}/${y}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #e8eef5;font-size:13px;color:#1e293b;">${desc}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #e8eef5;font-size:13px;color:#059669;font-weight:700;text-align:right;">R$ ${fmtBR(v)}</td>
         </tr>`;
     });
 
-    if (!linhasHTML) {
-      linhasHTML = `<tr><td colspan="4" style="padding:16px;text-align:center;color:#94a3b8;">Sem movimentos neste período.</td></tr>`;
+    saidasRows.forEach((r) => {
+      const v = parseFloat(r.valor) || 0;
+      totalS += v;
+      const dia = keyDia(r.dia);
+      const [y, m, d] = dia.split('-');
+      const desc = r.descricao || r.categoria || 'Despesa';
+      const cat = r.categoria ? ` <span style="color:#94a3b8;font-size:11px;">(${r.categoria})</span>` : '';
+      linhasSaida += `
+        <tr>
+          <td style="padding:10px 8px;border-bottom:1px solid #e8eef5;font-size:13px;color:#475569;">${d}/${m}/${y}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #e8eef5;font-size:13px;color:#1e293b;">${desc}${cat}</td>
+          <td style="padding:10px 8px;border-bottom:1px solid #e8eef5;font-size:13px;color:#dc2626;font-weight:700;text-align:right;">R$ ${fmtBR(v)}</td>
+        </tr>`;
+    });
+
+    if (!linhasEntrada) {
+      linhasEntrada = `<tr><td colspan="3" style="padding:16px;text-align:center;color:#94a3b8;">Nenhuma entrada no período.</td></tr>`;
+    }
+    if (!linhasSaida) {
+      linhasSaida = `<tr><td colspan="3" style="padding:16px;text-align:center;color:#94a3b8;">Nenhuma saída no período.</td></tr>`;
     }
 
     const nomesMes = ['', 'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
@@ -286,72 +330,120 @@ exports.enviarFluxoCaixaEmail = async (req, res) => {
     const dataEmissao = new Date().toLocaleString('pt-BR');
 
     const htmlEmail = `
-      <div style="font-family:Arial,sans-serif;max-width:640px;margin:0 auto;color:#1e293b;">
-        <div style="background:linear-gradient(135deg,#0891b2,#059669);padding:24px;border-radius:12px 12px 0 0;color:#fff;">
-          <h1 style="margin:0;font-size:20px;">Fluxo de Caixa — ${periodoLabel}</h1>
-          <p style="margin:8px 0 0;opacity:0.9;font-size:14px;">${clinica.nome_clinica}</p>
-        </div>
-        <div style="border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 12px 12px;">
-          <p style="font-size:13px;color:#64748b;">Emitido em ${dataEmissao}</p>
-          <table width="100%" style="margin:16px 0;border-collapse:collapse;">
-            <tr>
-              <td style="padding:12px;background:#ecfdf5;border-radius:8px;text-align:center;">
-                <div style="font-size:11px;color:#059669;font-weight:700;">ENTRADAS</div>
-                <div style="font-size:18px;font-weight:800;color:#059669;">R$ ${totalE.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-              </td>
-              <td width="8"></td>
-              <td style="padding:12px;background:#fef2f2;border-radius:8px;text-align:center;">
-                <div style="font-size:11px;color:#dc2626;font-weight:700;">SAÍDAS</div>
-                <div style="font-size:18px;font-weight:800;color:#dc2626;">R$ ${totalS.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-              </td>
-              <td width="8"></td>
-              <td style="padding:12px;background:#eff6ff;border-radius:8px;text-align:center;">
-                <div style="font-size:11px;color:#2563eb;font-weight:700;">SALDO</div>
-                <div style="font-size:18px;font-weight:800;color:${saldo >= 0 ? '#059669' : '#dc2626'};">R$ ${saldo.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-              </td>
-            </tr>
-          </table>
-          <table width="100%" style="border-collapse:collapse;margin-top:12px;">
-            <thead>
-              <tr style="border-bottom:2px solid #e2e8f0;text-align:left;">
-                <th style="padding:8px;font-size:11px;color:#64748b;">DIA</th>
-                <th style="padding:8px;font-size:11px;color:#64748b;text-align:right;">ENTRADAS</th>
-                <th style="padding:8px;font-size:11px;color:#64748b;text-align:right;">SAÍDAS</th>
-                <th style="padding:8px;font-size:11px;color:#64748b;text-align:right;">SALDO</th>
-              </tr>
-            </thead>
-            <tbody>${linhasHTML}</tbody>
-          </table>
-          <p style="margin-top:24px;font-size:11px;color:#94a3b8;text-align:center;">
-            MedLM — Relatório automático de fluxo de caixa
-          </p>
-        </div>
-      </div>`;
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 12px;">
+    <tr><td align="center">
+      <table width="100%" style="max-width:640px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#0891b2 0%,#059669 100%);padding:28px 32px;color:#fff;">
+            <div style="font-size:12px;opacity:0.85;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;">MedLM · Relatório financeiro</div>
+            <h1 style="margin:8px 0 4px;font-size:22px;font-weight:700;">Fluxo de Caixa</h1>
+            <p style="margin:0;font-size:15px;opacity:0.95;">${periodoLabel} · ${clinica.nome_clinica}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 32px;">
+            <p style="margin:0 0 16px;font-size:12px;color:#64748b;">Emitido em ${dataEmissao}</p>
 
-    // Usa o notificationService se tiver método genérico; senão tenta o de recibo adaptado
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr>
+                <td width="32%" style="background:#ecfdf5;border-radius:12px;padding:14px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;">Entradas</div>
+                  <div style="font-size:18px;font-weight:800;color:#059669;margin-top:4px;">R$ ${fmtBR(totalE)}</div>
+                </td>
+                <td width="2%"></td>
+                <td width="32%" style="background:#fef2f2;border-radius:12px;padding:14px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;">Saídas</div>
+                  <div style="font-size:18px;font-weight:800;color:#dc2626;margin-top:4px;">R$ ${fmtBR(totalS)}</div>
+                </td>
+                <td width="2%"></td>
+                <td width="32%" style="background:#eff6ff;border-radius:12px;padding:14px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:#2563eb;text-transform:uppercase;">Saldo</div>
+                  <div style="font-size:18px;font-weight:800;color:${saldo >= 0 ? '#059669' : '#dc2626'};margin-top:4px;">R$ ${fmtBR(saldo)}</div>
+                </td>
+              </tr>
+            </table>
+
+            <h2 style="margin:0 0 10px;font-size:14px;color:#059669;text-transform:uppercase;letter-spacing:0.06em;">Entradas (receitas)</h2>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+              <thead>
+                <tr style="background:#f8fafc;">
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Data</th>
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Descrição</th>
+                  <th style="padding:10px 8px;text-align:right;font-size:11px;color:#64748b;text-transform:uppercase;">Valor</th>
+                </tr>
+              </thead>
+              <tbody>${linhasEntrada}</tbody>
+            </table>
+
+            <h2 style="margin:0 0 10px;font-size:14px;color:#dc2626;text-transform:uppercase;letter-spacing:0.06em;">Saídas (despesas)</h2>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+              <thead>
+                <tr style="background:#f8fafc;">
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Data</th>
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Descrição</th>
+                  <th style="padding:10px 8px;text-align:right;font-size:11px;color:#64748b;text-transform:uppercase;">Valor</th>
+                </tr>
+              </thead>
+              <tbody>${linhasSaida}</tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8;">
+            © ${new Date().getFullYear()} MedLM — ${clinica.nome_clinica}
+            ${clinica.telefone_clinica ? ` · ${clinica.telefone_clinica}` : ''}
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`;
+
+    const assunto = `Fluxo de Caixa ${periodoLabel} — ${clinica.nome_clinica}`;
+
     if (typeof notificationService.sendHtmlEmail === 'function') {
       await notificationService.sendHtmlEmail({
         to: clinica.email_master,
-        subject: `Fluxo de Caixa ${periodoLabel} — ${clinica.nome_clinica}`,
+        subject: assunto,
         html: htmlEmail
       });
+    } else if (typeof notificationService.sendReciboEmailNotification === 'function') {
+      // Reaproveita canal de e-mail do recibo, se existir overload genérico
+      await notificationService.sendReciboEmailNotification(
+        { ...clinica, email: clinica.email_master },
+        {
+          pacienteNome: clinica.nome_clinica,
+          pacienteEmail: clinica.email_master,
+          operadorNome: 'Sistema MedLM',
+          dataEmissao,
+          linhasHTML: linhasEntrada + linhasSaida,
+          valorPago: `R$ ${fmtBR(totalE)}`,
+          valorAberto: `R$ ${fmtBR(totalS)}`,
+          assunto,
+          htmlCustom: htmlEmail,
+          tipo: 'fluxo_caixa'
+        }
+      );
     } else if (typeof notificationService.sendEmailNotification === 'function') {
-      // Fallback: muitos projetos MedLM já têm send com HTML custom
       await notificationService.sendEmailNotification(
         { ...clinica, email: clinica.email_master },
         {
           nome: clinica.nome_clinica,
           email: clinica.email_master,
-          assunto: `Fluxo de Caixa ${periodoLabel}`,
+          assunto,
           html: htmlEmail,
           tipo: 'fluxo_caixa'
         }
       );
     } else {
-      console.warn('notificationService sem método de e-mail HTML — implemente sendHtmlEmail');
       return res.status(501).json({
         success: false,
-        error: 'Serviço de e-mail ainda não expõe envio HTML. Adicione sendHtmlEmail no notificationService.',
+        error: 'Serviço de e-mail sem método HTML. Implemente sendHtmlEmail.',
         preview_html: htmlEmail
       });
     }

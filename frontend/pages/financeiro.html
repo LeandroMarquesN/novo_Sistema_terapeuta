@@ -91,15 +91,83 @@
         .page-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; font-weight: 800; }
         .page-sub { color: rgba(148,163,184,0.5); font-size: 13px; font-weight: 500; }
 
-        /* Fluxo de caixa – layout seguro desktop + mobile */
+        /* Fluxo de caixa – compacto no desktop, sempre visível */
         #secao-fluxo-caixa {
-            display: block;
+            display: block !important;
+            visibility: visible !important;
             width: 100%;
             max-width: 100%;
             box-sizing: border-box;
             clear: both;
+            margin: 20px 0 32px 0 !important;
         }
         #secao-fluxo-caixa * { box-sizing: border-box; }
+        #secao-fluxo-caixa .fluxo-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px 18px;
+            position: relative;
+            overflow: hidden;
+        }
+        #secao-fluxo-caixa .fluxo-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+            opacity: 0.4;
+        }
+        #secao-fluxo-caixa .fluxo-kpi {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+        #secao-fluxo-caixa .fluxo-kpi .lbl {
+            font-size: 9px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.1em; color: rgba(148,163,184,0.55);
+        }
+        #secao-fluxo-caixa .fluxo-kpi .val {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px; font-weight: 800; margin-top: 4px;
+        }
+        #secao-fluxo-caixa select, #secao-fluxo-caixa button {
+            min-height: 40px;
+        }
+        #graficoFluxoCaixa {
+            width: 100% !important;
+            max-height: 200px !important;
+        }
+        #secao-fluxo-caixa .mov-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        #secao-fluxo-caixa .mov-table th {
+            padding: 8px 10px;
+            font-size: 9px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: rgba(52,211,153,0.55);
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+        }
+        #secao-fluxo-caixa .mov-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(52,211,153,0.06);
+            color: rgba(203,213,225,0.85);
+            vertical-align: top;
+        }
+        #secao-fluxo-caixa .badge-in {
+            display: inline-block; padding: 2px 8px; border-radius: 6px;
+            font-size: 9px; font-weight: 800; text-transform: uppercase;
+            background: rgba(52,211,153,0.12); color: #34d399;
+            border: 1px solid rgba(52,211,153,0.25);
+        }
+        #secao-fluxo-caixa .badge-out {
+            display: inline-block; padding: 2px 8px; border-radius: 6px;
+            font-size: 9px; font-weight: 800; text-transform: uppercase;
+            background: rgba(248,113,113,0.12); color: #f87171;
+            border: 1px solid rgba(248,113,113,0.25);
+        }
 
 
         /* Search bar */
@@ -442,6 +510,18 @@
                 transform: scale(0.95);
             }
             body { padding-bottom: 108px !important; }
+
+            #secao-fluxo-caixa {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                width: 100% !important;
+                margin: 16px 0 100px 0 !important;
+            }
+            #secao-fluxo-caixa .fluxo-card { padding: 14px !important; }
+            #secao-fluxo-caixa .fluxo-kpi .val { font-size: 16px !important; }
+            #graficoFluxoCaixa { max-height: 160px !important; }
+
 
             /* Main content – precisa rolar até o fim no mobile */
             main {
@@ -808,67 +888,67 @@
         </div>
 
         <!-- ═══ Fluxo de Caixa ═══ -->
-        <section id="secao-fluxo-caixa" style="display:block;width:100%;margin:24px 0 48px 0;">
-            <div class="table-card" style="padding:20px;overflow:visible;">
-                <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+        <section id="secao-fluxo-caixa">
+            <div class="fluxo-card">
+                <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px;">
                     <div>
-                        <h2 class="text-lg font-black text-slate-100 font-['Space_Grotesk']" style="display:flex;align-items:center;gap:8px;margin:0;">
-                            <i class="fas fa-chart-line text-cyan-400"></i> Fluxo de Caixa
+                        <h2 style="margin:0;font-size:16px;font-weight:800;color:#f1f5f9;font-family:'Space Grotesk',sans-serif;display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-chart-line" style="color:#22d3ee;"></i> Fluxo de Caixa
                         </h2>
-                        <p class="text-xs text-slate-500 font-semibold" style="margin:6px 0 0 0;">Entradas × saídas · e-mail para a clínica</p>
+                        <p style="margin:4px 0 0;font-size:11px;color:rgba(148,163,184,0.55);font-weight:600;">Entradas e saídas com descrição · envio por e-mail</p>
                     </div>
                     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
-                        <select id="fluxoMes" style="padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(52,211,153,0.2);color:#e2e8f0;font-size:12px;font-weight:700;min-height:44px;">
+                        <select id="fluxoMes" style="padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(52,211,153,0.2);color:#e2e8f0;font-size:12px;font-weight:700;">
                             <option value="1">Jan</option><option value="2">Fev</option><option value="3">Mar</option>
                             <option value="4">Abr</option><option value="5">Mai</option><option value="6">Jun</option>
                             <option value="7">Jul</option><option value="8">Ago</option><option value="9">Set</option>
                             <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
                         </select>
-                        <select id="fluxoAno" style="padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(52,211,153,0.2);color:#e2e8f0;font-size:12px;font-weight:700;min-height:44px;"></select>
-                        <button type="button" onclick="carregarFluxoCaixa()" style="padding:10px 14px;border-radius:12px;background:rgba(34,211,238,0.15);border:1px solid rgba(34,211,238,0.35);color:#22d3ee;font-size:11px;font-weight:800;text-transform:uppercase;min-height:44px;cursor:pointer;">
+                        <select id="fluxoAno" style="padding:8px 10px;border-radius:10px;background:rgba(255,255,255,0.05);border:1px solid rgba(52,211,153,0.2);color:#e2e8f0;font-size:12px;font-weight:700;"></select>
+                        <button type="button" onclick="carregarFluxoCaixa()" style="padding:8px 12px;border-radius:10px;background:rgba(34,211,238,0.12);border:1px solid rgba(34,211,238,0.3);color:#22d3ee;font-size:11px;font-weight:800;cursor:pointer;">
                             <i class="fas fa-sync-alt"></i> Atualizar
                         </button>
-                        <button type="button" onclick="enviarFluxoCaixaEmail()" id="btnEmailFluxo" style="padding:10px 14px;border-radius:12px;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.35);color:#34d399;font-size:11px;font-weight:800;text-transform:uppercase;min-height:44px;cursor:pointer;">
+                        <button type="button" onclick="enviarFluxoCaixaEmail()" id="btnEmailFluxo" style="padding:8px 12px;border-radius:10px;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);color:#34d399;font-size:11px;font-weight:800;cursor:pointer;">
                             <i class="fas fa-paper-plane"></i> E-mail
                         </button>
                     </div>
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
-                    <div class="stat-card" style="padding:14px;">
-                        <div class="stat-label">Entradas</div>
-                        <div id="fluxoTotalEntradas" class="stat-value val-revenue" style="font-size:18px;margin-top:6px;">R$ 0,00</div>
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px;">
+                    <div class="fluxo-kpi">
+                        <div class="lbl">Entradas</div>
+                        <div id="fluxoTotalEntradas" class="val" style="color:#34d399;">R$ 0,00</div>
                     </div>
-                    <div class="stat-card stat-card-red" style="padding:14px;">
-                        <div class="stat-label">Saídas</div>
-                        <div id="fluxoTotalSaidas" class="stat-value val-debtors" style="font-size:18px;margin-top:6px;">R$ 0,00</div>
+                    <div class="fluxo-kpi">
+                        <div class="lbl">Saídas</div>
+                        <div id="fluxoTotalSaidas" class="val" style="color:#f87171;">R$ 0,00</div>
                     </div>
-                    <div class="stat-card" style="padding:14px;">
-                        <div class="stat-label">Saldo</div>
-                        <div id="fluxoSaldo" class="stat-value val-profit" style="font-size:18px;margin-top:6px;">R$ 0,00</div>
+                    <div class="fluxo-kpi">
+                        <div class="lbl">Saldo</div>
+                        <div id="fluxoSaldo" class="val" style="color:#34d399;">R$ 0,00</div>
                     </div>
-                    <div class="stat-card stat-card-cyan" style="padding:14px;">
-                        <div class="stat-label">Margem</div>
-                        <div id="fluxoMargem" class="stat-value val-ltv" style="font-size:18px;margin-top:6px;">0%</div>
+                    <div class="fluxo-kpi">
+                        <div class="lbl">Margem</div>
+                        <div id="fluxoMargem" class="val" style="color:#22d3ee;">0%</div>
                     </div>
                 </div>
 
-                <div style="width:100%;margin-bottom:16px;">
-                    <canvas id="graficoFluxoCaixa" style="width:100%!important;max-width:100%;height:220px!important;"></canvas>
+                <div style="width:100%;max-height:200px;margin-bottom:14px;">
+                    <canvas id="graficoFluxoCaixa" height="160"></canvas>
                 </div>
 
-                <div style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;">
-                    <table class="fin-table" style="width:100%;min-width:320px;font-size:12px;">
+                <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;max-height:280px;overflow-y:auto;">
+                    <table class="mov-table">
                         <thead>
                             <tr>
-                                <th style="text-align:left;padding:10px 8px;">Dia</th>
-                                <th style="text-align:right;padding:10px 8px;">Entradas</th>
-                                <th style="text-align:right;padding:10px 8px;">Saídas</th>
-                                <th style="text-align:right;padding:10px 8px;">Acumulado</th>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th style="text-align:right;">Valor</th>
                             </tr>
                         </thead>
                         <tbody id="tabelaFluxoCaixa">
-                            <tr><td colspan="4" style="text-align:center;padding:24px;color:#64748b;">Carregando...</td></tr>
+                            <tr><td colspan="4" style="text-align:center;padding:20px;color:#64748b;">Carregando...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1267,17 +1347,25 @@
       document.getElementById('fluxoSaldo').innerText = fmt(data.resumo.saldo_periodo);
       document.getElementById('fluxoMargem').innerText = Math.round(data.resumo.margem || 0) + '%';
 
-      const tbody = document.getElementById('tabelaFluxoCaixa');
-      if (!data.fluxo || data.fluxo.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center py-6 text-slate-500">Sem movimentos neste período</td></tr>';
+      var tbody = document.getElementById('tabelaFluxoCaixa');
+      var movs = data.movimentos || [];
+      if (!movs.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#64748b;">Sem movimentos neste período</td></tr>';
       } else {
-        tbody.innerHTML = data.fluxo.map(function (f) {
-          var parts = f.dia.split('-');
-          var d = parts[2], m = parts[1];
-          return '<tr><td>' + d + '/' + m + '</td>' +
-            '<td class="text-right text-emerald-400 font-bold">' + fmt(f.entradas) + '</td>' +
-            '<td class="text-right text-red-400 font-bold">' + fmt(f.saidas) + '</td>' +
-            '<td class="text-right font-black ' + (f.saldo_acumulado >= 0 ? 'text-cyan-400' : 'text-red-400') + '">' + fmt(f.saldo_acumulado) + '</td></tr>';
+        tbody.innerHTML = movs.map(function (m) {
+          var parts = String(m.dia).split('-');
+          var d = parts[2] + '/' + parts[1];
+          var badge = m.tipo === 'entrada'
+            ? '<span class="badge-in">Entrada</span>'
+            : '<span class="badge-out">Saída</span>';
+          var cor = m.tipo === 'entrada' ? '#34d399' : '#f87171';
+          var sinal = m.tipo === 'entrada' ? '' : '-';
+          return '<tr>' +
+            '<td style="white-space:nowrap;">' + d + '</td>' +
+            '<td>' + badge + '</td>' +
+            '<td>' + (m.descricao || '-') + (m.categoria ? ' <span style="color:#64748b;font-size:10px;">(' + m.categoria + ')</span>' : '') + '</td>' +
+            '<td style="text-align:right;font-weight:800;color:' + cor + ';white-space:nowrap;">' + sinal + fmt(m.valor) + '</td>' +
+          '</tr>';
         }).join('');
       }
 
@@ -1296,6 +1384,7 @@
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
             scales: {
               x: { ticks: { color: '#64748b' }, grid: { color: 'rgba(255,255,255,0.04)' } },
