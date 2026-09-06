@@ -15,6 +15,8 @@ const elementosFicha = {
   cargoUsuario: document.getElementById('cargoUsuarioHeader'),
   crmUsuario: document.getElementById('crmUsuarioHeader'),
   pacienteHeader: document.getElementById('nomePacienteHeader'),
+  fotoPaciente: document.getElementById('fotoPacienteHeader'),
+  fotoPacienteFallback: document.getElementById('fotoPacienteFallback'),
   cpf: document.getElementById('infoCpf'),
   email: document.getElementById('infoEmail'),
   whatsapp: document.getElementById('infoWhatsapp'),
@@ -105,6 +107,25 @@ async function carregarFichaPaciente(pacienteId) {
     const p = await response.json();
 
     if (elementosFicha.pacienteHeader) elementosFicha.pacienteHeader.innerText = p.nome?.toUpperCase() || '---';
+
+    // Foto do paciente (Cloudinary) — cai no ícone padrão se não houver foto ou se o link falhar
+    if (elementosFicha.fotoPaciente && elementosFicha.fotoPacienteFallback) {
+      if (p.foto_perfil) {
+        elementosFicha.fotoPaciente.src = p.foto_perfil;
+        elementosFicha.fotoPaciente.onload = () => {
+          elementosFicha.fotoPaciente.classList.remove('hidden');
+          elementosFicha.fotoPacienteFallback.classList.add('hidden');
+        };
+        elementosFicha.fotoPaciente.onerror = () => {
+          elementosFicha.fotoPaciente.classList.add('hidden');
+          elementosFicha.fotoPacienteFallback.classList.remove('hidden');
+        };
+      } else {
+        elementosFicha.fotoPaciente.classList.add('hidden');
+        elementosFicha.fotoPacienteFallback.classList.remove('hidden');
+      }
+    }
+
     if (elementosFicha.cpf) elementosFicha.cpf.innerText = formatarCPF(p.cpf) || 'Não informado';
     if (elementosFicha.email) elementosFicha.email.innerText = p.email || '---';
 
