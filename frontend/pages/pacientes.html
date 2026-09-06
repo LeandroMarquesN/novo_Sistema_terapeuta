@@ -852,6 +852,11 @@
               <input type="text" id="editCpf" class="search-bar form-control">
             </div>
             <div class="col-md-6">
+              <label class="modal-info-label">Data de Nascimento</label>
+              <input type="date" id="editDataNascimento" class="search-bar form-control">
+              <small id="editIdadePreview" style="display:block;margin-top:6px;font-size:11px;color:rgba(52,211,153,0.75);font-weight:600;"></small>
+            </div>
+            <div class="col-md-6">
               <label class="modal-info-label">Telefone</label>
               <input type="text" id="editTelefone" class="search-bar form-control">
             </div>
@@ -861,7 +866,7 @@
             </div>
             <div class="col-md-4">
               <label class="modal-info-label">Tipo Sanguíneo</label>
-              <input type="text" id="editTipoSanguineo" class="search-bar form-control">
+              <input type="text" id="editTipoSanguineo" class="search-bar form-control" placeholder="Ex: O+">
             </div>
             <div class="col-md-4">
               <label class="modal-info-label">Peso (kg)</label>
@@ -1408,6 +1413,49 @@
     }
 
     // ── ATUALIZAR CADASTRO ────────────────────────────────
+    function formatarDataParaInput(valor) {
+      if (!valor) return '';
+      const str = String(valor).trim();
+      if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.substring(0, 10);
+      const br = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      if (br) return `${br[3]}-${br[2]}-${br[1]}`;
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }
+      return '';
+    }
+
+    function calcularIdadeDeData(isoDate) {
+      if (!isoDate) return null;
+      const nasc = new Date(isoDate + 'T00:00:00');
+      if (isNaN(nasc.getTime())) return null;
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - nasc.getFullYear();
+      const m = hoje.getMonth() - nasc.getMonth();
+      if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+      return idade >= 0 && idade < 150 ? idade : null;
+    }
+
+    function atualizarPreviewIdade() {
+      const input = document.getElementById('editDataNascimento');
+      const preview = document.getElementById('editIdadePreview');
+      if (!input || !preview) return;
+      const idade = calcularIdadeDeData(input.value);
+      if (idade === null) {
+        preview.textContent = input.value
+          ? 'Data inválida — confira o dia, mês e ano.'
+          : 'A idade é calculada automaticamente pela data de nascimento.';
+        preview.style.color = input.value ? 'var(--red)' : 'rgba(52,211,153,0.75)';
+      } else {
+        preview.textContent = `Idade calculada: ${idade} ano${idade === 1 ? '' : 's'}`;
+        preview.style.color = 'rgba(52,211,153,0.85)';
+      }
+    }
+
     async function abrirEdicaoPaciente(id) {
       try {
         const token = localStorage.getItem('token');
@@ -1427,6 +1475,12 @@
         document.getElementById('editAltura').value = p.altura || '';
         document.getElementById('editCondicoes').value = p.condicoes_preexistentes || '';
 
+        const dn = p.data_nascimento || p.dataNascimento || p.nascimento || p.dt_nascimento || '';
+        const inputNasc = document.getElementById('editDataNascimento');
+        inputNasc.max = new Date().toISOString().substring(0, 10);
+        inputNasc.value = formatarDataParaInput(dn);
+        atualizarPreviewIdade();
+
         new bootstrap.Modal(document.getElementById('modalEditarPaciente')).show();
       } catch (e) {
         console.error(e);
@@ -1436,11 +1490,19 @@
 
     async function salvarEdicaoPaciente() {
       const id = document.getElementById('editPacienteId').value;
+      const dataNascimento = document.getElementById('editDataNascimento').value || null;
+
+      if (dataNascimento && calcularIdadeDeData(dataNascimento) === null) {
+        alert('Data de nascimento inválida. Verifique o valor informado.');
+        return;
+      }
+
       const payload = {
         nome: document.getElementById('editNome').value,
         cpf: document.getElementById('editCpf').value,
         telefone: document.getElementById('editTelefone').value,
         email: document.getElementById('editEmail').value,
+        data_nascimento: dataNascimento,
         tipo_sanguineo: document.getElementById('editTipoSanguineo').value,
         peso: document.getElementById('editPeso').value || null,
         altura: document.getElementById('editAltura').value || null,
@@ -1460,7 +1522,7 @@
         const data = await res.json().catch(() => ({}));
 
         if (!res.ok) {
-          alert(data.message || 'Não foi possível atualizar o cadastro.');
+          alert(data.message || data.erro || 'Não foi possível atualizar o cadastro.');
           return;
         }
 
@@ -1471,6 +1533,14 @@
         alert('Erro de conexão ao salvar cadastro.');
       }
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const inputNasc = document.getElementById('editDataNascimento');
+      if (inputNasc) {
+        inputNasc.addEventListener('change', atualizarPreviewIdade);
+        inputNasc.addEventListener('input', atualizarPreviewIdade);
+      }
+    });
 
     // ── ENVIAR TOKEN DE ACESSO ────────────────────────────
     async function enviarTokenAcesso(id, nome) {

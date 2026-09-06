@@ -16,6 +16,13 @@ const frontendPath = path.resolve(__dirname, '..', '..', 'frontend');
 router.get('/login', portalPacienteController.validarAcessoPortal);
 router.get('/api/dados', verificarAcessoPortal, portalPacienteController.getDadosPortal);
 
+// Atualizar dados cadastrais (nome, data_nascimento, telefone, etc.)
+router.patch(
+    '/api/atualizar-dados',
+    verificarAcessoPortal,
+    portalPacienteController.atualizarDadosPortal
+);
+
 // Nova rota de upload
 router.post(
     '/api/upload-documento',

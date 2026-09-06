@@ -115,6 +115,84 @@ exports.getDadosPortal = async (req, res) => {
 };
 
 /**
+ * Atualiza dados cadastrais do paciente logado no portal
+ * (inclui data_nascimento e recalcula idade)
+ */
+exports.atualizarDadosPortal = async (req, res) => {
+    try {
+        const sessao = req.session.pacientePortal;
+
+        if (!sessao || !sessao.id) {
+            return res.status(401).json({ error: "Sessão inválida. Acesse pelo link do e-mail." });
+        }
+
+        const pacienteId = sessao.id;
+        const clinicaId = sessao.clinicaId;
+
+        const {
+            nome,
+            data_nascimento,
+            telefone,
+            tipo_sanguineo,
+            email
+        } = req.body || {};
+
+        let idade = null;
+        if (data_nascimento) {
+            const nasc = new Date(String(data_nascimento).substring(0, 10) + 'T00:00:00');
+            if (Number.isNaN(nasc.getTime())) {
+                return res.status(400).json({ error: "Data de nascimento inválida." });
+            }
+            const hoje = new Date();
+            idade = hoje.getFullYear() - nasc.getFullYear();
+            const m = hoje.getMonth() - nasc.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+            if (idade < 0 || idade > 150) {
+                return res.status(400).json({ error: "Data de nascimento inválida." });
+            }
+        }
+
+        const [rows] = await db.query(
+            'SELECT id FROM pacientes WHERE id = ? AND clinica_id = ? LIMIT 1',
+            [pacienteId, clinicaId]
+        );
+        if (!rows.length) {
+            return res.status(404).json({ error: "Paciente não encontrado." });
+        }
+
+        await db.query(
+            `UPDATE pacientes SET
+                nome = COALESCE(?, nome),
+                data_nascimento = COALESCE(?, data_nascimento),
+                idade = COALESCE(?, idade),
+                telefone = COALESCE(?, telefone),
+                tipo_sanguineo = COALESCE(?, tipo_sanguineo),
+                email = COALESCE(?, email)
+             WHERE id = ? AND clinica_id = ?`,
+            [
+                nome || null,
+                data_nascimento || null,
+                idade,
+                telefone || null,
+                tipo_sanguineo || null,
+                email || null,
+                pacienteId,
+                clinicaId
+            ]
+        );
+
+        return res.json({
+            ok: true,
+            message: "Dados atualizados com sucesso.",
+            idade
+        });
+    } catch (error) {
+        console.error("Erro ao atualizar dados do portal:", error);
+        return res.status(500).json({ error: "Erro ao atualizar dados." });
+    }
+};
+
+/**
  * Upload de exames/documentos pelo paciente
  */
 exports.uploadDocumentoPortal = async (req, res) => {

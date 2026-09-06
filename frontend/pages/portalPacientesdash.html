@@ -265,17 +265,28 @@
             <!-- Perfil + Agendamentos -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div class="glass panel p-6 sm:p-7">
-                    <div class="flex items-center gap-4 mb-5">
-                        <div class="icon-chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">👤</div>
-                        <div>
-                            <h3 class="font-bold text-lg text-white">Seus Dados</h3>
-                            <p class="text-xs text-slate-400">Informações cadastrais</p>
+                    <div class="flex items-center justify-between gap-3 mb-5">
+                        <div class="flex items-center gap-4 min-w-0">
+                            <div class="icon-chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">👤</div>
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-lg text-white">Seus Dados</h3>
+                                <p class="text-xs text-slate-400">Informações cadastrais</p>
+                            </div>
                         </div>
+                        <button type="button" id="btnEditarDados"
+                            class="shrink-0 text-xs font-semibold text-emerald-400 hover:text-emerald-300 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 transition-colors">
+                            Editar
+                        </button>
                     </div>
-                    <div class="space-y-0">
+
+                    <div id="dadosView" class="space-y-0">
                         <div class="stat-row flex justify-between items-center py-3">
                             <span class="text-sm text-slate-400">Nome</span>
                             <span id="nome" class="text-sm font-semibold text-white text-right">...</span>
+                        </div>
+                        <div class="stat-row flex justify-between items-center py-3">
+                            <span class="text-sm text-slate-400">Data de Nascimento</span>
+                            <span id="dataNascimentoView" class="text-sm font-semibold text-white">...</span>
                         </div>
                         <div class="stat-row flex justify-between items-center py-3">
                             <span class="text-sm text-slate-400">Idade</span>
@@ -285,7 +296,57 @@
                             <span class="text-sm text-slate-400">Tipo Sanguíneo</span>
                             <span id="sangue" class="text-sm font-semibold text-amber-400 mono">...</span>
                         </div>
+                        <div class="stat-row flex justify-between items-center py-3">
+                            <span class="text-sm text-slate-400">Telefone</span>
+                            <span id="telefoneView" class="text-sm font-semibold text-white">...</span>
+                        </div>
+                        <div class="stat-row flex justify-between items-center py-3">
+                            <span class="text-sm text-slate-400">E-mail</span>
+                            <span id="emailView" class="text-sm font-semibold text-white text-right truncate max-w-[60%]">...</span>
+                        </div>
                     </div>
+
+                    <form id="formEditarDados" class="hidden space-y-4">
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1.5">Nome completo</label>
+                            <input type="text" id="editPortalNome" required
+                                class="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1.5">Data de Nascimento</label>
+                            <input type="date" id="editPortalNascimento"
+                                class="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50">
+                            <p id="editPortalIdadePreview" class="text-xs text-emerald-400/80 mt-1.5"></p>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1.5">Telefone</label>
+                                <input type="tel" id="editPortalTelefone"
+                                    class="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-slate-400 mb-1.5">Tipo Sanguíneo</label>
+                                <input type="text" id="editPortalSangue" placeholder="Ex: O+"
+                                    class="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-400 mb-1.5">E-mail</label>
+                            <input type="email" id="editPortalEmail"
+                                class="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500/50">
+                        </div>
+                        <p id="editPortalMsg" class="text-xs hidden"></p>
+                        <div class="flex flex-col-reverse sm:flex-row gap-2 pt-1">
+                            <button type="button" id="btnCancelarEdicao"
+                                class="w-full sm:w-auto px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+                                Cancelar
+                            </button>
+                            <button type="submit" id="btnSalvarDados"
+                                class="w-full sm:flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-cyan-400 hover:opacity-95 transition-opacity">
+                                Salvar alterações
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
                 <div class="glass panel p-6 sm:p-7">
@@ -512,12 +573,142 @@
             }
         }
 
+        // ========== Helpers de data / idade ==========
+        function formatarDataParaInput(valor) {
+            if (!valor) return '';
+            const str = String(valor).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.substring(0, 10);
+            const br = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+            if (br) return `${br[3]}-${br[2]}-${br[1]}`;
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            }
+            return '';
+        }
+
+        function formatarDataBR(valor) {
+            const iso = formatarDataParaInput(valor);
+            if (!iso) return '—';
+            const [y, m, d] = iso.split('-');
+            return `${d}/${m}/${y}`;
+        }
+
+        function calcularIdadeDeData(isoDate) {
+            if (!isoDate) return null;
+            const nasc = new Date(isoDate + 'T00:00:00');
+            if (isNaN(nasc.getTime())) return null;
+            const hoje = new Date();
+            let idade = hoje.getFullYear() - nasc.getFullYear();
+            const m = hoje.getMonth() - nasc.getMonth();
+            if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+            return idade >= 0 && idade < 150 ? idade : null;
+        }
+
+        let pacienteCache = null;
+
+        function atualizarPreviewIdadePortal() {
+            const input = document.getElementById('editPortalNascimento');
+            const preview = document.getElementById('editPortalIdadePreview');
+            if (!input || !preview) return;
+            const idade = calcularIdadeDeData(input.value);
+            if (idade === null) {
+                preview.textContent = input.value ? 'Data inválida.' : 'A idade é calculada pela data de nascimento.';
+            } else {
+                preview.textContent = `Idade calculada: ${idade} ano${idade === 1 ? '' : 's'}`;
+            }
+        }
+
+        function abrirEdicaoDados() {
+            if (!pacienteCache) return;
+            const p = pacienteCache;
+            document.getElementById('editPortalNome').value = p.nome || '';
+            const dn = p.data_nascimento || p.dataNascimento || p.nascimento || '';
+            const inputNasc = document.getElementById('editPortalNascimento');
+            inputNasc.max = new Date().toISOString().substring(0, 10);
+            inputNasc.value = formatarDataParaInput(dn);
+            document.getElementById('editPortalTelefone').value = p.telefone || '';
+            document.getElementById('editPortalSangue').value = p.tipo_sanguineo || '';
+            document.getElementById('editPortalEmail').value = p.email || '';
+            atualizarPreviewIdadePortal();
+            document.getElementById('dadosView').classList.add('hidden');
+            document.getElementById('formEditarDados').classList.remove('hidden');
+            document.getElementById('btnEditarDados').classList.add('hidden');
+            const msg = document.getElementById('editPortalMsg');
+            msg.classList.add('hidden');
+            msg.textContent = '';
+        }
+
+        function cancelarEdicaoDados() {
+            document.getElementById('dadosView').classList.remove('hidden');
+            document.getElementById('formEditarDados').classList.add('hidden');
+            document.getElementById('btnEditarDados').classList.remove('hidden');
+        }
+
+        async function salvarDadosPortal(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSalvarDados');
+            const msg = document.getElementById('editPortalMsg');
+            const dataNascimento = document.getElementById('editPortalNascimento').value || null;
+
+            if (dataNascimento && calcularIdadeDeData(dataNascimento) === null) {
+                msg.textContent = 'Data de nascimento inválida.';
+                msg.className = 'text-xs text-rose-400';
+                msg.classList.remove('hidden');
+                return;
+            }
+
+            const payload = {
+                nome: document.getElementById('editPortalNome').value.trim(),
+                data_nascimento: dataNascimento,
+                telefone: document.getElementById('editPortalTelefone').value.trim(),
+                tipo_sanguineo: document.getElementById('editPortalSangue').value.trim(),
+                email: document.getElementById('editPortalEmail').value.trim()
+            };
+
+            btn.disabled = true;
+            btn.textContent = 'Salvando...';
+            msg.classList.add('hidden');
+
+            try {
+                const res = await fetch('/portal_paciente/api/atualizar-dados', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(data.error || data.message || 'Não foi possível salvar.');
+
+                msg.textContent = 'Dados atualizados com sucesso!';
+                msg.className = 'text-xs text-emerald-400';
+                msg.classList.remove('hidden');
+
+                setTimeout(() => {
+                    cancelarEdicaoDados();
+                    carregarDados();
+                }, 700);
+            } catch (err) {
+                console.error(err);
+                msg.textContent = err.message || 'Erro ao salvar.';
+                msg.className = 'text-xs text-rose-400';
+                msg.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Salvar alterações';
+            }
+        }
+
         // ========== Carregar Dados ==========
         function carregarDados() {
             fetch('/portal_paciente/api/dados')
                 .then(r => r.json())
                 .then(data => {
                     if (!data || !data.paciente) throw new Error("Dados não encontrados");
+
+                    pacienteCache = data.paciente;
 
                     // Cabeçalho
                     document.getElementById('boasVindas').innerText = `Olá, ${data.paciente.nome}`;
@@ -526,8 +717,16 @@
 
                     // Perfil
                     document.getElementById('nome').innerText = data.paciente.nome;
-                    document.getElementById('idade').innerText = (data.paciente.idade || '--') + ' anos';
+                    const dn = data.paciente.data_nascimento || data.paciente.dataNascimento || data.paciente.nascimento || '';
+                    document.getElementById('dataNascimentoView').innerText = formatarDataBR(dn);
+                    const idadeCalc = calcularIdadeDeData(formatarDataParaInput(dn));
+                    document.getElementById('idade').innerText =
+                        (idadeCalc !== null ? idadeCalc : (data.paciente.idade || '--')) + ' anos';
                     document.getElementById('sangue').innerText = data.paciente.tipo_sanguineo || 'N/A';
+                    const telEl = document.getElementById('telefoneView');
+                    if (telEl) telEl.innerText = data.paciente.telefone || '—';
+                    const emailEl = document.getElementById('emailView');
+                    if (emailEl) emailEl.innerText = data.paciente.email || '—';
 
                     // Botão agendar
                     const btnAgendar = document.getElementById('btnAgendar');
@@ -619,37 +818,46 @@
                 });
         }
 
-        // ========== Eventos de Upload ==========
+        // ========== Eventos ==========
         document.addEventListener("DOMContentLoaded", () => {
             carregarDados();
+
+            const btnEditar = document.getElementById('btnEditarDados');
+            const btnCancelar = document.getElementById('btnCancelarEdicao');
+            const formEditar = document.getElementById('formEditarDados');
+            const inputNasc = document.getElementById('editPortalNascimento');
+
+            if (btnEditar) btnEditar.addEventListener('click', abrirEdicaoDados);
+            if (btnCancelar) btnCancelar.addEventListener('click', cancelarEdicaoDados);
+            if (formEditar) formEditar.addEventListener('submit', salvarDadosPortal);
+            if (inputNasc) {
+                inputNasc.addEventListener('change', atualizarPreviewIdadePortal);
+                inputNasc.addEventListener('input', atualizarPreviewIdadePortal);
+            }
 
             const zone = document.getElementById('uploadZone');
             const fileInput = document.getElementById('fileInput');
 
-            zone.addEventListener('click', () => fileInput.click());
-
-            zone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                zone.classList.add('dragover');
-            });
-
-            zone.addEventListener('dragleave', () => {
-                zone.classList.remove('dragover');
-            });
-
-            zone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                zone.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) enviarArquivo(files[0]);
-            });
-
-            fileInput.addEventListener('change', () => {
-                if (fileInput.files.length > 0) {
-                    enviarArquivo(fileInput.files[0]);
-                    fileInput.value = '';
-                }
-            });
+            if (zone && fileInput) {
+                zone.addEventListener('click', () => fileInput.click());
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('dragover');
+                });
+                zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) enviarArquivo(files[0]);
+                });
+                fileInput.addEventListener('change', () => {
+                    if (fileInput.files.length > 0) {
+                        enviarArquivo(fileInput.files[0]);
+                        fileInput.value = '';
+                    }
+                });
+            }
         });
     </script>
 </body>

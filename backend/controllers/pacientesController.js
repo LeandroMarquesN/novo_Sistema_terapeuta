@@ -347,6 +347,18 @@ exports.atualizarFoto = async (req, res) => {
 // ─────────────────────────────────────────────
 // Atualizar cadastro do paciente
 // ─────────────────────────────────────────────
+function calcularIdade(dataNascimento) {
+    if (!dataNascimento) return null;
+    const nasc = new Date(String(dataNascimento).substring(0, 10) + 'T00:00:00');
+    if (Number.isNaN(nasc.getTime())) return null;
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - nasc.getFullYear();
+    const m = hoje.getMonth() - nasc.getMonth();
+    if (m < 0 || (m === 0 && hoje.getDate() < nasc.getDate())) idade--;
+    if (idade < 0 || idade > 150) return null;
+    return idade;
+}
+
 exports.atualizarPaciente = async (req, res) => {
     if (!req.usuario) {
         return res.status(401).json({ success: false, message: 'Não autenticado' });
@@ -364,7 +376,29 @@ exports.atualizarPaciente = async (req, res) => {
 
     const dados = {};
     for (const campo of camposPermitidos) {
-        if (req.body[campo] !== undefined) dados[campo] = req.body[campo];
+        if (req.body[campo] !== undefined) {
+            if (campo === 'data_nascimento' && (req.body[campo] === '' || req.body[campo] === null)) {
+                dados[campo] = null;
+            } else {
+                dados[campo] = req.body[campo];
+            }
+        }
+    }
+
+    // Se veio data_nascimento, recalcula e grava a idade
+    if (Object.prototype.hasOwnProperty.call(dados, 'data_nascimento')) {
+        if (dados.data_nascimento) {
+            const idade = calcularIdade(dados.data_nascimento);
+            if (idade === null) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Data de nascimento inválida.'
+                });
+            }
+            dados.idade = idade;
+        } else {
+            dados.idade = null;
+        }
     }
 
     if (Object.keys(dados).length === 0) {
