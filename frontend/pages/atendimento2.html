@@ -171,10 +171,6 @@
             box-shadow: 0 0 0 4px rgba(52,211,153,0.08) !important;
         }
         .input-premium::placeholder { color: rgba(148,163,184,0.3) !important; }
-        .input-premium:disabled {
-            opacity: 0.55; cursor: not-allowed;
-            background: rgba(255,255,255,0.015) !important;
-        }
 
         .btn-primary-gradient {
             background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
@@ -617,7 +613,7 @@
                             
                             <!-- Linha 1: Ações principais -->
                             <div class="flex flex-col sm:flex-row gap-2">
-                                <button type="button" onclick="limparFormulario()" id="btnLimparFormulario"
+                                <button type="button" onclick="limparFormulario()" 
                                         class="btn-secondary flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider">
                                     Limpar
                                 </button>
@@ -626,13 +622,6 @@
                                         class="btn-primary-gradient flex-1 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
                                     <i class="fas fa-file-signature text-[11px]"></i>
                                     <span>Finalizar e Assinar</span>
-                                </button>
-
-                                <button type="button" onclick="criarNovoProntuario()" id="btnNovoProntuario"
-                                        class="hidden flex-1 px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider items-center justify-center gap-2"
-                                        style="background: rgba(34,211,238,0.12); border: 1px solid rgba(34,211,238,0.35); color: var(--cyan);">
-                                    <i class="fas fa-file-medical text-[11px]"></i>
-                                    <span>Criar novo prontuário</span>
                                 </button>
                             </div>
 
@@ -727,39 +716,8 @@
         document.getElementById('dataAtualAtendimento').innerText = new Date().toLocaleDateString('pt-BR');
 
         function limparFormulario() {
-            // Trava de segurança: nunca limpar por cima de um prontuário já finalizado.
-            // Se o usuário quer começar um registro novo a partir de um finalizado,
-            // o caminho correto é o botão "Criar novo prontuário".
-            if (document.querySelector('.prontuario-container')?.classList.contains('prontuario-travado')) {
-                return;
-            }
             quill.setContents([]);
             document.getElementById('diagnosticoCid').value = '';
-        }
-
-        /**
-         * Inicia um prontuário novo vinculado ao mesmo paciente em atendimento.
-         * Não existe fluxo de edição/PUT neste sistema — "Finalizar e Assinar" sempre
-         * cria um registro novo (POST) já finalizado. Esta função só zera o formulário
-         * e destrava a interface para essa próxima entrada.
-         */
-        function criarNovoProntuario() {
-            document.getElementById('idDoProntuarioAtual').value = '';
-            document.getElementById('diagnosticoCid').value = '';
-            quill.setContents([]);
-
-            aplicarEstadoProntuario('rascunho');
-
-            document.getElementById('dataAtualAtendimento').innerText = new Date().toLocaleDateString('pt-BR');
-
-            // visualizarEvolucaoAntiga() troca o cabeçalho pelo profissional que assinou
-            // o registro antigo — restaura para o profissional realmente logado agora.
-            if (typeof carregarDadosSessaoSaaS === 'function') {
-                carregarDadosSessaoSaaS();
-            }
-
-            document.getElementById('editorEvolucao').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            quill.focus();
         }
 
         function aplicarEstadoProntuario(status) {
@@ -767,32 +725,10 @@
             const badge = document.getElementById('badgeFinalizado');
             const isFinalizado = status === 'finalizado';
 
-            // Editor de texto
             quill.enable(!isFinalizado);
-
-            // Campo de CID — antes ficava editável mesmo com o prontuário travado
-            const campoCid = document.getElementById('diagnosticoCid');
-            campoCid.disabled = isFinalizado;
-
             container.classList.toggle('prontuario-travado', isFinalizado);
             badge.classList.toggle('hidden', !isFinalizado);
             badge.classList.toggle('flex', isFinalizado);
-
-            // Ações: um prontuário finalizado não pode ser reassinado nem "limpo"
-            // por cima — só dá pra criar um registro novo a partir dele.
-            const btnSalvar = document.getElementById('btnSalvarProntuario');
-            const btnNovo = document.getElementById('btnNovoProntuario');
-            const btnLimpar = document.getElementById('btnLimparFormulario');
-
-            btnSalvar.classList.toggle('hidden', isFinalizado);
-            btnSalvar.classList.toggle('flex', !isFinalizado);
-
-            btnNovo.classList.toggle('hidden', !isFinalizado);
-            btnNovo.classList.toggle('flex', isFinalizado);
-
-            btnLimpar.disabled = isFinalizado;
-            btnLimpar.style.opacity = isFinalizado ? '0.4' : '1';
-            btnLimpar.style.cursor = isFinalizado ? 'not-allowed' : 'pointer';
         }
 
         function aplicarTemaSalvo() {
