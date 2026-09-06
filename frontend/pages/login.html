@@ -31,33 +31,66 @@
     body {
       font-family: 'Inter', sans-serif;
       background-color: var(--slate-bg);
-      background-image:
-        radial-gradient(ellipse 70% 60% at 20% 0%,   rgba(8,145,178,0.22) 0%, transparent 65%),
-        radial-gradient(ellipse 60% 55% at 80% 100%, rgba(5,150,105,0.20) 0%, transparent 65%),
-        radial-gradient(ellipse 40% 35% at 50% 50%,  rgba(251,191,36,0.04) 0%, transparent 70%);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
       color: #cbd5e1;
       overflow: hidden;
+      position: relative;
     }
 
-    /* Scanlines */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
+    /* ─── Video background ─── */
+    .video-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      background: #020c12;
+    }
+    .video-bg video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      filter: brightness(0.40) saturate(1.2) contrast(1.05);
+    }
+    .video-bg .fallback {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 60% at 20% 0%,   rgba(8,145,178,0.22) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 55% at 80% 100%, rgba(5,150,105,0.20) 0%, transparent 65%),
+        linear-gradient(180deg, #020617, #04151c 50%, #020c12);
+    }
+    .video-overlay {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(2, 12, 18, 0.6) 0%, rgba(2, 12, 18, 0.4) 40%, rgba(2, 12, 18, 0.8) 100%),
+        radial-gradient(ellipse at center, transparent 20%, rgba(2, 12, 18, 0.55) 100%);
+      pointer-events: none;
+    }
+    .video-scanlines {
+      position: absolute;
+      inset: 0;
       background: repeating-linear-gradient(
         0deg, transparent, transparent 2px,
-        rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+        rgba(0, 0, 0, 0.07) 2px, rgba(0, 0, 0, 0.07) 4px
       );
-      pointer-events: none; z-index: 0;
+      pointer-events: none;
+      opacity: 0.6;
     }
 
     /* ─── Orbs ─── */
     .orb {
       position: fixed; border-radius: 50%;
-      pointer-events: none; filter: blur(80px); z-index: 0;
+      pointer-events: none; filter: blur(80px); z-index: 1;
     }
     .orb-1 {
       width: 500px; height: 500px;
@@ -82,12 +115,13 @@
 
     /* Grid lines */
     .hero-grid {
-      position: fixed; inset: 0; z-index: 0;
+      position: fixed; inset: 0; z-index: 1;
       background-image:
         linear-gradient(rgba(52,211,153,0.035) 1px, transparent 1px),
         linear-gradient(90deg, rgba(52,211,153,0.035) 1px, transparent 1px);
       background-size: 60px 60px;
       mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+      pointer-events: none;
     }
 
     /* ─── Card ─── */
@@ -98,7 +132,7 @@
     }
 
     .login-container {
-      background: rgba(255,255,255,0.025);
+      background: rgba(2, 12, 18, 0.65);
       border: 1px solid var(--border);
       border-radius: 28px;
       padding: 44px 40px;
@@ -106,8 +140,8 @@
       -webkit-backdrop-filter: blur(24px);
       box-shadow:
         0 0 0 1px rgba(52,211,153,0.05),
-        0 32px 80px rgba(0,0,0,0.5),
-        0 0 60px rgba(8,145,178,0.08);
+        0 32px 80px rgba(0,0,0,0.6),
+        0 0 60px rgba(8,145,178,0.12);
       position: relative;
       overflow: hidden;
     }
@@ -256,7 +290,6 @@
       background: rgba(52,211,153,0.04);
       box-shadow: 0 0 0 3px rgba(52,211,153,0.08), 0 0 20px rgba(52,211,153,0.06);
     }
-    .form-control:focus + .input-focus-ring { opacity: 1; }
     .input-wrap:focus-within .input-icon { color: var(--emerald); }
 
     /* ─── Submit button ─── */
@@ -316,8 +349,6 @@
 
     /* ============================================================
        MOBILE / TABLET (≤ 768px)
-       Letras maiores • Campos maiores • Ícones à direita
-       Bordas mais grossas • Visual mais futurista
        ============================================================ */
     @media (max-width: 768px) {
 
@@ -341,28 +372,19 @@
         border-radius: 24px;
         border-width: 2px;
         border-color: rgba(52,211,153,0.28);
-        box-shadow:
-          0 0 0 1px rgba(52,211,153,0.08),
-          0 24px 60px rgba(0,0,0,0.55),
-          0 0 40px rgba(8,145,178,0.12),
-          inset 0 1px 0 rgba(255,255,255,0.04);
       }
 
-      /* Linha superior mais forte */
       .login-container::before {
         height: 2px;
         opacity: 0.85;
       }
 
-      /* Logo maior */
       span.logo-img {
         height: 72px;
         width: 200px;
       }
 
-      .logo-brand {
-        font-size: 26px;
-      }
+      .logo-brand { font-size: 26px; }
 
       .logo-tagline {
         font-size: 13px;
@@ -370,21 +392,15 @@
         color: rgba(148,163,184,0.55);
       }
 
-      .logo-wrapper {
-        margin-bottom: 24px;
-      }
+      .logo-wrapper { margin-bottom: 24px; }
 
-      /* Heading maior */
       .login-heading {
         font-size: 22px;
         margin-bottom: 24px;
         gap: 10px;
       }
-      .login-heading i {
-        font-size: 16px !important;
-      }
+      .login-heading i { font-size: 16px !important; }
 
-      /* Error message maior */
       #error-message {
         font-size: 15px;
         padding: 14px 16px;
@@ -393,7 +409,6 @@
         margin-bottom: 22px;
       }
 
-      /* Labels maiores */
       .form-label {
         font-size: 13px;
         letter-spacing: 0.1em;
@@ -401,16 +416,10 @@
         color: rgba(148,163,184,0.65);
       }
 
-      .field-wrap {
-        margin-bottom: 22px;
-      }
+      .field-wrap { margin-bottom: 22px; }
 
-      /* ─── INPUTS MAIORES + ÍCONE À DIREITA ─── */
-      .input-wrap {
-        position: relative;
-      }
+      .input-wrap { position: relative; }
 
-      /* Ícone vai para a DIREITA */
       .input-icon {
         left: auto !important;
         right: 18px !important;
@@ -426,17 +435,15 @@
         text-shadow: 0 0 10px rgba(52,211,153,0.5);
       }
 
-      /* Campo de texto maior e com padding à direita para o ícone */
       .form-control {
         font-size: 17px !important;
         font-weight: 500;
-        padding: 18px 52px 18px 18px !important; /* direita reservada pro ícone */
+        padding: 18px 52px 18px 18px !important;
         border-radius: 16px;
         border-width: 2px;
         border-color: rgba(52,211,153,0.22);
         background: rgba(255,255,255,0.05);
         min-height: 58px;
-        letter-spacing: 0.01em;
       }
 
       .form-control::placeholder {
@@ -447,12 +454,9 @@
       .form-control:focus {
         border-color: rgba(52,211,153,0.55);
         background: rgba(52,211,153,0.06);
-        box-shadow:
-          0 0 0 4px rgba(52,211,153,0.12),
-          0 0 28px rgba(52,211,153,0.15);
+        box-shadow: 0 0 0 4px rgba(52,211,153,0.12), 0 0 28px rgba(52,211,153,0.15);
       }
 
-      /* Link "Esqueceu a senha" maior */
       .field-wrap a {
         font-size: 14px !important;
         color: rgba(52,211,153,0.8) !important;
@@ -460,7 +464,6 @@
         display: inline-block;
       }
 
-      /* Botão maior e mais impactante */
       .btn-primary {
         font-size: 17px;
         font-weight: 800;
@@ -469,17 +472,10 @@
         border-width: 2px;
         margin-top: 12px;
         min-height: 60px;
-        box-shadow:
-          0 0 28px rgba(8,145,178,0.45),
-          0 0 56px rgba(5,150,105,0.18),
-          inset 0 1px 0 rgba(255,255,255,0.12);
       }
 
-      .btn-primary i {
-        font-size: 18px;
-      }
+      .btn-primary i { font-size: 18px; }
 
-      /* Footer maior */
       .login-footer {
         margin-top: 28px;
         font-size: 15px;
@@ -492,34 +488,34 @@
         font-weight: 700;
       }
 
-      /* Orbs um pouco menores no mobile */
       .orb-1 { width: 320px; height: 320px; }
       .orb-2 { width: 280px; height: 280px; }
     }
 
-    /* Telas bem pequenas (≤ 380px) */
-    @media (max-width: 380px) {
-      .login-container {
-        padding: 28px 16px 32px;
-      }
-      .form-control {
-        font-size: 16px !important;
-        padding: 16px 48px 16px 16px !important;
-        min-height: 54px;
-      }
-      .btn-primary {
-        font-size: 16px;
-        padding: 16px;
-        min-height: 56px;
-      }
-      .logo-brand {
-        font-size: 24px;
-      }
+    @media (prefers-reduced-motion: reduce) {
+      .video-bg video { display: none; }
     }
   </style>
 </head>
 
 <body>
+
+  <!-- Background Video -->
+  <div class="video-bg" aria-hidden="true">
+    <div class="fallback"></div>
+    <video
+      id="loginVideo"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+    >
+      <source src="/videos/hero-loop-cerebro.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+    <div class="video-scanlines"></div>
+  </div>
 
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -530,7 +526,6 @@
 
       <!-- Logo -->
       <div class="logo-wrapper">
-        <!-- Troca para logo-icon-wrap caso não tenha imagem -->
         <span class="logo-img"></span>
         <span class="logo-brand">MedLM</span>
         <span class="logo-tagline">Resultados Reais</span>
@@ -576,7 +571,6 @@
               autocomplete="current-password"
             >
           </div>
-          <!-- 🔑 Link adicionado aqui -->
           <div style="text-align: right; margin-top: 6px;">
             <a href="/pages/recuperar-senha.html" style="font-size: 11px; color: rgba(52,211,153,0.7); text-decoration: none; font-weight: 600;">Esqueceu sua senha?</a>
           </div>
@@ -596,6 +590,16 @@
   </div>
 
   <script>
+    // Garante autoplay do vídeo de fundo (políticas de browser)
+    const v = document.getElementById('loginVideo');
+    if (v) {
+      v.muted = true;
+      const play = () => v.play().catch(() => {});
+      play();
+      document.addEventListener('touchstart', play, { once: true });
+      document.addEventListener('click', play, { once: true });
+    }
+
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -625,7 +629,6 @@
           if (data.usuarioNome) localStorage.setItem('medlm_user_name', data.usuarioNome);
           if (data.clinicaNome) localStorage.setItem('medlm_clinic_name', data.clinicaNome);
 
-          // 🔑 SALVA O CARGO (necessário para permissão de exclusão)
           if (data.cargo) {
             localStorage.setItem('medlm_user_cargo', data.cargo);
           } else if (data.usuario && data.usuario.cargo) {
@@ -639,7 +642,7 @@
           } else {
             window.location.href = '/dashboard';
           }
-        }else {
+        } else {
           btn.classList.remove('loading');
           btn.innerHTML = '<i class="fas fa-sign-in-alt" style="margin-right:8px"></i> Entrar no Sistema';
           errorMsg.textContent   = data.error || 'Erro ao realizar login.';
