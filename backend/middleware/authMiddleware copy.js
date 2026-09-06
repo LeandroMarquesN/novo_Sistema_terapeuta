@@ -1,16 +1,8 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
 
-function isApiRequest(req) {
-    const url = req.originalUrl || req.url || '';
-    return (
-        url.includes('/api/') ||
-        req.xhr === true ||
-        (req.headers.accept && req.headers.accept.includes('application/json'))
-    );
-}
-
 module.exports = async (req, res, next) => {
+    // Tenta pegar o token do Header OU do Cookie
     const authHeader = req.headers['authorization'];
     let token = authHeader && authHeader.split(' ')[1];
 
@@ -24,8 +16,8 @@ module.exports = async (req, res, next) => {
     }
 
     if (!token) {
-        if (isApiRequest(req)) {
-            return res.status(401).json({ error: 'Acesso negado.' });
+        if (req.path.includes('/api/')) {
+            return res.status(401).json({ error: "Acesso negado." });
         }
         return res.redirect('/login');
     }
@@ -33,16 +25,18 @@ module.exports = async (req, res, next) => {
     try {
         const verificado = jwt.verify(token, process.env.JWT_SECRET);
 
+        // Confere se esse token ainda é a sessão vigente do usuário.
+        // Se outro login sobrescreveu o current_session_token, essa sessão morre.
         const [rows] = await db.execute(
             'SELECT current_session_token FROM usuarios WHERE id = ?',
             [verificado.id]
         );
 
         if (!rows.length || rows[0].current_session_token !== verificado.sid) {
-            if (isApiRequest(req)) {
+            if (req.path.includes('/api/')) {
                 return res.status(401).json({
-                    error: 'Sua sessão foi encerrada porque este usuário entrou em outro dispositivo.',
-                    codigo: 'SESSAO_SUBSTITUIDA'
+                    error: "Sua sessão foi encerrada porque este usuário entrou em outro dispositivo.",
+                    codigo: "SESSAO_SUBSTITUIDA"
                 });
             }
             return res.redirect('/login?motivo=sessao_substituida');
@@ -51,7 +45,7 @@ module.exports = async (req, res, next) => {
         req.usuario = verificado;
         next();
     } catch (err) {
-        if (isApiRequest(req)) {
+        if (req.path.includes('/api/') || req.originalUrl.includes('/api/')) {
             return res.status(401).json({ error: 'Token inválido ou expirado.' });
         }
         return res.redirect('/login');
