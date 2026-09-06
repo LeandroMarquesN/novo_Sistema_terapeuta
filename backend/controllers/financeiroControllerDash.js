@@ -405,45 +405,32 @@ exports.enviarFluxoCaixaEmail = async (req, res) => {
 </html>`;
 
     const assunto = `Fluxo de Caixa ${periodoLabel} — ${clinica.nome_clinica}`;
+    const saldoCor = saldo >= 0 ? '#059669' : '#dc2626';
 
-    if (typeof notificationService.sendHtmlEmail === 'function') {
+    if (typeof notificationService.sendFluxoCaixaEmail === 'function') {
+      await notificationService.sendFluxoCaixaEmail(clinica, {
+        html: htmlEmail,
+        assunto,
+        periodoLabel,
+        dataEmissao,
+        totalEntradasStr: `R$ ${fmtBR(totalE)}`,
+        totalSaidasStr: `R$ ${fmtBR(totalS)}`,
+        saldoStr: `R$ ${fmtBR(saldo)}`,
+        saldoCor,
+        linhasEntrada,
+        linhasSaida
+      });
+    } else if (typeof notificationService.sendHtmlEmail === 'function') {
       await notificationService.sendHtmlEmail({
         to: clinica.email_master,
         subject: assunto,
-        html: htmlEmail
+        html: htmlEmail,
+        fromName: `MedLM - ${clinica.nome_clinica}`
       });
-    } else if (typeof notificationService.sendReciboEmailNotification === 'function') {
-      // Reaproveita canal de e-mail do recibo, se existir overload genérico
-      await notificationService.sendReciboEmailNotification(
-        { ...clinica, email: clinica.email_master },
-        {
-          pacienteNome: clinica.nome_clinica,
-          pacienteEmail: clinica.email_master,
-          operadorNome: 'Sistema MedLM',
-          dataEmissao,
-          linhasHTML: linhasEntrada + linhasSaida,
-          valorPago: `R$ ${fmtBR(totalE)}`,
-          valorAberto: `R$ ${fmtBR(totalS)}`,
-          assunto,
-          htmlCustom: htmlEmail,
-          tipo: 'fluxo_caixa'
-        }
-      );
-    } else if (typeof notificationService.sendEmailNotification === 'function') {
-      await notificationService.sendEmailNotification(
-        { ...clinica, email: clinica.email_master },
-        {
-          nome: clinica.nome_clinica,
-          email: clinica.email_master,
-          assunto,
-          html: htmlEmail,
-          tipo: 'fluxo_caixa'
-        }
-      );
     } else {
       return res.status(501).json({
         success: false,
-        error: 'Serviço de e-mail sem método HTML. Implemente sendHtmlEmail.',
+        error: 'Atualize notificationService.js com sendHtmlEmail / sendFluxoCaixaEmail.',
         preview_html: htmlEmail
       });
     }

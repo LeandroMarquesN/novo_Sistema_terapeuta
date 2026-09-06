@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fluxo de Caixa</title>
+</head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:'Segoe UI',Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:24px 12px;">
+    <tr><td align="center">
+      <table width="100%" style="max-width:640px;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,0.08);">
+        <tr>
+          <td style="background:linear-gradient(135deg,#0891b2 0%,#059669 100%);padding:28px 32px;color:#fff;">
+            <div style="font-size:12px;opacity:0.85;letter-spacing:0.08em;text-transform:uppercase;font-weight:600;">MedLM · Relatório financeiro</div>
+            <h1 style="margin:8px 0 4px;font-size:22px;font-weight:700;">Fluxo de Caixa</h1>
+            <p style="margin:0;font-size:15px;opacity:0.95;">{{periodo_label}} · {{nome_clinica}}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:24px 32px;">
+            <p style="margin:0 0 16px;font-size:12px;color:#64748b;">Emitido em {{data_emissao}}</p>
+
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+              <tr>
+                <td width="32%" style="background:#ecfdf5;border-radius:12px;padding:14px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:#059669;text-transform:uppercase;">Entradas</div>
+                  <div style="font-size:18px;font-weight:800;color:#059669;margin-top:4px;">{{total_entradas}}</div>
+                </td>
+                <td width="2%"></td>
+                <td width="32%" style="background:#fef2f2;border-radius:12px;padding:14px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;">Saídas</div>
+                  <div style="font-size:18px;font-weight:800;color:#dc2626;margin-top:4px;">{{total_saidas}}</div>
+                </td>
+                <td width="2%"></td>
+                <td width="32%" style="background:#eff6ff;border-radius:12px;padding:14px;text-align:center;">
+                  <div style="font-size:10px;font-weight:700;color:#2563eb;text-transform:uppercase;">Saldo</div>
+                  <div style="font-size:18px;font-weight:800;color:{{saldo_cor}};margin-top:4px;">{{saldo}}</div>
+                </td>
+              </tr>
+            </table>
+
+            <h2 style="margin:0 0 10px;font-size:14px;color:#059669;text-transform:uppercase;letter-spacing:0.06em;">Entradas (receitas)</h2>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+              <thead>
+                <tr style="background:#f8fafc;">
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Data</th>
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Descrição</th>
+                  <th style="padding:10px 8px;text-align:right;font-size:11px;color:#64748b;text-transform:uppercase;">Valor</th>
+                </tr>
+              </thead>
+              <tbody>{{linhas_entradas}}</tbody>
+            </table>
+
+            <h2 style="margin:0 0 10px;font-size:14px;color:#dc2626;text-transform:uppercase;letter-spacing:0.06em;">Saídas (despesas)</h2>
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;">
+              <thead>
+                <tr style="background:#f8fafc;">
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Data</th>
+                  <th style="padding:10px 8px;text-align:left;font-size:11px;color:#64748b;text-transform:uppercase;">Descrição</th>
+                  <th style="padding:10px 8px;text-align:right;font-size:11px;color:#64748b;text-transform:uppercase;">Valor</th>
+                </tr>
+              </thead>
+              <tbody>{{linhas_saidas}}</tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 32px;background:#f8fafc;border-top:1px solid #e2e8f0;text-align:center;font-size:11px;color:#94a3b8;">
+            © {{ano_atual}} MedLM — {{nome_clinica}}
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
