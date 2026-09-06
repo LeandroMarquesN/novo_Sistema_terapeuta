@@ -822,15 +822,34 @@
         .chart-card-title { font-family: 'Space Grotesk', sans-serif; color: #e2e8f0; font-size: 14px; font-weight: 700; }
         .chart-card-sub { color: rgba(148,163,184,0.4); font-size: 11px; }
 
-        /* Gaveta */
+        /* Gaveta — sempre acima da tabbar mobile */
+        #gaveta-prontuario {
+            z-index: 100 !important;
+        }
         #gaveta-painel {
             background: rgba(2,12,18,0.96) !important;
             border-right: 1px solid var(--border) !important;
             backdrop-filter: blur(30px);
+            /* Garante layout em coluna para footer fixo no rodapé do painel */
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+            height: 100%;
         }
         .gaveta-header {
             border-bottom: 1px solid var(--border) !important;
-            background: transparent !important;
+            background: rgba(2,12,18,0.98) !important;
+            flex-shrink: 0;
+            position: relative;
+        }
+        /* Indicador visual de swipe (mobile) */
+        .gaveta-swipe-handle {
+            display: none;
+            width: 40px;
+            height: 4px;
+            border-radius: 99px;
+            background: rgba(148,163,184,0.35);
+            margin: 0 auto 10px;
         }
         .gaveta-tag {
             background: rgba(52,211,153,0.1);
@@ -842,12 +861,14 @@
         }
         #gaveta-paciente-nome { color: #f1f5f9; font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 800; }
         .gaveta-close-btn {
-            width: 32px; height: 32px; border-radius: 10px;
+            width: 36px; height: 36px; border-radius: 10px;
             background: rgba(248,113,113,0.08); border: 1px solid rgba(248,113,113,0.2);
             color: #f87171; display: flex; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s;
+            flex-shrink: 0;
         }
         .gaveta-close-btn:hover { background: rgba(248,113,113,0.15); box-shadow: 0 0 12px rgba(248,113,113,0.2); }
+        .gaveta-close-btn:active { transform: scale(0.94); }
 
         .gaveta-info-grid {
             background: rgba(255,255,255,0.025);
@@ -896,16 +917,33 @@
 
         .gaveta-footer {
             border-top: 1px solid var(--border) !important;
-            background: transparent !important;
+            background: rgba(2,12,18,0.98) !important;
+            flex-shrink: 0;
+            padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+            z-index: 5;
         }
         .btn-salvar {
             background: linear-gradient(135deg, #0891b2, #059669);
             color: #fff; font-weight: 800; font-family: 'Space Grotesk', sans-serif;
-            font-size: 12px; padding: 12px 20px; border-radius: 12px;
+            font-size: 12px; padding: 14px 20px; border-radius: 12px;
             border: none; cursor: pointer; transition: all 0.3s;
             box-shadow: 0 0 20px rgba(8,145,178,0.3);
         }
         .btn-salvar:hover { box-shadow: 0 0 30px rgba(8,145,178,0.5); transform: translateY(-1px); }
+        .btn-salvar:active { transform: scale(0.98); }
+        .btn-fechar-gaveta {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(148,163,184,0.2);
+            color: rgba(148,163,184,0.85);
+            font-weight: 700; font-family: 'Space Grotesk', sans-serif;
+            font-size: 12px; padding: 14px 18px; border-radius: 12px;
+            cursor: pointer; transition: all 0.25s;
+        }
+        .btn-fechar-gaveta:hover {
+            border-color: rgba(248,113,113,0.35);
+            color: #f87171;
+            background: rgba(248,113,113,0.08);
+        }
 
         .apexcharts-canvas { background: transparent !important; }
         .apexcharts-tooltip { background: rgba(2,12,18,0.95) !important; border: 1px solid var(--border) !important; border-radius: 12px !important; color: #e2e8f0 !important; }
@@ -1504,10 +1542,29 @@
                 font-size: 15px !important;
             }
 
-            /* Gaveta full width no mobile */
+            /* Gaveta full width no mobile + tabbar escondida quando aberta */
             #gaveta-painel {
                 max-width: 100% !important;
                 width: 100% !important;
+            }
+            .gaveta-swipe-handle {
+                display: block !important;
+            }
+            body.gaveta-open .mobile-bottom-tabbar {
+                transform: translateY(140%) !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            body.gaveta-open {
+                overflow: hidden !important;
+            }
+            .gaveta-footer {
+                padding: 14px 16px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+            .btn-salvar,
+            .btn-fechar-gaveta {
+                padding: 15px 16px !important;
+                font-size: 13px !important;
             }
 
             /* Grid principal vira 1 coluna */
@@ -2443,22 +2500,25 @@
     </div>
 
     <!-- ─── Drawer / Gaveta ─── -->
-    <div id="gaveta-prontuario" class="fixed inset-0 z-50 invisible transition-all duration-300">
+    <div id="gaveta-prontuario" class="fixed inset-0 z-[100] invisible transition-all duration-300">
         <div id="gaveta-backdrop" class="absolute inset-0 opacity-0 transition-opacity duration-300" style="background:rgba(2,12,18,0.7);backdrop-filter:blur(6px)"></div>
 
         <div id="gaveta-painel" class="absolute inset-y-0 left-0 w-full max-w-lg shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
 
-            <div class="gaveta-header p-6 flex justify-between items-center">
-                <div>
-                    <span class="gaveta-tag">Ficha Clínica</span>
-                    <h3 id="gaveta-paciente-nome" class="mt-1">Carregando...</h3>
+            <div class="gaveta-header p-4 sm:p-6 flex flex-col">
+                <div class="gaveta-swipe-handle" aria-hidden="true"></div>
+                <div class="flex justify-between items-center gap-3">
+                    <div class="min-w-0">
+                        <span class="gaveta-tag">Ficha Clínica</span>
+                        <h3 id="gaveta-paciente-nome" class="mt-1 truncate">Carregando...</h3>
+                    </div>
+                    <button type="button" onclick="fecharGavetaProntuario()" class="gaveta-close-btn" aria-label="Fechar prontuário" title="Fechar">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <button onclick="fecharGavetaProntuario()" class="gaveta-close-btn">
-                    <i class="fas fa-times"></i>
-                </button>
             </div>
 
-            <div class="p-6 overflow-y-auto flex-1 space-y-5">
+            <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5" id="gaveta-conteudo-scroll">
                 <div class="gaveta-info-grid grid grid-cols-2 gap-4">
                     <div>
                         <span class="gaveta-info-label">Data e Hora</span>
@@ -2511,8 +2571,13 @@
                 </div>
             </div>
 
-            <div class="gaveta-footer p-4 flex gap-3">
-                <button class="btn-salvar flex-1" id="btnSalvarEvolucao">Salvar Evolução</button>
+            <div class="gaveta-footer p-4 flex flex-col-reverse sm:flex-row gap-3">
+                <button type="button" onclick="fecharGavetaProntuario()" class="btn-fechar-gaveta w-full sm:w-auto">
+                    <i class="fas fa-times mr-1.5"></i> Fechar
+                </button>
+                <button type="button" class="btn-salvar flex-1 w-full" id="btnSalvarEvolucao">
+                    <i class="fas fa-save mr-1.5"></i> Salvar Evolução
+                </button>
             </div>
         </div>
     </div>
@@ -2527,6 +2592,144 @@
     <script src="../ScriptGlobal/logout.js"></script>
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
     <script src="../ScriptGlobal/BotaoFalarAgenda.Script.js"></script>
+
+    <!-- Gaveta: tabbar hide + swipe-to-close + body lock -->
+    <script>
+    (function () {
+        function setGavetaOpen(open) {
+            if (open) {
+                document.body.classList.add('gaveta-open');
+            } else {
+                document.body.classList.remove('gaveta-open');
+            }
+        }
+
+        // Envolve as funções originais (definidas no dashboardScript.js) quando disponíveis
+        function wrapGavetaFns() {
+            if (typeof window.abrirGavetaProntuario === 'function' && !window.abrirGavetaProntuario._wrapped) {
+                const originalAbrir = window.abrirGavetaProntuario;
+                window.abrirGavetaProntuario = function () {
+                    const r = originalAbrir.apply(this, arguments);
+                    setGavetaOpen(true);
+                    return r;
+                };
+                window.abrirGavetaProntuario._wrapped = true;
+            }
+            if (typeof window.fecharGavetaProntuario === 'function' && !window.fecharGavetaProntuario._wrapped) {
+                const originalFechar = window.fecharGavetaProntuario;
+                window.fecharGavetaProntuario = function () {
+                    const r = originalFechar.apply(this, arguments);
+                    setGavetaOpen(false);
+                    // Limpa transform residual do swipe
+                    const painel = document.getElementById('gaveta-painel');
+                    if (painel) {
+                        painel.style.transition = '';
+                        painel.style.transform = '';
+                    }
+                    return r;
+                };
+                window.fecharGavetaProntuario._wrapped = true;
+            }
+        }
+
+        // Tenta wrap várias vezes (script defer)
+        wrapGavetaFns();
+        document.addEventListener('DOMContentLoaded', wrapGavetaFns);
+        window.addEventListener('load', wrapGavetaFns);
+        setTimeout(wrapGavetaFns, 500);
+        setTimeout(wrapGavetaFns, 1500);
+
+        // Observa classe do container caso o script original só altere classes
+        const root = document.getElementById('gaveta-prontuario');
+        if (root) {
+            const obs = new MutationObserver(function () {
+                const aberta = !root.classList.contains('invisible');
+                setGavetaOpen(aberta);
+            });
+            obs.observe(root, { attributes: true, attributeFilter: ['class'] });
+        }
+
+        // Swipe para fechar (arrastar para a esquerda)
+        const painel = document.getElementById('gaveta-painel');
+        if (!painel) return;
+
+        let startX = 0;
+        let startY = 0;
+        let currentX = 0;
+        let dragging = false;
+        let locked = false; // se movimento vertical, não captura
+
+        function onTouchStart(e) {
+            if (!document.body.classList.contains('gaveta-open')) return;
+            const t = e.touches[0];
+            startX = t.clientX;
+            startY = t.clientY;
+            currentX = 0;
+            dragging = true;
+            locked = false;
+            painel.style.transition = 'none';
+        }
+
+        function onTouchMove(e) {
+            if (!dragging) return;
+            const t = e.touches[0];
+            const dx = t.clientX - startX;
+            const dy = t.clientY - startY;
+
+            // Só considera swipe horizontal para a esquerda (fechar)
+            if (!locked) {
+                if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 10) {
+                    // scroll vertical — libera
+                    locked = true;
+                    dragging = false;
+                    painel.style.transition = '';
+                    painel.style.transform = '';
+                    return;
+                }
+                if (Math.abs(dx) > 10) locked = true;
+            }
+
+            // Apenas arrastar para a esquerda (dx negativo) fecha a gaveta que abre da esquerda
+            if (dx < 0) {
+                currentX = dx;
+                painel.style.transform = 'translateX(' + dx + 'px)';
+                if (e.cancelable) e.preventDefault();
+            }
+        }
+
+        function onTouchEnd() {
+            if (!dragging) return;
+            dragging = false;
+            painel.style.transition = 'transform 0.28s cubic-bezier(0.4,0,0.2,1)';
+
+            // Se arrastou mais de ~28% da largura ou > 110px, fecha
+            const threshold = Math.min(painel.offsetWidth * 0.28, 140);
+            if (currentX < -threshold) {
+                if (typeof window.fecharGavetaProntuario === 'function') {
+                    window.fecharGavetaProntuario();
+                }
+            } else {
+                painel.style.transform = '';
+            }
+            currentX = 0;
+        }
+
+        painel.addEventListener('touchstart', onTouchStart, { passive: true });
+        painel.addEventListener('touchmove', onTouchMove, { passive: false });
+        painel.addEventListener('touchend', onTouchEnd, { passive: true });
+        painel.addEventListener('touchcancel', onTouchEnd, { passive: true });
+
+        // Backdrop também fecha (caso o script original não trate)
+        const backdrop = document.getElementById('gaveta-backdrop');
+        if (backdrop) {
+            backdrop.addEventListener('click', function () {
+                if (typeof window.fecharGavetaProntuario === 'function') {
+                    window.fecharGavetaProntuario();
+                }
+            });
+        }
+    })();
+    </script>
 
     <!-- Mobile drawer control -->
     <script>

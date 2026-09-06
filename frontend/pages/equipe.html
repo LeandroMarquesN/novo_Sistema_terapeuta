@@ -85,6 +85,19 @@
             display: none;
         }
 
+        /* Modal sempre acima da tabbar + scroll interno */
+        #modalMembro {
+            z-index: 100 !important;
+        }
+        #modalContent {
+            max-height: min(92vh, 720px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        #modalContent form {
+            padding-bottom: 8px;
+        }
+
         @media (max-width: 1023px) {
             #sidebarMenu {
                 display: none !important;
@@ -92,12 +105,32 @@
             main {
                 padding-left: 0 !important;
                 padding-top: 80px !important;
-                padding-bottom: 110px !important;
+                padding-bottom: 120px !important; /* mais suspiro no mobile */
             }
 
             .mobile-topbar,
             .mobile-bottom-tabbar {
                 display: flex !important;
+            }
+
+            /* Modal no mobile: sobe um pouco e libera espaço */
+            #modalMembro {
+                align-items: flex-end !important;
+                padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+            #modalContent {
+                max-height: min(88vh, 680px);
+                width: 100%;
+                margin-bottom: 0;
+            }
+            /* Esconde a tabbar enquanto o modal estiver aberto */
+            body.modal-open .mobile-bottom-tabbar {
+                transform: translateY(140%) !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+            body.modal-open {
+                overflow: hidden;
             }
 
             .mobile-topbar {
@@ -507,9 +540,9 @@
     </div>
 
     <!-- Modal de Cadastro -->
-    <div id="modalMembro" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50 transition-all duration-300">
-        <div class="cyber-panel glow-line rounded-[1.5rem] sm:rounded-[2rem] w-full max-w-md p-6 sm:p-8 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
-            <div class="flex items-center justify-between pb-4 border-b border-white/5 mb-6">
+    <div id="modalMembro" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-[100] transition-all duration-300">
+        <div class="cyber-panel glow-line rounded-[1.5rem] sm:rounded-[2rem] w-full max-w-md p-5 sm:p-8 shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+            <div class="flex items-center justify-between pb-4 border-b border-white/5 mb-5 sticky top-0 bg-[#06131c] z-10 -mx-1 px-1">
                 <h2 class="text-lg sm:text-xl font-black text-white flex items-center gap-2.5 font-['Space_Grotesk']">
                     <i class="fas fa-user-plus text-cyan-400"></i> Credenciar Integrante
                 </h2>
@@ -518,7 +551,7 @@
                 </button>
             </div>
 
-            <form id="formMembro" class="space-y-5">
+            <form id="formMembro" class="space-y-4 sm:space-y-5">
                 <div>
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Nome Completo</label>
                     <input type="text" name="nome" required class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-semibold">
@@ -598,11 +631,11 @@
                     </div>
                 </div>
 
-                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 mt-6 border-t border-white/5">
-                    <button type="button" onclick="toggleModal()" class="px-4 py-2.5 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 font-bold transition text-[11px] uppercase tracking-wider">
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-5 mt-5 border-t border-white/5 sticky bottom-0 bg-[#06131c] pb-1">
+                    <button type="button" onclick="toggleModal()" class="w-full sm:w-auto px-4 py-3 sm:py-2.5 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 font-bold transition text-[11px] uppercase tracking-wider">
                         Cancelar
                     </button>
-                    <button type="submit" id="btnSalvarMembro" class="px-4 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-black shadow-lg shadow-emerald-950/50 transition text-[11px] uppercase tracking-wider">
+                    <button type="submit" id="btnSalvarMembro" class="w-full sm:w-auto px-4 py-3 sm:py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-xl font-black shadow-lg shadow-emerald-950/50 transition text-[11px] uppercase tracking-wider">
                         Salvar Registro
                     </button>
                 </div>
@@ -611,7 +644,7 @@
     </div>
 
     <!-- Toast -->
-    <div id="toast-sucesso" class="fixed bottom-6 right-4 sm:right-6 transform translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-50">
+    <div id="toast-sucesso" class="fixed bottom-6 right-4 sm:right-6 transform translate-y-20 opacity-0 transition-all duration-500 ease-in-out z-[110]">
         <div class="cyber-panel border-l-4 border-emerald-400 text-white px-5 sm:px-6 py-4 rounded-2xl shadow-2xl flex items-center space-x-3 sm:space-x-4 max-w-sm">
             <div class="bg-emerald-500/10 p-2.5 rounded-xl text-emerald-400 border border-emerald-500/20 shrink-0">
                 <i class="fas fa-check-circle text-xl"></i>
@@ -638,6 +671,7 @@
 
             if(modal.classList.contains('hidden')) {
                 modal.classList.remove('hidden');
+                document.body.classList.add('modal-open');
                 setTimeout(() => {
                     modal.classList.add('opacity-100');
                     content.classList.remove('scale-95', 'opacity-0');
@@ -647,7 +681,10 @@
                 content.classList.remove('scale-100', 'opacity-100');
                 content.classList.add('scale-95', 'opacity-0');
                 modal.classList.remove('opacity-100');
-                setTimeout(() => modal.classList.add('hidden'), 300);
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    document.body.classList.remove('modal-open');
+                }, 300);
             }
         }
 
