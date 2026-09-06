@@ -91,6 +91,17 @@
         .page-title { font-family: 'Space Grotesk', sans-serif; color: #f1f5f9; font-weight: 800; }
         .page-sub { color: rgba(148,163,184,0.5); font-size: 13px; font-weight: 500; }
 
+        /* Fluxo de caixa – layout seguro desktop + mobile */
+        #secao-fluxo-caixa {
+            display: block;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            clear: both;
+        }
+        #secao-fluxo-caixa * { box-sizing: border-box; }
+
+
         /* Search bar */
         .search-bar {
             background: rgba(255,255,255,0.04) !important;
@@ -432,11 +443,46 @@
             }
             body { padding-bottom: 108px !important; }
 
-            /* Main content */
+            /* Main content – precisa rolar até o fim no mobile */
             main {
                 margin-left: 0 !important;
-                padding: 80px 14px 24px !important;
-                overflow-x: hidden;
+                padding: 80px 14px 120px !important;
+                overflow-x: hidden !important;
+                overflow-y: auto !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            /* Fluxo de caixa sempre visível no mobile */
+            #secao-fluxo-caixa {
+                display: block !important;
+                visibility: visible !important;
+                opacity: 1 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 20px 0 40px 0 !important;
+                padding: 0 !important;
+                position: relative !important;
+                z-index: 1 !important;
+            }
+            #secao-fluxo-caixa .table-card {
+                padding: 16px !important;
+                border-radius: 18px !important;
+                overflow: visible !important;
+            }
+            #secao-fluxo-caixa .stat-value {
+                font-size: 18px !important;
+            }
+            #secao-fluxo-caixa .fin-table thead th,
+            #secao-fluxo-caixa .fin-table tbody td {
+                padding: 10px 8px !important;
+                font-size: 11px !important;
+            }
+            #graficoFluxoCaixa {
+                max-width: 100% !important;
+                width: 100% !important;
+                height: auto !important;
             }
 
             header { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; }
@@ -600,7 +646,7 @@
     </a>
 </nav>
 
-<div class="flex h-screen overflow-hidden font-sans">
+<div class="flex h-screen overflow-hidden font-sans" id="layout-financeiro">
 
     <aside class="fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col">
         <div class="flex flex-col h-full">
@@ -762,70 +808,69 @@
         </div>
 
         <!-- ═══ Fluxo de Caixa ═══ -->
-        <section id="secao-fluxo-caixa" class="mt-8 mb-8">
-            <div class="table-card p-6">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <section id="secao-fluxo-caixa" style="display:block;width:100%;margin:24px 0 48px 0;">
+            <div class="table-card" style="padding:20px;overflow:visible;">
+                <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
                     <div>
-                        <h2 class="text-lg font-black text-slate-100 font-['Space_Grotesk'] flex items-center gap-2">
+                        <h2 class="text-lg font-black text-slate-100 font-['Space_Grotesk']" style="display:flex;align-items:center;gap:8px;margin:0;">
                             <i class="fas fa-chart-line text-cyan-400"></i> Fluxo de Caixa
                         </h2>
-                        <p class="text-xs text-slate-500 font-semibold mt-1">Entradas × saídas do período · visualização e envio por e-mail</p>
+                        <p class="text-xs text-slate-500 font-semibold" style="margin:6px 0 0 0;">Entradas × saídas · e-mail para a clínica</p>
                     </div>
-                    <div class="flex flex-wrap items-center gap-2">
-                        <select id="fluxoMes" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-bold outline-none">
+                    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+                        <select id="fluxoMes" style="padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(52,211,153,0.2);color:#e2e8f0;font-size:12px;font-weight:700;min-height:44px;">
                             <option value="1">Jan</option><option value="2">Fev</option><option value="3">Mar</option>
                             <option value="4">Abr</option><option value="5">Mai</option><option value="6">Jun</option>
                             <option value="7">Jul</option><option value="8">Ago</option><option value="9">Set</option>
                             <option value="10">Out</option><option value="11">Nov</option><option value="12">Dez</option>
                         </select>
-                        <select id="fluxoAno" class="px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-200 text-xs font-bold outline-none"></select>
-                        <button type="button" onclick="carregarFluxoCaixa()" class="px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-xs font-black uppercase tracking-wider hover:bg-cyan-500/25 transition">
+                        <select id="fluxoAno" style="padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(52,211,153,0.2);color:#e2e8f0;font-size:12px;font-weight:700;min-height:44px;"></select>
+                        <button type="button" onclick="carregarFluxoCaixa()" style="padding:10px 14px;border-radius:12px;background:rgba(34,211,238,0.15);border:1px solid rgba(34,211,238,0.35);color:#22d3ee;font-size:11px;font-weight:800;text-transform:uppercase;min-height:44px;cursor:pointer;">
                             <i class="fas fa-sync-alt"></i> Atualizar
                         </button>
-                        <button type="button" onclick="enviarFluxoCaixaEmail()" id="btnEmailFluxo" class="px-4 py-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-black uppercase tracking-wider hover:bg-emerald-500/25 transition">
-                            <i class="fas fa-paper-plane"></i> Enviar por E-mail
+                        <button type="button" onclick="enviarFluxoCaixaEmail()" id="btnEmailFluxo" style="padding:10px 14px;border-radius:12px;background:rgba(52,211,153,0.15);border:1px solid rgba(52,211,153,0.35);color:#34d399;font-size:11px;font-weight:800;text-transform:uppercase;min-height:44px;cursor:pointer;">
+                            <i class="fas fa-paper-plane"></i> E-mail
                         </button>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-                    <div class="stat-card p-4">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;">
+                    <div class="stat-card" style="padding:14px;">
                         <div class="stat-label">Entradas</div>
-                        <div id="fluxoTotalEntradas" class="stat-value text-xl val-revenue">R$ 0,00</div>
+                        <div id="fluxoTotalEntradas" class="stat-value val-revenue" style="font-size:18px;margin-top:6px;">R$ 0,00</div>
                     </div>
-                    <div class="stat-card stat-card-red p-4">
+                    <div class="stat-card stat-card-red" style="padding:14px;">
                         <div class="stat-label">Saídas</div>
-                        <div id="fluxoTotalSaidas" class="stat-value text-xl val-debtors">R$ 0,00</div>
+                        <div id="fluxoTotalSaidas" class="stat-value val-debtors" style="font-size:18px;margin-top:6px;">R$ 0,00</div>
                     </div>
-                    <div class="stat-card p-4">
-                        <div class="stat-label">Saldo do período</div>
-                        <div id="fluxoSaldo" class="stat-value text-xl val-profit">R$ 0,00</div>
+                    <div class="stat-card" style="padding:14px;">
+                        <div class="stat-label">Saldo</div>
+                        <div id="fluxoSaldo" class="stat-value val-profit" style="font-size:18px;margin-top:6px;">R$ 0,00</div>
                     </div>
-                    <div class="stat-card stat-card-cyan p-4">
+                    <div class="stat-card stat-card-cyan" style="padding:14px;">
                         <div class="stat-label">Margem</div>
-                        <div id="fluxoMargem" class="stat-value text-xl val-ltv">0%</div>
+                        <div id="fluxoMargem" class="stat-value val-ltv" style="font-size:18px;margin-top:6px;">0%</div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                    <div class="lg:col-span-3 min-h-[200px]">
-                        <canvas id="graficoFluxoCaixa" height="140"></canvas>
-                    </div>
-                    <div class="lg:col-span-2 overflow-x-auto max-h-[320px] overflow-y-auto">
-                        <table class="fin-table text-xs w-full">
-                            <thead>
-                                <tr>
-                                    <th class="text-left">Dia</th>
-                                    <th class="text-right">Entradas</th>
-                                    <th class="text-right">Saídas</th>
-                                    <th class="text-right">Acumulado</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabelaFluxoCaixa">
-                                <tr><td colspan="4" class="text-center py-6 text-slate-500">Carregando...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div style="width:100%;margin-bottom:16px;">
+                    <canvas id="graficoFluxoCaixa" style="width:100%!important;max-width:100%;height:220px!important;"></canvas>
+                </div>
+
+                <div style="width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;">
+                    <table class="fin-table" style="width:100%;min-width:320px;font-size:12px;">
+                        <thead>
+                            <tr>
+                                <th style="text-align:left;padding:10px 8px;">Dia</th>
+                                <th style="text-align:right;padding:10px 8px;">Entradas</th>
+                                <th style="text-align:right;padding:10px 8px;">Saídas</th>
+                                <th style="text-align:right;padding:10px 8px;">Acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaFluxoCaixa">
+                            <tr><td colspan="4" style="text-align:center;padding:24px;color:#64748b;">Carregando...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </section>
@@ -1305,4 +1350,3 @@
 <script src="../ScriptGlobal/darkMOdeFinanceiro.js"></script>
 </body>
 </html>
-Hiding recesso days bug - Grok
