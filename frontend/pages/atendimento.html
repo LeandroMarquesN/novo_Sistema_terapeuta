@@ -375,6 +375,23 @@
             .prontuario-container { border: none !important; box-shadow: none !important; }
         }
 
+        /* ─── Barra de ações: flutuante em telas pequenas/médias ───
+           Nesses tamanhos as 3 colunas empilham e a seção do prontuário cresce
+           livremente, então "sticky" não tem teto pra grudar — a barra afunda
+           lá embaixo. Vira barra fixa na viewport, com respiro nas bordas. */
+        @media (max-width: 1023.98px) {
+            #barraAcoesRodape {
+                position: fixed !important;
+                left: 12px; right: 12px; bottom: 12px;
+                z-index: 90;
+                border-radius: 22px !important;
+                border: 1px solid var(--border-cy);
+                box-shadow: 0 16px 40px -10px rgba(0,0,0,0.7), 0 0 24px rgba(52,211,153,0.08);
+            }
+            /* Respiro: nada do conteúdo fica escondido atrás da barra flutuante */
+            main .flex-1.flex.flex-col.lg\:flex-row { padding-bottom: 172px !important; }
+        }
+
         .glass-panel {
             box-shadow:
                 0 1px 0 rgba(255,255,255,0.05) inset,
@@ -699,7 +716,7 @@
                         </div>
 
                         <!-- BOTÕES DE AÇÃO (sempre acessíveis) -->
-                        <div class="p-3 sm:p-4 glass-header flex flex-col gap-2 sticky bottom-0 z-10" style="background: rgba(2,12,18,0.95); backdrop-filter: blur(12px);">
+                        <div id="barraAcoesRodape" class="p-3 sm:p-4 glass-header flex flex-col gap-2 sticky bottom-0 z-10" style="background: rgba(2,12,18,0.95); backdrop-filter: blur(12px);">
                             
                             <!-- Linha 1: Ações principais -->
                             <div class="flex flex-col sm:flex-row gap-2">
