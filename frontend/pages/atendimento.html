@@ -944,10 +944,10 @@
             function renderizar(termo) {
                 const t = termo.trim().toLowerCase();
                 const resultados = t.length === 0
-                    ? CID10_COMUM.slice(0, 12)
+                    ? CID10_COMUM.slice(0, 30)
                     : CID10_COMUM.filter((c) =>
                         c.codigo.toLowerCase().includes(t) || c.descricao.toLowerCase().includes(t)
-                    ).slice(0, 20);
+                    ).slice(0, 30);
 
                 if (!resultados.length) {
                     lista.innerHTML = '<div class="cid-vazio">Nenhum código encontrado na lista de referência.<br>Você ainda pode digitar o código manualmente.</div>';
