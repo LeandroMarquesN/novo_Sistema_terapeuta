@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Clinico | Gestão Inteligente</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="../css/animacaoBack.css">
+    <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
+
+    <style>
+        :root {
+            --emerald:   #34d399;
+            --emerald-d: #059669;
+            --cyan:      #22d3ee;
+            --teal:      #0f766e;
+            --amber:     #fbbf24;
+            --amber-d:   #d97706;
+            --slate-bg:  #020c12;
+            --border:    rgba(52,211,153,0.15);
+            --border-cy: rgba(34,211,238,0.18);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--slate-bg);
+            background-image:
+                radial-gradient(ellipse 70% 55% at 15% 0%,   rgba(8,145,178,0.22) 0%, transparent 65%),
+                radial-gradient(ellipse 55% 50% at 85% 100%, rgba(5,150,105,0.20) 0%, transparent 65%),
+                radial-gradient(ellipse 40% 35% at 50% 50%,  rgba(251,191,36,0.04) 0%, transparent 70%);
+            font-family: 'Inter', sans-serif;
+            color: #cbd5e1;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Scanlines */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: repeating-linear-gradient(
+                0deg, transparent, transparent 2px,
+                rgba(0,0,0,0.07) 2px, rgba(0,0,0,0.07) 4px
+            );
+            pointer-events: none; z-index: 0;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+        /* ─── Navbar ─── */
+        nav {
+            position: fixed; width: 100%; z-index: 50; top: 0;
+            background: rgba(2,12,18,0.80);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .nav-inner {
+            max-width: 1200px; margin: 0 auto;
+            padding: 0 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            height: 64px;
+        }
+
+        .nav-logo-icon {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: linear-gradient(135deg, #0891b2, #059669);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 16px rgba(8,145,178,0.5), 0 0 32px rgba(5,150,105,0.2);
+        }
+        .nav-logo-icon i { color: #fff; font-size: 14px; }
+
+        .nav-brand {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 17px; font-weight: 700;
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 6px rgba(34,211,238,0.25));
+        }
+
+        .nav-login {
+            font-size: 13px; font-weight: 600;
+            color: rgba(148,163,184,0.7);
+            text-decoration: none;
+            transition: color 0.25s;
+        }
+        .nav-login:hover { color: var(--emerald); }
+
+        .nav-cta {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #0891b2, #059669);
+            color: #fff; font-weight: 800; font-size: 13px;
+            padding: 9px 22px; border-radius: 99px;
+            text-decoration: none;
+            box-shadow: 0 0 20px rgba(8,145,178,0.4), 0 0 40px rgba(5,150,105,0.15);
+            transition: all 0.3s; font-family: 'Space Grotesk', sans-serif;
+        }
+        .nav-cta:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px rgba(8,145,178,0.6), 0 0 60px rgba(5,150,105,0.25);
+        }
+
+        /* ─── Hero ─── */
+        .hero {
+            position: relative; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center;
+            padding-top: 80px; overflow: hidden;
+        }
+
+        /* Orb glows */
+        .orb {
+            position: absolute; border-radius: 50%;
+            pointer-events: none; filter: blur(80px);
+        }
+        .orb-1 {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(8,145,178,0.18), transparent 70%);
+            top: -10%; left: -15%;
+            animation: orbFloat1 12s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(5,150,105,0.15), transparent 70%);
+            bottom: -5%; right: -10%;
+            animation: orbFloat2 15s ease-in-out infinite;
+        }
+        .orb-3 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(251,191,36,0.06), transparent 70%);
+            top: 40%; left: 50%;
+            animation: orbFloat1 20s ease-in-out infinite reverse;
+        }
+
+        @keyframes orbFloat1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(40px, 30px); }
+        }
+        @keyframes orbFloat2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-30px, -40px); }
+        }
+
+        /* Grid lines background */
+        .hero-grid {
+            position: absolute; inset: 0; z-index: 0;
+            background-image:
+                linear-gradient(rgba(52,211,153,0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(52,211,153,0.04) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 30%, transparent 100%);
+        }
+
+        .hero-content {
+            position: relative; z-index: 10;
+            max-width: 860px; margin: 0 auto;
+            padding: 0 24px; text-align: center;
+        }
+
+        /* Version badge */
+        .version-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(52,211,153,0.08);
+            border: 1px solid rgba(52,211,153,0.25);
+            color: var(--emerald);
+            font-size: 12px; font-weight: 700;
+            padding: 6px 16px; border-radius: 99px;
+            letter-spacing: 0.04em;
+            margin-bottom: 28px;
+        }
+        .version-badge .dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--emerald);
+            box-shadow: 0 0 8px var(--emerald);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.85); }
+        }
+
+        /* Headline */
+        .hero-headline {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(36px, 6vw, 68px);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+            color: #f1f5f9;
+            margin-bottom: 20px;
+        }
+        .hero-headline .accent {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--emerald) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 0 20px rgba(34,211,238,0.3));
+        }
+
+        /* Sub */
+        .hero-sub {
+            font-size: clamp(15px, 2vw, 18px);
+            color: rgba(148,163,184,0.75);
+            max-width: 560px; margin: 0 auto 40px;
+            line-height: 1.7;
+            font-weight: 400;
+        }
+
+        /* CTAs */
+        .cta-group {
+            display: flex; flex-wrap: wrap; gap: 14px;
+            justify-content: center; align-items: center;
+            margin-bottom: 56px;
+        }
+
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+            color: #fff; font-weight: 800; font-size: 16px;
+            padding: 16px 32px; border-radius: 18px;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+            box-shadow: 0 0 30px rgba(8,145,178,0.4), 0 0 60px rgba(5,150,105,0.15), 0 4px 24px rgba(0,0,0,0.3);
+            transition: all 0.3s; border: 1px solid rgba(52,211,153,0.3);
+            position: relative; overflow: hidden;
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute; top: 0; left: -100%; width: 60%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.6s ease;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(8,145,178,0.6), 0 0 80px rgba(5,150,105,0.25), 0 8px 32px rgba(0,0,0,0.4); }
+        .btn-primary:hover::before { left: 150%; }
+
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            color: rgba(203,213,225,0.85); font-weight: 700; font-size: 16px;
+            padding: 16px 32px; border-radius: 18px;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: all 0.3s; backdrop-filter: blur(10px);
+        }
+        .btn-secondary:hover {
+            border-color: rgba(52,211,153,0.35);
+            color: var(--emerald);
+            background: rgba(52,211,153,0.06);
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(52,211,153,0.1);
+        }
+
+        /* Developer button */
+        .btn-dev {
+            background: none; border: none; cursor: pointer;
+            color: rgba(148,163,184,0.3);
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 0.18em; text-transform: uppercase;
+            transition: color 0.25s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-dev:hover { color: rgba(52,211,153,0.5); }
+
+        /* ─── Stats bar ─── */
+        .stats-bar {
+            display: flex; flex-wrap: wrap; gap: 0;
+            justify-content: center;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            position: relative;
+        }
+        .stats-bar::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+            opacity: 0.5;
+        }
+
+        .stat-item {
+            flex: 1; min-width: 140px;
+            padding: 24px 28px; text-align: center;
+            border-right: 1px solid var(--border);
+            transition: background 0.25s;
+        }
+        .stat-item:last-child { border-right: none; }
+        .stat-item:hover { background: rgba(52,211,153,0.04); }
+
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 28px; font-weight: 800;
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            filter: drop-shadow(0 0 8px rgba(34,211,238,0.25));
+            display: block; margin-bottom: 4px;
+        }
+        .stat-label {
+            font-size: 11px; font-weight: 600;
+            color: rgba(148,163,184,0.5);
+            text-transform: uppercase; letter-spacing: 0.1em;
+        }
+
+        /* ─── Features (below fold) ─── */
+        .features {
+            position: relative; z-index: 1;
+            max-width: 1200px; margin: 0 auto;
+            padding: 80px 24px;
+        }
+
+        .features-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800; color: #f1f5f9;
+            text-align: center; margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+        .features-sub {
+            font-size: 15px; color: rgba(148,163,184,0.55);
+            text-align: center; max-width: 480px;
+            margin: 0 auto 56px; line-height: 1.7;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid var(--border);
+            border-radius: 22px; padding: 28px;
+            transition: all 0.35s; position: relative; overflow: hidden;
+        }
+        .feature-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(52,211,153,0.4), transparent);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(52,211,153,0.3);
+            box-shadow: 0 12px 40px rgba(52,211,153,0.1);
+        }
+
+        .feature-icon {
+            width: 46px; height: 46px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 18px; font-size: 18px;
+        }
+        .icon-cyan  { background: rgba(34,211,238,0.12);  border: 1px solid rgba(34,211,238,0.2);  color: var(--cyan); }
+        .icon-em    { background: rgba(52,211,153,0.12);  border: 1px solid rgba(52,211,153,0.2);  color: var(--emerald); }
+        .icon-amber { background: rgba(251,191,36,0.10);  border: 1px solid rgba(251,191,36,0.2);  color: var(--amber); }
+
+        .feature-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 16px; font-weight: 700;
+            color: #e2e8f0; margin-bottom: 8px;
+        }
+        .feature-desc {
+            font-size: 13px; color: rgba(148,163,184,0.55);
+            line-height: 1.65;
+        }
+
+        /* ─── Footer line ─── */
+        .footer-line {
+            text-align: center;
+            padding: 32px 24px;
+            border-top: 1px solid var(--border);
+            font-size: 12px; color: rgba(148,163,184,0.3);
+            font-weight: 500; letter-spacing: 0.05em;
+            position: relative; z-index: 1;
+        }
+        .footer-line span { color: rgba(52,211,153,0.5); }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="nav-inner">
+            <div style="display:flex;align-items:center;gap:10px">
+                <div class="nav-logo-icon">
+                    <img src="../logo/faviicon4.png" alt="Logo MedIM" style="height: 100%; width: auto; object-fit: contain;">
+                </div>
+                <span class="nav-brand">Sistema Clinico Inteligente</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:20px">
+                <a href="/login" class="nav-login">Entrar</a>
+                <a href="/pages/Cadastro_Clinica.html" class="nav-cta">
+                    <i class="fas fa-rocket" style="font-size:12px"></i> Teste Grátis
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <main class="hero">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+        <div class="hero-grid"></div>
+
+        <div class="hero-content">
+
+            <div class="version-badge">
+                <span class="dot"></span>
+                MedLM seu Sitema Clinico Multi-tenant
+            </div>
+
+            <h1 class="hero-headline">
+                A evolução na gestão da sua<br>
+                <span class="accent">clínica ou consultório.</span>
+            </h1>
+
+            <p class="hero-sub">
+                Organize pacientes, agendamentos e seu financeiro em um só lugar. Feito para profissionais que buscam escala e organização.
+            </p>
+
+            <div class="cta-group">
+                <a href="/pages/Cadastro_Clinica.html" class="btn-primary">
+                    <i class="fas fa-rocket"></i> Criar Minha Clínica
+                </a>
+                <a href="/login" class="btn-secondary">
+                    <i class="fas fa-sign-in-alt"></i> Acessar Sistema
+                </a>
+            </div>
+
+            <!-- Stats bar -->
+            <div class="stats-bar" style="margin-bottom:40px">
+                <div class="stat-item">
+                    <span class="stat-num">+2.400</span>
+                    <span class="stat-label">Pacientes gerenciados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">98%</span>
+                    <span class="stat-label">Satisfação dos usuários</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">99.9%</span>
+                    <span class="stat-label">Uptime garantido</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-num">24/7</span>
+                    <span class="stat-label">Suporte disponível</span>
+                </div>
+            </div>
+
+            <button onclick="verificarSenhaMestre()" class="btn-dev">
+                <i class="fas fa-lock"></i> Área do Desenvolvedor
+            </button>
+
+        </div>
+    </main>
+
+    <!-- Features -->
+    <section class="features">
+        <h2 class="features-title">Tudo que sua clínica precisa</h2>
+        <p class="features-sub">Uma plataforma completa, construída para o dia a dia clínico com foco em produtividade e segurança.</p>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon icon-cyan"><i class="fas fa-calendar-check"></i></div>
+                <h3 class="feature-title">Agendamento Inteligente</h3>
+                <p class="feature-desc">Gerencie sua agenda em tempo real, com confirmações automáticas e lembretes via WhatsApp.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-em"><i class="fas fa-user-injured"></i></div>
+                <h3 class="feature-title">Prontuário Digital</h3>
+                <p class="feature-desc">Acesse o histórico completo de cada paciente, evoluções e condições pré-existentes em segundos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-amber"><i class="fas fa-hand-holding-usd"></i></div>
+                <h3 class="feature-title">Gestão Financeira</h3>
+                <p class="feature-desc">Controle faturamento, sessões liquidadas, inadimplência e no-shows com relatórios visuais.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-cyan"><i class="fas fa-users-cog"></i></div>
+                <h3 class="feature-title">Gestão de Equipe</h3>
+                <p class="feature-desc">Cadastre terapeutas, distribua pacientes e acompanhe o desempenho da sua equipe clínica.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-em"><i class="fas fa-chart-line"></i></div>
+                <h3 class="feature-title">Dashboard Analítico</h3>
+                <p class="feature-desc">Métricas semanais e mensais com gráficos comparativos para decisões estratégicas precisas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon icon-amber"><i class="fas fa-shield-alt"></i></div>
+                <h3 class="feature-title">Segurança &amp; Multi-tenant</h3>
+                <p class="feature-desc">Cada clínica em ambiente isolado, com criptografia e backups automáticos em nuvem.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer-line">
+        © 2025 Sistema Clinico Inteligente — Feito com <span>♥</span> para profissionais de saúde
+    </footer>
+
+    <script>
+        function verificarSenhaMestre() {
+            const senha = prompt('Digite a senha de acesso mestre:');
+            if (senha === 'leandro') {
+                window.location.href = 'cadastro-usuario.html';
+            } else {
+                alert('Acesso negado!');
+            }
+        }
+    </script>
+</body>
+</html>
