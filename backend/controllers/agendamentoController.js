@@ -211,6 +211,9 @@ exports.criarAgendamento = async (req, res) => {
   } catch (err) {
     if (connection) await connection.rollback();
 
+    // 🌟 Adicione apenas esta linha para imprimir o erro real no log do Render:
+    console.error("❌ ERRO DETALHADO AO CRIAR AGENDAMENTO:", err);
+
     if (err.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({
         erro: 'Este horário já está ocupado por outro agendamento. Escolha outro horário.'
