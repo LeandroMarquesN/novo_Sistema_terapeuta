@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamento | <%= clinica.nome_clinica %></title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Importação da Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
+    <style>
+        body {
+            /* Degradê suave Azul para Verde */
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%);
+            min-height: 100 screen;
+            font-family: -apple-system, system-ui, sans-serif;
+        }
+        @media (prefers-color-scheme: dark) {
+            body { background: linear-gradient(135deg, #0f172a 0%, #064e3b 100%); color: white; }
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 2rem;
+        }
+        .step { display: none; }
+        .step.active { display: block; animation: slideUp 0.4s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .ios-input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            width: 100%;
+        }
+        /* Stile do banner */
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+
+        .header-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #10b981 100%);
+            border-radius: 0 0 3rem 3rem;
+            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.2);
+        }
+
+        .text-glow {
+            background: linear-gradient(to right, #fff, #99f6e4, #fff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+    </style>
+</head>
+<body class="p-4">
+   
+
+    <!-- Banner de Boas-Vindas -->
+    <!-- Banner de Boas-Vindas Premium -->
+    <header class="w-full header-gradient pt-12 pb-16 px-6 text-center mb-8 relative overflow-hidden font-poppins">
+        <!-- Círculos de brilho decorativos (Estilo iOS) -->
+        <div class="absolute top-[-10%] left-[-10%] w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-[-20%] right-[-10%] w-60 h-60 bg-emerald-400/20 rounded-full blur-3xl"></div>
+
+        <div class="relative z-10 max-w-lg mx-auto">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md border border-white/30 rounded-full mb-6">
+                <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span class="text-[10px] text-white font-bold uppercase tracking-widest">Portal de Agendamento Oficial</span>
+            </div>
+
+            <h1 class="text-white/90 text-sm font-medium uppercase tracking-[0.2em] mb-2">Bem-vindo à</h1>
+
+            <!-- Nome da Clínica com Efeito de Brilho -->
+            <h2 class="text-4xl md:text-5xl font-extrabold text-glow leading-tight drop-shadow-lg">
+                <%= clinica.nome_clinica %>
+            </h2>
+            
+
+            <div class="mt-4 flex justify-center items-center gap-2 text-white/70 text-xs">
+                <i class="fas fa-shield-check"></i>
+                <span>Ambiente Seguro e Criptografado</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-lg mx-auto">
+        <!-- Progress Bar -->
+        <div class="flex justify-between mb-8 px-10 relative">
+            <div class="absolute top-1/2 left-10 right-10 h-[2px] bg-slate-300 -z-10"></div>
+            <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm">1</div>
+            <div id="dot-2" class="w-8 h-8 rounded-full bg-slate-300 text-white flex items-center justify-center font-bold text-sm transition-colors">2</div>
+            <div id="dot-3" class="w-8 h-8 rounded-full bg-slate-300 text-white flex items-center justify-center font-bold text-sm transition-colors">3</div>
+        </div>
+
+        <form id="agendamentoForm">
+            <!-- PASSO 1: DADOS -->
+            <!-- PASSO 1: DADOS -->
+            <section id="step1" class="step active glass p-6 shadow-xl">
+                <div class="bg-blue-600 -mx-6 -mt-6 p-4 rounded-t-2xl mb-6 text-white text-center">
+                    <p class="font-bold text-lg">Seja bem-vindo!</p>
+                    <p class="text-xs opacity-90">Preencha seus dados para iniciar o agendamento.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- NOME -->
+                    <div>
+                        <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Nome Completo</label>
+                        <input type="text" id="nome" name="nome" placeholder="Como no seu RG" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.nome : '' %>" required>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- EMAIL -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="exemplo@email.com" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.email : '' %>" required>
+                        </div>
+                        <!-- WHATSAPP -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">WhatsApp</label>
+                            <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.telefone : '' %>" required>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <!-- CPF -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">CPF</label>
+                            <input type="text" id="cpf" name="cpf" placeholder="000.000.000-00" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado ? pacienteLogado.cpf : '' %>" required>
+                        </div>
+                        <!-- DATA NASCIMENTO -->
+                        <div>
+                            <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Data de Nascimento</label>
+                            <input type="date" id="data_nascimento" name="data_nascimento" class="ios-input focus:ring-2 focus:ring-blue-400" value="<%= pacienteLogado && pacienteLogado.data_nascimento ? new Date(pacienteLogado.data_nascimento).toISOString().split('T')[0] : '' %>" required>
+                        </div>
+                    </div>
+
+                    <!-- GÊNERO -->
+                    <div>
+                        <label class="text-[10px] font-black text-blue-600 ml-1 uppercase tracking-wider">Gênero</label>
+                        <select id="genero" name="genero" class="ios-input focus:ring-2 focus:ring-blue-400">
+                            <option value="Masculino">Masculino</option>
+                            <option value="Feminino">Feminino</option>
+                            <option value="Não informado">Prefiro não informar</option>
+                        </select>
+                    </div>
+                    <!-- 🛡️ CHECKBOX LGPD HUMANIZADO -->
+                    <div class="form-check my-3 p-3 bg-slate-50 rounded-xl border border-slate-200">
+                        <input class="form-check-input mt-1" type="checkbox" value="true" id="aceite_lgpd" name="aceite_lgpd" required>
+                        <label class="form-check-label text-slate-600 text-xs ms-2" for="aceite_lgpd" style="line-height: 1.4;">
+                            <strong>Privacidade e Sigilo:</strong> Autorizo o armazenamento seguro dos meus dados de saúde e informações pessoais para uso exclusivo no atendimento clínico, garantindo total confidencialidade e conformidade com a LGPD.
+                        </label>
+                    </div>
+                </div>
+
+                <button type="button" onclick="validateStep1()" class="w-full mt-8 bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+                    Próximo: Escolher Horário <i class="fas fa-calendar-alt"></i>
+                </button>
+            </section>
+
+            <!-- PASSO 2: HORÁRIO -->
+            <section id="step2" class="step glass p-6 shadow-xl">
+                <div class="bg-emerald-500 -mx-6 -mt-6 p-4 rounded-t-2xl mb-6 text-white text-center">
+                    <p class="font-bold">Passo 2: Escolha o Momento</p>
+                    <p class="text-xs opacity-80">Selecione o dia e o horário desejado</p>
+                </div>
+
+                <div class="mb-6">
+                    <label class="text-xs font-bold text-slate-500 ml-1">SELECIONE A DATA</label>
+                    <input type="date" id="data_escolhida" onchange="handleDataChange()" class="ios-input border-2 border-emerald-100">
+                </div>
+
+                <!-- NOVO: aviso de data indisponível (dia fechado / recesso) -->
+                <div id="avisoDataIndisponivel" class="hidden mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-bold flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="avisoDataTexto"></span>
+                </div>
+
+                <div id="container_horarios" class="grid grid-cols-3 gap-2 min-h-[100px]">
+                    <!-- Injetado via JS -->
+                </div>
+
+                <div class="mt-8 space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 ml-1">COMO DESEJA SER ATENDIDO?</label>
+                        <select name="tipo_terapia" class="ios-input">
+                            <option value="Presencial">Atendimento Presencial</option>
+                            <option value="Online">Atendimento Online (Vídeo)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 ml-1">MOTIVO DA CONSULTA (OPCIONAL)</label>
+                        <textarea id="motivo_consulta" name="motivo_consulta" placeholder="Conte brevemente o que você busca..." class="ios-input h-20"></textarea>
+                    </div>
+                </div>
+
+                <button type="button" id="btn-next-3" onclick="goToStep(3)" disabled class="w-full mt-8 bg-slate-300 text-white font-bold py-4 rounded-2xl transition">
+                    Revisar e Finalizar
+                </button>
+            </section>
+
+            <!-- PASSO 3: CONFIRMAÇÃO -->
+            <section id="step3" class="step glass p-6 shadow-xl text-center">
+                <div class="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                    <i class="fas fa-calendar-check text-3xl text-white"></i>
+                </div>
+                <h3 class="text-2xl font-bold mb-2">Tudo Pronto!</h3>
+                <p class="text-slate-500 text-sm mb-6">Confirme abaixo para garantir sua vaga.</p>
+
+                <div class="bg-gradient-to-br from-blue-600 to-emerald-500 rounded-3xl p-6 text-white mb-6 text-left shadow-xl">
+                    <p class="text-[10px] uppercase tracking-tighter opacity-80">Sinal da Consulta</p>
+                    <h4 class="text-4xl font-black">R$ <%= config.valor_sinal || '0,00' %></h4>
+                    <hr class="my-4 opacity-20">
+                    <p class="text-[11px] leading-relaxed italic">
+                        O pagamento do sinal não é obrigatório para confirmar seu horário. No momento o pagamento
+                        online pela plataforma está passando por uma atualização — assim que seu agendamento for
+                        confirmado, o sinal poderá ser pago <strong>diretamente na clínica</strong>.
+                    </p>
+                </div>
+
+                <div class="space-y-3">
+                    <button type="button" onclick="finalizarAgendamentoCompleto('confirmado', event)" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-lg active:scale-95 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-check-circle"></i> Confirmar Agendamento
+                    </button>
+                    <button type="button" onclick="abrirModalLembrete()" class="w-full bg-white border-2 border-slate-200 text-slate-500 font-bold py-3 rounded-2xl text-sm">
+                        Prefiro pagar o sinal agora
+                    </button>
+                </div>
+            </section>
+        </form>
+    </main>
+    <!-- modal de agendamento realizzado -->
+    <!-- MODAL DE SUCESSO (ESTILO IOS/GLASSMORFISM) -->
+    <div id="modalSucesso" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 hidden backdrop-blur-md transition-all">
+        <div class="glass w-full max-w-sm p-8 text-center shadow-2xl bg-white/80 dark:bg-slate-900/80 animate-slide-up">
+
+            <!-- Ícone Animado -->
+            <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-green-200">
+                <i class="fas fa-check text-3xl text-white"></i>
+            </div>
+
+            <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-2">Agendado!</h3>
+            <p class="text-slate-500 dark:text-slate-300 text-sm mb-8">
+                Tudo certo, seu horário foi reservado. Enviamos os detalhes para o seu e-mail e WhatsApp.
+            </p>
+
+            <button onclick="fecharSucessoERecarregar()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-blue-200 shadow-lg active:scale-95 transition-all">
+                Entendido
+            </button>
+        </div>
+    </div>
+    <!-- modal: pagamento pela plataforma em atualização -->
+    <div id="modalPagamentoLembrete" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl">
+            <div class="text-amber-500 text-4xl mb-4"><i class="fas fa-tools"></i></div>
+
+            <h2 class="text-2xl font-bold mb-2">Pagamento em atualização</h2>
+            <p class="text-slate-600 mb-4">
+                O pagamento do sinal pela plataforma está passando por uma atualização e, no momento,
+                não está disponível para novos agendamentos.
+            </p>
+
+            <div class="bg-slate-50 p-3 rounded-lg mb-4 text-sm text-slate-700">
+                <p>Data: <span id="resumoData" class="font-bold"></span></p>
+                <p>Horário: <span id="resumoHora" class="font-bold"></span></p>
+            </div>
+
+            <p class="text-slate-600 mb-6">
+                Você pode confirmar seu horário normalmente agora e realizar o pagamento do sinal
+                <strong>diretamente na clínica</strong>.
+            </p>
+
+            <button onclick="fecharLembreteEConfirmar(event)" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition-all shadow-md">
+                Entendi, confirmar agendamento
+            </button>
+            <button onclick="fecharLembrete()" class="mt-4 text-slate-400 text-sm hover:underline">
+                Voltar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════
+        // ESTADO GLOBAL
+        // ═══════════════════════════════════════════════════════════════
+        let dados = { clinica_id: "<%= clinica.id %>", horario: "" };
+
+        // Config da clínica injetada direto do servidor — evita nova chamada à API
+        // dias_semana: string tipo "1,2,3,4,5" (0=Dom ... 6=Sáb)
+        // periodos_fechados: array de { titulo, inicio, fim } (recessos/feriados)
+        const configClinica = {
+            dias_semana: "<%= config.dias_semana || '1,2,3,4,5' %>",
+            periodos_fechados: <%- JSON.stringify(config.periodos_fechados || []) %>
+        };
+
+        // ═══════════════════════════════════════════════════════════════
+        // UTILITÁRIO: data local (CORRIGIDO — sem bug de fuso do toISOString)
+        // toISOString() sempre usa UTC; como Brasília é UTC-3, a partir das
+        // 21h locais o UTC já virou o dia seguinte, o que bugava o "hoje".
+        // ═══════════════════════════════════════════════════════════════
+        function getDataLocalISO(data = new Date()) {
+            const ano = data.getFullYear();
+            const mes = String(data.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.getDate()).padStart(2, '0');
+            return `${ano}-${mes}-${dia}`;
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // NOVO: verifica se a data é dia de atendimento e não está em recesso
+        // Retorna null se a data está livre, ou uma mensagem de erro se não.
+        // ═══════════════════════════════════════════════════════════════
+        function verificarDataFechada(dataStr) {
+            const diasPermitidos = (configClinica.dias_semana || '1,2,3,4,5')
+                .split(',')
+                .map(d => d.trim());
+
+            const diaSemana = new Date(dataStr + 'T12:00:00').getDay().toString();
+
+            if (!diasPermitidos.includes(diaSemana)) {
+                return 'A clínica não atende neste dia da semana. Por favor, escolha outra data.';
+            }
+
+            const dataAlvo = new Date(dataStr + 'T00:00:00');
+            const periodos = configClinica.periodos_fechados || [];
+            const recesso = periodos.find(p => {
+                const inicio = new Date(p.inicio + 'T00:00:00');
+                const fim = new Date(p.fim + 'T00:00:00');
+                return dataAlvo >= inicio && dataAlvo <= fim;
+            });
+
+            if (recesso) {
+                return `A clínica estará fechada nesta data (${recesso.titulo || 'recesso/feriado'}). Escolha outra data.`;
+            }
+
+            return null; // data livre
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // NOVO: dispara ao trocar a data — valida ANTES de buscar horários
+        // ═══════════════════════════════════════════════════════════════
+        function handleDataChange() {
+            const dataInput = document.getElementById('data_escolhida').value;
+            const avisoDiv = document.getElementById('avisoDataIndisponivel');
+            const avisoTexto = document.getElementById('avisoDataTexto');
+            const container = document.getElementById('container_horarios');
+            const btnNext = document.getElementById('btn-next-3');
+
+            if (!dataInput) return;
+
+            // Reseta seleção de horário anterior sempre que a data muda
+            dados.horario = '';
+            btnNext.disabled = true;
+            btnNext.classList.remove('bg-emerald-500');
+            btnNext.classList.add('bg-slate-300');
+
+            const motivoFechado = verificarDataFechada(dataInput);
+
+            if (motivoFechado) {
+                avisoTexto.innerText = motivoFechado;
+                avisoDiv.classList.remove('hidden');
+                container.innerHTML = '';
+                return;
+            }
+
+            avisoDiv.classList.add('hidden');
+            carregarHorarios();
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // MODAL: "Prefiro pagar o sinal agora"
+        // Como o pagamento pela plataforma ainda não está configurado
+        // (ver PAGAMENTO_PLATAFORMA_ATIVO no backend), esse modal apenas
+        // avisa o paciente e o leva a confirmar o agendamento sem cobrança
+        // online — o sinal fica para ser pago na clínica.
+        // ═══════════════════════════════════════════════════════════════
+        function abrirModalLembrete() {
+            const inputData = document.getElementById('data_escolhida');
+            const displayData = document.getElementById('resumoData');
+            const displayHora = document.getElementById('resumoHora');
+            const modal = document.getElementById('modalPagamentoLembrete');
+
+            if (!inputData.value || !dados.horario) {
+                console.warn("Tentativa de abrir modal sem dados de agendamento.");
+                return;
+            }
+
+            // Formatação amigável da data: '2026-06-25' -> '25/06/2026'
+            const [ano, mes, dia] = inputData.value.split('-');
+            displayData.innerText = `${dia}/${mes}/${ano}`;
+            displayHora.innerText = dados.horario;
+
+            modal.classList.remove('hidden');
+        }
+
+        function fecharLembrete() {
+            document.getElementById('modalPagamentoLembrete').classList.add('hidden');
+        }
+
+        // Fecha o modal de aviso e segue direto para a confirmação do
+        // agendamento (sem pagamento pela plataforma, que ainda não existe).
+        function fecharLembreteEConfirmar(event) {
+            fecharLembrete();
+            finalizarAgendamentoCompleto('confirmado', event);
+        }
+        // ----- fim ------
+
+
+
+        // validacao de dados
+        // validacao de dados
+        function validateStep1() {
+            const campos = ['nome', 'email', 'telefone', 'cpf', 'data_nascimento'];
+            let valido = true;
+
+            // Valida os inputs de texto/data
+            campos.forEach(id => {
+                const el = document.getElementById(id);
+                if (!el || !el.value) {
+                    if (el) el.classList.add('border-red-500', 'bg-red-50');
+                    valido = false;
+                } else {
+                    el.classList.remove('border-red-500', 'bg-red-50');
+                }
+            });
+
+            // Validação do Checkbox LGPD
+            const checkLgpd = document.getElementById('aceite_lgpd');
+            const containerLgpd = checkLgpd ? checkLgpd.closest('.form-check') : null; // Pega o container para destacar se quiser
+
+            if (!checkLgpd || !checkLgpd.checked) {
+                valido = false;
+                if (containerLgpd) {
+                    containerLgpd.classList.add('border-red-500', 'bg-red-100'); // Destaca em vermelho se não marcou
+                }
+            } else {
+                if (containerLgpd) {
+                    containerLgpd.classList.remove('border-red-500', 'bg-red-100');
+                }
+            }
+
+            // Se tudo estiver válido, avança. Se não, avisa o usuário.
+            if (valido) {
+                goToStep(2);
+            } else {
+                // Alerta mais específico para guiar o usuário
+                alert("Por favor, preencha todos os campos obrigatórios e aceite os termos de (LGPD)privacidade para prosseguir.");
+            }
+        }
+
+        function goToStep(step) {
+                    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+                    document.getElementById('step' + step).classList.add('active');
+                    if(step >= 2) document.getElementById('dot-2').classList.replace('bg-slate-300', 'bg-blue-600');
+                    if(step >= 3) document.getElementById('dot-3').classList.replace('bg-slate-300', 'bg-blue-600');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+
+        // ═══════════════════════════════════════════════════════════════
+        // Busca os horários livres no servidor (dias/recessos já filtrados
+        // no front por handleDataChange antes de chegar aqui)
+        // ═══════════════════════════════════════════════════════════════
+        async function carregarHorarios() {
+                // 1. LIMPEZA DE SEGURANÇA: Remove qualquer lixo extra da string da data
+                let dataInput = document.getElementById('data_escolhida').value;
+                
+                // Se por acaso vier algo como "2026-06-25:1", isso vai limpar para "2026-06-25"
+                if (dataInput.includes(':')) {
+                    dataInput = dataInput.split(':')[0];
+                }
+
+                const container = document.getElementById('container_horarios');
+                container.innerHTML = '<div class="col-span-3 text-center py-4"><i class="fas fa-spinner fa-spin text-blue-500"></i> Buscando horários...</div>';
+
+                try {
+                   // 1. Captura o slug da URL atual (ex: 'clinica-solar-2')
+                    const pathParts = window.location.pathname.split('/');
+                    const slug = pathParts[2]; // O índice 2 será o slug em '/agendar/slug'
+
+                    // 2. Monta a URL seguindo a estrutura do seu portal-agendamento-routes.js
+                    const url = `/agendar/${slug}/api/horarios?clinica_id=${dados.clinica_id}&data=${dataInput}`;
+                    
+                    const resp = await fetch(url);
+                    
+                    if (!resp.ok) throw new Error('Erro na comunicação com o servidor');
+                    
+                    const json = await resp.json();
+
+                    const agora = new Date();
+                    // CORRIGIDO: usa data local em vez de toISOString() (que usa UTC e quebra à noite)
+                    const hojeDataISO = getDataLocalISO(agora);
+
+                    container.innerHTML = '';
+
+                    const horariosFiltrados = json.horarios.filter(h => {
+
+                    if (dataInput !== hojeDataISO) return true;
+
+                        const [hora, min] = h.split(':').map(Number);
+                        const dataSlot = new Date();
+                        dataSlot.setHours(hora, min, 0, 0);
+
+                            return dataSlot > agora;
+                    });
+
+                    if (horariosFiltrados.length === 0) {
+                            container.innerHTML = '<div class="col-span-3 text-center text-red-500 text-sm font-bold p-4">Ops! Não há mais horários disponíveis para esta data.</div>';
+                            return;
+                     }
+
+                        horariosFiltrados.forEach(h => {
+                            const btn = document.createElement('button');
+                            btn.type = "button";
+                            btn.innerText = h;
+                            btn.className = "p-3 rounded-xl border-2 border-white bg-white/50 shadow-sm font-bold text-slate-700 transition-all active:scale-90";
+                            btn.onclick = () => {
+                                document.querySelectorAll('#container_horarios button').forEach(b => b.classList.remove('bg-blue-600', 'text-white', 'border-blue-600'));
+                                btn.classList.add('bg-blue-600', 'text-white', 'border-blue-600');
+                                dados.horario = h;
+                                document.getElementById('btn-next-3').disabled = false;
+                                document.getElementById('btn-next-3').classList.replace('bg-slate-300', 'bg-emerald-500');
+                            };
+                            container.appendChild(btn);
+                        });
+                    } catch (err) {
+                        console.error("Erro:", err);
+                        container.innerHTML = '<div class="col-span-3 text-center text-red-500">Erro ao carregar horários.</div>';
+                    }
+        }
+
+        // ═══════════════════════════════════════════════════════════════
+        // Finaliza o agendamento. AJUSTADO para tratar o erro 409
+        // (conflito de horário — alguém já pegou aquele horário antes)
+        // Obs: o "status" enviado aqui é só informativo pro payload — o
+        // backend decide o status_agendamento real (sempre 'confirmado'
+        // enquanto o pagamento pela plataforma estiver desligado).
+        // ═══════════════════════════════════════════════════════════════
+        async function finalizarAgendamentoCompleto(status, event) {
+
+                const btnConfirmar = event.currentTarget; // Usar currentTarget garante que sempre pegue o botão
+                btnConfirmar.disabled = true;
+                btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+
+                const form = document.getElementById('agendamentoForm');
+                const payload = Object.fromEntries(new FormData(form).entries());
+
+                payload.clinica_id = dados.clinica_id;
+                payload.horario = dados.horario;
+                payload.data = document.getElementById('data_escolhida').value.substring(0, 10);
+                payload.status_agendamento = status;
+
+                // Captura o slug da URL atual para bater com a sua rota definida no routes.js
+                const slug = window.location.pathname.split('/')[2]; 
+
+                try {
+                    const resp = await fetch(`/agendar/${slug}/finalizar`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const res = await resp.json();
+
+                    if (res.success) {
+                        // 1. Fecha qualquer modal de processo
+                        if (typeof fecharModal === "function") fecharModal();
+
+                        // 2. Abre APENAS o modal de sucesso original
+                        const modalSucesso = document.getElementById('modalSucesso');
+                        if (modalSucesso) {
+                            modalSucesso.classList.remove('hidden');
+                        } else {
+                            // Fallback caso o ID do modal tenha mudado
+                            alert("Agendamento realizado com sucesso!");
+                        }
+                    } else if (resp.status === 409) {
+                        // NOVO: conflito de horário — outra pessoa pegou esse horário primeiro.
+                        // Reseta a seleção e manda o paciente escolher outro horário.
+                        alert(res.message || "Esse horário acabou de ser reservado por outra pessoa. Por favor, escolha outro horário.");
+                        dados.horario = '';
+                        goToStep(2);
+                        // Recarrega os horários da data já escolhida para refletir a ocupação real
+                        const motivoFechado = verificarDataFechada(document.getElementById('data_escolhida').value);
+                        if (!motivoFechado) carregarHorarios();
+                        btnConfirmar.disabled = false;
+                        btnConfirmar.innerText = "Confirmar Agendamento";
+                    } else {
+                        alert("Erro: " + (res.message || "Não foi possível concluir o agendamento."));
+                        btnConfirmar.disabled = false;
+                        btnConfirmar.innerText = "Confirmar Agendamento";
+                    }
+                    } catch (e) {
+                        console.error(e);
+                        alert("Erro crítico ao salvar agendamento.");
+                        btnConfirmar.disabled = false;
+                    }
+                }
+
+            // Funções auxiliares para o Modal de Sucesso
+            function abrirModalSucesso() {
+                document.getElementById('modalSucesso').classList.remove('hidden');
+            }
+
+            function fecharSucessoERecarregar() {
+                // Fecha o modal e recarrega a página ou redireciona
+                document.getElementById('modalSucesso').classList.add('hidden');
+                window.location.reload();
+            }
+
+        // Definir data mínima como HOJE para o input date (CORRIGIDO: fuso local, não UTC)
+        document.getElementById('data_escolhida').min = getDataLocalISO();
+    </script>
+</body>
+</html>
