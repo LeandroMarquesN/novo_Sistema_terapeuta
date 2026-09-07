@@ -43,3 +43,22 @@ exports.login = async (req, res) => {
         return res.status(500).json({ message: 'Erro interno do servidor' });
     }
 };
+// 🌟 NOVO MÉTODO: Listar profissionais da clínica para o agendamento
+exports.listarUsuariosDaClinica = async (req, res) => {
+    const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+
+    if (!clinicaId) {
+        return res.status(400).json({ erro: 'Clínica não identificada na sessão.' });
+    }
+
+    try {
+        const [usuarios] = await db.execute(
+            'SELECT id, nome, cargo, crm, uf_crm FROM usuarios WHERE clinica_id = ?',
+            [clinicaId]
+        );
+        return res.status(200).json(usuarios);
+    } catch (error) {
+        console.error('Erro ao listar profissionais da clínica:', error);
+        return res.status(500).json({ erro: 'Erro interno ao buscar profissionais' });
+    }
+};
