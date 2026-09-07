@@ -1,7 +1,7 @@
 // portal-agendamento-routes.js
 const express = require('express');
 const router = express.Router();
-const portalController = require('../controllers/portalController_2');
+const portalController = require('../controllers/portalController');
 const agendamentoController = require('../controllers/agendamentoController');
 const portalMiddleware = require('../middleware/portalPacienteMiddleware');
 
