@@ -504,9 +504,7 @@
             body.modal-recibo-open {
                 overflow: hidden !important;
             }
-            /* Gaveta extrato também acima da tabbar */
-            #gavetaExtrato { z-index: 100 !important; }
-            #backdropExtrato { z-index: 90 !important; }
+            /* Gaveta extrato: z-index já garantido globalmente nas classes do elemento (fica acima da tabbar) */
             body.gaveta-extrato-open .mobile-bottom-tabbar {
                 transform: translateY(140%) !important;
                 opacity: 0 !important;
@@ -1078,7 +1076,7 @@
 </div>
 
 <!-- Gaveta Extrato -->
-<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-full sm:w-[420px] md:w-[500px] lg:w-[600px] max-w-full bg-[#020c12] border-l border-[rgba(52,211,153,0.15)] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-50 flex flex-col hidden">
+<div id="gavetaExtrato" class="fixed inset-y-0 right-0 w-full md:w-[500px] lg:w-[600px] max-w-full bg-[#020c12] border-l border-[rgba(52,211,153,0.15)] shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out z-[100] flex flex-col hidden">
     <div class="p-4 sm:p-6 border-b border-[rgba(52,211,153,0.15)] flex justify-between items-center bg-white/[0.02] backdrop-blur-md">
         <div class="min-w-0">
             <h3 class="text-base sm:text-lg font-black text-slate-100 tracking-tight font-['Space_Grotesk'] truncate">Extrato Financeiro</h3>
@@ -1171,7 +1169,7 @@
     </div>
 </div>
 
-<div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/60 backdrop-blur-xs z-[90] hidden transition-opacity duration-300"></div>
+<div id="backdropExtrato" onclick="fecharGavetaExtrato()" class="fixed inset-0 bg-black/30 backdrop-blur-md z-[90] hidden transition-opacity duration-300"></div>
 
 <!-- Modal Impressão Recibo -->
 <div id="modalImpressaoRecibo" class="hidden fixed inset-0 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-slate-900/60 backdrop-blur-sm no-print">
