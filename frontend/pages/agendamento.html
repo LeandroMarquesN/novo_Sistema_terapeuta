@@ -1041,23 +1041,43 @@
     })();
     
     async function carregarProfissionais() {
-      try {
-        const res = await fetch('/api/usuarios/clinica', {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const data = await res.json();
-        const select = document.getElementById('selectProfissional');
-        if (data && data.length > 0) {
-          select.innerHTML = '<option value="" selected disabled>Selecione o profissional...</option>' +
-            data.map(u => `<option value="${u.id}">${u.nome} (${u.cargo || 'Profissional'})</option>`).join('');
-        } else {
-          select.innerHTML = '<option value="" disabled>Nenhum profissional encontrado</option>';
-        }
-      } catch (err) {
-        console.error('Erro ao carregar profissionais:', err);
-      }
+  const select = document.getElementById('selectProfissional');
+  if (!select) return;
+
+  try {
+    select.innerHTML = '<option value="" selected disabled>Carregando profissionais...</option>';
+    
+    const res = await fetch('/api/usuarios/clinica', {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+    });
+    
+    const responseJson = await res.json();
+    
+    // 🛡️ Blindagem: extrai o array independentemente se veio direto ou dentro de uma propriedade
+    let profissionais = [];
+    if (Array.isArray(responseJson)) {
+      profissionais = responseJson;
+    } else if (responseJson && Array.isArray(responseJson.dados)) {
+      profissionais = responseJson.dados;
+    } else if (responseJson && Array.isArray(responseJson.usuarios)) {
+      profissionais = responseJson.usuarios;
+    } else if (responseJson && Array.isArray(responseJson.profissionais)) {
+      profissionais = responseJson.profissionais;
     }
-    document.addEventListener('DOMContentLoaded', carregarProfissionais);
+
+    if (profissionais.length > 0) {
+      select.innerHTML = '<option value="" selected disabled>Selecione o profissional...</option>' +
+        profissionais.map(u => `<option value="${u.id}">${u.nome} (${u.cargo || 'Profissional'})</option>`).join('');
+    } else {
+      select.innerHTML = '<option value="" disabled>Nenhum profissional cadastrado</option>';
+    }
+  } catch (err) {
+    console.error('Erro ao carregar profissionais:', err);
+    select.innerHTML = '<option value="" disabled>Erro ao carregar profissionais</option>';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', carregarProfissionais);
   </script>
 
   <script src="../ScriptGlobal/verifiLog.js"></script>
