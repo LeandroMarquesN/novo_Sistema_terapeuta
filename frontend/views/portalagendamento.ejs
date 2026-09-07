@@ -385,6 +385,12 @@
 
                 <div class="space-y-4">
                     <div>
+                        <label class="form-label block mb-1.5">Profissional Responsável</label>
+                        <select id="selectProfissionalPublico" name="usuario_id" class="input-premium w-full px-4 py-3 text-sm" required>
+                            <option value="" selected disabled>Carregando profissionais...</option>
+                        </select>
+                    </div>
+                    <div>
                         <label class="form-label block mb-1.5">Como deseja ser atendido?</label>
                         <select name="tipo_terapia" class="input-premium w-full px-4 py-3 text-sm">
                             <option value="Presencial">Atendimento Presencial</option>
@@ -749,6 +755,46 @@
         }
 
         document.getElementById('data_escolhida').min = getDataLocalISO();
+        // começa aqui a funcao de carregar os profissionais da clinica:
+        async function carregarProfissionaisPublicos() {
+    const select = document.getElementById('selectProfissionalPublico');
+    if (!select) return;
+
+    try {
+        select.innerHTML = '<option value="" selected disabled>Carregando profissionais...</option>';
+        
+        const pathParts = window.location.pathname.split('/');
+        const slug = pathParts[2]; // Pega o slug da URL /agendar/:slug/...
+        
+        const res = await fetch(`/agendar/${slug}/api/usuarios`);
+        const responseJson = await res.json();
+        
+        // 🛡️ Blindagem para extrair o array de profissionais independentemente do formato
+        let profissionais = [];
+        if (Array.isArray(responseJson)) {
+            profissionais = responseJson;
+        } else if (responseJson && Array.isArray(responseJson.dados)) {
+            profissionais = responseJson.dados;
+        } else if (responseJson && Array.isArray(responseJson.usuarios)) {
+            profissionais = responseJson.usuarios;
+        } else if (responseJson && Array.isArray(responseJson.profissionais)) {
+            profissionais = responseJson.profissionais;
+        }
+
+        if (profissionais.length > 0) {
+            select.innerHTML = '<option value="" selected disabled>Selecione o profissional...</option>' +
+                profissionais.map(u => `<option value="${u.id}">${u.nome} (${u.cargo || 'Profissional'})</option>`).join('');
+        } else {
+            select.innerHTML = '<option value="" disabled>Nenhum profissional disponível no momento</option>';
+        }
+    } catch (err) {
+        console.error('Erro ao carregar profissionais públicos:', err);
+        select.innerHTML = '<option value="" disabled>Erro ao carregar profissionais</option>';
+    }
+}
+
+// Chamar o carregamento dos profissionais assim que a página abrir ou avançar para o passo 2
+        //   e termina aqui
     </script>
 </body>
 </html>
