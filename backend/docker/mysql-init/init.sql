@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS planos (
 INSERT IGNORE INTO planos (id, nome_plano, valor_base, valor_promocional, limite_membros) VALUES
 (1, 'trial', 109.90, 89.90, 3),
 (2, 'premium', 169.90, 89.90, 10),
-(3, 'enterprise', 269.90, 89.90, 999);
+(3, 'enterprise', 269.90, 89.90, 50);
 
 -- 2.1  LISTA DE ESPERA DE FUNDADORES DO MED LM
 CREATE TABLE IF NOT EXISTS lista_espera (
