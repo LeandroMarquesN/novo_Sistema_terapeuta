@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS pacientes (
   genero VARCHAR(20),
   status_pagamento VARCHAR(20) DEFAULT 'pendente',
   origem ENUM('portal', 'manual', 'indicacao') DEFAULT 'manual',
-  altura DECIMAL(3,2),
+  altura DECIMAL(5,2),
   condicoes_preexistentes TEXT,
   foto_perfil VARCHAR(255),
 
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   motivo_consulta TEXT,
   origem_indicacao VARCHAR(100),
   peso DECIMAL(5,2),
-  altura DECIMAL(3,2),
+  altura DECIMAL(5,2),
   data_nascimento DATE,
   idade INT,
   tipo_sanguineo VARCHAR(5),
