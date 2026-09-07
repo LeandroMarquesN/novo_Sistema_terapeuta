@@ -116,6 +116,7 @@ exports.getDadosPortal = async (req, res) => {
 
 /**
  * Atualiza dados cadastrais do paciente logado no portal
+ * (inclui data_nascimento e recalcula idade)
  */
 exports.atualizarDadosPortal = async (req, res) => {
     try {
@@ -206,6 +207,7 @@ exports.uploadDocumentoPortal = async (req, res) => {
             return res.status(400).json({ error: "Nenhum arquivo enviado." });
         }
 
+        // Validações básicas de segurança
         const allowedMimes = [
             'application/pdf',
             'image/jpeg',
@@ -220,6 +222,7 @@ exports.uploadDocumentoPortal = async (req, res) => {
             });
         }
 
+        // Limite de 15MB
         if (req.file.size > 15 * 1024 * 1024) {
             return res.status(400).json({ error: "Arquivo muito grande. Máximo 15MB." });
         }
@@ -227,8 +230,10 @@ exports.uploadDocumentoPortal = async (req, res) => {
         const pacienteId = sessao.id;
         const clinicaId = sessao.clinicaId;
 
+        // Upload para o R2
         const resultado = await uploadDocumentoToR2(req.file, pacienteId);
 
+        // Salva no banco
         const [insert] = await db.query(
             `INSERT INTO paciente_documentos 
              (clinica_id, paciente_id, nome_original, storage_key, mime_type, tamanho_bytes) 
@@ -243,6 +248,7 @@ exports.uploadDocumentoPortal = async (req, res) => {
             ]
         );
 
+        // Notificação interna para a clínica
         const { criarNotificacao } = require('../services/notificationServiceClientExterno');
 
         const [pac] = await db.query('SELECT nome FROM pacientes WHERE id = ?', [pacienteId]);
@@ -257,6 +263,7 @@ exports.uploadDocumentoPortal = async (req, res) => {
             pacienteId
         });
 
+        // Gera URL assinada para retornar já utilizável
         const urlAssinada = await getUrlDocumentoR2(resultado.storageKey);
 
         res.status(201).json({

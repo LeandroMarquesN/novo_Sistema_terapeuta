@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="icon" href="../logo/faviicon.ico" type="image/x-icon">
+    <link rel="icon" href="/logo/faviicon.ico" type="image/x-icon">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
     <title>MED-LM | Portal do Paciente</title>
@@ -207,6 +207,7 @@
             border-radius: 1rem;
         }
 
+        /* Upload zone */
         .upload-zone {
             border: 2px dashed rgba(52, 211, 153, 0.35);
             transition: all 0.25s ease;
@@ -266,11 +267,7 @@
                 <div class="glass panel p-6 sm:p-7">
                     <div class="flex items-center justify-between gap-3 mb-5">
                         <div class="flex items-center gap-4 min-w-0">
-                            <!-- Avatar adaptado para receber a foto do Cloudinary -->
-                            <div class="icon-chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 overflow-hidden relative" id="avatarContainer">
-                                <span id="avatarFallback">👤</span>
-                                <img id="avatarImg" src="" alt="Foto do paciente" class="w-full h-full object-cover hidden" />
-                            </div>
+                            <div class="icon-chip bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">👤</div>
                             <div class="min-w-0">
                                 <h3 class="font-bold text-lg text-white">Seus Dados</h3>
                                 <p class="text-xs text-slate-400">Informações cadastrais</p>
@@ -364,7 +361,7 @@
                 </div>
             </div>
 
-            <!-- UPLOAD DE EXAMES / DOCUMENTOS -->
+            <!-- ========== UPLOAD DE EXAMES / DOCUMENTOS ========== -->
             <div class="glass panel p-6 sm:p-8 mb-8">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="icon-chip bg-amber-500/10 text-amber-300 border border-amber-400/20">📄</div>
@@ -374,6 +371,7 @@
                     </div>
                 </div>
 
+                <!-- Zona de Upload -->
                 <div id="uploadZone" class="upload-zone rounded-xl p-6 sm:p-8 text-center mb-6 cursor-pointer">
                     <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.webp" class="hidden" />
                     
@@ -391,10 +389,11 @@
                     </div>
                 </div>
 
+                <!-- Lista de documentos -->
                 <div id="lista-documentos" class="space-y-3"></div>
             </div>
 
-            <!-- PRONTUÁRIO (ACORDEÃO) -->
+            <!-- ========== PRONTUÁRIO (ACORDEÃO) ========== -->
             <div class="glass panel p-6 sm:p-8 mb-8">
                 <div class="flex items-center gap-4 mb-6">
                     <div class="icon-chip bg-purple-500/10 text-purple-300 border border-purple-400/20">📝</div>
@@ -427,6 +426,7 @@
     </div>
 
     <script>
+        // ========== Helpers ==========
         function statusStyle(status) {
             const s = (status || '').toLowerCase();
             if (s.includes('cancel')) return { color: '#fb7185' };
@@ -448,6 +448,7 @@
             });
         }
 
+        // ========== Toggle Prontuário (Acordeão) ==========
         function toggleProntuario(id) {
             const conteudo = document.getElementById(`${id}-conteudo`);
             const icon = document.getElementById(`${id}-icon`);
@@ -457,6 +458,7 @@
 
             const isOpen = !conteudo.classList.contains('hidden');
 
+            // Fecha todos os outros
             document.querySelectorAll('[id$="-conteudo"]').forEach(el => {
                 if (el.id !== `${id}-conteudo`) el.classList.add('hidden');
             });
@@ -467,6 +469,7 @@
                 if (el.id !== `${id}-resumo`) el.classList.remove('hidden');
             });
 
+            // Alterna o atual
             if (isOpen) {
                 conteudo.classList.add('hidden');
                 icon.classList.remove('rotate-180');
@@ -478,6 +481,7 @@
             }
         }
 
+        // ========== Render Documentos ==========
         function renderDocumentos(documentos) {
             const container = document.getElementById('lista-documentos');
             if (!container) return;
@@ -514,6 +518,7 @@
             }).join('');
         }
 
+        // ========== Upload ==========
         async function enviarArquivo(file) {
             const zone = document.getElementById('uploadZone');
             const idle = document.getElementById('uploadIdle');
@@ -544,7 +549,9 @@
                 bar.style.width = '100%';
                 text.innerText = 'Enviado com sucesso!';
 
+                // Atualiza a lista
                 setTimeout(() => {
+                    // Recarrega os dados para pegar a lista atualizada
                     carregarDados();
                     idle.classList.remove('hidden');
                     progress.classList.add('hidden');
@@ -566,6 +573,7 @@
             }
         }
 
+        // ========== Helpers de data / idade ==========
         function formatarDataParaInput(valor) {
             if (!valor) return '';
             const str = String(valor).trim();
@@ -693,6 +701,7 @@
             }
         }
 
+        // ========== Carregar Dados ==========
         function carregarDados() {
             fetch('/portal_paciente/api/dados')
                 .then(r => r.json())
@@ -701,22 +710,12 @@
 
                     pacienteCache = data.paciente;
 
-                    // Exibir foto do paciente (Cloudinary) se houver
-                    const avatarImg = document.getElementById('avatarImg');
-                    const avatarFallback = document.getElementById('avatarFallback');
-                    if (data.paciente.foto_perfil) {
-                        avatarImg.src = data.paciente.foto_perfil;
-                        avatarImg.classList.remove('hidden');
-                        if (avatarFallback) avatarFallback.classList.add('hidden');
-                    } else {
-                        avatarImg.classList.add('hidden');
-                        if (avatarFallback) avatarFallback.classList.remove('hidden');
-                    }
-
+                    // Cabeçalho
                     document.getElementById('boasVindas').innerText = `Olá, ${data.paciente.nome}`;
                     document.getElementById('nomeClinica').innerText = data.paciente.nome_clinica || "Clínica MED-LM";
                     document.title = `${data.paciente.nome_clinica} | Portal do Paciente`;
 
+                    // Perfil
                     document.getElementById('nome').innerText = data.paciente.nome;
                     const dn = data.paciente.data_nascimento || data.paciente.dataNascimento || data.paciente.nascimento || '';
                     document.getElementById('dataNascimentoView').innerText = formatarDataBR(dn);
@@ -729,17 +728,20 @@
                     const emailEl = document.getElementById('emailView');
                     if (emailEl) emailEl.innerText = data.paciente.email || '—';
 
+                    // Botão agendar
                     const btnAgendar = document.getElementById('btnAgendar');
                     if (btnAgendar && data.paciente.slug) {
                         btnAgendar.href = `/agendar/${data.paciente.slug}`;
                     }
 
+                    // Horários
                     if (data.config && document.getElementById('horarioInfo')) {
                         const abertura = data.config.horario_abertura?.substring(0,5) || '--:--';
                         const fechamento = data.config.horario_fechamento?.substring(0,5) || '--:--';
                         document.getElementById('horarioInfo').innerText = `Aberto de ${abertura} às ${fechamento}`;
                     }
 
+                    // Agendamentos
                     const agendaDiv = document.getElementById('lista-agendamentos');
                     if (agendaDiv) {
                         if (!data.agendamentos || data.agendamentos.length === 0) {
@@ -758,8 +760,10 @@
                         }
                     }
 
+                    // Documentos
                     renderDocumentos(data.documentos || []);
 
+                    // Prontuários (acordeão)
                     const timelineDiv = document.getElementById('timeline-prontuarios');
                     if (timelineDiv && data.prontuarios) {
                         if (data.prontuarios.length === 0) {
@@ -814,6 +818,7 @@
                 });
         }
 
+        // ========== Eventos ==========
         document.addEventListener("DOMContentLoaded", () => {
             carregarDados();
 
