@@ -1,0 +1,1039 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Agendar Consulta | MedLM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
+
+  <style>
+    :root {
+      --emerald:   #34d399;
+      --emerald-d: #059669;
+      --cyan:      #22d3ee;
+      --amber:     #fbbf24;
+      --red:       #f87171;
+      --blue:      #60a5fa;
+      --slate-bg:  #020c12;
+      --border:    rgba(52,211,153,0.15);
+      --border-cy: rgba(34,211,238,0.18);
+      --card:      rgba(255,255,255,0.028);
+      --sidebar-w: 80px;
+      --footer-nav-h: 72px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--slate-bg);
+      background-image:
+        radial-gradient(ellipse 75% 60% at 10% 0%,   rgba(8,145,178,0.22) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 55% at 90% 100%, rgba(5,150,105,0.20) 0%, transparent 65%),
+        radial-gradient(ellipse 45% 40% at 50% 45%,  rgba(251,191,36,0.04) 0%, transparent 70%);
+      color: #cbd5e1;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 2px,
+        rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none; z-index: 0;
+    }
+
+    .orb { position: fixed; border-radius: 50%; pointer-events: none; filter: blur(80px); z-index: 0; }
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(8,145,178,0.16), transparent 70%);
+      top: -14%; left: -6%;
+      animation: orbFloat1 16s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 420px; height: 420px;
+      background: radial-gradient(circle, rgba(5,150,105,0.14), transparent 70%);
+      bottom: -12%; right: -6%;
+      animation: orbFloat2 20s ease-in-out infinite;
+    }
+    @keyframes orbFloat1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(24px,18px)} }
+    @keyframes orbFloat2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-18px,-22px)} }
+
+    .hero-grid {
+      position: fixed; inset: 0; z-index: 0;
+      background-image:
+        linear-gradient(rgba(52,211,153,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(52,211,153,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse 85% 80% at 50% 50%, black 20%, transparent 100%);
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
+
+    main, aside, header, .app-main-shell { position: relative; z-index: 1; }
+
+    .glass-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.05) inset,
+        0 -1px 0 rgba(0,0,0,0.4) inset,
+        0 24px 48px -20px rgba(0,0,0,0.55);
+    }
+    .glass-panel::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--emerald), var(--cyan), transparent);
+      opacity: 0.4;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      transition: all 0.2s ease;
+    }
+    .glass-card:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(52,211,153,0.25);
+    }
+
+    .page-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 800;
+      background: linear-gradient(90deg, var(--cyan), var(--emerald));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 8px rgba(34,211,238,0.2));
+    }
+
+    .form-label {
+      font-size: 9px; font-weight: 800;
+      color: rgba(148,163,184,0.45);
+      text-transform: uppercase; letter-spacing: 0.1em;
+      display: block; margin-bottom: 6px;
+    }
+
+    .input-premium {
+      background: rgba(255,255,255,0.04) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 12px !important;
+      color: #e2e8f0 !important;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.25s;
+      outline: none;
+      width: 100%;
+      padding: 10px 14px;
+      font-size: 0.9rem;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(255,255,255,0.03) !important;
+    }
+    .input-premium:focus {
+      border-color: rgba(52,211,153,0.4) !important;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.25), 0 0 0 4px rgba(52,211,153,0.08) !important;
+    }
+    .input-premium::placeholder { color: rgba(148,163,184,0.3) !important; }
+    .input-premium:disabled, .input-premium[readonly] {
+      opacity: 0.55; cursor: not-allowed;
+      background: rgba(255,255,255,0.015) !important;
+      color: var(--cyan) !important;
+    }
+
+    .btn-primary-gradient {
+      background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+      color: #fff; border: 1px solid rgba(52,211,153,0.3);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.18) inset,
+        0 -2px 0 rgba(0,0,0,0.18) inset,
+        0 0 20px rgba(8,145,178,0.3);
+      transition: all 0.25s;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 12px;
+    }
+    .btn-primary-gradient:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(8,145,178,0.45); }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: #94a3b8;
+      transition: all 0.25s;
+      font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.08); color: #e2e8f0; }
+
+    /* Sidebar desktop */
+    .app-sidebar {
+      display: none;
+    }
+    @media (min-width: 992px) {
+      .app-sidebar {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        width: var(--sidebar-w);
+        padding: 22px 0;
+        background: rgba(255,255,255,0.025);
+        border-right: 1px solid var(--border);
+        backdrop-filter: blur(20px);
+        z-index: 1030;
+      }
+      .app-main-shell { margin-left: var(--sidebar-w); }
+      .app-footer-nav { display: none !important; }
+      .btn-hamburger-mobile { display: none !important; }
+    }
+
+    .sidebar-link {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(148,163,184,0.6);
+      font-size: 1.1rem;
+      text-decoration: none;
+      transition: all 0.25s;
+      border: 1px solid transparent;
+    }
+    .sidebar-link:hover {
+      color: var(--emerald);
+      background: rgba(52,211,153,0.08);
+      border-color: var(--border);
+    }
+    .sidebar-link.active {
+      color: #041019;
+      background: linear-gradient(135deg, var(--cyan), var(--emerald));
+      box-shadow: 0 0 16px rgba(5,255,196,0.35);
+    }
+
+    /* Mobile bottom nav */
+    .app-footer-nav {
+      position: fixed;
+      left: 0; right: 0; bottom: 0;
+      z-index: 1035;
+      height: var(--footer-nav-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: rgba(2,12,18,0.92);
+      backdrop-filter: blur(16px);
+      border-top: 1px solid rgba(52,211,153,0.15);
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .footer-nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      color: rgba(148,163,184,0.5);
+      text-decoration: none;
+      font-size: 0.65rem; font-weight: 600;
+      flex: 1; padding-top: 4px;
+    }
+    .footer-nav-item i { font-size: 1.15rem; }
+    .footer-nav-item.active {
+      color: var(--emerald);
+      text-shadow: 0 0 10px rgba(5,255,196,0.4);
+    }
+
+    .app-main-shell {
+      padding-bottom: calc(var(--footer-nav-h) + 28px);
+    }
+    @media (min-width: 992px) {
+      .app-main-shell { padding-bottom: 40px; }
+    }
+
+    /* Checkboxes */
+    .condicao-check {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .condicao-check:hover {
+      border-color: rgba(52,211,153,0.3);
+      background: rgba(52,211,153,0.05);
+    }
+    .condicao-check input:checked + span {
+      color: var(--emerald);
+      font-weight: 700;
+    }
+
+    /* Modal */
+    .modal-panel {
+      background: rgba(2,12,18,0.97);
+      border: 1px solid var(--border-cy);
+      box-shadow: 0 60px 100px rgba(0,0,0,0.6), 0 0 60px rgba(34,211,238,0.08);
+    }
+
+    .section-header {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 16px;
+    }
+    .section-header .icon-wrap {
+      width: 36px; height: 36px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(34,211,238,0.1);
+      border: 1px solid rgba(34,211,238,0.25);
+      color: var(--cyan);
+      font-size: 0.9rem;
+    }
+    .section-header h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #fff;
+      margin: 0;
+    }
+
+    .lgpd-box {
+      background: rgba(52,211,153,0.06);
+      border: 1px solid rgba(52,211,153,0.2);
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+
+    #camera-stream, #captured-photo {
+      width: 100%; max-width: 280px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    /* Floating action bar mobile */
+    @media (max-width: 991.98px) {
+      #barraAcoesAgendamento {
+        position: fixed !important;
+        left: 12px; right: 12px; bottom: calc(var(--footer-nav-h) + 12px);
+        z-index: 90;
+        border-radius: 22px !important;
+        border: 1px solid var(--border-cy);
+        box-shadow: 0 16px 40px -10px rgba(0,0,0,0.7), 0 0 24px rgba(52,211,153,0.08);
+        background: rgba(2,12,18,0.95) !important;
+        backdrop-filter: blur(12px);
+      }
+    }
+  </style>
+</head>
+
+<body class="antialiased">
+
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="hero-grid"></div>
+
+  <!-- Desktop Sidebar -->
+  <aside class="app-sidebar">
+    <div class="flex flex-col items-center gap-2.5">
+      <a href="/dashboard" class="sidebar-link" title="Dashboard"><i class="fas fa-chart-line"></i></a>
+      <a href="/pacientes" class="sidebar-link" title="Pacientes"><i class="fas fa-user-injured"></i></a>
+      <a href="/agendamento" class="sidebar-link active" title="Agendamento"><i class="fas fa-calendar-check"></i></a>
+      <a href="/atendimento" class="sidebar-link" title="Atendimento"><i class="fas fa-user-doctor"></i></a>
+      <a href="/equipe" class="sidebar-link" title="Equipe"><i class="fas fa-users-gear"></i></a>
+      <a href="/dashboard/configuracoes" class="sidebar-link" title="Configurações"><i class="fas fa-gear"></i></a>
+    </div>
+    <div class="flex flex-col items-center gap-2.5">
+      <a href="javascript:void(0)" onclick="handleLogout(event)" class="sidebar-link" title="Sair" style="color:#f87171"><i class="fas fa-right-from-bracket"></i></a>
+    </div>
+  </aside>
+
+  <!-- Mobile hamburger -->
+  <button id="btnMenuMobile" class="btn-hamburger-mobile fixed top-4 right-4 z-[60] w-12 h-12 rounded-2xl flex items-center justify-center lg:hidden shadow-2xl"
+          style="background:linear-gradient(135deg,#0891b2,#059669);border:1px solid rgba(52,211,153,0.4)">
+    <i class="fas fa-bars text-white text-lg"></i>
+  </button>
+  <div id="overlayMenu" class="fixed inset-0 bg-black/60 z-[55] hidden lg:hidden"></div>
+
+  <!-- Mobile slide menu -->
+  <div id="mobileMenu" class="fixed top-0 left-0 bottom-0 w-[280px] z-[56] -translate-x-full transition-transform duration-300 lg:hidden flex flex-col p-5"
+       style="background:rgba(2,12,18,0.97);border-right:1px solid var(--border);backdrop-filter:blur(20px)">
+    <div class="flex items-center justify-between mb-6 pb-4" style="border-bottom:1px solid var(--border)">
+      <span class="page-title text-lg">MedLM</span>
+      <button id="btnCloseMenu" class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(248,113,113,0.12);border:1px solid rgba(248,113,113,0.3);color:var(--red)">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <nav class="flex flex-col gap-1.5">
+      <a href="/dashboard" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/5"><i class="fas fa-chart-line w-5 text-center" style="color:var(--cyan)"></i> Dashboard</a>
+      <a href="/pacientes" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/5"><i class="fas fa-user-injured w-5 text-center" style="color:var(--cyan)"></i> Pacientes</a>
+      <a href="/agendamento" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold" style="background:rgba(52,211,153,0.08);color:var(--emerald);border:1px solid rgba(52,211,153,0.2)"><i class="fas fa-calendar-check w-5 text-center"></i> Agendamento</a>
+      <a href="/atendimento" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/5"><i class="fas fa-user-doctor w-5 text-center" style="color:var(--cyan)"></i> Atendimento</a>
+      <a href="/equipe" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/5"><i class="fas fa-users-gear w-5 text-center" style="color:var(--cyan)"></i> Minha Equipe</a>
+      <a href="/dashboard/configuracoes" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-slate-400 hover:bg-white/5"><i class="fas fa-gear w-5 text-center" style="color:var(--cyan)"></i> Configurações</a>
+    </nav>
+    <div class="mt-auto pt-4" style="border-top:1px solid var(--border)">
+      <a href="javascript:void(0)" onclick="handleLogout(event)" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm" style="color:var(--red)"><i class="fas fa-right-from-bracket w-5 text-center"></i> Sair</a>
+    </div>
+  </div>
+
+  <div class="app-main-shell">
+    <!-- Page header -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 flex flex-wrap items-center justify-between gap-3">
+      <div>
+        <h1 class="page-title text-2xl sm:text-3xl mb-1">Agendamento de Consulta</h1>
+        <p class="text-slate-500 text-sm">Cadastre um novo paciente e organize a agenda do consultório.</p>
+      </div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold" style="background:rgba(255,255,255,0.03);border:1px solid var(--border)">
+        <i class="fas fa-clock" style="color:var(--emerald)"></i>
+        <span id="data-hora" class="text-slate-300"></span>
+      </div>
+    </div>
+
+    <!-- Form container -->
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 mt-6 mb-8">
+      <form id="formAgendamento" enctype="multipart/form-data" class="glass-panel p-5 sm:p-8 space-y-8">
+
+        <!-- LGPD -->
+        <div class="lgpd-box">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input class="mt-0.5 w-4 h-4 rounded accent-emerald-500" type="checkbox" value="true" id="aceite_lgpd" name="aceite_lgpd" required>
+            <span class="text-xs text-slate-400 leading-relaxed">
+              <strong class="text-slate-300">Privacidade e Sigilo (LGPD):</strong>
+              Concordo que as informações de saúde e dados pessoais sejam armazenados com segurança para uso exclusivo no atendimento clínico, em conformidade com a LGPD.
+            </span>
+          </label>
+        </div>
+
+        <!-- SEÇÃO: Dados do Paciente -->
+        <section>
+          <div class="section-header">
+            <div class="icon-wrap"><i class="fas fa-id-card"></i></div>
+            <h3>Dados do Paciente</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="md:col-span-8">
+              <label for="nomePaciente" class="form-label">Nome do Paciente</label>
+              <input type="text" id="nomePaciente" name="nome" class="input-premium" placeholder="Digite o nome completo" required
+                     oninput="limparNome(this)" onblur="validarNomeCompletoEOffensive(this)">
+              <small id="nomeError" class="text-xs mt-1 block" style="color:var(--red);display:none"></small>
+            </div>
+            <div class="md:col-span-4">
+              <label for="cpfPaciente" class="form-label">CPF (Obrigatório)</label>
+              <input type="text" id="cpfPaciente" name="cpf" class="input-premium" placeholder="000.000.000-00" maxlength="14" required inputmode="numeric"
+                     oninput="validarEMascararCPF(this)">
+              <small id="cpfError" class="text-xs mt-1 block" style="color:var(--red);display:none">Apenas números são permitidos!</small>
+            </div>
+            <div class="md:col-span-6">
+              <label for="emailPaciente" class="form-label">E-mail</label>
+              <input type="email" id="emailPaciente" name="email" class="input-premium" placeholder="exemplo@email.com" required
+                     onblur="validarEmail(this)">
+              <div id="emailError" class="text-xs mt-1" style="color:var(--red);display:none">E-mail inválido ou mal formatado.</div>
+            </div>
+            <div class="md:col-span-6">
+              <label for="telefonePaciente" class="form-label">Telefone / WhatsApp</label>
+              <input type="tel" id="telefonePaciente" name="telefone" class="input-premium" placeholder="(11) 99999-9999" maxlength="15" required inputmode="numeric"
+                     oninput="validarEMascararTelefone(this)">
+              <small id="telError" class="text-xs mt-1 block" style="color:var(--red);display:none">Apenas números são permitidos!</small>
+            </div>
+            <div class="md:col-span-3">
+              <label for="dataNascimentoPaciente" class="form-label">Data de Nascimento</label>
+              <input type="date" id="dataNascimentoPaciente" name="data_nascimento" class="input-premium" required onchange="calcularIdade(); validarDataNascimento(this)">
+              <small id="dataError" class="text-xs mt-1 block" style="color:var(--red);display:none">Data inválida ou no futuro!</small>
+            </div>
+            <div class="md:col-span-3">
+              <label for="idadePaciente" class="form-label">Idade</label>
+              <input type="number" id="idadePaciente" name="idade" class="input-premium" readonly placeholder="—">
+            </div>
+            <div class="md:col-span-3">
+              <label for="generoPaciente" class="form-label">Gênero</label>
+              <select id="generoPaciente" name="genero" class="input-premium" required>
+                <option value="" selected disabled>Selecione...</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Feminino">Feminino</option>
+                <option value="Prefiro não dizer">Prefiro não dizer</option>
+                <option value="Outro">Outro</option>
+              </select>
+            </div>
+            <div class="md:col-span-3">
+              <label for="tipoSanguineoPaciente" class="form-label">Tipo Sanguíneo</label>
+              <select id="tipoSanguineoPaciente" name="tipo_sanguineo" class="input-premium">
+                <option value="">Selecione</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+                <option>O+</option><option>O-</option>
+              </select>
+            </div>
+            <div class="md:col-span-3">
+              <label for="pesoPaciente" class="form-label">Peso (kg)</label>
+              <input type="number" id="pesoPaciente" name="peso" step="0.1" class="input-premium" placeholder="Ex: 70.5">
+            </div>
+            <div class="md:col-span-3">
+              <label for="alturaPaciente" class="form-label">Altura (cm)</label>
+              <input type="number" id="alturaPaciente" name="altura" step="0.1" class="input-premium" placeholder="Ex: 175">
+            </div>
+          </div>
+        </section>
+
+        <!-- SEÇÃO: Condições de Saúde -->
+        <section>
+          <div class="section-header">
+            <div class="icon-wrap" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.25);color:var(--amber)"><i class="fas fa-heartbeat"></i></div>
+            <h3>Condições de Saúde / Alergias</h3>
+          </div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Hipertensão" class="accent-emerald-500"><span>Hipertensão</span></label>
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Diabetes" class="accent-emerald-500"><span>Diabetes</span></label>
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Asma" class="accent-emerald-500"><span>Asma</span></label>
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Alergia a medicamentos" class="accent-emerald-500"><span>Alergia a medicamentos</span></label>
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Cardiopatia" class="accent-emerald-500"><span>Cardiopatia</span></label>
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Epilepsia" class="accent-emerald-500"><span>Epilepsia</span></label>
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Gestante" class="accent-emerald-500"><span>Gestante</span></label>
+            <label class="condicao-check"><input type="checkbox" name="condicoes[]" value="Outras" class="accent-emerald-500"><span>Outras</span></label>
+          </div>
+        </section>
+
+        <!-- SEÇÃO: Agendamento -->
+        <section>
+          <div class="section-header">
+            <div class="icon-wrap" style="background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.25);color:var(--emerald)"><i class="fas fa-calendar-plus"></i></div>
+            <h3>Dados do Agendamento</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div class="md:col-span-4">
+              <label for="tipoTerapia" class="form-label">Tipo de Terapia / Atendimento</label>
+              <select id="tipoTerapia" name="tipo_terapia" class="input-premium" required>
+                <option value="" selected disabled>Selecione...</option>
+                <option value="Presencial">Presencial</option>
+                <option value="Online">Online (Vídeo)</option>
+                <option value="Avaliação">Avaliação Inicial</option>
+                <option value="Retorno">Retorno</option>
+              </select>
+            </div>
+            <div class="md:col-span-4">
+              <label for="dataHoraAgendamento" class="form-label">Data e Hora do Agendamento</label>
+              <input type="datetime-local" id="dataHoraAgendamento" name="data_agendamento" class="input-premium" required>
+            </div>
+            <div class="md:col-span-4">
+              <label for="origemIndicacao" class="form-label">Como conheceu o consultório?</label>
+              <select id="origemIndicacao" name="origem_indicacao" class="input-premium">
+                <option value="">Selecione</option>
+                <option>Indicação</option>
+                <option>Instagram</option>
+                <option>Google</option>
+                <option>Facebook</option>
+                <option>Outro</option>
+              </select>
+            </div>
+            <div class="md:col-span-6">
+              <label for="motivoConsulta" class="form-label">Motivo da Consulta</label>
+              <textarea id="motivoConsulta" name="motivo_consulta" rows="2" class="input-premium resize-none" placeholder="Descreva brevemente o motivo..."></textarea>
+            </div>
+            <div class="md:col-span-6">
+              <label for="observacoes" class="form-label">Observações</label>
+              <textarea id="observacoes" name="observacoes" rows="2" class="input-premium resize-none" placeholder="Observações internas..."></textarea>
+            </div>
+            <div class="md:col-span-4">
+              <label class="form-label">Valor do Sinal (R$)</label>
+              <div class="flex gap-2">
+                <select id="selectSinal" class="input-premium" style="max-width:140px" onchange="ajustarValorSinal(this.value)">
+                  <option value="">Rápido...</option>
+                  <option value="50.00">R$ 50</option>
+                  <option value="100.00">R$ 100</option>
+                  <option value="150.00">R$ 150</option>
+                  <option value="200.00">R$ 200</option>
+                  <option value="custom">Outro</option>
+                </select>
+                <input type="text" id="valorSinal" name="valor_sinal" class="input-premium" placeholder="0,00" oninput="mascaraMoeda(this)">
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SEÇÃO: Anexos e Foto -->
+        <section>
+          <div class="section-header">
+            <div class="icon-wrap" style="background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.25);color:var(--blue)"><i class="fas fa-paperclip"></i></div>
+            <h3>Anexos e Foto do Paciente</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="anexoInput" class="form-label">Documentos / Exames</label>
+              <input type="file" id="anexoInput" name="anexos" multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" class="input-premium text-sm">
+              <p class="text-[10px] text-slate-500 mt-1.5">PDF, imagens ou documentos. Máx. vários arquivos.</p>
+            </div>
+            <div>
+              <label class="form-label">Foto do Paciente (opcional)</label>
+              <div id="camera-container" class="space-y-3">
+                <video id="camera-stream" autoplay playsinline style="display:none"></video>
+                <canvas id="photo-canvas" style="display:none"></canvas>
+                <img id="captured-photo" src="" alt="Foto capturada" style="display:none">
+                <div class="flex flex-wrap gap-2">
+                  <button type="button" id="btn-open-camera" class="btn-secondary px-4 py-2 rounded-xl text-xs flex items-center gap-2">
+                    <i class="fas fa-camera"></i> Abrir Câmera
+                  </button>
+                  <button type="button" id="btn-take-photo" class="btn-primary-gradient px-4 py-2 rounded-xl text-xs" style="display:none">
+                    <i class="fas fa-circle"></i> Capturar
+                  </button>
+                  <button type="button" id="btn-retake-photo" class="btn-secondary px-4 py-2 rounded-xl text-xs" style="display:none">
+                    <i class="fas fa-redo"></i> Refazer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Barra de ações -->
+        <div id="barraAcoesAgendamento" class="flex flex-col sm:flex-row gap-3 pt-2">
+          <button type="button" onclick="document.getElementById('formAgendamento').reset(); if(typeof patientPhotoBlob!=='undefined') patientPhotoBlob=null;"
+                  class="btn-secondary flex-1 sm:flex-none px-6 py-3 rounded-xl">
+            Limpar
+          </button>
+          <button type="submit" class="btn-primary-gradient flex-1 px-6 py-3 rounded-xl flex items-center justify-center gap-2">
+            <i class="fas fa-calendar-check"></i>
+            <span>Salvar Agendamento</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Mobile footer nav -->
+  <nav class="app-footer-nav lg:hidden">
+    <a href="/dashboard" class="footer-nav-item"><i class="fas fa-chart-line"></i><span>Home</span></a>
+    <a href="/pacientes" class="footer-nav-item"><i class="fas fa-user-injured"></i><span>Pacientes</span></a>
+    <a href="/agendamento" class="footer-nav-item active"><i class="fas fa-calendar-check"></i><span>Agenda</span></a>
+    <a href="/atendimento" class="footer-nav-item"><i class="fas fa-user-doctor"></i><span>Atender</span></a>
+    <a href="/dashboard/configuracoes" class="footer-nav-item"><i class="fas fa-gear"></i><span>Config</span></a>
+  </nav>
+
+  <!-- Modal Alerta Clínico -->
+  <div id="customAlertModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div class="modal-panel w-full max-w-md rounded-[28px] p-6 shadow-2xl">
+      <div class="flex items-center gap-3 mb-4 pb-3" style="border-bottom:1px solid var(--border)">
+        <h3 id="customAlertModalLabel" class="text-base font-black text-white flex items-center gap-2" style="font-family:'Space Grotesk',sans-serif"></h3>
+      </div>
+      <div id="customAlertModalMessage" class="text-sm text-slate-300 mb-5 leading-relaxed"></div>
+      <div id="customAlertModalFooter" class="flex gap-2 justify-end"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── Relógio ──
+    function atualizarDataHora() {
+      const el = document.getElementById('data-hora');
+      if (el) el.textContent = new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    }
+    atualizarDataHora();
+    setInterval(atualizarDataHora, 30000);
+
+    // ── Mobile menu ──
+    const btnMenu = document.getElementById('btnMenuMobile');
+    const overlay = document.getElementById('overlayMenu');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const btnClose = document.getElementById('btnCloseMenu');
+
+    function openMenu() {
+      mobileMenu.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+    }
+    function closeMenu() {
+      mobileMenu.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    }
+    if (btnMenu) btnMenu.addEventListener('click', openMenu);
+    if (btnClose) btnClose.addEventListener('click', closeMenu);
+    if (overlay) overlay.addEventListener('click', closeMenu);
+
+    // ── Constantes ──
+    const APPOINTMENT_DURATION_MS = 10 * 60 * 60 * 1000; // 10h (legado)
+    let currentAppointments = [];
+    let patientPhotoBlob = null;
+
+    // ── Modal clínico ──
+    function showClinicalAlert(title, message, iconType = 'info', confirmButtonText = 'Ok') {
+      const modal = document.getElementById('customAlertModal');
+      const label = document.getElementById('customAlertModalLabel');
+      const msg = document.getElementById('customAlertModalMessage');
+      const footer = document.getElementById('customAlertModalFooter');
+
+      const icons = { info: 'fa-info-circle', success: 'fa-check-circle', warning: 'fa-exclamation-triangle', error: 'fa-times-circle', question: 'fa-question-circle' };
+      const colors = { info: 'var(--cyan)', success: 'var(--emerald)', warning: 'var(--amber)', error: 'var(--red)', question: 'var(--amber)' };
+
+      label.innerHTML = `<i class="fas ${icons[iconType] || icons.info}" style="color:${colors[iconType] || colors.info}"></i> ${title}`;
+      msg.innerHTML = message;
+      footer.innerHTML = `<button type="button" class="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs" onclick="document.getElementById('customAlertModal').classList.add('hidden');document.getElementById('customAlertModal').classList.remove('flex')">${confirmButtonText}</button>`;
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function showClinicalConfirm(title, message) {
+      return new Promise((resolve) => {
+        const modal = document.getElementById('customAlertModal');
+        const label = document.getElementById('customAlertModalLabel');
+        const msg = document.getElementById('customAlertModalMessage');
+        const footer = document.getElementById('customAlertModalFooter');
+
+        label.innerHTML = `<i class="fas fa-question-circle" style="color:var(--amber)"></i> ${title}`;
+        msg.innerHTML = message;
+        footer.innerHTML = `
+          <button type="button" class="btn-secondary px-5 py-2.5 rounded-xl text-xs" id="btnCancelConfirm">Cancelar</button>
+          <button type="button" class="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs" id="btnOkConfirm">Confirmar</button>
+        `;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        document.getElementById('btnOkConfirm').onclick = () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          resolve(true);
+        };
+        document.getElementById('btnCancelConfirm').onclick = () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          resolve(false);
+        };
+      });
+    }
+
+    // ── Máscaras e validações ──
+    function limparNome(input) {
+      input.value = input.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+    }
+
+    function validarNomeCompletoEOffensive(input) {
+      const nomeError = document.getElementById('nomeError');
+      const valor = input.value.trim();
+      const blacklist = ['cusao','cuzao','viado','bixa','bicha','otario','filho da puta','fdp','fulano','beltrano','ciclano','teste','testando','asdf','caralho','porra','desgraça','vtnm','vtnc','vacilao'];
+      const partes = valor.split(/\s+/);
+      let mensagem = '';
+
+      if (!valor || partes.length < 2) {
+        mensagem = 'Por favor, digite o nome completo (Nome e Sobrenome).';
+      } else if (blacklist.some(w => valor.toLowerCase().includes(w))) {
+        mensagem = 'Nome contém termos inválidos. Por favor, use o nome real do paciente.';
+      }
+
+      if (mensagem) {
+        nomeError.textContent = mensagem;
+        nomeError.style.display = 'block';
+      } else {
+        nomeError.style.display = 'none';
+      }
+    }
+
+    function validarEMascararCPF(input) {
+      const errorMsg = document.getElementById('cpfError');
+      let v = input.value;
+      if (/[a-zA-Z]/.test(v)) errorMsg.style.display = 'block';
+      else errorMsg.style.display = 'none';
+      v = v.replace(/\D/g, '');
+      if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+      else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+      else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+      input.value = v;
+    }
+
+    function validarEMascararTelefone(input) {
+      const errorMsg = document.getElementById('telError');
+      let v = input.value;
+      if (/[a-zA-Z]/.test(v)) errorMsg.style.display = 'block';
+      else errorMsg.style.display = 'none';
+      v = v.replace(/\D/g, '');
+      if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+      else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+      else if (v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, '($1) $2');
+      input.value = v;
+    }
+
+    function validarEmail(input) {
+      const errorDiv = document.getElementById('emailError');
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (input.value && !re.test(input.value)) {
+        errorDiv.style.display = 'block';
+        input.classList.add('is-invalid');
+      } else {
+        errorDiv.style.display = 'none';
+        input.classList.remove('is-invalid');
+      }
+    }
+
+    function validarDataNascimento(input) {
+      const errorMsg = document.getElementById('dataError');
+      if (input.value) {
+        const d = new Date(input.value + 'T00:00:00');
+        if (d > new Date()) {
+          errorMsg.style.display = 'block';
+          input.value = '';
+          return;
+        }
+      }
+      errorMsg.style.display = 'none';
+    }
+
+    function calcularIdade() {
+      const dataNascimentoInput = document.getElementById('dataNascimentoPaciente');
+      const idadeInput = document.getElementById('idadePaciente');
+      if (!dataNascimentoInput || !idadeInput) return;
+      const str = dataNascimentoInput.value;
+      if (!str) { idadeInput.value = ''; return; }
+      const dataNascimento = new Date(str + 'T00:00:00');
+      const hoje = new Date();
+      if (dataNascimento > hoje) {
+        idadeInput.value = '';
+        showClinicalAlert('Data de Nascimento Inválida', 'A data de nascimento não pode ser no futuro.', 'warning');
+        return;
+      }
+      let idade = hoje.getFullYear() - dataNascimento.getFullYear();
+      const mes = hoje.getMonth() - dataNascimento.getMonth();
+      if (mes < 0 || (mes === 0 && hoje.getDate() < dataNascimento.getDate())) idade--;
+      idadeInput.value = idade;
+    }
+
+    function mascaraMoeda(i) {
+      let v = i.value.replace(/\D/g, '');
+      v = (v / 100).toFixed(2) + '';
+      v = v.replace('.', ',');
+      v = v.replace(/(\d)(\d{3})(\d{3}),/g, '$1.$2.$3,');
+      v = v.replace(/(\d)(\d{3}),/g, '$1.$2,');
+      i.value = v;
+    }
+
+    function ajustarValorSinal(val) {
+      const input = document.getElementById('valorSinal');
+      if (val === 'custom' || !val) {
+        input.value = '';
+        input.focus();
+      } else {
+        const num = parseFloat(val);
+        input.value = num.toFixed(2).replace('.', ',');
+      }
+    }
+
+    function capitalizeWords(str) {
+      if (!str) return '';
+      return str.toLowerCase().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+    }
+
+    // ── Câmera ──
+    const video = document.getElementById('camera-stream');
+    const canvas = document.getElementById('photo-canvas');
+    const photo = document.getElementById('captured-photo');
+    const btnOpenCamera = document.getElementById('btn-open-camera');
+    const btnTakePhoto = document.getElementById('btn-take-photo');
+    const btnRetakePhoto = document.getElementById('btn-retake-photo');
+    let currentStream;
+
+    if (btnOpenCamera && video && canvas && photo && btnTakePhoto && btnRetakePhoto) {
+      btnOpenCamera.addEventListener('click', async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          currentStream = stream;
+          video.srcObject = stream;
+          video.style.display = 'block';
+          btnOpenCamera.style.display = 'none';
+          btnTakePhoto.style.display = 'inline-flex';
+          photo.style.display = 'none';
+          patientPhotoBlob = null;
+        } catch (err) {
+          console.error('Erro ao acessar a câmera:', err);
+          showClinicalAlert('Erro', 'Não foi possível acessar a câmera. Verifique as permissões do navegador.', 'error');
+        }
+      });
+
+      btnTakePhoto.addEventListener('click', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          patientPhotoBlob = blob;
+          photo.src = URL.createObjectURL(blob);
+          photo.style.display = 'block';
+          video.style.display = 'none';
+          btnTakePhoto.style.display = 'none';
+          btnRetakePhoto.style.display = 'inline-flex';
+        }, 'image/jpeg');
+        if (currentStream) currentStream.getTracks().forEach(t => t.stop());
+      });
+
+      btnRetakePhoto.addEventListener('click', () => {
+        patientPhotoBlob = null;
+        photo.style.display = 'none';
+        photo.src = '';
+        btnRetakePhoto.style.display = 'none';
+        btnOpenCamera.style.display = 'inline-flex';
+      });
+    }
+
+    // ── Submit do formulário ──
+    document.addEventListener('DOMContentLoaded', () => {
+      const formAgendamento = document.getElementById('formAgendamento');
+      if (!formAgendamento) return;
+
+      formAgendamento.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const finalFormData = new FormData();
+
+        for (const pair of formData.entries()) {
+          if (pair[0] !== 'anexos') {
+            let valor = pair[1];
+            if (pair[0] === 'data_agendamento' && valor) {
+              valor = valor.replace('Z', '').replace('T', ' ');
+            }
+            finalFormData.append(pair[0], valor);
+          }
+        }
+
+        const errors = [];
+
+        let nomePaciente = form.querySelector('input[name="nome"]').value.trim();
+        if (!nomePaciente) {
+          errors.push('O campo "Nome do Paciente" é obrigatório.');
+        } else {
+          nomePaciente = capitalizeWords(nomePaciente);
+          finalFormData.set('nome', nomePaciente);
+        }
+
+        const tipoTerapia = form.querySelector('select[name="tipo_terapia"]').value;
+        if (!tipoTerapia) errors.push('Selecione um "Tipo de Terapia".');
+
+        const dataAgendamento = form.querySelector('input[name="data_agendamento"]').value;
+        if (!dataAgendamento) {
+          errors.push('O campo "Data e Hora do Agendamento" é obrigatório.');
+        } else {
+          const dataHora = new Date(dataAgendamento);
+          if (isNaN(dataHora.getTime()) || dataHora < new Date()) {
+            errors.push('A "Data e Hora do Agendamento" é inválida ou está no passado.');
+          }
+        }
+
+        const pesoInput = form.querySelector('input[name="peso"]');
+        let pesoValue = pesoInput ? pesoInput.value.replace(',', '.') : '';
+        if (pesoValue && (isNaN(parseFloat(pesoValue)) || parseFloat(pesoValue) <= 0)) {
+          errors.push('O "Peso" deve ser um número válido e maior que zero.');
+        }
+        if (pesoInput) finalFormData.set('peso', pesoValue);
+
+        const alturaInput = form.querySelector('input[name="altura"]');
+        let alturaValue = alturaInput ? alturaInput.value.replace(',', '.') : '';
+        if (alturaValue && (isNaN(parseFloat(alturaValue)) || parseFloat(alturaValue) <= 0)) {
+          errors.push('A "Altura" deve ser um número válido e maior que zero.');
+        }
+        if (alturaInput) finalFormData.set('altura', alturaValue);
+
+        const condicoesSaude = Array.from(form.querySelectorAll('input[name="condicoes[]"]:checked')).map(c => c.value);
+        finalFormData.set('condicoes', JSON.stringify(condicoesSaude));
+
+        const anexoInput = document.getElementById('anexoInput');
+        if (anexoInput && anexoInput.files && anexoInput.files.length > 0) {
+          for (const file of anexoInput.files) finalFormData.append('anexos', file);
+        }
+
+        if (patientPhotoBlob) {
+          finalFormData.append('patient_photo', patientPhotoBlob, 'patient_photo.jpeg');
+        }
+
+        // CPF
+        const cpfInput = form.querySelector('input[name="cpf"]');
+        const cpfPaciente = cpfInput ? cpfInput.value.trim() : '';
+        if (!cpfPaciente || cpfPaciente.replace(/\D/g, '').length < 11) {
+          errors.push('O CPF do paciente é obrigatório para o cadastro no sistema.');
+        } else {
+          finalFormData.set('cpf', cpfPaciente);
+        }
+
+        // LGPD
+        const lgpd = form.querySelector('input[name="aceite_lgpd"]');
+        if (!lgpd || !lgpd.checked) {
+          errors.push('O consentimento da LGPD é obrigatório.');
+        }
+
+        if (errors.length > 0) {
+          showClinicalAlert('Erro de Validação', errors.join('<br>'), 'warning');
+          return;
+        }
+
+        try {
+          const resposta = await fetch('/api/agendamentos', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: finalFormData
+          });
+
+          if (resposta.status === 409) {
+            const errorData = await resposta.json();
+            showClinicalAlert('Conflito de Agendamento', errorData.message || errorData.erro || 'Horário ocupado.', 'warning');
+            return;
+          }
+
+          if (!resposta.ok) {
+            let mensagemErro = 'Ocorreu um erro ao salvar o agendamento.';
+            try {
+              const errorData = await resposta.json();
+              mensagemErro = errorData.mensagem || errorData.erro || errorData.message || mensagemErro;
+            } catch (_) {
+              mensagemErro = await resposta.text() || mensagemErro;
+            }
+            throw new Error(mensagemErro);
+          }
+
+          showClinicalAlert('Sucesso!', 'Agendamento salvo com sucesso.', 'success');
+          form.reset();
+          patientPhotoBlob = null;
+          if (video) video.style.display = 'none';
+          if (photo) { photo.style.display = 'none'; photo.src = ''; }
+          if (btnOpenCamera) btnOpenCamera.style.display = 'inline-flex';
+          if (btnTakePhoto) btnTakePhoto.style.display = 'none';
+          if (btnRetakePhoto) btnRetakePhoto.style.display = 'none';
+
+        } catch (erro) {
+          console.error('Erro ao salvar agendamento:', erro);
+          showClinicalAlert('Erro!', erro.message || 'Ocorreu um erro ao salvar.', 'error');
+        }
+      });
+    });
+
+    // ── Reagendamento via URL ──
+    (function () {
+      const preencherCampos = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('reagendamento') === 'true') {
+          const mapaCampos = {
+            'nomePaciente': 'nome',
+            'cpfPaciente': 'cpf',
+            'emailPaciente': 'email',
+            'telefonePaciente': 'telefone'
+          };
+          Object.keys(mapaCampos).forEach(idCampo => {
+            const valorUrl = urlParams.get(mapaCampos[idCampo]);
+            const elemento = document.getElementById(idCampo);
+            if (elemento && valorUrl) {
+              elemento.value = decodeURIComponent(valorUrl);
+              elemento.dispatchEvent(new Event('input', { bubbles: true }));
+              elemento.dispatchEvent(new Event('blur', { bubbles: true }));
+            }
+          });
+        }
+      };
+      preencherCampos();
+      document.addEventListener('DOMContentLoaded', preencherCampos);
+      setTimeout(preencherCampos, 600);
+    })();
+  </script>
+
+  <script src="../ScriptGlobal/verifiLog.js"></script>
+  <script src="../ScriptGlobal/logout.js"></script>
+</body>
+</html>
