@@ -473,6 +473,12 @@ exports.enviarTokenAcesso = async (req, res) => {
             'SELECT nome_clinica, slug, telefone_clinica FROM clinicas WHERE id = ?',
             [clinicaId]
         );
+
+        // <-- COLOQUE O TRECHO EXATAMENTE AQUI -->
+        if (!clinicaRows || clinicaRows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Clínica não encontrada.' });
+        }
+
         const clinica = clinicaRows[0];
 
         const token = crypto.randomBytes(32).toString('hex');
