@@ -30,8 +30,14 @@ exports.criarAgendamento = async (req, res) => {
     nome, cpf, email, telefone, data_nascimento, idade,
     peso, genero, altura, tipo_sanguineo, tipo_terapia,
     data_agendamento, motivo_consulta, origem_indicacao, observacoes, aceite_lgpd,
-    valor_sinal
+    valor_sinal, usuario_id // 🌟 Captura o ID do profissional escolhido no select
   } = req.body;
+
+  // Validação de segurança para o profissional
+  const profissionalIdFinal = usuario_id || (req.usuario ? req.usuario.id : null);
+  if (!profissionalIdFinal) {
+    return res.status(400).json({ mensagem: 'O profissional responsável deve ser selecionado.' });
+  }
 
   // Trava de segurança LGPD
   if (!aceite_lgpd || aceite_lgpd === 'false' || aceite_lgpd === false || aceite_lgpd === '0') {
@@ -128,7 +134,7 @@ exports.criarAgendamento = async (req, res) => {
     `;
 
     const valoresAgendamento = [
-      clinicaId, paciente_id, usuarioId, nome, data_agendamento,
+      clinicaId, paciente_id, profissionalIdFinal, nome, data_agendamento,
       tipo_terapia, motivo_consulta, origem_indicacao, 'aguardando_sinal',
       peso || null, genero || null, altura || null, data_nascimento || null, idade || null,
       tipo_sanguineo || null, email || null, telefone || null, cpf, condicoesString

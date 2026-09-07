@@ -986,7 +986,14 @@
         <div class="col-12">
           <h5 class="section-title"><i class="fas fa-calendar-days"></i> Detalhes da Consulta</h5>
         </div>
-
+        <!-- formulario para aescolher oprofisional -->
+        <div class="md:col-span-4">
+          <label for="selectProfissional" class="form-label">Profissional Responsável</label>
+          <select id="selectProfissional" name="usuario_id" class="input-premium" required>
+            <option value="" selected disabled>Carregando profissionais...</option>
+          </select>
+        </div>
+        <!-- fim do formulario para escolher profissional -->
         <div class="col-md-6">
           <label for="tipoTerapia" class="form-label">Tipo de Atendimento</label>
           <select class="form-select" id="tipoTerapia" name="tipo_terapia" required>

@@ -513,10 +513,18 @@
                 <option value="" selected disabled>Selecione...</option>
                 <option value="Presencial">Presencial</option>
                 <option value="Online">Online (Vídeo)</option>
-                <option value="Avaliação">Avaliação Inicial</option>
-                <option value="Retorno">Retorno</option>
+                <!-- <option value="Avaliação">Avaliação Inicial</option>
+                <option value="Retorno">Retorno</option> -->
               </select>
             </div>
+             <!-- formulario para aescolher oprofisional -->
+            <div class="md:col-span-4">
+              <label for="selectProfissional" class="form-label">Profissional Responsável</label>
+              <select id="selectProfissional" name="usuario_id" class="input-premium" required>
+                <option value="" selected disabled>Carregando profissionais...</option>
+              </select>
+            </div>
+            <!-- fim do formulario para escolher profissional -->
             <div class="md:col-span-4">
               <label for="dataHoraAgendamento" class="form-label">Data e Hora do Agendamento</label>
               <input type="datetime-local" id="dataHoraAgendamento" name="data_agendamento" class="input-premium" required>
@@ -558,7 +566,7 @@
         </section>
 
         <!-- SEÇÃO: Anexos e Foto -->
-        <section>
+        <!-- <section>
           <div class="section-header">
             <div class="icon-wrap" style="background:rgba(96,165,250,0.1);border-color:rgba(96,165,250,0.25);color:var(--blue)"><i class="fas fa-paperclip"></i></div>
             <h3>Anexos e Foto do Paciente</h3>
@@ -589,7 +597,7 @@
               </div>
             </div>
           </div>
-        </section>
+        </section> -->
 
         <!-- Barra de ações -->
         <div id="barraAcoesAgendamento" class="flex flex-col sm:flex-row gap-3 pt-2">
@@ -1031,6 +1039,25 @@
       document.addEventListener('DOMContentLoaded', preencherCampos);
       setTimeout(preencherCampos, 600);
     })();
+    
+    async function carregarProfissionais() {
+      try {
+        const res = await fetch('/api/usuarios/clinica', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        const data = await res.json();
+        const select = document.getElementById('selectProfissional');
+        if (data && data.length > 0) {
+          select.innerHTML = '<option value="" selected disabled>Selecione o profissional...</option>' +
+            data.map(u => `<option value="${u.id}">${u.nome} (${u.cargo || 'Profissional'})</option>`).join('');
+        } else {
+          select.innerHTML = '<option value="" disabled>Nenhum profissional encontrado</option>';
+        }
+      } catch (err) {
+        console.error('Erro ao carregar profissionais:', err);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', carregarProfissionais);
   </script>
 
   <script src="../ScriptGlobal/verifiLog.js"></script>
