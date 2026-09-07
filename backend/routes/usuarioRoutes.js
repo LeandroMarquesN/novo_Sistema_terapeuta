@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/usuarioController');
-// Importe o seu middleware de autenticação se necessário (ex: const auth = require('../middlewares/auth'));
+const authMiddleware = require('../middlewares/authMiddleware'); // 🌟 Importe o middleware de autenticação
 
 // Criar usuário
 router.post('/', usuarioController.criarUsuario);
@@ -10,7 +10,7 @@ router.post('/', usuarioController.criarUsuario);
 // Login de usuário
 router.post('/login', usuarioController.login);
 
-// 🌟 NOVA ROTA: Listar profissionais da clínica (certifique-se de passar o middleware de autenticação que injeta req.usuario)
-router.get('/clinica', /* auth, */ usuarioController.listarUsuariosDaClinica);
+// 🌟 ROTA CORRIGIDA: Agora o authMiddleware roda antes, injetando o req.usuario com o clinica_id correto
+router.get('/clinica', authMiddleware, usuarioController.listarUsuariosDaClinica);
 
 module.exports = router;
