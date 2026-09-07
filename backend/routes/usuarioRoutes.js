@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/usuarioController');
-const authMiddleware = require('../middlewares/authMiddleware'); // 🌟 Importe o middleware de autenticação
+const authMiddleware = require('../middleware/authMiddleware'); // 🌟 Importe o middleware de autenticação
 
 // Criar usuário
 router.post('/', usuarioController.criarUsuario);
