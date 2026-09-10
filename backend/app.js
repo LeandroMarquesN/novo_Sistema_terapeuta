@@ -22,6 +22,9 @@ const agendamentoRoutes = require('./routes/agendamentoRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const dashboardApiRoutes = require('./routes/dashboardapiroutes'); // NOVO
 
+const agendaAvancadaRoutes = require('./routes/agendaAvancadaRoutes');
+const agendaAvancadaApiRoutes = require('./routes/agendaAvancadaApiRoutes');
+
 const configuracaoRoutes = require('./routes/configuracaoRoutes');
 const portalRoutes = require('./routes/portal-agendamento-routes');
 const portalPacientelroutes = require('./routes/portalPacienteroutes');
@@ -97,6 +100,9 @@ app.use('/api/marketing', marketingRoutes);
 
 app.use('/portal_paciente', portalPacientelroutes); // Aqui mapeamos o prefixo
 app.use('/programa-fundadores', landingPageRoutes)
+
+app.use('/', agendaAvancadaRoutes);
+app.use('/api/agenda-avancada', agendaAvancadaApiRoutes);
 
 console.log("Rota /programa-fundadores montada com sucesso!");
 

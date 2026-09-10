@@ -390,24 +390,6 @@
         }
         .nav-link-active i { text-shadow: 0 0 12px rgba(52,211,153,0.8); }
 
-        /* ─── Badge "PRO" (Agenda Avançada / feature premium) ─── */
-        .nav-badge-pro {
-            display: inline-flex;
-            align-items: center;
-            margin-left: 8px;
-            padding: 1px 7px;
-            font-size: 9px;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            border-radius: 99px;
-            color: var(--amber);
-            background: rgba(251,191,36,0.12);
-            border: 1px solid rgba(251,191,36,0.3);
-            text-shadow: none;
-            flex-shrink: 0;
-        }
-        .mobile-drawer .nav-item .nav-badge-pro { margin-left: auto; }
-
         #theme-toggle-btn {
             color: rgba(148,163,184,0.6);
             border-radius: 14px;
@@ -1964,10 +1946,6 @@
             <a href="/agendamento" class="nav-item">
                 <i class="fas fa-calendar-check"></i> Agendamento
             </a>
-            <a href="/agenda-avancada" class="nav-item">
-                <i class="fas fa-calendar-week"></i> Agenda Avançada
-                <span class="nav-badge-pro">PRO</span>
-            </a>
             <a href="/equipe" class="nav-item">
                 <i class="fas fa-users-cog"></i> Minha Equipe
             </a>
@@ -2045,11 +2023,7 @@
                         <i class="fas fa-calendar-check w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Agendamento</span>
                     </a>
-                    <a href="/agenda-avancada" class="nav-link flex items-center p-3.5">
-                        <i class="fas fa-calendar-week w-6"></i>
-                        <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap flex items-center gap-2">Agenda Avançada <span class="nav-badge-pro">PRO</span></span>
-                    </a>
-
+                    
                     <a href="/equipe" class="nav-link flex items-center p-3.5">
                         <i class="fas fa-users-cog w-6"></i>
                         <span class="ml-4 font-medium opacity-0 group-hover:opacity-100 whitespace-nowrap">Minha Equipe</span>
