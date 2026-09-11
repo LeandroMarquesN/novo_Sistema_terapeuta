@@ -331,7 +331,9 @@
 
       const headerCel = document.createElement('div');
       headerCel.className = `col-header-dia ${ehHoje(d) ? 'hoje-col' : ''}`;
+      headerCel.dataset.iso = iso;
       headerCel.innerHTML = `<div class="dia-semana">${DIAS_SEMANA[d.getDay()]}</div><div class="dia-numero">${d.getDate()}</div>`;
+      headerCel.addEventListener('click', () => selecionarDiaColuna(iso));
       headerFrag.appendChild(headerCel);
 
       const lembreteCel = document.createElement('div');
@@ -367,10 +369,14 @@
       col.appendChild(criarBlocoAgendamento(a, idx));
     });
 
+    // Clique na coluna destaca o header do dia correspondente
+    col.addEventListener('click', () => selecionarDiaColuna(iso), true);
+
     // Criação rápida por toque em célula vazia
     col.querySelectorAll('.celula-hora').forEach(cel => {
       cel.addEventListener('click', (e) => {
         if (e.target !== cel) return; // ignora clique em bloco
+        selecionarDiaColuna(iso);
         const hora = cel.dataset.hora.padStart(2, '0');
         abrirModalAgendamento({ novo: true, data: iso, hora: `${hora}:00` });
       });
@@ -387,6 +393,17 @@
     });
 
     return col;
+  }
+
+  function selecionarDiaColuna(iso) {
+    state.diaSelecionado = iso;
+    $all('.col-header-dia').forEach(h => {
+      h.classList.toggle('dia-selecionado', h.dataset.iso === iso);
+    });
+    $all('.coluna-dia').forEach(c => {
+      c.classList.toggle('coluna-selecionada', c.dataset.iso === iso);
+    });
+    atualizarIndicadorSync(iso);
   }
 
   function criarBlocoAgendamento(a, idx) {
@@ -457,20 +474,39 @@
     }
   }
 
-  function atualizarIndicadorSync() {
+  function atualizarIndicadorSync(isoForcado) {
     const header = $('#colunasHeaderConteudo');
     const indicador = $('#indicador-sync');
-    if (!header.children.length) return;
-    const scrollWrapRect = gridScroll.getBoundingClientRect();
-    const centro = scrollWrapRect.left + scrollWrapRect.width / 2;
+    if (!header || !header.children.length || !indicador) return;
 
-    let alvo = header.children[0];
-    for (const col of header.children) {
-      const rect = col.getBoundingClientRect();
-      if (rect.left <= centro && rect.right >= centro) { alvo = col; break; }
+    let alvo = null;
+    if (isoForcado) {
+      alvo = header.querySelector(`.col-header-dia[data-iso="${isoForcado}"]`);
     }
+    if (!alvo) {
+      const scrollWrapRect = gridScroll.getBoundingClientRect();
+      const centro = scrollWrapRect.left + scrollWrapRect.width / 2;
+      alvo = header.children[0];
+      for (const col of header.children) {
+        const rect = col.getBoundingClientRect();
+        if (rect.left <= centro && rect.right >= centro) { alvo = col; break; }
+      }
+      // Ao rolar, também marca o dia do centro como selecionado
+      if (alvo && alvo.dataset.iso) {
+        state.diaSelecionado = alvo.dataset.iso;
+        $all('.col-header-dia').forEach(h => {
+          h.classList.toggle('dia-selecionado', h.dataset.iso === alvo.dataset.iso);
+        });
+        $all('.coluna-dia').forEach(c => {
+          c.classList.toggle('coluna-selecionada', c.dataset.iso === alvo.dataset.iso);
+        });
+      }
+    }
+
+    const headerParent = $('#colunas-header');
     const rectAlvo = alvo.getBoundingClientRect();
-    indicador.style.left = `${rectAlvo.left - header.getBoundingClientRect().left + 72}px`;
+    const rectParent = headerParent.getBoundingClientRect();
+    indicador.style.left = `${rectAlvo.left - rectParent.left}px`;
     indicador.style.width = `${rectAlvo.width}px`;
   }
 
@@ -762,27 +798,40 @@
         else badge.classList.add('hidden');
       }
 
+      document.querySelectorAll('.modal-entrada-overlay').forEach(el => el.remove());
+
       const overlay = document.createElement('div');
-      overlay.className = 'modal-overlay open';
+      overlay.className = 'modal-overlay open modal-entrada-overlay';
+      overlay.style.zIndex = '80';
       overlay.innerHTML = `
-        <div class="modal-box">
-          <div class="flex items-center justify-between mb-4">
-            <h3 class="modal-titulo">Entrada — Portal do Paciente</h3>
-            <button class="btn-voltar-camada w-8 h-8 flex items-center justify-center" id="fecharEntrada"><i class="fas fa-times"></i></button>
+        <div class="modal-box" style="display:flex;flex-direction:column;max-height:min(88vh,640px);padding:0;overflow:hidden;">
+          <div class="flex items-center justify-between px-5 pt-5 pb-3" style="flex-shrink:0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,18,24,0.98);z-index:2;">
+            <h3 class="modal-titulo" style="font-size:16px;">Entrada — Portal do Paciente</h3>
+            <button type="button" class="btn-voltar-camada w-9 h-9 flex items-center justify-center" id="fecharEntrada" aria-label="Fechar" style="flex-shrink:0;">
+              <i class="fas fa-times"></i>
+            </button>
           </div>
-          ${lista.length ? lista.map(n => `
-            <div class="flex items-start gap-3 py-3" style="border-bottom:1px solid var(--border)">
-              <i class="fas fa-bell mt-1" style="color:var(--cyan)"></i>
-              <div>
-                <p style="color:#e2e8f0;font-weight:700;font-size:13px;">${escapeHtml(n.titulo || '')}</p>
-                <p style="color:rgba(148,163,184,0.55);font-size:12px;">${escapeHtml(n.mensagem || '')}</p>
+          <div class="px-5 py-3" style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">
+            ${lista.length ? lista.map(n => `
+              <div class="flex items-start gap-3 py-3" style="border-bottom:1px solid var(--border)">
+                <i class="fas fa-bell mt-1" style="color:var(--cyan);flex-shrink:0;"></i>
+                <div style="min-width:0;flex:1;">
+                  <p style="color:#e2e8f0;font-weight:700;font-size:13px;word-break:break-word;">${escapeHtml(n.titulo || '')}</p>
+                  <p style="color:rgba(148,163,184,0.55);font-size:12px;word-break:break-word;">${escapeHtml(n.mensagem || '')}</p>
+                </div>
               </div>
-            </div>
-          `).join('') : `<p style="color:rgba(148,163,184,0.5);font-size:13px;text-align:center;padding:20px 0;">Nenhuma notificação.</p>`}
+            `).join('') : `<p style="color:rgba(148,163,184,0.5);font-size:13px;text-align:center;padding:28px 0;">Nenhuma notificação.</p>`}
+          </div>
         </div>`;
       document.body.appendChild(overlay);
-      overlay.querySelector('#fecharEntrada').addEventListener('click', () => overlay.remove());
-      overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+      document.body.style.overflow = 'hidden';
+
+      function fecharEntrada() {
+        overlay.remove();
+        document.body.style.overflow = '';
+      }
+      overlay.querySelector('#fecharEntrada').addEventListener('click', fecharEntrada);
+      overlay.addEventListener('click', (e) => { if (e.target === overlay) fecharEntrada(); });
     } catch (err) { console.error('Erro ao carregar entrada:', err); }
   });
 
