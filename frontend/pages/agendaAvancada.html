@@ -71,7 +71,7 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: rgba(52,211,153,0.3); border-radius: 99px; }
 
-    /* ─── Sidebar (Desktop) — igual ao dashboard.ejs ─── */
+    /* ─── Sidebar (Desktop + Mobile Drawer) ─── */
     aside.sidebar-desktop {
       background: rgba(2,12,18,0.92) !important;
       border-right: 1px solid var(--border) !important;
@@ -116,6 +116,64 @@
     }
     #theme-toggle-btn { color: rgba(148,163,184,0.6); border-radius: 14px; border: 1px solid transparent; transition: all 0.25s; }
     #theme-toggle-btn:hover { color: var(--cyan); border-color: var(--border-cyan); }
+
+    /* Botão hambúrguer flutuante (mobile/tablet) */
+    #btnMenuMobile {
+      display: none;
+      position: fixed;
+      top: 14px;
+      left: 14px;
+      z-index: 55;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(2,12,18,0.92);
+      border: 1px solid var(--border);
+      color: var(--emerald);
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4), 0 0 16px rgba(52,211,153,0.15);
+      backdrop-filter: blur(12px);
+      transition: all 0.25s;
+    }
+    #btnMenuMobile:active { transform: scale(0.94); }
+
+    /* Overlay escuro atrás da sidebar mobile */
+    #sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 48;
+      background: rgba(2,6,10,0.65);
+      backdrop-filter: blur(3px);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    #sidebar-overlay.open {
+      display: block;
+      opacity: 1;
+    }
+
+    /* Botão X dentro da sidebar (mobile) */
+    #btnFecharSidebar {
+      display: none;
+      position: absolute;
+      top: 18px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      color: rgba(148,163,184,0.8);
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      z-index: 2;
+      transition: all 0.2s;
+    }
+    #btnFecharSidebar:hover { color: #f87171; border-color: rgba(248,113,113,0.35); }
 
     /* ─── Header da Agenda ─── */
     #agenda-header {
@@ -429,7 +487,7 @@
       border-radius: 99px; padding: 1px 5px;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 1024px) {
       #footer-nav { left: 80px; }
     }
 
@@ -468,9 +526,37 @@
       color: var(--amber); font-size: 30px; margin: 0 auto 20px;
     }
 
-    @media (max-width: 767px) {
-      .sidebar-desktop { display: none; }
+    /* ─── Mobile / Tablet: sidebar vira drawer deslizante ─── */
+    @media (max-width: 1023px) {
+      #btnMenuMobile { display: flex; }
+
+      aside.sidebar-desktop {
+        display: flex !important;
+        width: 280px !important;
+        max-width: 85vw;
+        transform: translateX(-105%);
+        transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 50;
+        box-shadow: 8px 0 40px rgba(0,0,0,0.45);
+      }
+      aside.sidebar-desktop.open {
+        transform: translateX(0);
+      }
+      aside.sidebar-desktop .logo-text-brand,
+      aside.sidebar-desktop .nav-link span,
+      aside.sidebar-desktop a span {
+        opacity: 1 !important;
+      }
+      aside.sidebar-desktop:hover { width: 280px !important; }
+
+      #btnFecharSidebar { display: flex; }
+
       main { margin-left: 0 !important; }
+
+      #agenda-header { padding-left: 64px !important; }
+    }
+
+    @media (max-width: 767px) {
       .col-header-espaco, .coluna-horas { flex-basis: 56px; }
       .lembrete-rotulo { flex-basis: 56px; }
     }
@@ -478,10 +564,23 @@
 </head>
 <body>
 
+  <!-- ─── Botão Hambúrguer Flutuante (mobile/tablet) ─── -->
+  <button id="btnMenuMobile" aria-label="Abrir menu" type="button">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <!-- ─── Overlay da sidebar mobile ─── -->
+  <div id="sidebar-overlay"></div>
+
   <div class="flex h-screen overflow-hidden">
 
-    <!-- ─── Sidebar Desktop (mesmo padrão do dashboard.ejs) ─── -->
-    <aside class="sidebar-desktop fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
+    <!-- ─── Sidebar (Desktop + Drawer Mobile) ─── -->
+    <aside id="sidebar" class="sidebar-desktop fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
+      <!-- Botão fechar (X) — visível só no mobile -->
+      <button id="btnFecharSidebar" aria-label="Fechar menu" type="button">
+        <i class="fas fa-times"></i>
+      </button>
+
       <div class="flex flex-col">
         <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
           <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">M</div>
@@ -533,7 +632,7 @@
     </aside>
 
     <!-- ─── Main ─── -->
-    <main class="flex-1 md:ml-20 flex flex-col h-screen overflow-hidden" style="position:relative;z-index:1;">
+    <main class="flex-1 lg:ml-20 flex flex-col h-screen overflow-hidden" style="position:relative;z-index:1;">
 
       <!-- Header -->
       <header id="agenda-header" class="flex items-center justify-between gap-3 px-4 md:px-8 py-4 flex-shrink-0">
@@ -632,7 +731,7 @@
 
   <!-- ─── Menu Contextual Flutuante ─── -->
   <div id="menu-contextual">
-    <div class="menu-ctx-item" data-acao="reagendar"><i class="fas fa-clock"></i> Reagendarr</div>
+    <div class="menu-ctx-item" data-acao="reagendar"><i class="fas fa-clock"></i> Reagendar</div>
     <div class="menu-ctx-item" data-acao="editar"><i class="fas fa-pen"></i> Editar</div>
     <div class="menu-ctx-item" data-acao="duplicar"><i class="fas fa-copy"></i> Duplicar</div>
     <div class="menu-ctx-item danger" data-acao="cancelar"><i class="fas fa-trash"></i> Cancelar / Apagar</div>
@@ -711,6 +810,77 @@
     <span id="toastMsg">Ação realizada com sucesso!</span>
   </div>
 
+  <script>
+  /* ─── Sidebar Mobile: hambúrguer + drawer + swipe ─── */
+  (function () {
+    const sidebar  = document.getElementById('sidebar');
+    const overlay  = document.getElementById('sidebar-overlay');
+    const btnOpen  = document.getElementById('btnMenuMobile');
+    const btnClose = document.getElementById('btnFecharSidebar');
+    if (!sidebar || !overlay || !btnOpen || !btnClose) return;
+
+    function abrirSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function fecharSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      sidebar.style.transform = '';
+      sidebar.style.transition = '';
+    }
+
+    btnOpen.addEventListener('click', abrirSidebar);
+    btnClose.addEventListener('click', fecharSidebar);
+    overlay.addEventListener('click', fecharSidebar);
+
+    sidebar.querySelectorAll('a').forEach(function (link) {
+      link.addEventListener('click', function () {
+        if (window.innerWidth < 1024) fecharSidebar();
+      });
+    });
+
+    let startX = 0;
+    let currentX = 0;
+    let dragging = false;
+
+    sidebar.addEventListener('touchstart', function (e) {
+      if (window.innerWidth >= 1024 || !sidebar.classList.contains('open')) return;
+      startX = e.touches[0].clientX;
+      currentX = startX;
+      dragging = true;
+      sidebar.style.transition = 'none';
+    }, { passive: true });
+
+    sidebar.addEventListener('touchmove', function (e) {
+      if (!dragging) return;
+      currentX = e.touches[0].clientX;
+      const delta = currentX - startX;
+      if (delta < 0) {
+        sidebar.style.transform = 'translateX(' + delta + 'px)';
+      }
+    }, { passive: true });
+
+    sidebar.addEventListener('touchend', function () {
+      if (!dragging) return;
+      dragging = false;
+      const delta = currentX - startX;
+      sidebar.style.transition = '';
+      if (delta < -80) {
+        fecharSidebar();
+      } else {
+        sidebar.style.transform = '';
+      }
+    });
+
+    window.addEventListener('resize', function () {
+      if (window.innerWidth >= 1024) fecharSidebar();
+    });
+  })();
+  </script>
   <script src="../ScriptGlobal/AgendaAvancadaScript.js"></script>
 </body>
 </html>
