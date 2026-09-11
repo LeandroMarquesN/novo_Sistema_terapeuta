@@ -635,6 +635,13 @@
             localStorage.setItem('medlm_user_cargo', data.usuario.cargo);
           }
 
+          // Plano da clínica — usado para liberar menus (ex: Agenda Avançada só Enterprise)
+          // Backend deve enviar plano_id (1=trial, 2=premium, 3=enterprise) e/ou nome_plano
+          const planoId = data.plano_id ?? data.planoId ?? (data.clinica && data.clinica.plano_id) ?? null;
+          const nomePlano = (data.nome_plano || data.nomePlano || (data.clinica && data.clinica.nome_plano) || '').toString().toLowerCase();
+          if (planoId != null) localStorage.setItem('medlm_plano_id', String(planoId));
+          if (nomePlano) localStorage.setItem('medlm_plano', nomePlano);
+
           btn.innerHTML = '<i class="fas fa-check" style="margin-right:8px"></i> Acesso liberado!';
 
           if (data.redirectUrl) {

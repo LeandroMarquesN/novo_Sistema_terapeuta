@@ -9,7 +9,8 @@ exports.login = async (req, res) => {
 
     try {
         const [usuarios] = await db.execute(
-            `SELECT u.*, c.nome_clinica AS clinica_nome, c.status AS clinica_status, c.data_expiracao, p.nome_plano
+            `SELECT u.*, c.nome_clinica AS clinica_nome, c.status AS clinica_status, c.data_expiracao,
+                    c.plano_id, p.nome_plano
                 FROM usuarios u
                 LEFT JOIN clinicas c ON u.clinica_id = c.id
                 LEFT JOIN planos p ON c.plano_id = p.id
@@ -70,7 +71,10 @@ exports.login = async (req, res) => {
             clinicaNome: usuario.clinica_nome || 'MedLM Admin',
             cargo: usuario.cargo,
             crm: usuario.crm || null,
-            uf_crm: usuario.uf_crm || null
+            uf_crm: usuario.uf_crm || null,
+            // Plano da clínica — usado no frontend para liberar menus (ex: Agenda Avançada = Enterprise)
+            plano_id: usuario.plano_id || null,
+            nome_plano: usuario.nome_plano || null
         });
 
     } catch (error) {
