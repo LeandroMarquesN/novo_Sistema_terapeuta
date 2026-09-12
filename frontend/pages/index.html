@@ -1,556 +1,612 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MedLM | Sistema Clínico Inteligente</title>
-  <meta name="description" content="Gestão clínica multi-tenant: agenda, prontuário, portal do paciente e financeiro avançado.">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
-  <style>
-    :root {
-      --emerald: #34d399;
-      --emerald-d: #059669;
-      --cyan: #22d3ee;
-      --slate-bg: #020c12;
-      --border: rgba(52, 211, 153, 0.15);
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedLM | Sistema Clínico Inteligente</title>
+<meta name="description" content="Gestão clínica multi-tenant: agenda, prontuário, portal do paciente e financeiro avançado.">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
+<style>
+  :root{
+    --emerald:#34d399; --emerald-d:#059669; --cyan:#22d3ee; --amber:#fbbf24;
+    --slate-bg:#020c12; --border:rgba(52,211,153,.15);
+    --card:rgba(2,12,18,.62); --card-strong:rgba(2,12,18,.78);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--slate-bg);font-family:'Inter',sans-serif;color:#cbd5e1;min-height:100vh;overflow-x:hidden}
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-thumb{background:rgba(52,211,153,.3);border-radius:99px}
+  :focus-visible{outline:2px solid var(--emerald);outline-offset:3px}
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  /* ── Video background (persistente por toda a página) ── */
+  .video-bg{position:fixed;inset:0;z-index:0;overflow:hidden;background:#020c12}
+  .video-bg video{position:absolute;top:50%;left:50%;min-width:100%;min-height:100%;width:auto;height:auto;
+    transform:translate(-50%,-50%);object-fit:cover;filter:brightness(.4) saturate(1.15) contrast(1.05)}
+  .video-bg .fallback{position:absolute;inset:0;background:
+    radial-gradient(ellipse 70% 55% at 15% 0%,rgba(8,145,178,.25) 0%,transparent 65%),
+    radial-gradient(ellipse 55% 50% at 85% 100%,rgba(5,150,105,.22) 0%,transparent 65%),
+    linear-gradient(180deg,#020617,#04151c 50%,#020c12)}
+  .video-overlay{position:absolute;inset:0;background:
+    linear-gradient(180deg,rgba(2,12,18,.6) 0%,rgba(2,12,18,.55) 30%,rgba(2,12,18,.88) 100%),
+    radial-gradient(ellipse at center,transparent 15%,rgba(2,12,18,.55) 100%);pointer-events:none}
+  .video-scanlines{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.06) 2px,rgba(0,0,0,.06) 4px);pointer-events:none;opacity:.55}
+  .page{position:relative;z-index:1}
 
-    body {
-      background: var(--slate-bg);
-      font-family: 'Inter', sans-serif;
-      color: #cbd5e1;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+  /* ── Nav ── */
+  nav{position:fixed;width:100%;z-index:50;top:0;background:rgba(2,12,18,.72);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);transition:background .3s,box-shadow .3s}
+  nav.scrolled{background:rgba(2,12,18,.9);box-shadow:0 8px 30px rgba(0,0,0,.35)}
+  .nav-inner{max-width:1280px;margin:0 auto;padding:0 24px;display:flex;justify-content:space-between;align-items:center;height:64px}
+  .nav-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0891b2,#059669);display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 0 16px rgba(8,145,178,.5)}
+  .nav-brand{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;background:linear-gradient(90deg,var(--cyan),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .nav-links{display:flex;align-items:center;gap:28px}
+  .nav-link{font-size:13px;font-weight:600;color:rgba(203,213,225,.6);text-decoration:none;transition:color .25s;position:relative}
+  .nav-link::after{content:'';position:absolute;left:0;bottom:-6px;width:0;height:1px;background:var(--emerald);transition:width .3s var(--ease)}
+  .nav-link:hover{color:#e2e8f0}
+  .nav-link:hover::after{width:100%}
+  .nav-actions{display:flex;align-items:center;gap:20px}
+  .nav-login{font-size:13px;font-weight:600;color:rgba(148,163,184,.75);text-decoration:none;transition:color .25s}
+  .nav-login:hover{color:var(--emerald)}
+  .nav-cta{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#0891b2,#059669);color:#fff;font-weight:800;font-size:13px;padding:9px 22px;border-radius:99px;text-decoration:none;font-family:'Space Grotesk',sans-serif;box-shadow:0 0 20px rgba(8,145,178,.4);transition:all .3s;position:relative;overflow:hidden}
+  .nav-cta:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(8,145,178,.55)}
+  @media (max-width:860px){.nav-links{display:none}}
 
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.3); border-radius: 99px; }
+  /* ── Hero ── */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:96px 24px 64px}
+  .hero-content{max-width:860px;margin:0 auto;text-align:center}
+  .version-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.28);color:var(--emerald);font-size:12px;font-weight:700;padding:6px 16px;border-radius:99px;margin-bottom:28px;backdrop-filter:blur(8px)}
+  .version-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);box-shadow:0 0 8px var(--emerald);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+  .hero-headline{font-family:'Space Grotesk',sans-serif;font-size:clamp(34px,6vw,64px);font-weight:800;line-height:1.08;letter-spacing:-.03em;color:#f1f5f9;margin-bottom:20px;text-shadow:0 2px 24px rgba(0,0,0,.45)}
+  .hero-headline .accent{background:linear-gradient(135deg,var(--cyan),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero-sub{font-size:clamp(15px,2vw,18px);color:rgba(226,232,240,.78);max-width:560px;margin:0 auto 40px;line-height:1.7;text-shadow:0 1px 12px rgba(0,0,0,.4)}
+  .cta-group{display:flex;flex-wrap:wrap;gap:14px;justify-content:center;margin-bottom:48px}
+  .btn-primary{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#0891b2,#059669);color:#fff;font-weight:800;font-size:16px;padding:16px 32px;border-radius:18px;text-decoration:none;font-family:'Space Grotesk',sans-serif;border:1px solid rgba(52,211,153,.35);box-shadow:0 0 30px rgba(8,145,178,.4),0 4px 24px rgba(0,0,0,.35);transition:all .3s;position:relative;overflow:hidden}
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 40px rgba(8,145,178,.55)}
+  .btn-secondary{display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid var(--border);color:rgba(226,232,240,.9);font-weight:700;font-size:16px;padding:16px 32px;border-radius:18px;text-decoration:none;font-family:'Space Grotesk',sans-serif;backdrop-filter:blur(12px);transition:all .3s;position:relative;overflow:hidden}
+  .btn-secondary:hover{border-color:rgba(52,211,153,.4);color:var(--emerald);background:rgba(52,211,153,.08)}
+  .trust-row{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-bottom:36px}
+  .trust-chip{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:14px;background:rgba(2,12,18,.55);border:1px solid var(--border);backdrop-filter:blur(12px);font-size:12px;font-weight:600;color:rgba(203,213,225,.85)}
+  .trust-chip i{color:var(--emerald);font-size:13px}
+  .btn-dev{background:none;border:none;cursor:pointer;color:rgba(148,163,184,.35);font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;display:inline-flex;align-items:center;gap:6px;transition:color .25s}
+  .btn-dev:hover{color:rgba(52,211,153,.55)}
+  .scroll-cue{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(148,163,184,.5);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+  .scroll-cue i{animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(7px)}}
 
-    /* ── Video background ── */
-    .video-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      overflow: hidden;
-      background: #020c12;
-    }
-    .video-bg video {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      transform: translate(-50%, -50%);
-      object-fit: cover;
-      /* leve desfoque + saturação pro texto legível */
-      filter: brightness(0.45) saturate(1.15) contrast(1.05);
-    }
-    /* Fallback se vídeo não carregar */
-    .video-bg .fallback {
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 70% 55% at 15% 0%, rgba(8, 145, 178, 0.25) 0%, transparent 65%),
-        radial-gradient(ellipse 55% 50% at 85% 100%, rgba(5, 150, 105, 0.22) 0%, transparent 65%),
-        linear-gradient(180deg, #020617, #04151c 50%, #020c12);
-    }
-    .video-overlay {
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(180deg, rgba(2, 12, 18, 0.55) 0%, rgba(2, 12, 18, 0.35) 40%, rgba(2, 12, 18, 0.75) 100%),
-        radial-gradient(ellipse at center, transparent 20%, rgba(2, 12, 18, 0.5) 100%);
-      pointer-events: none;
-    }
-    .video-scanlines {
-      position: absolute;
-      inset: 0;
-      background: repeating-linear-gradient(
-        0deg, transparent, transparent 2px,
-        rgba(0, 0, 0, 0.06) 2px, rgba(0, 0, 0, 0.06) 4px
-      );
-      pointer-events: none;
-      opacity: 0.6;
-    }
+  /* ── Shared section shell ── */
+  .section{max-width:1280px;margin:0 auto;padding:100px 24px}
+  .section-tight{padding-top:60px;padding-bottom:60px}
+  .section-head{max-width:640px;margin:0 auto 56px;text-align:center}
+  .section-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(28px,4vw,42px);font-weight:800;color:#f1f5f9;line-height:1.15;letter-spacing:-.02em}
+  .section-sub{font-size:15px;color:rgba(148,163,184,.65);margin-top:14px;line-height:1.75}
+  .divider-line{width:64px;height:2px;margin:20px auto 0;background:linear-gradient(90deg,var(--cyan),var(--emerald));border-radius:2px}
 
-    .page { position: relative; z-index: 1; }
+  /* ── Reveal-on-scroll ── */
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s var(--ease),transform .8s var(--ease)}
+  .reveal.in-view{opacity:1;transform:none}
+  .reveal-scale{opacity:0;transform:scale(.94);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+  .reveal-scale.in-view{opacity:1;transform:scale(1)}
+  @media (prefers-reduced-motion:reduce){
+    .reveal,.reveal-scale{opacity:1!important;transform:none!important;transition:none!important}
+    .video-bg video{display:none}
+  }
 
-    /* ── Nav ── */
-    nav {
-      position: fixed;
-      width: 100%;
-      z-index: 50;
-      top: 0;
-      background: rgba(2, 12, 18, 0.72);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-    }
-    .nav-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 0 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 64px;
-    }
-    .nav-logo-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, #0891b2, #059669);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      box-shadow: 0 0 16px rgba(8, 145, 178, 0.5);
-    }
-    .nav-brand {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 17px;
-      font-weight: 700;
-      background: linear-gradient(90deg, var(--cyan), var(--emerald));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .nav-login {
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(148, 163, 184, 0.75);
-      text-decoration: none;
-      transition: color 0.25s;
-    }
-    .nav-login:hover { color: var(--emerald); }
-    .nav-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: linear-gradient(135deg, #0891b2, #059669);
-      color: #fff;
-      font-weight: 800;
-      font-size: 13px;
-      padding: 9px 22px;
-      border-radius: 99px;
-      text-decoration: none;
-      font-family: 'Space Grotesk', sans-serif;
-      box-shadow: 0 0 20px rgba(8, 145, 178, 0.4);
-      transition: all 0.3s;
-    }
-    .nav-cta:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 30px rgba(8, 145, 178, 0.55);
-    }
+  /* ── Ripple / click effect ── */
+  .click-fx{position:relative;overflow:hidden}
+  .ripple{position:absolute;border-radius:50%;background:rgba(52,211,153,.38);transform:scale(0);animation:rippleAnim .65s ease-out forwards;pointer-events:none}
+  @keyframes rippleAnim{to{transform:scale(3.2);opacity:0}}
 
-    /* ── Hero ── */
-    .hero {
-      position: relative;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 96px 24px 64px;
-    }
-    .hero-content {
-      max-width: 860px;
-      margin: 0 auto;
-      text-align: center;
-    }
-    .version-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(52, 211, 153, 0.1);
-      border: 1px solid rgba(52, 211, 153, 0.28);
-      color: var(--emerald);
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 16px;
-      border-radius: 99px;
-      margin-bottom: 28px;
-      backdrop-filter: blur(8px);
-    }
-    .version-badge .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--emerald);
-      box-shadow: 0 0 8px var(--emerald);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.45; }
-    }
+  /* ── Intro statement ── */
+  .intro{max-width:900px}
+  .intro-statement{font-family:'Space Grotesk',sans-serif;font-size:clamp(22px,3.4vw,36px);font-weight:600;line-height:1.4;color:#e2e8f0;text-align:center}
+  .intro-statement em{font-style:normal;color:var(--emerald)}
+  .intro-body{max-width:600px;margin:32px auto 0;text-align:center;font-size:15px;line-height:1.85;color:rgba(148,163,184,.75)}
+  .intro-tag{margin-top:36px;text-align:center;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:var(--cyan)}
 
-    .hero-headline {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(34px, 6vw, 64px);
-      font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.03em;
-      color: #f1f5f9;
-      margin-bottom: 20px;
-      text-shadow: 0 2px 24px rgba(0, 0, 0, 0.45);
-    }
-    .hero-headline .accent {
-      background: linear-gradient(135deg, var(--cyan), var(--emerald));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero-sub {
-      font-size: clamp(15px, 2vw, 18px);
-      color: rgba(226, 232, 240, 0.78);
-      max-width: 560px;
-      margin: 0 auto 40px;
-      line-height: 1.7;
-      text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
-    }
+  /* ── Ecosystem grid ── */
+  .eco-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin-top:8px}
+  .eco-chip{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(14px);transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;cursor:pointer}
+  .eco-chip:hover{transform:translateY(-3px);border-color:rgba(52,211,153,.35);box-shadow:0 10px 30px rgba(52,211,153,.08)}
+  .eco-chip i{color:var(--emerald);font-size:16px;width:22px;text-align:center;flex-shrink:0}
+  .eco-chip span{font-size:13.5px;font-weight:600;color:#dbe4ee}
+  .eco-foot{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:20px;margin-top:44px}
+  .eco-count{display:flex;align-items:baseline;gap:8px;font-family:'Space Grotesk',sans-serif}
+  .eco-count .num{font-size:34px;font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .eco-count .lbl{font-size:13px;color:rgba(148,163,184,.65);font-weight:600}
+  .eco-tagline{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:#e2e8f0;text-align:center}
+  .eco-tagline span{color:rgba(148,163,184,.5);font-weight:500}
 
-    .cta-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 14px;
-      justify-content: center;
-      margin-bottom: 48px;
-    }
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: linear-gradient(135deg, #0891b2, #059669);
-      color: #fff;
-      font-weight: 800;
-      font-size: 16px;
-      padding: 16px 32px;
-      border-radius: 18px;
-      text-decoration: none;
-      font-family: 'Space Grotesk', sans-serif;
-      border: 1px solid rgba(52, 211, 153, 0.35);
-      box-shadow: 0 0 30px rgba(8, 145, 178, 0.4), 0 4px 24px rgba(0, 0, 0, 0.35);
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 40px rgba(8, 145, 178, 0.55);
-    }
-    .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--border);
-      color: rgba(226, 232, 240, 0.9);
-      font-weight: 700;
-      font-size: 16px;
-      padding: 16px 32px;
-      border-radius: 18px;
-      text-decoration: none;
-      font-family: 'Space Grotesk', sans-serif;
-      backdrop-filter: blur(12px);
-      transition: all 0.3s;
-    }
-    .btn-secondary:hover {
-      border-color: rgba(52, 211, 153, 0.4);
-      color: var(--emerald);
-      background: rgba(52, 211, 153, 0.08);
-    }
+  /* ── Flow (sequência real) ── */
+  .flow-wrap{max-width:420px;margin:0 auto;position:relative}
+  .flow-line{position:absolute;left:23px;top:22px;bottom:22px;width:2px;background:linear-gradient(180deg,var(--cyan),var(--emerald),var(--cyan));background-size:100% 200%;border-radius:2px;opacity:.35}
+  .flow-line.active{animation:flowPulse 3.2s linear infinite}
+  @keyframes flowPulse{0%{background-position:0 0}100%{background-position:0 -200%}}
+  .flow-step{position:relative;display:flex;align-items:center;gap:20px;padding:16px 0}
+  .flow-dot{width:48px;height:48px;flex-shrink:0;border-radius:50%;background:var(--card-strong);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;color:var(--emerald);position:relative;z-index:1;backdrop-filter:blur(10px);transition:border-color .4s,box-shadow .4s}
+  .flow-step.in-view .flow-dot{border-color:rgba(52,211,153,.5);box-shadow:0 0 22px rgba(52,211,153,.25)}
+  .flow-label{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:#e2e8f0}
+  .flow-foot{text-align:center;margin-top:40px;font-size:15px;color:rgba(148,163,184,.65);font-style:normal}
 
-    /* Trust chips — honestos, sem números inventados */
-    .trust-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 36px;
-    }
-    .trust-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 14px;
-      background: rgba(2, 12, 18, 0.55);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(12px);
-      font-size: 12px;
-      font-weight: 600;
-      color: rgba(203, 213, 225, 0.85);
-    }
-    .trust-chip i { color: var(--emerald); font-size: 13px; }
+  /* ── Security split ── */
+  .security-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:start}
+  @media (max-width:860px){.security-grid{grid-template-columns:1fr;gap:36px}}
+  .sec-copy p{font-size:15px;line-height:1.85;color:rgba(203,213,225,.78);margin-bottom:16px}
+  .sec-copy strong{color:#e2e8f0;font-weight:700}
+  .sec-quote{border-left:2px solid var(--emerald);padding-left:18px;margin:22px 0;font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:600;color:#e2e8f0}
+  .checklist{display:flex;flex-direction:column;gap:10px}
+  .check-item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-size:13.5px;font-weight:600;color:#dbe4ee;transition:transform .25s var(--ease),border-color .25s}
+  .check-item:hover{transform:translateX(4px);border-color:rgba(52,211,153,.3)}
+  .check-item i{color:var(--emerald);font-size:13px;flex-shrink:0}
+  .check-count{margin-top:20px;text-align:right;font-family:'Space Grotesk',sans-serif;font-size:13px;color:rgba(148,163,184,.6);font-weight:600}
+  .check-count .num{color:var(--emerald);font-size:16px;font-weight:800}
 
-    .btn-dev {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: rgba(148, 163, 184, 0.35);
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: color 0.25s;
-    }
-    .btn-dev:hover { color: rgba(52, 211, 153, 0.55); }
+  /* ── RBAC ── */
+  .rbac-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}
+  .role-card{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:26px;backdrop-filter:blur(16px);transition:transform .3s var(--ease),border-color .3s,box-shadow .3s;position:relative;overflow:hidden}
+  .role-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(52,211,153,.45),transparent)}
+  .role-card:hover{transform:translateY(-4px);border-color:rgba(52,211,153,.32);box-shadow:0 14px 40px rgba(52,211,153,.1)}
+  .role-icon{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:17px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.22);color:var(--cyan)}
+  .role-title{font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:700;color:#e2e8f0;margin-bottom:12px}
+  .role-tags{display:flex;flex-wrap:wrap;gap:6px}
+  .role-tag{font-size:11px;font-weight:600;padding:5px 10px;border-radius:8px;background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.18);color:rgba(203,213,225,.85)}
+  .rbac-principle{max-width:640px;margin:44px auto 0;text-align:center;font-size:15px;line-height:1.8;color:rgba(148,163,184,.7)}
+  .rbac-principle strong{color:var(--emerald);font-weight:700}
 
-    /* Features */
-    .features {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 72px 24px 96px;
-    }
-    .features-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(28px, 4vw, 40px);
-      font-weight: 800;
-      color: #f1f5f9;
-      text-align: center;
-      margin-bottom: 12px;
-    }
-    .features-sub {
-      font-size: 15px;
-      color: rgba(148, 163, 184, 0.6);
-      text-align: center;
-      max-width: 480px;
-      margin: 0 auto 48px;
-      line-height: 1.7;
-    }
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 18px;
-    }
-    .feature-card {
-      background: rgba(2, 12, 18, 0.65);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 26px;
-      backdrop-filter: blur(16px);
-      transition: all 0.3s;
-      position: relative;
-      overflow: hidden;
-    }
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(52, 211, 153, 0.45), transparent);
-    }
-    .feature-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(52, 211, 153, 0.32);
-      box-shadow: 0 12px 40px rgba(52, 211, 153, 0.1);
-    }
-    .feature-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 16px;
-      font-size: 18px;
-    }
-    .icon-cyan { background: rgba(34, 211, 238, 0.12); border: 1px solid rgba(34, 211, 238, 0.22); color: var(--cyan); }
-    .icon-em { background: rgba(52, 211, 153, 0.12); border: 1px solid rgba(52, 211, 153, 0.22); color: var(--emerald); }
-    .icon-amber { background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.22); color: #fbbf24; }
-    .feature-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 16px;
-      font-weight: 700;
-      color: #e2e8f0;
-      margin-bottom: 8px;
-    }
-    .feature-desc {
-      font-size: 13px;
-      color: rgba(148, 163, 184, 0.6);
-      line-height: 1.65;
-    }
+  /* ── Highlight split (financeiro / prontuário) ── */
+  .highlight-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media (max-width:800px){.highlight-grid{grid-template-columns:1fr}}
+  .highlight-card{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:34px;backdrop-filter:blur(16px);transition:transform .3s var(--ease),border-color .3s}
+  .highlight-card:hover{transform:translateY(-4px);border-color:rgba(52,211,153,.3)}
+  .highlight-icon{width:52px;height:52px;border-radius:15px;display:flex;align-items:center;justify-content:center;margin-bottom:20px;font-size:20px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.22);color:var(--amber)}
+  .highlight-card:nth-child(2) .highlight-icon{background:rgba(52,211,153,.12);border-color:rgba(52,211,153,.22);color:var(--emerald)}
+  .highlight-title{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:700;color:#f1f5f9;margin-bottom:10px}
+  .highlight-desc{font-size:14px;line-height:1.75;color:rgba(148,163,184,.7);margin-bottom:18px}
+  .highlight-list{display:flex;flex-direction:column;gap:9px}
+  .highlight-list li{list-style:none;display:flex;align-items:center;gap:10px;font-size:13px;color:rgba(203,213,225,.8);font-weight:500}
+  .highlight-list i{color:var(--emerald);font-size:11px}
 
-    .footer-line {
-      text-align: center;
-      padding: 28px 24px;
-      border-top: 1px solid var(--border);
-      font-size: 12px;
-      color: rgba(148, 163, 184, 0.35);
-      background: rgba(2, 12, 18, 0.5);
-    }
-    .footer-line span { color: rgba(52, 211, 153, 0.5); }
+  /* ── Experience / devices ── */
+  .exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+  @media (max-width:860px){.exp-grid{grid-template-columns:1fr;gap:36px}}
+  .exp-copy p{font-size:15px;line-height:1.85;color:rgba(203,213,225,.78);margin-bottom:14px}
+  .exp-copy strong{color:var(--emerald)}
+  .device-row{display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+  .device-card{flex:1 1 120px;background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px 14px;text-align:center;backdrop-filter:blur(14px);transition:transform .3s var(--ease),border-color .3s}
+  .device-card:hover{transform:translateY(-4px);border-color:rgba(34,211,238,.35)}
+  .device-card i{font-size:26px;color:var(--cyan);margin-bottom:12px;display:block}
+  .device-card span{font-size:12px;font-weight:600;color:rgba(203,213,225,.8)}
 
-    /* Mobile: vídeo pode ser pesado — pausa se preferir-reduced-motion */
-    @media (prefers-reduced-motion: reduce) {
-      .video-bg video { display: none; }
-    }
-    @media (max-width: 768px) {
-      .video-bg video {
-        /* cobre tela em portrait */
-        min-width: 100%;
-        min-height: 100%;
-      }
-    }
-  </style>
+  /* ── Dashboard stat band ── */
+  .stat-band{background:var(--card-strong);border:1px solid var(--border);border-radius:28px;padding:52px 40px;backdrop-filter:blur(20px);position:relative;overflow:hidden}
+  .stat-band::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 0%,rgba(52,211,153,.08),transparent 70%);pointer-events:none}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:28px;text-align:center;position:relative}
+  .stat-num{font-family:'Space Grotesk',sans-serif;font-size:clamp(32px,5vw,48px);font-weight:800;background:linear-gradient(135deg,var(--cyan),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+  .stat-lbl{margin-top:8px;font-size:12.5px;font-weight:600;color:rgba(148,163,184,.65)}
+
+  /* ── Pillars ── */
+  .pillar-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}
+  .pillar-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px 20px;backdrop-filter:blur(14px);transition:transform .3s var(--ease),border-color .3s}
+  .pillar-card:hover{transform:translateY(-3px) scale(1.015);border-color:rgba(52,211,153,.3)}
+  .pillar-title{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:14px;letter-spacing:.02em;color:var(--emerald);margin-bottom:8px}
+  .pillar-desc{font-size:12.5px;line-height:1.65;color:rgba(148,163,184,.65)}
+
+  /* ── Personas ── */
+  .persona-list{display:flex;flex-direction:column;gap:2px;max-width:680px;margin:0 auto}
+  .persona-row{display:flex;align-items:center;gap:18px;padding:18px 22px;border-radius:16px;transition:background .3s,transform .3s var(--ease)}
+  .persona-row:hover{background:rgba(52,211,153,.05);transform:translateX(6px)}
+  .persona-row + .persona-row{border-top:1px solid var(--border)}
+  .persona-icon{width:38px;height:38px;border-radius:11px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+  .persona-text{font-size:14.5px;color:rgba(226,232,240,.85);font-weight:500}
+  .persona-text strong{color:#f1f5f9;font-weight:700}
+
+  /* ── Closing ── */
+  .closing{text-align:center;max-width:760px}
+  .closing-title{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,5vw,50px);font-weight:800;line-height:1.15;letter-spacing:-.02em;color:#f1f5f9;margin-bottom:18px}
+  .closing-title .accent{background:linear-gradient(135deg,var(--cyan),var(--emerald));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .closing-sub{font-size:15px;line-height:1.85;color:rgba(148,163,184,.7);margin-bottom:40px}
+  .closing-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:40px}
+  .closing-tags span{font-size:12px;font-weight:600;color:rgba(203,213,225,.75);padding:8px 14px;border-radius:99px;background:var(--card);border:1px solid var(--border)}
+
+  .footer-line{text-align:center;padding:28px 24px;border-top:1px solid var(--border);font-size:12px;color:rgba(148,163,184,.35);background:rgba(2,12,18,.5)}
+  .footer-line span{color:rgba(52,211,153,.5)}
+
+  @media (max-width:640px){
+    .section{padding:72px 20px}
+    .eco-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+    .flow-wrap{max-width:100%}
+    .cta-group{flex-direction:column;width:100%}
+    .cta-group a{justify-content:center}
+  }
+</style>
 </head>
 <body>
 
-  <!-- Background video (panorâmico / full-bleed) -->
-  <div class="video-bg" aria-hidden="true">
-    <div class="fallback"></div>
-    <!--
-      Coloque o arquivo em: public/videos/hero-loop.mp4  (ou ajuste o src)
-      Formatos: .mp4 (H.264) recomendado; .webm opcional para Chrome
-    -->
-    <video
-      id="heroVideo"
-      autoplay
-      muted
-      loop
-      playsinline
-      preload="auto"
-      poster=""
-    >
-      <!-- Principal: copie seu vídeo da pasta Downloads para o projeto -->
-      <source src="/videos/hero-loop.mp4" type="video/mp4">
-      <source src="/videos/hero-loop.webm" type="video/webm">
-    </video>
-    <div class="video-overlay"></div>
-    <div class="video-scanlines"></div>
-  </div>
+<div class="video-bg" aria-hidden="true">
+  <div class="fallback"></div>
+  <video id="heroVideo" autoplay muted loop playsinline preload="auto" poster="">
+    <source src="/videos/hero-loop.mp4" type="video/mp4">
+    <source src="/videos/hero-loop.webm" type="video/webm">
+  </video>
+  <div class="video-overlay"></div>
+  <div class="video-scanlines"></div>
+</div>
 
-  <div class="page">
-    <nav>
-      <div class="nav-inner">
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="nav-logo-icon">
-            <img src="../logo/faviicon4.png" alt="MedLM" style="height:100%;width:auto;object-fit:contain;" onerror="this.style.display='none'">
-          </div>
-          <span class="nav-brand">MedLM</span>
+<div class="page">
+  <nav id="siteNav">
+    <div class="nav-inner">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="nav-logo-icon">
+          <img src="../logo/faviicon4.png" alt="MedLM" style="height:100%;width:auto;object-fit:contain;" onerror="this.style.display='none'">
         </div>
-        <div style="display:flex;align-items:center;gap:20px">
-          <a href="/login" class="nav-login">Entrar</a>
-          <a href="/pages/Cadastro_Clinica.html" class="nav-cta">
-            <i class="fas fa-rocket" style="font-size:12px"></i> Teste grátis
-          </a>
+        <span class="nav-brand">MedLM</span>
+      </div>
+      <div class="nav-links">
+        <a href="#ecossistema" class="nav-link">Plataforma</a>
+        <a href="#seguranca" class="nav-link">Segurança</a>
+        <a href="#rbac" class="nav-link">Permissões</a>
+        <a href="#diferenciais" class="nav-link">Diferenciais</a>
+      </div>
+      <div class="nav-actions">
+        <a href="/login" class="nav-login">Entrar</a>
+        <a href="/pages/Cadastro_Clinica.html" class="nav-cta click-fx"><i class="fas fa-rocket" style="font-size:12px"></i> Teste grátis</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <main class="hero" id="hero">
+    <div class="hero-content">
+      <div class="version-badge"><span class="dot"></span> MedLM · Sistema clínico multi-tenant</div>
+      <h1 class="hero-headline">A evolução na gestão da sua<br><span class="accent">clínica ou consultório.</span></h1>
+      <p class="hero-sub">Agenda, prontuário, portal do paciente e financeiro avançado em um só lugar. Feito para profissionais que querem organização e escala — sem burocracia.</p>
+      <div class="cta-group">
+        <a href="/pages/Cadastro_Clinica.html" class="btn-primary click-fx"><i class="fas fa-rocket"></i> Criar minha clínica</a>
+        <a href="/login" class="btn-secondary click-fx"><i class="fas fa-sign-in-alt"></i> Acessar sistema</a>
+      </div>
+      <div class="trust-row">
+        <div class="trust-chip"><i class="fas fa-shield-alt"></i> Alinhado à LGPD</div>
+        <div class="trust-chip"><i class="fas fa-building"></i> Multi-tenant</div>
+        <div class="trust-chip"><i class="fas fa-chart-line"></i> Financeiro avançado</div>
+        <div class="trust-chip"><i class="fas fa-globe"></i> Portal do paciente</div>
+      </div>
+      <button type="button" onclick="verificarSenhaMestre()" class="btn-dev"><i class="fas fa-lock"></i> Área do desenvolvedor</button>
+    </div>
+    <div class="scroll-cue"><span>Role para conhecer</span><i class="fas fa-chevron-down"></i></div>
+  </main>
+
+  <!-- INTRO -->
+  <section class="section intro">
+    <p class="intro-statement reveal">O mercado de saúde não precisa de mais um software cheio de telas. Precisa de uma plataforma que <em>simplifique a operação da clínica</em> sem abrir mão de segurança, controle e inteligência.</p>
+    <p class="intro-body reveal">O MedLM nasceu para repensar a experiência de gestão em clínicas multidisciplinares — reunindo atendimento, prontuários, agenda, equipe, financeiro e informações estratégicas em um único ecossistema.</p>
+    <p class="intro-tag reveal">Tecnologia complexa por trás. Simplicidade para quem usa.</p>
+  </section>
+
+  <!-- ECOSSISTEMA -->
+  <section class="section" id="ecossistema">
+    <div class="section-head reveal">
+      <h2 class="section-title">Uma plataforma. Toda a operação.</h2>
+      <p class="section-sub">Agenda conversa com pacientes. Atendimento conversa com prontuários. Equipe conversa com permissões. Gestão conversa com financeiro. O MedLM conecta esses processos em uma única experiência.</p>
+      <div class="divider-line"></div>
+    </div>
+    <div class="eco-grid">
+      <div class="eco-chip reveal"><i class="fas fa-user-injured"></i><span>Gestão de pacientes</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-calendar-alt"></i><span>Agenda e agendamentos</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-file-medical"></i><span>Prontuário eletrônico</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-notes-medical"></i><span>Evolução de atendimentos</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-users-cog"></i><span>Gestão da equipe</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-wallet"></i><span>Controle financeiro</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-money-bill-wave"></i><span>Fluxo de caixa</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-chart-bar"></i><span>Relatórios gerenciais</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-bell"></i><span>Comunicação e notificações</span></div>
+      <div class="eco-chip reveal"><i class="fas fa-chart-pie"></i><span>Dashboard estratégico</span></div>
+    </div>
+    <div class="eco-foot reveal">
+      <div class="eco-count"><span class="num counter" data-target="10">0</span><span class="lbl">módulos integrados</span></div>
+      <div class="eco-tagline">Menos sistemas. Menos retrabalho. <span>Mais controle.</span></div>
+    </div>
+  </section>
+
+  <!-- FLUXO -->
+  <section class="section section-tight" id="fluxo">
+    <div class="section-head reveal">
+      <h2 class="section-title">MedLM não é apenas uma agenda</h2>
+      <p class="section-sub">Agenda é só uma parte da operação. Veja como as informações se conectam, do primeiro contato até a gestão.</p>
+      <div class="divider-line"></div>
+    </div>
+    <div class="flow-wrap">
+      <div class="flow-line" id="flowLine"></div>
+      <div class="flow-step reveal"><div class="flow-dot">01</div><div class="flow-label">Pacientes</div></div>
+      <div class="flow-step reveal"><div class="flow-dot">02</div><div class="flow-label">Agenda</div></div>
+      <div class="flow-step reveal"><div class="flow-dot">03</div><div class="flow-label">Atendimento</div></div>
+      <div class="flow-step reveal"><div class="flow-dot">04</div><div class="flow-label">Prontuário</div></div>
+      <div class="flow-step reveal"><div class="flow-dot">05</div><div class="flow-label">Equipe</div></div>
+      <div class="flow-step reveal"><div class="flow-dot">06</div><div class="flow-label">Financeiro</div></div>
+      <div class="flow-step reveal"><div class="flow-dot">07</div><div class="flow-label">Gestão</div></div>
+    </div>
+    <p class="flow-foot reveal">Um sistema operacional para a rotina da clínica.</p>
+  </section>
+
+  <!-- SEGURANÇA -->
+  <section class="section" id="seguranca">
+    <div class="section-head reveal">
+      <h2 class="section-title">Segurança e privacidade desde o projeto</h2>
+      <p class="section-sub">Em saúde, dados são extremamente sensíveis — por isso segurança não é um recurso adicionado no final, é parte da arquitetura.</p>
+      <div class="divider-line"></div>
+    </div>
+    <div class="security-grid">
+      <div class="sec-copy reveal">
+        <p>O MedLM opera como uma plataforma <strong>SaaS multi-tenant</strong>: cada clínica possui seu próprio ambiente lógico, com dados e operações associados ao seu respectivo tenant.</p>
+        <p>A identificação do tenant é acompanhada por validações no backend e nas operações de banco de dados, criando camadas de proteção contra acesso ou mistura indevida de informações entre clínicas.</p>
+        <div class="sec-quote">Uma clínica não deve enxergar os dados de outra.</div>
+        <p>O controle existe não apenas na interface, mas também nas regras de autenticação, autorização e acesso aos dados — incorporando boas práticas de proteção de dados e requisitos aplicáveis da LGPD, como o princípio do menor privilégio e a separação de dados por clínica.</p>
+      </div>
+      <div class="reveal">
+        <div class="checklist">
+          <div class="check-item"><i class="fas fa-check-circle"></i>Gestão de sessões</div>
+          <div class="check-item"><i class="fas fa-check-circle"></i>Controle de autenticação</div>
+          <div class="check-item"><i class="fas fa-check-circle"></i>Validação de permissões</div>
+          <div class="check-item"><i class="fas fa-check-circle"></i>Separação de ambientes por clínica</div>
+          <div class="check-item"><i class="fas fa-check-circle"></i>Controle de acesso por perfil</div>
+          <div class="check-item"><i class="fas fa-check-circle"></i>Redução da persistência local</div>
+          <div class="check-item"><i class="fas fa-check-circle"></i>Encerramento de sessões por regra</div>
+          <div class="check-item"><i class="fas fa-check-circle"></i>Proteção das operações críticas no backend</div>
+        </div>
+        <div class="check-count"><span class="num counter" data-target="8">0</span> camadas de proteção projetadas</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RBAC -->
+  <section class="section" id="rbac">
+    <div class="section-head reveal">
+      <h2 class="section-title">Cada profissional no seu lugar</h2>
+      <p class="section-sub">Nem todo usuário precisa enxergar tudo — e isso é uma vantagem. O MedLM usa controle de acesso baseado em funções (RBAC).</p>
+      <div class="divider-line"></div>
+    </div>
+    <div class="rbac-grid">
+      <div class="role-card reveal">
+        <div class="role-icon"><i class="fas fa-user-shield"></i></div>
+        <div class="role-title">Administrador</div>
+        <div class="role-tags"><span class="role-tag">Gestão da clínica</span><span class="role-tag">Usuários</span><span class="role-tag">Configurações</span><span class="role-tag">Relatórios</span><span class="role-tag">Financeiro</span></div>
+      </div>
+      <div class="role-card reveal">
+        <div class="role-icon"><i class="fas fa-user-md"></i></div>
+        <div class="role-title">Profissional de saúde</div>
+        <div class="role-tags"><span class="role-tag">Pacientes autorizados</span><span class="role-tag">Agenda</span><span class="role-tag">Atendimento</span><span class="role-tag">Prontuário</span><span class="role-tag">Evoluções</span></div>
+      </div>
+      <div class="role-card reveal">
+        <div class="role-icon"><i class="fas fa-concierge-bell"></i></div>
+        <div class="role-title">Recepção</div>
+        <div class="role-tags"><span class="role-tag">Agenda</span><span class="role-tag">Cadastro de pacientes</span><span class="role-tag">Operações administrativas autorizadas</span></div>
+      </div>
+      <div class="role-card reveal">
+        <div class="role-icon"><i class="fas fa-coins"></i></div>
+        <div class="role-title">Financeiro</div>
+        <div class="role-tags"><span class="role-tag">Receitas</span><span class="role-tag">Despesas</span><span class="role-tag">Fluxo de caixa</span><span class="role-tag">Relatórios autorizados</span></div>
+      </div>
+    </div>
+    <p class="rbac-principle reveal">O MedLM não parte da ideia de "todo mundo pode acessar tudo" — cada colaborador acessa apenas o que precisa para realizar seu trabalho. <strong>A permissão passa a fazer parte da governança da clínica.</strong></p>
+  </section>
+
+  <!-- FINANCEIRO / PRONTUÁRIO -->
+  <section class="section section-tight">
+    <div class="highlight-grid">
+      <div class="highlight-card reveal-scale">
+        <div class="highlight-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="highlight-title">Financeiro estratégico</div>
+        <div class="highlight-desc">O financeiro também precisa de governança. O MedLM transforma informações financeiras em ferramentas de gestão — com acesso restrito aos perfis autorizados.</div>
+        <ul class="highlight-list">
+          <li><i class="fas fa-circle"></i>Receitas, despesas e DRE</li>
+          <li><i class="fas fa-circle"></i>Fluxo de caixa e recibos</li>
+          <li><i class="fas fa-circle"></i>Relatórios e indicadores</li>
+        </ul>
+      </div>
+      <div class="highlight-card reveal-scale">
+        <div class="highlight-icon"><i class="fas fa-file-medical-alt"></i></div>
+        <div class="highlight-title">Prontuário e atendimento</div>
+        <div class="highlight-desc">O cuidado continua sendo o centro. Informações clínicas organizadas dentro de uma experiência digital moderna e integrada à operação da clínica.</div>
+        <ul class="highlight-list">
+          <li><i class="fas fa-circle"></i>Histórico do paciente</li>
+          <li><i class="fas fa-circle"></i>Evoluções e registros de atendimento</li>
+          <li><i class="fas fa-circle"></i>Documentos do acompanhamento</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIÊNCIA -->
+  <section class="section" id="experiencia">
+    <div class="exp-grid">
+      <div class="exp-copy reveal">
+        <h2 class="section-title" style="text-align:left;margin-bottom:20px">Tecnologia que desaparece</h2>
+        <p>O objetivo de uma boa tecnologia não é mostrar o quanto ela é complexa — é fazer a complexidade <strong>desaparecer</strong> para quem utiliza.</p>
+        <p>Interface moderna, navegação intuitiva, hierarquia visual clara e componentes reutilizáveis reduzem a curva de aprendizado: menos dúvidas, menos cliques, mais autonomia.</p>
+        <p>E como a clínica não está presa a um único computador, a experiência acompanha a rotina em qualquer dispositivo.</p>
+      </div>
+      <div class="reveal">
+        <div class="device-row">
+          <div class="device-card"><i class="fas fa-desktop"></i><span>Desktop</span></div>
+          <div class="device-card"><i class="fas fa-laptop"></i><span>Notebook</span></div>
+          <div class="device-card"><i class="fas fa-tablet-alt"></i><span>Tablet</span></div>
+          <div class="device-card"><i class="fas fa-mobile-alt"></i><span>Smartphone</span></div>
         </div>
       </div>
-    </nav>
+    </div>
+  </section>
 
-    <main class="hero">
-      <div class="hero-content">
-        <div class="version-badge">
-          <span class="dot"></span>
-          MedLM · Sistema clínico multi-tenant
-        </div>
-
-        <h1 class="hero-headline">
-          A evolução na gestão da sua<br>
-          <span class="accent">clínica ou consultório.</span>
-        </h1>
-
-        <p class="hero-sub">
-          Agenda, prontuário, portal do paciente e financeiro avançado em um só lugar.
-          Feito para profissionais que querem organização e escala — sem burocracia.
-        </p>
-
-        <div class="cta-group">
-          <a href="/pages/Cadastro_Clinica.html" class="btn-primary">
-            <i class="fas fa-rocket"></i> Criar minha clínica
-          </a>
-          <a href="/login" class="btn-secondary">
-            <i class="fas fa-sign-in-alt"></i> Acessar sistema
-          </a>
-        </div>
-
-        <!-- Chips honestos (sem métricas inventadas) -->
-        <div class="trust-row">
-          <div class="trust-chip"><i class="fas fa-shield-alt"></i> Alinhado à LGPD</div>
-          <div class="trust-chip"><i class="fas fa-building"></i> Multi-tenant</div>
-          <div class="trust-chip"><i class="fas fa-chart-line"></i> Financeiro avançado</div>
-          <div class="trust-chip"><i class="fas fa-globe"></i> Portal do paciente</div>
-        </div>
-
-        <button type="button" onclick="verificarSenhaMestre()" class="btn-dev">
-          <i class="fas fa-lock"></i> Área do desenvolvedor
-        </button>
+  <!-- DASHBOARD / STATS -->
+  <section class="section section-tight" id="dashboard">
+    <div class="section-head reveal">
+      <h2 class="section-title">A clínica em uma visão</h2>
+      <p class="section-sub">Informação espalhada gera decisões lentas. O dashboard do MedLM centraliza a operação — o gestor deixa de procurar e passa a enxergar.</p>
+    </div>
+    <div class="stat-band reveal-scale">
+      <div class="stat-grid">
+        <div><div class="stat-num counter" data-target="10">0</div><div class="stat-lbl">Módulos integrados</div></div>
+        <div><div class="stat-num counter" data-target="4">0</div><div class="stat-lbl">Perfis de acesso (RBAC)</div></div>
+        <div><div class="stat-num counter" data-target="8">0</div><div class="stat-lbl">Camadas de proteção</div></div>
+        <div><div class="stat-num counter" data-target="7">0</div><div class="stat-lbl">Etapas conectadas no fluxo</div></div>
       </div>
-    </main>
+    </div>
+  </section>
 
-    <section class="features">
-      <h2 class="features-title">Tudo que sua clínica precisa</h2>
-      <p class="features-sub">Módulos reais do produto — prontos para o dia a dia clínico.</p>
+  <!-- DIFERENCIAIS -->
+  <section class="section" id="diferenciais">
+    <div class="section-head reveal">
+      <h2 class="section-title">O que realmente diferencia o MedLM</h2>
+      <p class="section-sub">Não é apenas a quantidade de funcionalidades. É a maneira como elas trabalham juntas.</p>
+      <div class="divider-line"></div>
+    </div>
+    <div class="pillar-grid">
+      <div class="pillar-card reveal"><div class="pillar-title">Segurança</div><div class="pillar-desc">Arquitetura e controles de acesso pensados para proteger informações sensíveis.</div></div>
+      <div class="pillar-card reveal"><div class="pillar-title">Governança</div><div class="pillar-desc">Permissões estruturadas de acordo com funções e responsabilidades.</div></div>
+      <div class="pillar-card reveal"><div class="pillar-title">Integração</div><div class="pillar-desc">Agenda, pacientes, atendimento e gestão em um único ecossistema.</div></div>
+      <div class="pillar-card reveal"><div class="pillar-title">Experiência</div><div class="pillar-desc">Interface moderna criada para reduzir complexidade.</div></div>
+      <div class="pillar-card reveal"><div class="pillar-title">Escala</div><div class="pillar-desc">Arquitetura SaaS preparada para atender múltiplas clínicas.</div></div>
+      <div class="pillar-card reveal"><div class="pillar-title">Inteligência</div><div class="pillar-desc">Dados organizados para ajudar a clínica a decidir melhor.</div></div>
+    </div>
+  </section>
 
-      <div class="features-grid">
-        <div class="feature-card">
-          <div class="feature-icon icon-cyan"><i class="fas fa-calendar-check"></i></div>
-          <h3 class="feature-title">Agenda inteligente</h3>
-          <p class="feature-desc">Horários livres respeitam duração, recessos e pausas. Portal online para o paciente agendar.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon icon-em"><i class="fas fa-file-medical"></i></div>
-          <h3 class="feature-title">Prontuário digital</h3>
-          <p class="feature-desc">Histórico e evoluções com acesso controlado por cargo da equipe.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon icon-amber"><i class="fas fa-wallet"></i></div>
-          <h3 class="feature-title">Financeiro avançado</h3>
-          <p class="feature-desc">Recebíveis, despesas, KPIs, fluxo de caixa com descrição e relatório por e-mail.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon icon-cyan"><i class="fas fa-users-cog"></i></div>
-          <h3 class="feature-title">Gestão de equipe</h3>
-          <p class="feature-desc">Cadastre profissionais, permissões e acompanhe a operação da clínica.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon icon-em"><i class="fas fa-chart-pie"></i></div>
-          <h3 class="feature-title">Dashboard</h3>
-          <p class="feature-desc">Visão de indicadores para decisões com dados da sua própria operação.</p>
-        </div>
-        <div class="feature-card">
-          <div class="feature-icon icon-amber"><i class="fas fa-shield-alt"></i></div>
-          <h3 class="feature-title">Segurança & multi-tenant</h3>
-          <p class="feature-desc">Cada clínica isolada, sessão controlada e cuidado com dados sensíveis.</p>
-        </div>
-      </div>
-    </section>
+  <!-- PERSONAS -->
+  <section class="section section-tight" id="pessoas">
+    <div class="section-head reveal">
+      <h2 class="section-title">Cada pessoa no seu ambiente</h2>
+      <p class="section-sub">Imagine entrar no sistema e encontrar exatamente aquilo que precisa.</p>
+    </div>
+    <div class="persona-list">
+      <div class="persona-row reveal"><div class="persona-icon"><i class="fas fa-user-md"></i></div><div class="persona-text">O <strong>profissional</strong> encontra seus pacientes e atendimentos.</div></div>
+      <div class="persona-row reveal"><div class="persona-icon"><i class="fas fa-concierge-bell"></i></div><div class="persona-text">A <strong>recepção</strong> encontra sua agenda.</div></div>
+      <div class="persona-row reveal"><div class="persona-icon"><i class="fas fa-user-shield"></i></div><div class="persona-text">O <strong>administrador</strong> encontra seus indicadores.</div></div>
+      <div class="persona-row reveal"><div class="persona-icon"><i class="fas fa-coins"></i></div><div class="persona-text">O <strong>financeiro</strong> encontra seus números.</div></div>
+      <div class="persona-row reveal"><div class="persona-icon"><i class="fas fa-chart-pie"></i></div><div class="persona-text">O <strong>gestor</strong> encontra uma visão completa da operação.</div></div>
+    </div>
+  </section>
 
-    <footer class="footer-line">
-      © <span id="year"></span> MedLM — Sistema Clínico Inteligente · Feito com <span>♥</span> para profissionais de saúde
-    </footer>
-  </div>
+  <!-- FECHAMENTO -->
+  <section class="section closing" style="margin:0 auto">
+    <h2 class="closing-title reveal">Complexidade por trás. <span class="accent">Simplicidade na frente.</span></h2>
+    <p class="closing-sub reveal">O MedLM não existe para substituir uma agenda, um prontuário ou uma planilha. Ele existe para conectar tudo isso — transformar tecnologia em organização, dados em informação, informação em decisão.</p>
+    <div class="cta-group reveal">
+      <a href="/pages/Cadastro_Clinica.html" class="btn-primary click-fx"><i class="fas fa-rocket"></i> Criar minha clínica</a>
+      <a href="/login" class="btn-secondary click-fx"><i class="fas fa-sign-in-alt"></i> Acessar sistema</a>
+    </div>
+    <div class="closing-tags reveal">
+      <span>Sua clínica</span><span>Seu time</span><span>Seus dados</span><span>Sua gestão</span>
+    </div>
+  </section>
 
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
+  <footer class="footer-line">
+    © <span id="year"></span> MedLM — Sistema Clínico Inteligente · Feito com <span>♥</span> para profissionais de saúde
+  </footer>
+</div>
 
-    // Garante autoplay (políticas de browser exigem muted + playsinline)
-    const v = document.getElementById('heroVideo');
-    if (v) {
-      v.muted = true;
-      const play = () => v.play().catch(() => {});
-      play();
-      document.addEventListener('touchstart', play, { once: true });
-      document.addEventListener('click', play, { once: true });
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // Autoplay do vídeo de fundo
+  const v = document.getElementById('heroVideo');
+  if (v) {
+    v.muted = true;
+    const play = () => v.play().catch(() => {});
+    play();
+    document.addEventListener('touchstart', play, { once: true });
+    document.addEventListener('click', play, { once: true });
+  }
+
+  function verificarSenhaMestre() {
+    const senha = prompt('Digite a senha de acesso mestre:');
+    if (senha === 'leandro') {
+      window.location.href = 'cadastro-usuario.html';
+    } else if (senha !== null) {
+      alert('Acesso negado!');
     }
+  }
 
-    function verificarSenhaMestre() {
-      const senha = prompt('Digite a senha de acesso mestre:');
-      if (senha === 'leandro') {
-        window.location.href = 'cadastro-usuario.html';
-      } else if (senha !== null) {
-        alert('Acesso negado!');
+  // Nav com sombra ao rolar
+  const navEl = document.getElementById('siteNav');
+  window.addEventListener('scroll', () => {
+    navEl.classList.toggle('scrolled', window.scrollY > 12);
+  }, { passive: true });
+
+  // Reveal on scroll (com stagger por bloco)
+  const revealEls = document.querySelectorAll('.reveal, .reveal-scale, .flow-step');
+  const groups = new Map();
+  revealEls.forEach(el => {
+    const parent = el.parentElement;
+    if (!groups.has(parent)) groups.set(parent, []);
+    groups.get(parent).push(el);
+  });
+  groups.forEach(list => {
+    list.forEach((el, i) => { el.style.transitionDelay = (i * 70) + 'ms'; });
+  });
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        io.unobserve(entry.target);
       }
-    }
-  </script>
+    });
+  }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+  revealEls.forEach(el => io.observe(el));
+
+  // Linha do fluxo: ativa o pulso quando a seção entra em vista
+  const flowLine = document.getElementById('flowLine');
+  const flowSection = document.getElementById('fluxo');
+  if (flowLine && flowSection) {
+    const flowIo = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        flowLine.classList.toggle('active', entry.isIntersecting);
+      });
+    }, { threshold: 0.2 });
+    flowIo.observe(flowSection);
+  }
+
+  // Contadores animados
+  const counters = document.querySelectorAll('.counter');
+  const animateCounter = (el) => {
+    const target = parseInt(el.dataset.target, 10) || 0;
+    const duration = 1100;
+    const start = performance.now();
+    const step = (now) => {
+      const p = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      el.textContent = Math.round(eased * target);
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = target;
+    };
+    requestAnimationFrame(step);
+  };
+  const counterIo = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        counterIo.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  counters.forEach(el => counterIo.observe(el));
+
+  // Efeito de clique (ripple) em botões e cards interativos
+  document.querySelectorAll('.click-fx, .eco-chip, .role-card, .highlight-card, .pillar-card, .device-card, .check-item, .persona-row').forEach(el => {
+    el.classList.add('click-fx');
+    el.addEventListener('click', function (e) {
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      this.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 650);
+    });
+  });
+</script>
 </body>
 </html>
