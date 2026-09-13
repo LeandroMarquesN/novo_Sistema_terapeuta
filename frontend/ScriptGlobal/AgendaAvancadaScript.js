@@ -262,27 +262,58 @@
     }, 4200);
   }
 
+
+  /** Cabeçalho + faixa de lembretes acompanham o scroll horizontal do corpo (são um só). */
+  function sincronizarScrollCabecalho() {
+    const scroll = $('#grid-scroll');
+    if (!scroll) return;
+    const x = -scroll.scrollLeft;
+    const headerContent = $('#colunasHeaderConteudo');
+    const lembretes = $('#faixaLembretesConteudo');
+    if (headerContent) {
+      headerContent.style.transform = 'translate3d(' + x + 'px,0,0)';
+      headerContent.style.willChange = 'transform';
+    }
+    if (lembretes) {
+      lembretes.style.transform = 'translate3d(' + x + 'px,0,0)';
+      lembretes.style.willChange = 'transform';
+    }
+  }
+
   function centralizarColunaPorIso(iso, suave) {
     const scroll = $('#grid-scroll');
-    const header = $('#colunasHeaderConteudo');
-    if (!scroll || !header || !iso) return;
-    const alvo = header.querySelector('.col-header-dia[data-iso="' + iso + '"]');
+    if (!scroll || !iso) return;
+    // Usa a COLUNA DO CORPO (fonte da verdade) — não o header (pode estar dessincronizado)
+    const alvo = document.querySelector('.coluna-dia[data-iso="' + iso + '"]');
     if (!alvo) return;
+
+    state.diaSelecionado = iso;
+    $all('.col-header-dia').forEach(h => h.classList.toggle('dia-selecionado', h.dataset.iso === iso));
+    $all('.coluna-dia').forEach(c => c.classList.toggle('coluna-selecionada', c.dataset.iso === iso));
+
     const alvoRect = alvo.getBoundingClientRect();
     const scrollRect = scroll.getBoundingClientRect();
     const delta = (alvoRect.left - scrollRect.left) - (scroll.clientWidth / 2) + (alvoRect.width / 2);
     const destino = Math.max(0, scroll.scrollLeft + delta);
+
+    // trava snap por um instante para não “voltar” para outro dia
+    _snapLock = true;
+    clearTimeout(_snapTimer);
+
+    const after = () => {
+      sincronizarScrollCabecalho();
+      atualizarIndicadorSync(iso);
+      atualizarOrientacaoGrade(iso);
+      setTimeout(() => { _snapLock = false; }, 380);
+    };
+
     if (suave && typeof scroll.scrollTo === 'function') {
       scroll.scrollTo({ left: destino, behavior: 'smooth' });
+      setTimeout(after, 320);
     } else {
       scroll.scrollLeft = destino;
+      after();
     }
-    state.diaSelecionado = iso;
-    // evita loop: não re-centraliza
-    $all('.col-header-dia').forEach(h => h.classList.toggle('dia-selecionado', h.dataset.iso === iso));
-    $all('.coluna-dia').forEach(c => c.classList.toggle('coluna-selecionada', c.dataset.iso === iso));
-    atualizarIndicadorSync(iso);
-    atualizarOrientacaoGrade(iso);
   }
 
   async function irParaData(iso) {
@@ -372,7 +403,8 @@
       if (!melhor || !melhor.dataset.iso) return;
       // só snap se não estiver quase no centro (evita jitter)
       if (melhorDist < 12) {
-        selecionarDiaColuna(melhor.dataset.iso);
+        selecionarDiaColuna(melhor.dataset.iso, { centralizar: false });
+        sincronizarScrollCabecalho();
         atualizarOrientacaoGrade(melhor.dataset.iso);
         return;
       }
@@ -749,6 +781,7 @@
 
     const scroll = $('#grid-scroll');
     if (scroll) scroll.scrollLeft = 0;
+    sincronizarScrollCabecalho();
     atualizarIndicadorSync();
     atualizarOcupacaoHeader();
     marcarSeparadoresMes();
@@ -1089,9 +1122,12 @@
   const gridScroll = $('#grid-scroll');
   if (gridScroll) {
     gridScroll.addEventListener('scroll', () => {
+      sincronizarScrollCabecalho();
       atualizarIndicadorSync();
       agendarSnapAoCentro();
     });
+    // sync inicial
+    sincronizarScrollCabecalho();
   }
 
   // Arrastar o cabeçalho de dias para navegar (scroll + carregar semanas ao chegar na borda)
@@ -1986,6 +2022,21 @@
         backdrop-filter: blur(16px);
       }
       #painelAtalhos.open { display: block !important; }
+
+      #colunas-header {
+        overflow: hidden !important;
+      }
+      #colunasHeaderConteudo {
+        display: flex !important;
+        will-change: transform;
+      }
+      #faixa-lembretes, #faixaLembretesConteudo {
+        overflow: hidden;
+      }
+      #faixaLembretesConteudo {
+        display: flex;
+        will-change: transform;
+      }
 `;
     document.head.appendChild(style);
   })();
