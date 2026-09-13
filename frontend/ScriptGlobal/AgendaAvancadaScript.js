@@ -815,7 +815,7 @@
         sub.style.position = 'relative';
         sub.style.borderRight = '1px solid rgba(148,163,184,0.08)';
         let cells = '';
-        for (let h = 0; h < 24; h++) cells += '<div class="celula-hora" data-hora="' + h + '" data-prof-id="' + pid + '"></div>';
+        for (let h = 0; h < 24; h++) cells += '<div class="celula-hora" data-hora="' + h + '" data-prof-id="' + pid + '"><span class="cel-corner">' + iso.slice(8,10) + '/' + iso.slice(5,7) + '</span></div>';
         sub.innerHTML = cells;
         (agendamentos || []).filter(a => String(a.usuario_id) === String(pid) && passaFiltros(a)).forEach((a, idx) => {
           const bloco = criarBlocoAgendamento(a, idx);
@@ -827,7 +827,7 @@
       col.appendChild(row);
     } else {
       let cells = '';
-      for (let h = 0; h < 24; h++) cells += '<div class="celula-hora" data-hora="' + h + '"></div>';
+      for (let h = 0; h < 24; h++) cells += '<div class="celula-hora" data-hora="' + h + '"><span class="cel-corner">' + iso.slice(8,10) + '/' + iso.slice(5,7) + '</span></div>';
       col.innerHTML = cells;
       (agendamentos || []).filter(passaFiltros).forEach((a, idx) => {
         const bloco = criarBlocoAgendamento(a, idx);
@@ -1703,7 +1703,7 @@
       }
       #btnAtalhos:hover { border-color: rgba(34,211,238,0.4); color: var(--cyan); }
       #painelAtalhos {
-        display: none; position: fixed; right: 16px; top: 72px; z-index: 200;
+        display: none; position: fixed; right: 16px; top: 72px; z-index: 9999;
         width: min(320px, calc(100vw - 24px));
         background: rgba(8,18,26,0.98); border: 1px solid var(--border);
         border-radius: 16px; padding: 14px 16px;
@@ -1946,6 +1946,7 @@
         '<div class="atalho-linha"><span>Ir para hoje</span><span class="atalho-tecla">T</span></div>',
         '<div class="atalho-linha"><span>Novo agendamento</span><span class="atalho-tecla">N</span></div>',
         '<div class="atalho-linha"><span>Rolar a grade (dias)</span><span class="atalho-tecla">← →</span></div>',
+        '<div class="atalho-linha"><span>Ir para data</span><span class="atalho-tecla">G</span></div>',
         '<div class="atalho-linha"><span>Ir para data</span><span class="atalho-tecla">G</span></div>',
         '<div class="atalho-linha"><span>Fechar modal ou menu</span><span class="atalho-tecla">Esc</span></div>'
       ].join('');
