@@ -173,7 +173,7 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   idade INT,
   tipo_sanguineo VARCHAR(5),
   condicoes TEXT,
-  duracao_minutos INT UNSIGNED NULL DEFAULT 50 COMMENT 'Duração em minutos (Agenda Avançada)';
+  duracao_minutos INT UNSIGNED NULL DEFAULT 50 COMMENT 'Duração em minutos (Agenda Avançada)',
   -- Coluna gerada: só tem valor se o agendamento estiver ATIVO (não cancelado)
   -- Cancelados viram NULL e não contam pra unicidade (NULL != NULL no MySQL)
   slot_ativo DATETIME GENERATED ALWAYS AS (
