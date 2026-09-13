@@ -9,7 +9,7 @@
   const API = '/api/agenda-avancada';
   const token = localStorage.getItem('token');
   const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
-  const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+  const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const HORA_ALTURA = 64; // px — precisa bater com .hora-linha / .celula-hora no CSS
   const COL_LARGURA = 160; // px — precisa bater com --col-width
 
@@ -53,49 +53,30 @@
     toast._timer = setTimeout(() => toast.classList.remove('show'), 3200);
   }
 
-  // ─── Helpers de data robustos (evita NaN e shift de timezone) ───
   function formatarDataISO(d) {
-    if (!(d instanceof Date) || isNaN(d.getTime())) return null;
     const ano = d.getFullYear();
     const mes = String(d.getMonth() + 1).padStart(2, '0');
     const dia = String(d.getDate()).padStart(2, '0');
     return `${ano}-${mes}-${dia}`;
   }
 
-  /** Converte string 'YYYY-MM-DD' ou 'YYYY-MM-DD HH:mm:ss' em Date LOCAL (sem shift UTC) */
-  function parseLocalDate(valor) {
-    if (valor instanceof Date && !isNaN(valor.getTime())) return valor;
-    if (typeof valor !== 'string') return new Date(NaN);
-
-    // Pega só a parte da data
-    const match = valor.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2})(?::(\d{2}))?)?/);
-    if (!match) return new Date(NaN);
-
-    const [, y, m, d, h = '0', min = '0', s = '0'] = match;
-    return new Date(+y, +m - 1, +d, +h, +min, +s);
-  }
-
   function inicioDaSemana(data) {
-    const d = parseLocalDate(data);
-    if (isNaN(d.getTime())) return new Date(); // fallback seguro
-    const diaSemana = d.getDay(); // 0 = domingo
+    const d = new Date(data);
+    const diaSemana = d.getDay(); // 0=domingo
     d.setDate(d.getDate() - diaSemana);
     d.setHours(0, 0, 0, 0);
     return d;
   }
 
   function somarDias(data, n) {
-    const d = parseLocalDate(data);
-    if (isNaN(d.getTime())) return new Date();
+    const d = new Date(data);
     d.setDate(d.getDate() + n);
     return d;
   }
 
   function ehHoje(d) {
     const hoje = new Date();
-    return d.getFullYear() === hoje.getFullYear()
-      && d.getMonth() === hoje.getMonth()
-      && d.getDate() === hoje.getDate();
+    return d.getFullYear() === hoje.getFullYear() && d.getMonth() === hoje.getMonth() && d.getDate() === hoje.getDate();
   }
 
   function corPastel(idx) {
@@ -151,18 +132,18 @@
       const data = await res.json();
       if (!data.success || !data.profissionais.length) {
         wrap.innerHTML = `<div class="col-span-full text-center py-10" style="color:rgba(148,163,184,0.5)">
-            <i class="fas fa-user-md text-3xl mb-3"></i><p>Nenhum profissional encontrado na equipe.</p></div>`;
+          <i class="fas fa-user-md text-3xl mb-3"></i><p>Nenhum profissional encontrado na equipe.</p></div>`;
         return;
       }
       wrap.innerHTML = data.profissionais.map(p => `
-          <div class="prof-card anim-enter p-5 flex flex-col items-center text-center gap-3" data-id="${p.id}" data-nome="${escapeHtml(p.nome)}">
-            <div class="prof-avatar">${iniciais(p.nome)}</div>
-            <div>
-              <p class="prof-nome">${escapeHtml(p.nome)}</p>
-              <p class="prof-cargo">${escapeHtml(p.cargo || '')}</p>
-            </div>
+        <div class="prof-card anim-enter p-5 flex flex-col items-center text-center gap-3" data-id="${p.id}" data-nome="${escapeHtml(p.nome)}">
+          <div class="prof-avatar">${iniciais(p.nome)}</div>
+          <div>
+            <p class="prof-nome">${escapeHtml(p.nome)}</p>
+            <p class="prof-cargo">${escapeHtml(p.cargo || '')}</p>
           </div>
-        `).join('');
+        </div>
+      `).join('');
 
       wrap.querySelectorAll('.prof-card').forEach(card => {
         card.addEventListener('click', () => {
@@ -200,9 +181,7 @@
     try {
       const res = await authFetch(`${API}/indicadores-ano?profissionalId=${state.profissional.id}&ano=${state.ano}`);
       const data = await res.json();
-      const diasComAgenda = new Set(
-        (data.dias || []).map(d => formatarDataISO(parseLocalDate(d.dia))).filter(Boolean)
-      );
+      const diasComAgenda = new Set((data.dias || []).map(d => formatarDataISO(new Date(d.dia))));
 
       grid.innerHTML = '';
       for (let mes = 1; mes <= 12; mes++) {
@@ -229,9 +208,9 @@
     }
 
     card.innerHTML = `
-        <p class="mes-card-titulo mb-3">${MESES[mes - 1]}</p>
-        <div class="grid grid-cols-7 gap-0.5">${cells}</div>
-      `;
+      <p class="mes-card-titulo mb-3">${MESES[mes - 1]}</p>
+      <div class="grid grid-cols-7 gap-0.5">${cells}</div>
+    `;
     card.addEventListener('click', () => {
       state.mesAtual = { ano: state.ano, mes };
       mostrarCamada(3);
@@ -265,10 +244,7 @@
       const res = await authFetch(`${API}/dias-mes?profissionalId=${state.profissional.id}&ano=${ano}&mes=${mes}`);
       const data = await res.json();
       const contagemPorDia = {};
-      (data.dias || []).forEach(d => {
-        const iso = formatarDataISO(parseLocalDate(d.dia));
-        if (iso) contagemPorDia[iso] = d.total;
-      });
+      (data.dias || []).forEach(d => { contagemPorDia[formatarDataISO(new Date(d.dia))] = d.total; });
 
       const primeiroDiaSemana = new Date(ano, mes - 1, 1).getDay();
       const totalDias = new Date(ano, mes, 0).getDate();
@@ -283,15 +259,14 @@
         const iso = formatarDataISO(d);
         const total = contagemPorDia[iso];
         html += `<div class="mes-dia-cel ${ehHoje(d) ? 'hoje' : ''}" data-iso="${iso}">
-            <span>${dia}</span>${total ? `<span class="contador">${total}</span>` : ''}
-          </div>`;
+          <span>${dia}</span>${total ? `<span class="contador">${total}</span>` : ''}
+        </div>`;
       }
       grid.innerHTML = html;
 
       grid.querySelectorAll('.mes-dia-cel[data-iso]').forEach(cel => {
         cel.addEventListener('click', () => {
-          const dataClicada = parseLocalDate(cel.dataset.iso + 'T00:00:00');
-          if (isNaN(dataClicada.getTime())) return;
+          const dataClicada = new Date(cel.dataset.iso + 'T00:00:00');
           mostrarCamada(4);
           carregarGradeInicial(inicioDaSemana(dataClicada));
         });
@@ -330,21 +305,16 @@
   }
 
   async function adicionarColunas(dias, modo) {
-    const isos = dias.map(d => formatarDataISO(d)).filter(Boolean);
-    if (!isos.length) return;
-
+    const isos = dias.map(formatarDataISO);
     const inicio = isos[0];
     const fim = isos[isos.length - 1] + ' 23:59:59';
 
     let agendamentosPorDia = {};
     try {
-      const res = await authFetch(
-        `${API}/grade?profissionalId=${state.profissional.id}&inicio=${inicio}&fim=${encodeURIComponent(fim)}`
-      );
+      const res = await authFetch(`${API}/grade?profissionalId=${state.profissional.id}&inicio=${inicio}&fim=${encodeURIComponent(fim)}`);
       const data = await res.json();
       (data.agendamentos || []).forEach(a => {
-        const iso = formatarDataISO(parseLocalDate(a.data_agendamento));
-        if (!iso) return;
+        const iso = formatarDataISO(new Date(a.data_agendamento));
         (agendamentosPorDia[iso] = agendamentosPorDia[iso] || []).push(a);
       });
     } catch (err) {
@@ -357,20 +327,12 @@
 
     dias.forEach(d => {
       const iso = formatarDataISO(d);
-      if (!iso) return;
-
-      // Evita colunas duplicadas
-      if (state.colunas.includes(iso)) return;
-
       state.agendamentosPorDia[iso] = agendamentosPorDia[iso] || [];
 
       const headerCel = document.createElement('div');
       headerCel.className = `col-header-dia ${ehHoje(d) ? 'hoje-col' : ''}`;
       headerCel.dataset.iso = iso;
-      headerCel.innerHTML = `
-          <div class="dia-semana">${DIAS_SEMANA[d.getDay()]}</div>
-          <div class="dia-numero">${d.getDate()}</div>
-        `;
+      headerCel.innerHTML = `<div class="dia-semana">${DIAS_SEMANA[d.getDay()]}</div><div class="dia-numero">${d.getDate()}</div>`;
       headerCel.addEventListener('click', () => selecionarDiaColuna(iso));
       headerFrag.appendChild(headerCel);
 
@@ -392,9 +354,6 @@
       $('#colunasDiasConteudo').append(colsFrag);
       $('#faixaLembretesConteudo').append(lembretesFrag);
     }
-
-    // Ordena state.colunas para manter consistência
-    state.colunas.sort();
   }
 
   function criarColunaDia(iso, agendamentos) {
@@ -448,30 +407,23 @@
   }
 
   function criarBlocoAgendamento(a, idx) {
-    const d = parseLocalDate(a.data_agendamento);
-    if (isNaN(d.getTime())) {
-      console.warn('Data inválida no agendamento', a.id, a.data_agendamento);
-      return document.createElement('div'); // não quebra a grade
-    }
-
+    const d = new Date(a.data_agendamento);
     const minutosDoDia = d.getHours() * 60 + d.getMinutes();
-    const duracaoPx = 56;
+    const duracaoPx = 56; // altura padrão de bloco (~50min) — ajustável conforme duração real
     const topPx = (minutosDoDia / 60) * HORA_ALTURA;
 
     const div = document.createElement('div');
     const cancelado = a.status_agendamento === 'cancelado';
     const origemClasse = a.origem_paciente === 'portal' ? 'origem-portal' : 'origem-recepcao';
-
     div.className = `bloco-agendamento ${corPastel(idx)} ${origemClasse} ${cancelado ? 'cancelado-bloco' : ''}`;
     div.style.top = `${topPx}px`;
     div.style.height = `${duracaoPx}px`;
     div.dataset.id = a.id;
     div.draggable = !cancelado;
-
     div.innerHTML = `
-        <div class="bloco-hora">${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</div>
-        <div class="bloco-nome">${escapeHtml(a.nome || 'Paciente')}</div>
-      `;
+      <div class="bloco-hora">${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}</div>
+      <div class="bloco-nome">${escapeHtml(a.nome || 'Paciente')}</div>
+    `;
 
     div.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/agendamento-id', a.id);
@@ -500,24 +452,21 @@
   });
 
   async function carregarMaisColunas(direcao) {
-    if (state.carregandoMais || !state.profissional || !state.colunas.length) return;
     state.carregandoMais = true;
-
     try {
       if (direcao === 'proxima') {
         const ultimoIso = state.colunas[state.colunas.length - 1];
-        const inicio = somarDias(ultimoIso + 'T00:00:00', 1);
+        const inicio = somarDias(new Date(ultimoIso + 'T00:00:00'), 1);
         const dias = [];
         for (let i = 0; i < 7; i++) dias.push(somarDias(inicio, i));
         await adicionarColunas(dias, 'append');
       } else {
         const primeiroIso = state.colunas[0];
-        const fim = somarDias(primeiroIso + 'T00:00:00', -1);
+        const fim = somarDias(new Date(primeiroIso + 'T00:00:00'), -1);
         const dias = [];
         for (let i = 6; i >= 0; i--) dias.push(somarDias(fim, -i));
         const larguraAntes = gridScroll.scrollWidth;
         await adicionarColunas(dias, 'prepend');
-        // Mantém a posição visual após prepend
         gridScroll.scrollLeft += (gridScroll.scrollWidth - larguraAntes);
       }
     } finally {
@@ -593,12 +542,12 @@
   });
 
   async function duplicar(a) {
-    const d = parseLocalDate(a.data_agendamento);
-    d.setDate(d.getDate() + 7); // duplica para a mesma hora, 7 dias depois
+    const d = new Date(a.data_agendamento);
+    d.setDate(d.getDate() + 7); // duplica para a mesma hora, 7 dias depois (ajustável no modal de reagendar se necessário)
     try {
       const res = await authFetch(`${API}/agendamentos/${a.id}/duplicar`, {
         method: 'POST',
-        body: JSON.stringify({ nova_data: `${formatarDataISO(d)} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:00` })
+        body: JSON.stringify({ nova_data: `${formatarDataISO(d)} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:00` })
       });
       const data = await res.json();
       if (data.success) { mostrarToast('Agendamento duplicado.'); recarregarGridAtual(); }
@@ -631,17 +580,7 @@
   function recarregarGridAtual() {
     if (!state.colunas.length) return;
     const primeiroIso = state.colunas[0];
-    const data = parseLocalDate(primeiroIso + 'T00:00:00');
-    if (isNaN(data.getTime())) return;
-    carregarGradeInicial(inicioDaSemana(data));
-  }
-
-  function irParaHoje() {
-    if (!state.profissional) return;
-    const hoje = new Date();
-    state.mesAtual = { ano: hoje.getFullYear(), mes: hoje.getMonth() + 1 };
-    mostrarCamada(4);
-    carregarGradeInicial(inicioDaSemana(hoje));
+    carregarGradeInicial(new Date(primeiroIso + 'T00:00:00'));
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -649,9 +588,9 @@
   // ═══════════════════════════════════════════════════════════════
   function abrirModalReagendar(a) {
     $('#rAgendamentoId').value = a.id;
-    const d = parseLocalDate(a.data_agendamento);
+    const d = new Date(a.data_agendamento);
     $('#rData').value = formatarDataISO(d);
-    $('#rHora').value = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    $('#rHora').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     abrirModal('modalReagendar');
   }
 
@@ -691,11 +630,11 @@
       $('#fHora').value = opts.hora;
     } else if (opts.editar) {
       const a = opts.agendamento;
-      const d = parseLocalDate(a.data_agendamento);
+      const d = new Date(a.data_agendamento);
       $('#modalAgendamentoTitulo').textContent = 'Editar Agendamento';
       $('#fAgendamentoId').value = a.id;
       $('#fData').value = formatarDataISO(d);
-      $('#fHora').value = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      $('#fHora').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
       $('#fTipoTerapia').value = a.tipo_terapia || '';
       $('#fMotivo').value = a.motivo_consulta || '';
       $('#fBuscaPaciente').value = a.nome || '';
@@ -713,6 +652,9 @@
     buscaPacienteTimer = setTimeout(() => buscarPacientes(termo), 350);
   });
 
+  // A rota real (pacienteRoutes.js) expõe apenas GET /api/pacientes (lista ativos da
+  // clínica logada), sem parâmetro de busca no servidor. Por isso: busca o cadastro
+  // completo uma única vez (cache em memória) e filtra por nome/telefone no cliente.
   let cachePacientes = null;
   async function obterCachePacientes() {
     if (cachePacientes) return cachePacientes;
@@ -734,12 +676,12 @@
       if (!lista.length) { wrap.innerHTML = `<p class="text-xs" style="color:rgba(148,163,184,0.5)">Nenhum paciente encontrado.</p>`; return; }
 
       wrap.innerHTML = lista.slice(0, 6).map(p => `
-          <div class="py-2 px-3 text-xs rounded-lg cursor-pointer" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);margin-bottom:4px;"
-               data-id="${p.id}" data-nome="${escapeHtml(p.nome)}">
-            <strong style="color:#e2e8f0">${escapeHtml(p.nome)}</strong>
-            <span style="color:rgba(148,163,184,0.5)"> — ${escapeHtml(p.telefone || '')}</span>
-          </div>
-        `).join('');
+        <div class="py-2 px-3 text-xs rounded-lg cursor-pointer" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);margin-bottom:4px;"
+             data-id="${p.id}" data-nome="${escapeHtml(p.nome)}">
+          <strong style="color:#e2e8f0">${escapeHtml(p.nome)}</strong>
+          <span style="color:rgba(148,163,184,0.5)"> — ${escapeHtml(p.telefone || '')}</span>
+        </div>
+      `).join('');
 
       wrap.querySelectorAll('[data-id]').forEach(item => {
         item.addEventListener('click', () => {
@@ -816,25 +758,21 @@
       const overlay = document.createElement('div');
       overlay.className = 'modal-overlay open';
       overlay.innerHTML = `
-          <div class="modal-box">
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="modal-titulo">Agendamentos de hoje</h3>
-              <button class="btn-voltar-camada w-8 h-8 flex items-center justify-center" id="fecharListaHoje"><i class="fas fa-times"></i></button>
-            </div>
-            ${lista.length ? lista.map(a => {
-        const dataObj = parseLocalDate(a.data_agendamento);
-        const horaFormatada = !isNaN(dataObj.getTime()) ? dataObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '--:--';
-        return `
-              <div class="flex items-center justify-between py-3" style="border-bottom:1px solid var(--border)">
-                <div>
-                  <p style="color:#e2e8f0;font-weight:700;font-size:13px;">${escapeHtml(a.nome || 'Paciente')}</p>
-                  <p style="color:rgba(148,163,184,0.5);font-size:11px;">${escapeHtml(a.tipo_terapia || '')}</p>
-                </div>
-                <span class="time-badge"><i class="fas fa-clock"></i> ${horaFormatada}</span>
+        <div class="modal-box">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="modal-titulo">Agendamentos de hoje</h3>
+            <button class="btn-voltar-camada w-8 h-8 flex items-center justify-center" id="fecharListaHoje"><i class="fas fa-times"></i></button>
+          </div>
+          ${lista.length ? lista.map(a => `
+            <div class="flex items-center justify-between py-3" style="border-bottom:1px solid var(--border)">
+              <div>
+                <p style="color:#e2e8f0;font-weight:700;font-size:13px;">${escapeHtml(a.nome || 'Paciente')}</p>
+                <p style="color:rgba(148,163,184,0.5);font-size:11px;">${escapeHtml(a.tipo_terapia || '')}</p>
               </div>
-            `;
-      }).join('') : `<p style="color:rgba(148,163,184,0.5);font-size:13px;text-align:center;padding:20px 0;">Nenhum agendamento para hoje.</p>`}
-          </div>`;
+              <span class="time-badge"><i class="fas fa-clock"></i> ${new Date(a.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}</span>
+            </div>
+          `).join('') : `<p style="color:rgba(148,163,184,0.5);font-size:13px;text-align:center;padding:20px 0;">Nenhum agendamento para hoje.</p>`}
+        </div>`;
       document.body.appendChild(overlay);
       overlay.querySelector('#fecharListaHoje').addEventListener('click', () => overlay.remove());
       overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
@@ -866,25 +804,25 @@
       overlay.className = 'modal-overlay open modal-entrada-overlay';
       overlay.style.zIndex = '80';
       overlay.innerHTML = `
-          <div class="modal-box" style="display:flex;flex-direction:column;max-height:min(88vh,640px);padding:0;overflow:hidden;">
-            <div class="flex items-center justify-between px-5 pt-5 pb-3" style="flex-shrink:0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,18,24,0.98);z-index:2;">
-              <h3 class="modal-titulo" style="font-size:16px;">Entrada — Portal do Paciente</h3>
-              <button type="button" class="btn-voltar-camada w-9 h-9 flex items-center justify-center" id="fecharEntrada" aria-label="Fechar" style="flex-shrink:0;">
-                <i class="fas fa-times"></i>
-              </button>
-            </div>
-            <div class="px-5 py-3" style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">
-              ${lista.length ? lista.map(n => `
-                <div class="flex items-start gap-3 py-3" style="border-bottom:1px solid var(--border)">
-                  <i class="fas fa-bell mt-1" style="color:var(--cyan);flex-shrink:0;"></i>
-                  <div style="min-width:0;flex:1;">
-                    <p style="color:#e2e8f0;font-weight:700;font-size:13px;word-break:break-word;">${escapeHtml(n.titulo || '')}</p>
-                    <p style="color:rgba(148,163,184,0.55);font-size:12px;word-break:break-word;">${escapeHtml(n.mensagem || '')}</p>
-                  </div>
+        <div class="modal-box" style="display:flex;flex-direction:column;max-height:min(88vh,640px);padding:0;overflow:hidden;">
+          <div class="flex items-center justify-between px-5 pt-5 pb-3" style="flex-shrink:0;border-bottom:1px solid var(--border);position:sticky;top:0;background:rgba(10,18,24,0.98);z-index:2;">
+            <h3 class="modal-titulo" style="font-size:16px;">Entrada — Portal do Paciente</h3>
+            <button type="button" class="btn-voltar-camada w-9 h-9 flex items-center justify-center" id="fecharEntrada" aria-label="Fechar" style="flex-shrink:0;">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="px-5 py-3" style="overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;">
+            ${lista.length ? lista.map(n => `
+              <div class="flex items-start gap-3 py-3" style="border-bottom:1px solid var(--border)">
+                <i class="fas fa-bell mt-1" style="color:var(--cyan);flex-shrink:0;"></i>
+                <div style="min-width:0;flex:1;">
+                  <p style="color:#e2e8f0;font-weight:700;font-size:13px;word-break:break-word;">${escapeHtml(n.titulo || '')}</p>
+                  <p style="color:rgba(148,163,184,0.55);font-size:12px;word-break:break-word;">${escapeHtml(n.mensagem || '')}</p>
                 </div>
-              `).join('') : `<p style="color:rgba(148,163,184,0.5);font-size:13px;text-align:center;padding:28px 0;">Nenhuma notificação.</p>`}
-            </div>
-          </div>`;
+              </div>
+            `).join('') : `<p style="color:rgba(148,163,184,0.5);font-size:13px;text-align:center;padding:28px 0;">Nenhuma notificação.</p>`}
+          </div>
+        </div>`;
       document.body.appendChild(overlay);
       document.body.style.overflow = 'hidden';
 
