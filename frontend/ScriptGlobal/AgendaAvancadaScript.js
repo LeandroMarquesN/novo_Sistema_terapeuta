@@ -851,6 +851,7 @@
   }
 
   function abrirPopupCelula(evento, iso, hora, profId, celEl) {
+    try {
     fecharPopupCelula();
     selecionarDiaColuna(iso);
     const d = parseLocalDate(iso + 'T00:00:00');
@@ -931,23 +932,30 @@
       });
     });
 
+    // fecha no próximo clique fora (evita fechar no mesmo clique que abriu)
     setTimeout(() => {
       const closer = (ev) => {
-        if (!pop.contains(ev.target)) {
-          fecharPopupCelula();
-          document.removeEventListener('click', closer);
-        }
+        if (pop.contains(ev.target)) return;
+        fecharPopupCelula();
+        document.removeEventListener('mousedown', closer, true);
+        document.removeEventListener('click', closer, true);
       };
-      document.addEventListener('click', closer);
-    }, 0);
+      document.addEventListener('mousedown', closer, true);
+    }, 30);
+    } catch (err) {
+      console.error('[Agenda] popup célula', err);
+      // fallback: abre modal completo
+      abrirModalAgendamento({ novo: true, data: iso, hora: String(hora).padStart(2,'0') + ':00', usuarioId: profId });
+    }
   }
 
   function bindCelulasHora(container, iso, profId) {
     container.querySelectorAll('.celula-hora').forEach(cel => {
+      cel.style.position = 'relative';
       cel.addEventListener('click', (e) => {
-        if (e.target !== cel && !e.target.classList.contains('celula-hora')) return;
-        // se clicou em bloco, o bloco trata o menu
+        // clique em bloco de agendamento → menu do bloco
         if (e.target.closest && e.target.closest('.bloco-agendamento')) return;
+        e.stopPropagation();
         selecionarDiaColuna(iso);
         const hora = String(cel.dataset.hora || '0').padStart(2, '0');
         const uid = cel.dataset.profId || profId;
@@ -1774,9 +1782,11 @@
       #colunas-header, #colunasHeaderConteudo { cursor: grab; user-select: none; }
       #colunas-header.header-dragging, .header-dragging { cursor: grabbing !important; }
       .celula-hora {
+        position: relative !important;
         background: rgba(255,255,255,0.015);
         border-bottom: 1px solid rgba(148,163,184,0.1) !important;
         transition: background 0.15s, box-shadow 0.15s;
+        overflow: visible;
       }
       .celula-hora:nth-child(even) {
         background: rgba(34,211,238,0.03);
@@ -1851,6 +1861,8 @@
       .hora-linha, .celula-hora {
         height: 120px !important;
         min-height: 120px;
+        position: relative !important;
+        box-sizing: border-box;
       }
       .coluna-horas, #colunaHoras {
         height: calc(24 * 120px) !important;
@@ -1860,27 +1872,28 @@
       }
       /* Chip de data no canto (estilo filtro, menor) */
       .celula-hora .cel-corner {
-        position: absolute;
-        top: 4px;
-        right: 4px;
-        z-index: 2;
-        font-size: 9px;
-        font-weight: 800;
+        position: absolute !important;
+        top: 4px !important;
+        right: 4px !important;
+        z-index: 3;
+        font-size: 9px !important;
+        font-weight: 800 !important;
         letter-spacing: 0.02em;
-        color: rgba(52, 211, 153, 0.75);
-        background: rgba(52, 211, 153, 0.08);
-        border: 1px solid rgba(52, 211, 153, 0.22);
+        color: #0f766e !important;
+        background: rgba(167, 243, 208, 0.85) !important;
+        border: 1px solid rgba(13, 148, 136, 0.45) !important;
         border-radius: 99px;
-        padding: 2px 6px;
+        padding: 2px 6px !important;
         line-height: 1.2;
         pointer-events: none;
         font-family: 'Space Grotesk', sans-serif;
         white-space: nowrap;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.15);
       }
       .coluna-dia.coluna-selecionada .celula-hora .cel-corner {
-        color: var(--emerald);
-        background: rgba(52, 211, 153, 0.16);
-        border-color: rgba(52, 211, 153, 0.4);
+        color: #064e3b !important;
+        background: rgba(110, 231, 183, 0.95) !important;
+        border-color: rgba(5, 150, 105, 0.55) !important;
       }
       .col-header-dia.hoje-col ~ * .cel-corner,
       .coluna-dia[data-iso].hoje-col .cel-corner { }
