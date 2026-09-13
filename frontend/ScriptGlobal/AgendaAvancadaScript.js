@@ -25,6 +25,16 @@
   const SNAP_MINUTOS = 15;           // snap de mercado
   const DURACAO_PADRAO = 50;         // minutos (padrão clínica)
 
+  const COL_LARGURA_SUB = 120;
+  const CORES_PROF = [
+    { bg: '#bfdbfe', border: '#2563eb' },
+    { bg: '#bbf7d0', border: '#059669' },
+    { bg: '#fed7aa', border: '#d97706' },
+    { bg: '#ddd6fe', border: '#7c3aed' },
+    { bg: '#fbcfe8', border: '#db2777' },
+    { bg: '#a5f3fc', border: '#0891b2' }
+  ];
+
   // Duração por tipo de terapia (ajuste conforme sua clínica)
   const DURACAO_POR_TIPO = {
     'psicoterapia': 50,
@@ -40,7 +50,9 @@
 
   const state = {
     profissional: null,
-    profissionais: [],          // cache lista completa (troca rápida)
+    profissionais: [],
+    modoMulti: false,
+    profissionaisVisiveis: [],  // ids no modo multi
     ano: new Date().getFullYear(),
     mesAtual: { ano: new Date().getFullYear(), mes: new Date().getMonth() + 1 },
     colunas: [],
@@ -49,8 +61,8 @@
     contextoAtual: null,
     diaSelecionado: null,
     filtros: {
-      status: 'todos',          // todos | aguardando_sinal | confirmado | cancelado | realizado
-      origem: 'todos'           // todos | recepcao | portal
+      status: 'todos',
+      origem: 'todos'
     }
   };
 
@@ -159,7 +171,7 @@
   }
 
   /** Verifica conflito local (mesmo profissional, horário sobreposto, não cancelado) */
-  function temConflito(iso, horaStr, duracaoMin, ignorarId) {
+  function temConflito(iso, horaStr, duracaoMin, ignorarId, usuarioId) {
     const lista = state.agendamentosPorDia[iso] || [];
     const [hh, mm] = horaStr.split(':').map(Number);
     const inicioNovo = hh * 60 + mm;
@@ -167,6 +179,7 @@
 
     return lista.some(a => {
       if (ignorarId && String(a.id) === String(ignorarId)) return false;
+      if (usuarioId && String(a.usuario_id) !== String(usuarioId)) return false;
       if (a.status_agendamento === 'cancelado') return false;
       const d = parseLocalDate(a.data_agendamento);
       if (isNaN(d.getTime())) return false;
@@ -185,6 +198,84 @@
     return true;
   }
 
+  function corDoProfissional(usuarioId) {
+    const idx = state.profissionais.findIndex(p => String(p.id) === String(usuarioId));
+    return CORES_PROF[(idx >= 0 ? idx : 0) % CORES_PROF.length];
+  }
+
+  function idsAtivosParaGrade() {
+    if (state.modoMulti && state.profissionaisVisiveis.length) return state.profissionaisVisiveis.map(String);
+    if (state.profissional) return [String(state.profissional.id)];
+    return [];
+  }
+
+  function larguraColunaDia() {
+    if (!state.modoMulti) return COL_LARGURA;
+    return Math.max(1, state.profissionaisVisiveis.length) * COL_LARGURA_SUB;
+  }
+
+  function aplicarLarguraCSS() {
+    document.documentElement.style.setProperty('--col-width', larguraColunaDia() + 'px');
+  }
+
+  function ativarModoMulti(ligado) {
+    state.modoMulti = !!ligado;
+    if (state.modoMulti) {
+      if (!state.profissionaisVisiveis.length) {
+        state.profissionaisVisiveis = state.profissionais.map(p => String(p.id));
+      }
+      const titulo = $('#tituloProfissional');
+      if (titulo) titulo.innerHTML = 'Equipe <span class="separator">|</span> <span style="color:var(--emerald)">Multi-agenda</span>';
+    } else if (state.profissional) {
+      state.profissionaisVisiveis = [String(state.profissional.id)];
+      const titulo = $('#tituloProfissional');
+      if (titulo) titulo.innerHTML = escapeHtml(state.profissional.nome) + ' <span class="separator">|</span> <span style="color:var(--emerald)">Agenda</span>';
+    }
+    atualizarToggleMultiUI();
+    renderChipsMulti();
+    aplicarLarguraCSS();
+    if (document.querySelector('#camada4.ativa') && state.colunas.length) recarregarGridAtual();
+  }
+
+  function toggleProfissionalVisivel(id) {
+    const sid = String(id);
+    const set = new Set(state.profissionaisVisiveis.map(String));
+    if (set.has(sid)) {
+      if (set.size <= 1) { mostrarToast('Mantenha ao menos um profissional visível.', 'info'); return; }
+      set.delete(sid);
+    } else set.add(sid);
+    state.profissionaisVisiveis = Array.from(set);
+    renderChipsMulti();
+    aplicarLarguraCSS();
+    if (document.querySelector('#camada4.ativa')) recarregarGridAtual();
+  }
+
+  function atualizarToggleMultiUI() {
+    const btn = $('#btnToggleMulti');
+    if (btn) {
+      btn.classList.toggle('filtro-ativo', state.modoMulti);
+      btn.innerHTML = state.modoMulti ? '<i class="fas fa-users"></i> Multi ON' : '<i class="fas fa-user"></i> Multi';
+    }
+    const sel = $('#selectProfissionalRapido');
+    if (sel) sel.style.display = state.modoMulti ? 'none' : '';
+    const chips = $('#chipsMultiProf');
+    if (chips) chips.style.display = state.modoMulti ? 'flex' : 'none';
+  }
+
+  function renderChipsMulti() {
+    const wrap = $('#chipsMultiProf');
+    if (!wrap) return;
+    wrap.innerHTML = state.profissionais.map((p, idx) => {
+      const cor = CORES_PROF[idx % CORES_PROF.length];
+      const ativo = state.profissionaisVisiveis.map(String).includes(String(p.id));
+      return '<button type="button" class="chip-prof ' + (ativo ? 'chip-ativo' : '') + '" data-prof-id="' + p.id + '" style="' + (ativo ? 'border-color:' + cor.border + ';background:' + cor.bg + '33;color:#e2e8f0' : '') + '"><span class="chip-dot" style="background:' + cor.border + '"></span>' + escapeHtml((p.nome || '').split(' ')[0]) + '</button>';
+    }).join('');
+    wrap.querySelectorAll('[data-prof-id]').forEach(btn => {
+      btn.addEventListener('click', () => toggleProfissionalVisivel(btn.dataset.profId));
+    });
+  }
+
+
   // ═══════════════════════════════════════════════════════════════
   // Navegação entre camadas
   // ═══════════════════════════════════════════════════════════════
@@ -200,6 +291,8 @@
 
     const barraFiltros = $('#barraFiltrosGrade');
     if (barraFiltros) barraFiltros.style.display = n === 4 ? 'flex' : 'none';
+    const multiBar = $('#barraMultiProf');
+    if (multiBar) multiBar.style.display = n === 4 ? 'flex' : 'none';
 
     const subtitulos = {
       1: 'Selecione um profissional para começar',
@@ -269,12 +362,15 @@
 
   function selecionarProfissional(id, nome) {
     state.profissional = { id, nome };
+    state.modoMulti = false;
+    state.profissionaisVisiveis = [String(id)];
     const titulo = $('#tituloProfissional');
     if (titulo) {
       titulo.innerHTML = `${escapeHtml(nome)} <span class="separator">|</span> <span style="color:var(--emerald)">Agenda</span>`;
     }
     const sel = $('#selectProfissionalRapido');
     if (sel) sel.value = String(id);
+    atualizarToggleMultiUI();
     mostrarCamada(2);
     carregarPanoramaAno();
   }
@@ -437,6 +533,7 @@
   async function carregarGradeInicial(dataInicioSemana) {
     state.colunas = [];
     state.agendamentosPorDia = {};
+    aplicarLarguraCSS();
     ['#colunasHeaderConteudo', '#colunasDiasConteudo', '#faixaLembretesConteudo'].forEach(sel => {
       const el = $(sel);
       if (el) el.innerHTML = '';
@@ -456,13 +553,16 @@
     const isos = dias.map(d => formatarDataISO(d)).filter(Boolean);
     if (!isos.length) return;
 
+    const ids = idsAtivosParaGrade();
+    if (!ids.length) { mostrarToast('Selecione ao menos um profissional.', 'info'); return; }
     const inicio = isos[0];
     const fim = isos[isos.length - 1] + ' 23:59:59';
+    const qs = ids.length > 1 ? `profissionalIds=${ids.join(',')}` : `profissionalId=${ids[0]}`;
 
     let agendamentosPorDia = {};
     try {
       const res = await authFetch(
-        `${API}/grade?profissionalId=${state.profissional.id}&inicio=${inicio}&fim=${encodeURIComponent(fim)}`
+        `${API}/grade?${qs}&inicio=${inicio}&fim=${encodeURIComponent(fim)}`
       );
       const data = await res.json();
       (data.agendamentos || []).forEach(a => {
@@ -489,11 +589,18 @@
       headerCel.className = `col-header-dia ${ehHoje(d) ? 'hoje-col' : ''}`;
       headerCel.dataset.iso = iso;
       const totalAtivos = (state.agendamentosPorDia[iso] || []).filter(a => a.status_agendamento !== 'cancelado').length;
-      headerCel.innerHTML = `
-        <div class="dia-semana">${DIAS_SEMANA[d.getDay()]}</div>
-        <div class="dia-numero">${d.getDate()}</div>
-        ${totalAtivos ? `<div class="col-ocupacao" title="${totalAtivos} agendamento(s)">${totalAtivos}</div>` : ''}
-      `;
+      headerCel.style.flex = '0 0 ' + larguraColunaDia() + 'px';
+      if (state.modoMulti) {
+        const subHeaders = state.profissionaisVisiveis.map(pid => {
+          const p = state.profissionais.find(x => String(x.id) === String(pid));
+          const cor = corDoProfissional(pid);
+          const nome = p ? p.nome.split(' ')[0] : pid;
+          return '<div class="sub-header-prof" style="border-bottom:2px solid ' + cor.border + '">' + escapeHtml(nome) + '</div>';
+        }).join('');
+        headerCel.innerHTML = '<div class="dia-semana">' + DIAS_SEMANA[d.getDay()] + '</div><div class="dia-numero">' + d.getDate() + '</div>' + (totalAtivos ? '<div class="col-ocupacao">' + totalAtivos + '</div>' : '') + '<div class="sub-headers-row">' + subHeaders + '</div>';
+      } else {
+        headerCel.innerHTML = '<div class="dia-semana">' + DIAS_SEMANA[d.getDay()] + '</div><div class="dia-numero">' + d.getDate() + '</div>' + (totalAtivos ? '<div class="col-ocupacao" title="' + totalAtivos + ' agendamento(s)">' + totalAtivos + '</div>' : '');
+      }
       headerCel.addEventListener('click', () => selecionarDiaColuna(iso));
       headerFrag.appendChild(headerCel);
 
@@ -523,59 +630,85 @@
 
   function criarColunaDia(iso, agendamentos) {
     const col = document.createElement('div');
-    col.className = 'coluna-dia';
+    col.className = 'coluna-dia' + (state.modoMulti ? ' coluna-multi' : '');
     col.dataset.iso = iso;
+    col.style.flex = '0 0 ' + larguraColunaDia() + 'px';
 
-    let cells = '';
-    for (let h = 0; h < 24; h++) {
-      cells += `<div class="celula-hora" data-hora="${h}"></div>`;
+    if (state.modoMulti) {
+      const row = document.createElement('div');
+      row.className = 'subcols-row';
+      state.profissionaisVisiveis.forEach(pid => {
+        const sub = document.createElement('div');
+        sub.className = 'subcoluna-prof';
+        sub.dataset.iso = iso;
+        sub.dataset.profId = pid;
+        sub.style.flex = '0 0 ' + COL_LARGURA_SUB + 'px';
+        sub.style.position = 'relative';
+        sub.style.borderRight = '1px solid rgba(148,163,184,0.08)';
+        let cells = '';
+        for (let h = 0; h < 24; h++) cells += '<div class="celula-hora" data-hora="' + h + '" data-prof-id="' + pid + '"></div>';
+        sub.innerHTML = cells;
+        (agendamentos || []).filter(a => String(a.usuario_id) === String(pid) && passaFiltros(a)).forEach((a, idx) => {
+          const bloco = criarBlocoAgendamento(a, idx);
+          if (bloco) sub.appendChild(bloco);
+        });
+        bindCelulasHora(sub, iso, pid);
+        row.appendChild(sub);
+      });
+      col.appendChild(row);
+    } else {
+      let cells = '';
+      for (let h = 0; h < 24; h++) cells += '<div class="celula-hora" data-hora="' + h + '"></div>';
+      col.innerHTML = cells;
+      (agendamentos || []).filter(passaFiltros).forEach((a, idx) => {
+        const bloco = criarBlocoAgendamento(a, idx);
+        if (bloco) col.appendChild(bloco);
+      });
+      bindCelulasHora(col, iso, state.profissional && state.profissional.id);
     }
-    col.innerHTML = cells;
-
-    (agendamentos || []).filter(passaFiltros).forEach((a, idx) => {
-      const bloco = criarBlocoAgendamento(a, idx);
-      if (bloco) col.appendChild(bloco);
-    });
 
     col.addEventListener('click', () => selecionarDiaColuna(iso), true);
+    return col;
+  }
 
-    col.querySelectorAll('.celula-hora').forEach(cel => {
+  function bindCelulasHora(container, iso, profId) {
+    container.querySelectorAll('.celula-hora').forEach(cel => {
       cel.addEventListener('click', (e) => {
         if (e.target !== cel) return;
         selecionarDiaColuna(iso);
         const hora = String(cel.dataset.hora || '0').padStart(2, '0');
-        abrirModalAgendamento({ novo: true, data: iso, hora: `${hora}:00` });
+        const uid = cel.dataset.profId || profId;
+        abrirModalAgendamento({ novo: true, data: iso, hora: hora + ':00', usuarioId: uid });
       });
-
-      cel.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        cel.classList.add('drop-hover');
-      });
+      cel.addEventListener('dragover', (e) => { e.preventDefault(); cel.classList.add('drop-hover'); });
       cel.addEventListener('dragleave', () => cel.classList.remove('drop-hover'));
       cel.addEventListener('drop', (e) => {
         e.preventDefault();
         cel.classList.remove('drop-hover');
         const agendamentoId = e.dataTransfer.getData('text/agendamento-id');
         if (!agendamentoId) return;
-
-        // Snap: usa a hora da célula + minutos 00 (ou poderia calcular offset Y)
-        const horaBase = Number(cel.dataset.hora || 0);
-        const minutosSnap = snapMinutos(horaBase * 60);
-        const horaStr = minutosParaHoraStr(minutosSnap);
-
-        // Conflito local
+        const horaStr = minutosParaHoraStr(snapMinutos(Number(cel.dataset.hora || 0) * 60));
+        const uid = cel.dataset.profId || profId;
         const agOrig = Object.values(state.agendamentosPorDia).flat().find(x => String(x.id) === String(agendamentoId));
-        const dur = obterDuracaoMinutos(agOrig || {});
-        if (temConflito(iso, horaStr, dur, agendamentoId)) {
+        if (temConflito(iso, horaStr, obterDuracaoMinutos(agOrig || {}), agendamentoId, uid)) {
           mostrarToast('Conflito de horário com outro agendamento.', 'error');
           return;
         }
-        reagendarViaDrop(agendamentoId, iso, horaStr);
+        // PATCH includes usuario_id when multi
+        (async () => {
+          const body = { data_agendamento: iso + ' ' + horaStr + ':00' };
+          if (uid) body.usuario_id = uid;
+          try {
+            const res = await authFetch(API + '/agendamentos/' + agendamentoId, { method: 'PATCH', body: JSON.stringify(body) });
+            const data = await res.json();
+            if (data.success) { mostrarToast('Agendamento reagendado.'); recarregarGridAtual(); }
+            else mostrarToast(data.message || 'Não foi possível reagendar.', 'error');
+          } catch (err) {}
+        })();
       });
     });
-
-    return col;
   }
+
 
   function selecionarDiaColuna(iso) {
     if (!iso) return;
@@ -605,9 +738,12 @@
     const statusClasse = a.status_agendamento === 'confirmado' ? 'status-confirmado'
       : a.status_agendamento === 'realizado' ? 'status-realizado' : '';
 
-    div.className = `bloco-agendamento ${corPastel(idx)} ${origemClasse} ${statusClasse} ${cancelado ? 'cancelado-bloco' : ''}`;
+    const corP = corDoProfissional(a.usuario_id);
+    div.className = `bloco-agendamento ${origemClasse} ${statusClasse} ${cancelado ? 'cancelado-bloco' : ''}`;
     div.style.top = `${topPx}px`;
     div.style.height = `${heightPx}px`;
+    div.style.background = corP.bg;
+    div.style.borderLeftColor = corP.border;
     div.dataset.id = a.id;
     div.draggable = !cancelado;
     div.title = `${a.nome || 'Paciente'} • ${duracaoMin} min • ${a.status_agendamento || ''}`;
@@ -862,6 +998,11 @@
     const res = $('#fResultadosPaciente');
     if (res) res.innerHTML = '';
 
+    // profissional alvo (multi: da subcoluna; single: state)
+    let uidAlvo = opts.usuarioId || (state.profissional && state.profissional.id);
+    if (opts.editar && opts.agendamento) uidAlvo = opts.agendamento.usuario_id;
+    form.dataset.usuarioId = uidAlvo || '';
+
     if (opts.novo) {
       $('#modalAgendamentoTitulo').textContent = 'Novo Agendamento';
       $('#fAgendamentoId').value = '';
@@ -983,7 +1124,7 @@
           res = await authFetch(`${API}/agendamentos/${id}`, { method: 'PATCH', body: JSON.stringify(payload) });
         } else {
           payload.paciente_id = pacienteId;
-          payload.usuario_id = state.profissional.id;
+          payload.usuario_id = (document.getElementById('formAgendamento') && document.getElementById('formAgendamento').dataset.usuarioId) || state.profissional.id;
           res = await authFetch(`${API}/agendamentos`, { method: 'POST', body: JSON.stringify(payload) });
         }
         resposta = await res.json();
@@ -1121,6 +1262,10 @@
       const iso = state.diaSelecionado || formatarDataISO(new Date());
       abrirModalAgendamento({ novo: true, data: iso, hora: '09:00' });
     }
+    if (e.key === 'm' || e.key === 'M') {
+      e.preventDefault();
+      ativarModoMulti(!state.modoMulti);
+    }
     if (e.key === 'ArrowLeft' && document.querySelector('#camada4.ativa')) {
       e.preventDefault();
       if (gridScroll) gridScroll.scrollLeft -= COL_LARGURA;
@@ -1172,6 +1317,17 @@
       @media (max-width: 767px) {
         #selectProfissionalRapido { max-width: 120px; font-size: 11px; }
       }
+      #barraMultiProf { display:none; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:8px; }
+      #btnToggleMulti { font-size:11px; font-weight:700; padding:6px 12px; border-radius:99px; background:rgba(255,255,255,0.04); border:1px solid var(--border); color:rgba(148,163,184,0.7); cursor:pointer; }
+      #btnToggleMulti.filtro-ativo { background:rgba(52,211,153,0.15); border-color:rgba(52,211,153,0.4); color:var(--emerald); }
+      .chip-prof { font-size:11px; font-weight:700; padding:5px 10px; border-radius:99px; background:rgba(255,255,255,0.03); border:1px solid var(--border); color:rgba(148,163,184,0.5); cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+      .chip-prof.chip-ativo { color:#e2e8f0; }
+      .chip-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+      .sub-headers-row { display:flex; margin-top:6px; }
+      .sub-header-prof { flex:1; font-size:9px; font-weight:800; text-align:center; color:rgba(226,232,240,0.7); padding-bottom:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      .coluna-multi { overflow:hidden; }
+      .subcols-row { min-height:calc(24 * 64px); display:flex; }
+      .subcoluna-prof { position:relative; }
     `;
     document.head.appendChild(style);
   })();
@@ -1192,6 +1348,17 @@
     }
 
     const conteudo = $('#conteudo-scroll');
+    if (conteudo && !$('#barraMultiProf')) {
+      const multi = document.createElement('div');
+      multi.id = 'barraMultiProf';
+      multi.innerHTML = '<button type="button" id="btnToggleMulti"><i class="fas fa-user"></i> Multi</button><div id="chipsMultiProf" style="display:none;flex-wrap:wrap;gap:6px;"></div>';
+      const c4 = $('#camada4');
+      if (c4 && c4.parentNode) c4.parentNode.insertBefore(multi, c4);
+      else conteudo.insertBefore(multi, conteudo.firstChild);
+      const btnM = $('#btnToggleMulti');
+      if (btnM) btnM.addEventListener('click', () => ativarModoMulti(!state.modoMulti));
+    }
+
     if (conteudo && !$('#barraFiltrosGrade')) {
       const barra = document.createElement('div');
       barra.id = 'barraFiltrosGrade';

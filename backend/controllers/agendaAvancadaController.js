@@ -48,7 +48,6 @@ async function paginaAgendaAvancada(req, res) {
     const habilitado = await featureHabilitada(clinicaId);
 
     if (!habilitado) {
-      // Tela amigável de upgrade — mantém a mesma paleta dark/emerald do sistema
       return res.status(200).send(telaDeUpgrade());
     }
 
@@ -169,54 +168,107 @@ async function diasDoMes(req, res) {
 }
 
 // =============================================================================
-// 5. CAMADA 4 — Grade de colunas (intervalo de datas) para a semana/período
+// 5. CAMADA 4 — Grade de colunas (intervalo de datas)
+// Aceita profissionalId (único) OU profissionalIds (csv: "1,2,3") para multi
 // =============================================================================
 async function gradeIntervalo(req, res) {
   const clinicaId = req.usuario?.clinica_id;
-  const { profissionalId, inicio, fim } = req.query;
+  const { profissionalId, profissionalIds, inicio, fim } = req.query;
   if (!clinicaId) return res.status(401).json({ success: false, message: 'Não autenticado.' });
-  if (!profissionalId || !inicio || !fim) return res.status(400).json({ success: false, message: 'Parâmetros ausentes.' });
+  if (!inicio || !fim) return res.status(400).json({ success: false, message: 'Parâmetros ausentes.' });
+
+  // Monta lista de IDs: multi tem prioridade; senão o singular
+  let ids = [];
+  if (profissionalIds) {
+    ids = String(profissionalIds)
+      .split(',')
+      .map(s => s.trim())
+      .filter(s => /^\d+$/.test(s))
+      .map(Number);
+  } else if (profissionalId && /^\d+$/.test(String(profissionalId))) {
+    ids = [Number(profissionalId)];
+  }
+
+  if (!ids.length) {
+    return res.status(400).json({ success: false, message: 'Informe profissionalId ou profissionalIds.' });
+  }
 
   try {
+    const placeholders = ids.map(() => '?').join(',');
     const [rows] = await db.query(
-      `SELECT a.id, a.paciente_id, a.nome, a.telefone, a.data_agendamento,
+      `SELECT a.id, a.paciente_id, a.usuario_id, a.nome, a.telefone, a.data_agendamento,
               a.status_agendamento, a.tipo_terapia, a.motivo_consulta,
               a.duracao_minutos,
-              p.origem AS origem_paciente
+              p.origem AS origem_paciente,
+              u.nome AS profissional_nome
        FROM agendamentos a
        LEFT JOIN pacientes p ON p.id = a.paciente_id
-       WHERE a.clinica_id = ? AND a.usuario_id = ?
+       LEFT JOIN usuarios u ON u.id = a.usuario_id
+       WHERE a.clinica_id = ?
+         AND a.usuario_id IN (${placeholders})
          AND a.data_agendamento BETWEEN ? AND ?
        ORDER BY a.data_agendamento ASC`,
-      [clinicaId, profissionalId, inicio, fim]
+      [clinicaId, ...ids, inicio, fim]
     );
     res.json({ success: true, agendamentos: rows });
   } catch (error) {
+    // Fallback se a coluna duracao_minutos ainda não existir
+    if (error.code === 'ER_BAD_FIELD_ERROR') {
+      try {
+        const placeholders = ids.map(() => '?').join(',');
+        const [rows] = await db.query(
+          `SELECT a.id, a.paciente_id, a.usuario_id, a.nome, a.telefone, a.data_agendamento,
+                  a.status_agendamento, a.tipo_terapia, a.motivo_consulta,
+                  p.origem AS origem_paciente,
+                  u.nome AS profissional_nome
+           FROM agendamentos a
+           LEFT JOIN pacientes p ON p.id = a.paciente_id
+           LEFT JOIN usuarios u ON u.id = a.usuario_id
+           WHERE a.clinica_id = ?
+             AND a.usuario_id IN (${placeholders})
+             AND a.data_agendamento BETWEEN ? AND ?
+           ORDER BY a.data_agendamento ASC`,
+          [clinicaId, ...ids, inicio, fim]
+        );
+        return res.json({ success: true, agendamentos: rows });
+      } catch (err2) {
+        console.error('Erro ao buscar grade de agendamentos:', err2);
+        return res.status(500).json({ success: false, message: 'Erro ao carregar a grade.' });
+      }
+    }
     console.error('Erro ao buscar grade de agendamentos:', error);
     res.status(500).json({ success: false, message: 'Erro ao carregar a grade.' });
   }
 }
 
 // =============================================================================
-// 6. Agendamentos de HOJE (botão "Hoje" do rodapé) — lista linear consolidada
+// 6. Agendamentos de HOJE
 // =============================================================================
 async function agendamentosHoje(req, res) {
   const clinicaId = req.usuario?.clinica_id;
-  const { profissionalId } = req.query;
+  const { profissionalId, profissionalIds } = req.query;
   if (!clinicaId) return res.status(401).json({ success: false, message: 'Não autenticado.' });
 
   try {
-    let sql = `SELECT a.id, a.paciente_id, a.nome, a.telefone, a.data_agendamento,
-                      a.status_agendamento, a.tipo_terapia, a.duracao_minutos, p.origem AS origem_paciente
+    let sql = `SELECT a.id, a.paciente_id, a.usuario_id, a.nome, a.telefone, a.data_agendamento,
+                      a.status_agendamento, a.tipo_terapia, p.origem AS origem_paciente,
+                      u.nome AS profissional_nome
                FROM agendamentos a
                LEFT JOIN pacientes p ON p.id = a.paciente_id
+               LEFT JOIN usuarios u ON u.id = a.usuario_id
                WHERE a.clinica_id = ? AND DATE(a.data_agendamento) = CURDATE()
                  AND a.status_agendamento != 'cancelado'`;
     const params = [clinicaId];
 
-    if (profissionalId) {
-      sql += ' AND a.usuario_id = ?';
-      params.push(profissionalId);
+    let ids = [];
+    if (profissionalIds) {
+      ids = String(profissionalIds).split(',').map(s => s.trim()).filter(s => /^\d+$/.test(s));
+    } else if (profissionalId) {
+      ids = [String(profissionalId)];
+    }
+    if (ids.length) {
+      sql += ` AND a.usuario_id IN (${ids.map(() => '?').join(',')})`;
+      params.push(...ids);
     }
     sql += ' ORDER BY a.data_agendamento ASC';
 
@@ -229,11 +281,10 @@ async function agendamentosHoje(req, res) {
 }
 
 // =============================================================================
-// 7. Criação rápida de agendamento (toque em célula vazia da grade)
+// 7. Criação rápida de agendamento
 // =============================================================================
 async function criarAgendamento(req, res) {
   const clinicaId = req.usuario?.clinica_id;
-  const usuarioLogadoId = req.usuario?.id;
   if (!clinicaId) return res.status(401).json({ success: false, message: 'Não autenticado.' });
 
   const { paciente_id, usuario_id, data_agendamento, tipo_terapia, motivo_consulta, duracao_minutos } = req.body;
@@ -243,26 +294,44 @@ async function criarAgendamento(req, res) {
   }
 
   try {
-    // Confirma que o paciente pertence à mesma clínica (nunca confiar em IDs vindos do front)
     const [[paciente]] = await db.query(
       `SELECT id, nome, telefone FROM pacientes WHERE id = ? AND clinica_id = ?`,
       [paciente_id, clinicaId]
     );
     if (!paciente) return res.status(404).json({ success: false, message: 'Paciente não encontrado nesta clínica.' });
 
-    const [resultado] = await db.query(
-      `INSERT INTO agendamentos
-        (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos)
-       VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?)`,
-      [
-        clinicaId, paciente_id, usuario_id, data_agendamento,
-        paciente.nome, paciente.telefone,
-        tipo_terapia || null, motivo_consulta || null,
-        duracao_minutos != null ? Number(duracao_minutos) : 50
-      ]
+    // Confirma que o profissional pertence à clínica
+    const [[prof]] = await db.query(
+      `SELECT id FROM usuarios WHERE id = ? AND clinica_id = ?`,
+      [usuario_id, clinicaId]
     );
+    if (!prof) return res.status(404).json({ success: false, message: 'Profissional não encontrado nesta clínica.' });
 
-    res.status(201).json({ success: true, id: resultado.insertId });
+    try {
+      const [resultado] = await db.query(
+        `INSERT INTO agendamentos
+          (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos)
+         VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?)`,
+        [
+          clinicaId, paciente_id, usuario_id, data_agendamento,
+          paciente.nome, paciente.telefone,
+          tipo_terapia || null, motivo_consulta || null,
+          duracao_minutos != null ? Number(duracao_minutos) : 50
+        ]
+      );
+      return res.status(201).json({ success: true, id: resultado.insertId });
+    } catch (errCol) {
+      if (errCol.code === 'ER_BAD_FIELD_ERROR') {
+        const [resultado] = await db.query(
+          `INSERT INTO agendamentos
+            (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta)
+           VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?)`,
+          [clinicaId, paciente_id, usuario_id, data_agendamento, paciente.nome, paciente.telefone, tipo_terapia || null, motivo_consulta || null]
+        );
+        return res.status(201).json({ success: true, id: resultado.insertId });
+      }
+      throw errCol;
+    }
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ success: false, message: 'Já existe um agendamento ativo nesse horário.' });
@@ -278,7 +347,7 @@ async function criarAgendamento(req, res) {
 async function atualizarAgendamento(req, res) {
   const clinicaId = req.usuario?.clinica_id;
   const { id } = req.params;
-  const { data_agendamento, tipo_terapia, motivo_consulta, status_agendamento, duracao_minutos } = req.body;
+  const { data_agendamento, tipo_terapia, motivo_consulta, status_agendamento, duracao_minutos, usuario_id } = req.body;
   if (!clinicaId) return res.status(401).json({ success: false, message: 'Não autenticado.' });
 
   try {
@@ -293,18 +362,37 @@ async function atualizarAgendamento(req, res) {
       campos.push('duracao_minutos = ?');
       valores.push(duracao_minutos == null ? null : Number(duracao_minutos));
     }
+    if (usuario_id) { campos.push('usuario_id = ?'); valores.push(usuario_id); }
 
     if (!campos.length) return res.status(400).json({ success: false, message: 'Nada para atualizar.' });
 
     valores.push(id, clinicaId);
 
-    const [resultado] = await db.query(
-      `UPDATE agendamentos SET ${campos.join(', ')} WHERE id = ? AND clinica_id = ?`,
-      valores
-    );
-
-    if (!resultado.affectedRows) return res.status(404).json({ success: false, message: 'Agendamento não encontrado.' });
-    res.json({ success: true });
+    try {
+      const [resultado] = await db.query(
+        `UPDATE agendamentos SET ${campos.join(', ')} WHERE id = ? AND clinica_id = ?`,
+        valores
+      );
+      if (!resultado.affectedRows) return res.status(404).json({ success: false, message: 'Agendamento não encontrado.' });
+      return res.json({ success: true });
+    } catch (errCol) {
+      if (errCol.code === 'ER_BAD_FIELD_ERROR' && duracao_minutos !== undefined) {
+        // Remove duracao_minutos e tenta de novo
+        const idx = campos.indexOf('duracao_minutos = ?');
+        if (idx >= 0) {
+          campos.splice(idx, 1);
+          valores.splice(idx, 1);
+        }
+        if (!campos.length) return res.json({ success: true });
+        const [resultado] = await db.query(
+          `UPDATE agendamentos SET ${campos.join(', ')} WHERE id = ? AND clinica_id = ?`,
+          valores
+        );
+        if (!resultado.affectedRows) return res.status(404).json({ success: false, message: 'Agendamento não encontrado.' });
+        return res.json({ success: true });
+      }
+      throw errCol;
+    }
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ success: false, message: 'Já existe um agendamento ativo nesse horário.' });
@@ -329,17 +417,41 @@ async function duplicarAgendamento(req, res) {
       `SELECT paciente_id, usuario_id, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos
        FROM agendamentos WHERE id = ? AND clinica_id = ?`,
       [id, clinicaId]
-    );
+    ).catch(async () => {
+      const [r] = await db.query(
+        `SELECT paciente_id, usuario_id, nome, telefone, tipo_terapia, motivo_consulta
+         FROM agendamentos WHERE id = ? AND clinica_id = ?`,
+        [id, clinicaId]
+      );
+      return [r];
+    });
+
     if (!original) return res.status(404).json({ success: false, message: 'Agendamento original não encontrado.' });
 
-    const [resultado] = await db.query(
-      `INSERT INTO agendamentos
-        (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos)
-       VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?)`,
-      [clinicaId, original.paciente_id, original.usuario_id, nova_data, original.nome, original.telefone, original.tipo_terapia, original.motivo_consulta, original.duracao_minutos]
-    );
-
-    res.status(201).json({ success: true, id: resultado.insertId });
+    try {
+      const [resultado] = await db.query(
+        `INSERT INTO agendamentos
+          (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos)
+         VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?)`,
+        [
+          clinicaId, original.paciente_id, original.usuario_id, nova_data,
+          original.nome, original.telefone, original.tipo_terapia, original.motivo_consulta,
+          original.duracao_minutos != null ? original.duracao_minutos : 50
+        ]
+      );
+      return res.status(201).json({ success: true, id: resultado.insertId });
+    } catch (errCol) {
+      if (errCol.code === 'ER_BAD_FIELD_ERROR') {
+        const [resultado] = await db.query(
+          `INSERT INTO agendamentos
+            (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta)
+           VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?)`,
+          [clinicaId, original.paciente_id, original.usuario_id, nova_data, original.nome, original.telefone, original.tipo_terapia, original.motivo_consulta]
+        );
+        return res.status(201).json({ success: true, id: resultado.insertId });
+      }
+      throw errCol;
+    }
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ success: false, message: 'Já existe um agendamento ativo nesse horário.' });
@@ -350,7 +462,7 @@ async function duplicarAgendamento(req, res) {
 }
 
 // =============================================================================
-// 10. Cancelar / apagar (soft delete — segue o padrão do resto do sistema)
+// 10. Cancelar / apagar (soft delete)
 // =============================================================================
 async function cancelarAgendamento(req, res) {
   const clinicaId = req.usuario?.clinica_id;
