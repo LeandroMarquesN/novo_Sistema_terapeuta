@@ -229,6 +229,125 @@
     }
   }
 
+  function centralizarColunaPorIso(iso, suave) {
+    const scroll = $('#grid-scroll');
+    const header = $('#colunasHeaderConteudo');
+    if (!scroll || !header || !iso) return;
+    const alvo = header.querySelector('.col-header-dia[data-iso="' + iso + '"]');
+    if (!alvo) return;
+    const alvoRect = alvo.getBoundingClientRect();
+    const scrollRect = scroll.getBoundingClientRect();
+    const delta = (alvoRect.left - scrollRect.left) - (scroll.clientWidth / 2) + (alvoRect.width / 2);
+    const destino = Math.max(0, scroll.scrollLeft + delta);
+    if (suave && typeof scroll.scrollTo === 'function') {
+      scroll.scrollTo({ left: destino, behavior: 'smooth' });
+    } else {
+      scroll.scrollLeft = destino;
+    }
+    state.diaSelecionado = iso;
+    selecionarDiaColuna(iso);
+    atualizarOrientacaoGrade(iso);
+  }
+
+  async function irParaData(iso) {
+    if (!iso || !idsAtivosParaGrade().length) {
+      mostrarToast('Selecione um profissional primeiro.', 'info');
+      return;
+    }
+    const data = parseLocalDate(iso + 'T00:00:00');
+    if (isNaN(data.getTime())) {
+      mostrarToast('Data inválida.', 'error');
+      return;
+    }
+    state.mesAtual = { ano: data.getFullYear(), mes: data.getMonth() + 1 };
+    mostrarCamada(4);
+    // Se a coluna já existe, só centraliza
+    if (state.colunas.includes(iso)) {
+      centralizarColunaPorIso(iso, true);
+      return;
+    }
+    // Carrega a semana que contém a data e centraliza
+    await carregarGradeInicial(inicioDaSemana(data));
+    // aguarda layout
+    requestAnimationFrame(() => {
+      centralizarColunaPorIso(iso, true);
+    });
+  }
+
+  function marcarSeparadoresMes() {
+    const header = $('#colunasHeaderConteudo');
+    const cols = $('#colunasDiasConteudo');
+    if (!header || !cols) return;
+    // limpa marcadores antigos
+    header.querySelectorAll('.sep-mes-header').forEach(el => el.classList.remove('sep-mes-header'));
+    cols.querySelectorAll('.sep-mes-coluna').forEach(el => {
+      el.classList.remove('sep-mes-coluna');
+      const lab = el.querySelector('.sep-mes-label');
+      if (lab) lab.remove();
+    });
+    const headers = Array.from(header.children);
+    let prevMes = null;
+    headers.forEach((h, i) => {
+      const iso = h.dataset.iso;
+      if (!iso) return;
+      const d = parseLocalDate(iso + 'T00:00:00');
+      if (isNaN(d.getTime())) return;
+      const mes = d.getMonth();
+      if (prevMes !== null && mes !== prevMes) {
+        h.classList.add('sep-mes-header');
+        const col = cols.querySelector('.coluna-dia[data-iso="' + iso + '"]');
+        if (col) {
+          col.classList.add('sep-mes-coluna');
+          if (!col.querySelector('.sep-mes-label')) {
+            const lab = document.createElement('div');
+            lab.className = 'sep-mes-label';
+            lab.textContent = MESES[mes];
+            col.appendChild(lab);
+          }
+        }
+      }
+      prevMes = mes;
+    });
+  }
+
+  let _snapTimer = null;
+  let _snapLock = false;
+  function agendarSnapAoCentro() {
+    if (_snapLock || state.carregandoMais) return;
+    clearTimeout(_snapTimer);
+    _snapTimer = setTimeout(() => {
+      if (state.carregandoMais) return;
+      const scroll = $('#grid-scroll');
+      const header = $('#colunasHeaderConteudo');
+      if (!scroll || !header || !header.children.length) return;
+      const rect = scroll.getBoundingClientRect();
+      const centro = rect.left + rect.width / 2;
+      let melhor = null;
+      let melhorDist = Infinity;
+      for (const col of header.children) {
+        const r = col.getBoundingClientRect();
+        const mid = (r.left + r.right) / 2;
+        const dist = Math.abs(mid - centro);
+        if (dist < melhorDist) {
+          melhorDist = dist;
+          melhor = col;
+        }
+      }
+      if (!melhor || !melhor.dataset.iso) return;
+      // só snap se não estiver quase no centro (evita jitter)
+      if (melhorDist < 12) {
+        selecionarDiaColuna(melhor.dataset.iso);
+        atualizarOrientacaoGrade(melhor.dataset.iso);
+        return;
+      }
+      _snapLock = true;
+      centralizarColunaPorIso(melhor.dataset.iso, true);
+      setTimeout(() => { _snapLock = false; }, 320);
+    }, 140);
+  }
+
+
+
   function passaFiltros(a) {
     if (state.filtros.status !== 'todos' && a.status_agendamento !== state.filtros.status) return false;
     if (state.filtros.origem !== 'todos') {
@@ -594,6 +713,7 @@
     if (scroll) scroll.scrollLeft = 0;
     atualizarIndicadorSync();
     atualizarOcupacaoHeader();
+    marcarSeparadoresMes();
   }
 
   async function adicionarColunas(dias, modo) {
@@ -673,6 +793,7 @@
       $('#faixaLembretesConteudo')?.append(lembretesFrag);
     }
     state.colunas.sort();
+    marcarSeparadoresMes();
   }
 
   function criarColunaDia(iso, agendamentos) {
@@ -819,10 +940,12 @@
   if (gridScroll) {
     gridScroll.addEventListener('scroll', () => {
       atualizarIndicadorSync();
-      if (state.carregandoMais || !state.profissional || !state.colunas.length) return;
+      agendarSnapAoCentro();
+      if (state.carregandoMais || !idsAtivosParaGrade().length || !state.colunas.length) return;
+      const w = larguraColunaDia();
       const proximoDoFim = gridScroll.scrollWidth - (gridScroll.scrollLeft + gridScroll.clientWidth);
-      if (proximoDoFim < COL_LARGURA * 2) carregarMaisColunas('proxima');
-      else if (gridScroll.scrollLeft < COL_LARGURA * 2) carregarMaisColunas('anterior');
+      if (proximoDoFim < w * 2) carregarMaisColunas('proxima');
+      else if (gridScroll.scrollLeft < w * 2) carregarMaisColunas('anterior');
     });
   }
 
@@ -1314,6 +1437,11 @@
       e.preventDefault();
       ativarModoMulti(!state.modoMulti);
     }
+    if (e.key === 'g' || e.key === 'G') {
+      e.preventDefault();
+      const inp = $('#inputIrParaData');
+      if (inp) { inp.showPicker ? inp.showPicker() : inp.click(); }
+    }
     if (e.key === 'ArrowLeft' && document.querySelector('#camada4.ativa')) {
       e.preventDefault();
       if (gridScroll) gridScroll.scrollLeft -= COL_LARGURA;
@@ -1439,6 +1567,33 @@
         gap: 12px; margin-bottom: 10px; flex-wrap: wrap;
       }
       #orientacaoGrade.visivel { display: flex; }
+      .orientacao-acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+      .btn-ir-data {
+        position: relative; display: inline-flex; align-items: center; gap: 6px;
+        font-size: 11px; font-weight: 700; padding: 6px 12px; border-radius: 99px;
+        background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+        color: rgba(148,163,184,0.85); cursor: pointer;
+      }
+      .btn-ir-data:hover { border-color: rgba(34,211,238,0.4); color: var(--cyan); }
+      .btn-ir-data input[type="date"] {
+        position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+      }
+      .col-header-dia.sep-mes-header {
+        border-left: 2px solid rgba(34,211,238,0.45) !important;
+        box-shadow: inset 3px 0 0 rgba(34,211,238,0.12);
+      }
+      .coluna-dia.sep-mes-coluna {
+        border-left: 2px solid rgba(34,211,238,0.35) !important;
+      }
+      .sep-mes-label {
+        position: absolute; top: 8px; left: 6px; z-index: 6;
+        font-size: 9px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--cyan); background: rgba(8,18,26,0.9);
+        border: 1px solid rgba(34,211,238,0.35); border-radius: 8px;
+        padding: 3px 8px; pointer-events: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+      }
+      #grid-scroll { scroll-behavior: smooth; }
     `;
     document.head.appendChild(style);
   })();
@@ -1509,9 +1664,26 @@
     if ($('#camada4') && !$('#orientacaoGrade')) {
       const ori = document.createElement('div');
       ori.id = 'orientacaoGrade';
-      ori.innerHTML = '<div id="labelFaixaSemana">—</div><button type="button" id="btnAtalhos" title="Atalhos de teclado"><i class="fas fa-keyboard"></i> Atalhos</button>';
+      ori.innerHTML = [
+        '<div id="labelFaixaSemana">—</div>',
+        '<div class="orientacao-acoes">',
+        '<label class="btn-ir-data" title="Ir para data">',
+        '<i class="fas fa-calendar-day"></i>',
+        '<span>Ir para data</span>',
+        '<input type="date" id="inputIrParaData" aria-label="Escolher data">',
+        '</label>',
+        '<button type="button" id="btnAtalhos" title="Atalhos de teclado"><i class="fas fa-keyboard"></i> Atalhos</button>',
+        '</div>'
+      ].join('');
       const c4 = $('#camada4');
       if (c4 && c4.parentNode) c4.parentNode.insertBefore(ori, c4);
+      const inputData = $('#inputIrParaData');
+      if (inputData) {
+        inputData.addEventListener('change', () => {
+          const v = inputData.value;
+          if (v) irParaData(v);
+        });
+      }
     }
     if ($('#grid-wrap') && !$('#badgeDiaFlutuante')) {
       const badge = document.createElement('div');
@@ -1530,6 +1702,7 @@
         '<div class="atalho-linha"><span>Ir para hoje</span><span class="atalho-tecla">T</span></div>',
         '<div class="atalho-linha"><span>Novo agendamento</span><span class="atalho-tecla">N</span></div>',
         '<div class="atalho-linha"><span>Rolar a grade (dias)</span><span class="atalho-tecla">← →</span></div>',
+        '<div class="atalho-linha"><span>Ir para data</span><span class="atalho-tecla">G</span></div>',
         '<div class="atalho-linha"><span>Fechar modal ou menu</span><span class="atalho-tecla">Esc</span></div>'
       ].join('');
       const host = $('#agenda-header') || document.body;
