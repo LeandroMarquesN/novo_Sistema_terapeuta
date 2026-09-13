@@ -20,7 +20,8 @@
   const token = localStorage.getItem('token');
   const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const HORA_ALTURA = 120; // ~2x — mais espaço para informação
+  const HORA_ALTURA = 192; // 3x do original (64) — células amplas + visual 3D
+  const GAP_CELULA = 6; // espaço entre cards 3D
   const COL_LARGURA = 160;
   const SNAP_MINUTOS = 15;           // snap de mercado
   const DURACAO_PADRAO = 50;         // minutos (padrão clínica)
@@ -758,7 +759,7 @@
     if (!col) return;
     let html = '';
     for (let h = 0; h < 24; h++) {
-      html += `<div class="hora-linha" style="height:${HORA_ALTURA}px;min-height:${HORA_ALTURA}px">${String(h).padStart(2, '0')}:00</div>`;
+      html += `<div class="hora-linha" style="height:${HORA_ALTURA + 6}px;min-height:${HORA_ALTURA + 6}px">${String(h).padStart(2, '0')}:00</div>`;
     }
     col.innerHTML = html;
     document.documentElement.style.setProperty('--hora-altura', HORA_ALTURA + 'px');
@@ -1078,8 +1079,9 @@
 
     const minutosDoDia = d.getHours() * 60 + d.getMinutes();
     const duracaoMin = obterDuracaoMinutos(a);
-    const topPx = (minutosDoDia / 60) * HORA_ALTURA;
-    const heightPx = Math.max(44, (duracaoMin / 60) * HORA_ALTURA - 6);
+    const passo = HORA_ALTURA + GAP_CELULA; // altura do card + gap
+    const topPx = (minutosDoDia / 60) * passo + 4; // +4 padding da coluna
+    const heightPx = Math.max(56, (duracaoMin / 60) * HORA_ALTURA - 10);
 
     if (isNaN(topPx) || isNaN(heightPx)) return null;
 
@@ -1850,35 +1852,88 @@
       #grid-scroll { scroll-behavior: smooth; }
       #colunas-header, #colunasHeaderConteudo { cursor: grab; user-select: none; }
       #colunas-header.header-dragging, .header-dragging { cursor: grabbing !important; }
+      /* Grade sem linhas: separação só pelo card 3D das células */
+      .coluna-dia {
+        background: transparent !important;
+        border-left: none !important;
+        border-right: none !important;
+        gap: 6px;
+        padding: 4px 5px;
+        box-sizing: border-box;
+      }
+      .coluna-dia.coluna-multi .subcols-row {
+        gap: 4px;
+      }
+      .subcoluna-prof {
+        gap: 6px;
+        padding: 0 2px;
+        border-right: none !important;
+        display: flex;
+        flex-direction: column;
+      }
       .celula-hora {
         position: relative !important;
-        background: rgba(255,255,255,0.015);
-        border-bottom: 1px solid rgba(148,163,184,0.1) !important;
-        transition: background 0.15s, box-shadow 0.15s;
+        height: 192px !important;
+        min-height: 192px !important;
+        margin: 0 0 6px 0 !important;
+        border: none !important;
+        border-bottom: none !important;
+        border-radius: 14px !important;
         overflow: visible;
+        box-sizing: border-box;
+        /* aspecto 3D */
+        background: linear-gradient(160deg,
+          rgba(30, 48, 62, 0.95) 0%,
+          rgba(12, 24, 34, 0.98) 45%,
+          rgba(8, 16, 24, 1) 100%) !important;
+        box-shadow:
+          0 1px 0 rgba(255,255,255,0.07) inset,
+          0 -2px 0 rgba(0,0,0,0.35) inset,
+          0 4px 10px rgba(0,0,0,0.35),
+          0 1px 2px rgba(0,0,0,0.25) !important;
+        border: 1px solid rgba(148,163,184,0.12) !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s;
       }
       .celula-hora:nth-child(even) {
-        background: rgba(34,211,238,0.03);
-      }
-      .celula-hora:nth-child(odd) {
-        background: rgba(52,211,153,0.025);
+        background: linear-gradient(160deg,
+          rgba(28, 52, 62, 0.95) 0%,
+          rgba(10, 26, 34, 0.98) 50%,
+          rgba(6, 18, 26, 1) 100%) !important;
       }
       .coluna-dia:nth-child(even) .celula-hora:nth-child(odd) {
-        background: rgba(251,191,36,0.04);
-      }
-      .coluna-dia:nth-child(even) .celula-hora:nth-child(even) {
-        background: rgba(255,255,255,0.02);
+        background: linear-gradient(160deg,
+          rgba(42, 40, 28, 0.9) 0%,
+          rgba(18, 20, 16, 0.98) 50%,
+          rgba(10, 12, 10, 1) 100%) !important;
       }
       .celula-hora:hover {
-        background: rgba(52,211,153,0.12) !important;
-        box-shadow: inset 0 0 0 1px rgba(52,211,153,0.35);
+        transform: translateY(-2px);
+        border-color: rgba(52,211,153,0.45) !important;
+        background: linear-gradient(160deg,
+          rgba(36, 70, 62, 0.98) 0%,
+          rgba(16, 40, 36, 0.98) 50%,
+          rgba(10, 28, 26, 1) 100%) !important;
+        box-shadow:
+          0 1px 0 rgba(52,211,153,0.2) inset,
+          0 -2px 0 rgba(0,0,0,0.3) inset,
+          0 8px 20px rgba(0,0,0,0.4),
+          0 0 16px rgba(52,211,153,0.12) !important;
       }
       .celula-hora.drop-hover {
-        background: rgba(34,211,238,0.18) !important;
-        box-shadow: inset 0 0 0 1px rgba(34,211,238,0.5);
+        transform: translateY(-2px) scale(1.01);
+        border-color: rgba(34,211,238,0.55) !important;
+        box-shadow:
+          0 1px 0 rgba(34,211,238,0.25) inset,
+          0 8px 22px rgba(0,0,0,0.4),
+          0 0 20px rgba(34,211,238,0.2) !important;
       }
-      .coluna-dia {
-        background: rgba(255,255,255,0.01);
+      .coluna-dia.coluna-selecionada .celula-hora {
+        border-color: rgba(52,211,153,0.28) !important;
+        box-shadow:
+          0 1px 0 rgba(52,211,153,0.12) inset,
+          0 -2px 0 rgba(0,0,0,0.3) inset,
+          0 4px 12px rgba(0,0,0,0.35),
+          0 0 0 1px rgba(52,211,153,0.15) !important;
       }
       .coluna-dia.coluna-selecionada {
         background: rgba(52,211,153,0.1) !important;
@@ -1935,17 +1990,34 @@
       .popup-btn-prim:hover { box-shadow: 0 0 20px rgba(8,145,178,0.45); }
     
       /* Altura dobrada das células / linhas de hora */
-      .hora-linha, .celula-hora {
-        height: 120px !important;
-        min-height: 120px;
+      .hora-linha {
+        height: 198px !important; /* 192 + gap aproximado */
+        min-height: 198px;
         position: relative !important;
         box-sizing: border-box;
+        border-bottom: none !important;
+        display: flex;
+        align-items: flex-start;
+        padding-top: 8px;
       }
       .coluna-horas, #colunaHoras {
-        height: calc(24 * 120px) !important;
+        height: calc(24 * 198px) !important;
       }
       .coluna-dia, .subcols-row {
-        min-height: calc(24 * 120px) !important;
+        min-height: calc(24 * 198px) !important;
+        display: flex;
+        flex-direction: column;
+      }
+      .subcols-row {
+        flex-direction: row !important;
+        align-items: stretch;
+      }
+      /* remove linhas da grade clássica */
+      #grid-scroll, .coluna-dia, .coluna-horas {
+        background-image: none !important;
+      }
+      .coluna-dia {
+        border-left: none !important;
       }
       /* Chip de data no canto (estilo filtro, menor) */
       .celula-hora .cel-corner {
@@ -2036,6 +2108,14 @@
       #faixaLembretesConteudo {
         display: flex;
         will-change: transform;
+      }
+
+      .bloco-agendamento {
+        border-radius: 12px !important;
+        box-shadow:
+          0 1px 0 rgba(255,255,255,0.25) inset,
+          0 4px 12px rgba(0,0,0,0.25) !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
       }
 `;
     document.head.appendChild(style);
