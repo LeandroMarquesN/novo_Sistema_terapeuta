@@ -210,6 +210,7 @@
   }
 
   function atualizarOrientacaoGrade(isoCentro) {
+    if (isoCentro) avisarMudancaMes(isoCentro);
     const badge = $('#badgeDiaFlutuante');
     const faixa = $('#labelFaixaSemana');
     if (isoCentro) {
@@ -227,6 +228,38 @@
       const base = slice.length ? slice : state.colunas.slice(0, 7);
       faixa.textContent = formatarFaixaSemana(base);
     }
+  }
+
+
+  let _ultimoMesAvisado = null;
+  function avisarMudancaMes(iso) {
+    if (!iso) return;
+    const d = parseLocalDate(iso + 'T00:00:00');
+    if (isNaN(d.getTime())) return;
+    const mesKey = d.getFullYear() + '-' + String(d.getMonth());
+    if (_ultimoMesAvisado === null) {
+      _ultimoMesAvisado = mesKey;
+      return; // carga inicial — não incomoda
+    }
+    if (_ultimoMesAvisado === mesKey) return;
+    _ultimoMesAvisado = mesKey;
+    const nomeMes = MESES[d.getMonth()];
+    mostrarToastMes('A partir daqui começa <strong>' + nomeMes + '</strong> de ' + d.getFullYear() + '.');
+  }
+
+  function mostrarToastMes(htmlMsg) {
+    let el = document.getElementById('toastMesNovo');
+    if (el) el.remove();
+    el = document.createElement('div');
+    el.id = 'toastMesNovo';
+    el.innerHTML = '<i class="fas fa-calendar-alt"></i><span>' + htmlMsg + '</span>';
+    document.body.appendChild(el);
+    requestAnimationFrame(() => el.classList.add('visivel'));
+    clearTimeout(window._toastMesTimer);
+    window._toastMesTimer = setTimeout(() => {
+      el.classList.remove('visivel');
+      setTimeout(() => el.remove(), 350);
+    }, 4200);
   }
 
   function centralizarColunaPorIso(iso, suave) {
@@ -773,7 +806,7 @@
       } else {
         headerCel.innerHTML = '<div class="dia-semana">' + formatarRotuloDia(d) + '</div>' + (ehHoje(d) ? '<div class="dia-hoje-tag">Hoje</div>' : '') + (totalAtivos ? '<div class="col-ocupacao" title="' + totalAtivos + ' agendamento(s)">' + totalAtivos + '</div>' : '');
       }
-      headerCel.addEventListener('click', () => selecionarDiaColuna(iso));
+      headerCel.addEventListener('click', (e) => { e.stopPropagation(); selecionarDiaColuna(iso); });
       headerFrag.appendChild(headerCel);
 
       const lembreteCel = document.createElement('div');
@@ -1812,8 +1845,16 @@
         background: rgba(255,255,255,0.01);
       }
       .coluna-dia.coluna-selecionada {
-        background: rgba(52,211,153,0.06) !important;
-        box-shadow: inset 0 0 0 1px rgba(52,211,153,0.2);
+        background: rgba(52,211,153,0.1) !important;
+        box-shadow: inset 0 0 0 2px rgba(52,211,153,0.45), inset 0 0 24px rgba(52,211,153,0.08) !important;
+      }
+      .col-header-dia.dia-selecionado {
+        background: rgba(52,211,153,0.18) !important;
+        border-bottom: 3px solid var(--emerald) !important;
+        box-shadow: 0 4px 16px rgba(52,211,153,0.2);
+      }
+      .col-header-dia.dia-selecionado .dia-semana {
+        color: var(--emerald) !important;
       }
       .hora-linha:nth-child(even) {
         background: rgba(34,211,238,0.04);
@@ -1916,6 +1957,35 @@
         font-size: 10px;
         margin-bottom: 2px;
       }
+
+      #toastMesNovo {
+        position: fixed; top: 88px; left: 50%; transform: translateX(-50%) translateY(-12px);
+        z-index: 100000;
+        display: flex; align-items: center; gap: 10px;
+        padding: 12px 20px; border-radius: 14px;
+        background: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+        color: #fff; font-size: 13px; font-weight: 600;
+        box-shadow: 0 12px 40px rgba(37,99,235,0.45);
+        opacity: 0; pointer-events: none; transition: opacity 0.3s, transform 0.3s;
+        max-width: min(420px, calc(100vw - 24px));
+        font-family: 'Space Grotesk', sans-serif;
+      }
+      #toastMesNovo.visivel { opacity: 1; transform: translateX(-50%) translateY(0); }
+      #toastMesNovo i { font-size: 16px; }
+      #painelAtalhos {
+        display: none !important;
+        position: fixed !important;
+        right: 16px !important;
+        top: 80px !important;
+        z-index: 100001 !important;
+        width: min(320px, calc(100vw - 24px));
+        background: rgba(8,18,26,0.98) !important;
+        border: 1px solid rgba(52,211,153,0.35) !important;
+        border-radius: 16px; padding: 14px 16px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.65) !important;
+        backdrop-filter: blur(16px);
+      }
+      #painelAtalhos.open { display: block !important; }
 `;
     document.head.appendChild(style);
   })();
@@ -1989,24 +2059,52 @@
       ori.innerHTML = [
         '<div id="labelFaixaSemana">—</div>',
         '<div class="orientacao-acoes">',
-        '<label class="btn-ir-data" title="Ir para data">',
-        '<i class="fas fa-calendar-day"></i>',
-        '<span>Ir para data</span>',
-        '<input type="date" id="inputIrParaData" aria-label="Escolher data">',
-        '</label>',
+        '<button type="button" class="btn-ir-data" id="btnIrParaData" title="Ir para data">',
+        '<i class="fas fa-calendar-day"></i><span>Ir para data</span>',
+        '</button>',
+        '<input type="date" id="inputIrParaData" aria-label="Escolher data" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none">',
         '<button type="button" id="btnAtalhos" title="Atalhos de teclado"><i class="fas fa-keyboard"></i> Atalhos</button>',
         '</div>'
       ].join('');
       const c4 = $('#camada4');
       if (c4 && c4.parentNode) c4.parentNode.insertBefore(ori, c4);
-      const inputData = $('#inputIrParaData');
-      if (inputData) {
-        inputData.addEventListener('change', () => {
-          const v = inputData.value;
-          if (v) irParaData(v);
-        });
-      }
     }
+
+    // Bind Ir para data (sempre, mesmo se DOM já existia)
+    const btnIr = $('#btnIrParaData');
+    const inputData = $('#inputIrParaData');
+    if (btnIr && !btnIr.dataset.bound) {
+      btnIr.dataset.bound = '1';
+      btnIr.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const inp = $('#inputIrParaData');
+        if (!inp) return;
+        try {
+          if (typeof inp.showPicker === 'function') inp.showPicker();
+          else { inp.style.pointerEvents = 'auto'; inp.style.opacity = '1'; inp.style.position = 'fixed'; inp.style.left = '50%'; inp.style.top = '100px'; inp.style.zIndex = '100002'; inp.focus(); inp.click(); }
+        } catch (err) {
+          inp.style.pointerEvents = 'auto';
+          inp.click();
+        }
+      });
+    }
+    if (inputData && !inputData.dataset.bound) {
+      inputData.dataset.bound = '1';
+      const ir = () => {
+        const v = inputData.value;
+        if (v) {
+          irParaData(v);
+          // esconde input se foi forçado a aparecer
+          inputData.style.opacity = '0';
+          inputData.style.pointerEvents = 'none';
+          inputData.style.position = 'absolute';
+        }
+      };
+      inputData.addEventListener('change', ir);
+      inputData.addEventListener('input', ir);
+    }
+
     if ($('#grid-wrap') && !$('#badgeDiaFlutuante')) {
       const badge = document.createElement('div');
       badge.id = 'badgeDiaFlutuante';
@@ -2015,8 +2113,11 @@
       if (getComputedStyle(gw).position === 'static') gw.style.position = 'relative';
       gw.appendChild(badge);
     }
-    if (!$('#painelAtalhos')) {
-      const painel = document.createElement('div');
+
+    // Painel de atalhos SEMPRE no body (nunca atrás da grade)
+    let painel = $('#painelAtalhos');
+    if (!painel) {
+      painel = document.createElement('div');
       painel.id = 'painelAtalhos';
       painel.innerHTML = [
         '<h4><i class="fas fa-keyboard"></i> Atalhos da Agenda</h4>',
@@ -2025,14 +2126,18 @@
         '<div class="atalho-linha"><span>Novo agendamento</span><span class="atalho-tecla">N</span></div>',
         '<div class="atalho-linha"><span>Rolar a grade (dias)</span><span class="atalho-tecla">← →</span></div>',
         '<div class="atalho-linha"><span>Ir para data</span><span class="atalho-tecla">G</span></div>',
-        '<div class="atalho-linha"><span>Ir para data</span><span class="atalho-tecla">G</span></div>',
         '<div class="atalho-linha"><span>Fechar modal ou menu</span><span class="atalho-tecla">Esc</span></div>'
       ].join('');
-      const host = $('#agenda-header') || document.body;
-      host.appendChild(painel);
+      document.body.appendChild(painel);
+    } else if (painel.parentElement !== document.body) {
+      document.body.appendChild(painel);
+    }
+    if (!painel.dataset.bound) {
+      painel.dataset.bound = '1';
       document.addEventListener('click', (e) => {
         const btn = e.target.closest && e.target.closest('#btnAtalhos');
         if (btn) {
+          e.preventDefault();
           e.stopPropagation();
           painel.classList.toggle('open');
           return;
