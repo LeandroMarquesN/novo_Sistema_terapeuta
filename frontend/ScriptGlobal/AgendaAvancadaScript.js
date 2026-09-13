@@ -20,13 +20,30 @@
   const token = localStorage.getItem('token');
   const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const HORA_ALTURA = 192; // 3x do original (64) — células amplas + visual 3D
-  const GAP_CELULA = 6; // espaço entre cards 3D
-  const COL_LARGURA = 160;
-  const SNAP_MINUTOS = 15;           // snap de mercado
-  const DURACAO_PADRAO = 50;         // minutos (padrão clínica)
+  const SNAP_MINUTOS = 15;
+  const DURACAO_PADRAO = 50;
 
-  const COL_LARGURA_SUB = 120;
+  /** Layout responsivo: mobile / tablet / desktop */
+  const LAYOUT = {
+    mobile:  { max: 767,  hora: 104, gap: 4, col: 118, colSub: 92,  dias: 7,  radius: 10 },
+    tablet:  { max: 1023, hora: 148, gap: 5, col: 136, colSub: 104, dias: 10, radius: 12 },
+    desktop: { max: 99999,hora: 192, gap: 6, col: 160, colSub: 120, dias: 14, radius: 14 }
+  };
+  let _bpAtual = null;
+
+  function obterBreakpoint() {
+    const w = window.innerWidth || 1200;
+    if (w <= LAYOUT.mobile.max) return 'mobile';
+    if (w <= LAYOUT.tablet.max) return 'tablet';
+    return 'desktop';
+  }
+  function L() { return LAYOUT[obterBreakpoint()]; }
+  function horaAltura() { return L().hora; }
+  function gapCelula() { return L().gap; }
+  function colLarguraBase() { return L().col; }
+  function colLarguraSub() { return L().colSub; }
+  // aliases usados no restante do código
+
   const CORES_PROF = [
     { bg: '#bfdbfe', border: '#2563eb' },
     { bg: '#bbf7d0', border: '#059669' },
@@ -438,12 +455,13 @@
   }
 
   function larguraColunaDia() {
-    if (!state.modoMulti) return COL_LARGURA;
-    return Math.max(1, state.profissionaisVisiveis.length) * COL_LARGURA_SUB;
+    if (!state.modoMulti) return colLarguraBase();
+    return Math.max(1, state.profissionaisVisiveis.length) * colLarguraSub();
   }
 
   function aplicarLarguraCSS() {
     document.documentElement.style.setProperty('--col-width', larguraColunaDia() + 'px');
+    if (typeof aplicarVarsLayout === 'function') aplicarVarsLayout();
   }
 
   function ativarModoMulti(ligado) {
@@ -754,17 +772,54 @@
   // ═══════════════════════════════════════════════════════════════
   // CAMADA 4 — Grade
   // ═══════════════════════════════════════════════════════════════
+  function aplicarVarsLayout() {
+    const lay = L();
+    const root = document.documentElement;
+    root.style.setProperty('--hora-altura', lay.hora + 'px');
+    root.style.setProperty('--gap-celula', lay.gap + 'px');
+    root.style.setProperty('--col-width', larguraColunaDia() + 'px');
+    root.style.setProperty('--cel-radius', lay.radius + 'px');
+    root.style.setProperty('--passo-hora', (lay.hora + lay.gap) + 'px');
+    root.dataset.agendaBp = obterBreakpoint();
+  }
+
   function montarColunaHoras() {
     const col = $('#colunaHoras');
     if (!col) return;
+    const passo = horaAltura() + gapCelula();
     let html = '';
     for (let h = 0; h < 24; h++) {
-      html += `<div class="hora-linha" style="height:${HORA_ALTURA + 6}px;min-height:${HORA_ALTURA + 6}px">${String(h).padStart(2, '0')}:00</div>`;
+      html += '<div class="hora-linha" style="height:' + passo + 'px;min-height:' + passo + 'px">' +
+        String(h).padStart(2, '0') + ':00</div>';
     }
     col.innerHTML = html;
-    document.documentElement.style.setProperty('--hora-altura', HORA_ALTURA + 'px');
+    aplicarVarsLayout();
   }
   montarColunaHoras();
+
+  /** Recalcula layout ao mudar de breakpoint (resize) */
+  function onResizeAgenda() {
+    const bp = obterBreakpoint();
+    if (bp === _bpAtual) {
+      aplicarVarsLayout();
+      return;
+    }
+    _bpAtual = bp;
+    aplicarVarsLayout();
+    montarColunaHoras();
+    if (document.querySelector('#camada4.ativa') && state.colunas.length) {
+      const base = state.colunas[0]
+        ? parseLocalDate(state.colunas[0] + 'T00:00:00')
+        : inicioDaSemana(new Date());
+      carregarGradeInicial(inicioDaSemana(base));
+    }
+  }
+  _bpAtual = obterBreakpoint();
+  let _resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(onResizeAgenda, 180);
+  });
 
   async function carregarGradeInicial(dataInicioSemana) {
     state.colunas = [];
@@ -776,8 +831,9 @@
     });
 
     const listaDias = [];
-    // 14 dias (2 semanas) — grade finita, sem scroll infinito automático
-    for (let i = 0; i < 14; i++) listaDias.push(somarDias(dataInicioSemana, i));
+    // Qtde de dias conforme breakpoint (mobile 7 / tablet 10 / desktop 14)
+    const qtdDias = L().dias;
+    for (let i = 0; i < qtdDias; i++) listaDias.push(somarDias(dataInicioSemana, i));
     await adicionarColunas(listaDias, 'append');
 
     const scroll = $('#grid-scroll');
@@ -882,7 +938,7 @@
         sub.className = 'subcoluna-prof';
         sub.dataset.iso = iso;
         sub.dataset.profId = pid;
-        sub.style.flex = '0 0 ' + COL_LARGURA_SUB + 'px';
+        sub.style.flex = '0 0 ' + colLarguraSub() + 'px';
         sub.style.position = 'relative';
         sub.style.borderRight = '1px solid rgba(148,163,184,0.08)';
         let cells = '';
@@ -1079,9 +1135,9 @@
 
     const minutosDoDia = d.getHours() * 60 + d.getMinutes();
     const duracaoMin = obterDuracaoMinutos(a);
-    const passo = HORA_ALTURA + GAP_CELULA; // altura do card + gap
+    const passo = horaAltura() + gapCelula(); // altura do card + gap
     const topPx = (minutosDoDia / 60) * passo + 4; // +4 padding da coluna
-    const heightPx = Math.max(56, (duracaoMin / 60) * HORA_ALTURA - 10);
+    const heightPx = Math.max(56, (duracaoMin / 60) * horaAltura() - 10);
 
     if (isNaN(topPx) || isNaN(heightPx)) return null;
 
@@ -1700,11 +1756,11 @@
     }
     if (e.key === 'ArrowLeft' && document.querySelector('#camada4.ativa')) {
       e.preventDefault();
-      if (gridScroll) gridScroll.scrollLeft -= COL_LARGURA;
+      if (gridScroll) gridScroll.scrollLeft -= colLarguraBase();
     }
     if (e.key === 'ArrowRight' && document.querySelector('#camada4.ativa')) {
       e.preventDefault();
-      if (gridScroll) gridScroll.scrollLeft += COL_LARGURA;
+      if (gridScroll) gridScroll.scrollLeft += colLarguraBase();
     }
   });
 
@@ -1873,12 +1929,12 @@
       }
       .celula-hora {
         position: relative !important;
-        height: 192px !important;
-        min-height: 192px !important;
-        margin: 0 0 6px 0 !important;
+        height: var(--hora-altura, 192px) !important;
+        min-height: var(--hora-altura, 192px) !important;
+        margin: 0 0 var(--gap-celula, 6px) 0 !important;
         border: none !important;
         border-bottom: none !important;
-        border-radius: 14px !important;
+        border-radius: var(--cel-radius, 14px) !important;
         overflow: visible;
         box-sizing: border-box;
         /* aspecto 3D */
@@ -1991,8 +2047,8 @@
     
       /* Altura dobrada das células / linhas de hora */
       .hora-linha {
-        height: 198px !important; /* 192 + gap aproximado */
-        min-height: 198px;
+        height: var(--passo-hora, 198px) !important;
+        min-height: var(--passo-hora, 198px);
         position: relative !important;
         box-sizing: border-box;
         border-bottom: none !important;
@@ -2001,10 +2057,10 @@
         padding-top: 8px;
       }
       .coluna-horas, #colunaHoras {
-        height: calc(24 * 198px) !important;
+        height: calc(24 * var(--passo-hora, 198px)) !important;
       }
       .coluna-dia, .subcols-row {
-        min-height: calc(24 * 198px) !important;
+        min-height: calc(24 * var(--passo-hora, 198px)) !important;
         display: flex;
         flex-direction: column;
       }
@@ -2116,6 +2172,206 @@
           0 1px 0 rgba(255,255,255,0.25) inset,
           0 4px 12px rgba(0,0,0,0.25) !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
+      }
+
+      /* ═══ RESPONSIVO: mobile / tablet / desktop ═══ */
+      #barraFiltrosGrade {
+        flex-wrap: wrap;
+        gap: 6px;
+        row-gap: 8px;
+      }
+      #orientacaoGrade {
+        gap: 8px;
+      }
+      #orientacaoGrade .orientacao-acoes {
+        flex-wrap: wrap;
+      }
+
+      /* Tablet */
+      @media (max-width: 1023px) {
+        #agenda-header {
+          flex-wrap: wrap;
+          gap: 8px;
+          padding: 10px 12px !important;
+        }
+        #tituloProfissional { font-size: 16px !important; }
+        #barraFiltrosGrade {
+          padding: 6px 4px;
+        }
+        .filtro-chip { font-size: 10px; padding: 5px 9px; }
+        #labelFaixaSemana { font-size: 12px; }
+        .col-header-dia { padding: 8px 4px !important; }
+        .col-header-dia .dia-semana { font-size: 10px !important; }
+        #badgeDiaFlutuante {
+          font-size: 12px;
+          padding: 6px 12px;
+          top: 6px;
+        }
+        .popup-celula {
+          width: min(300px, calc(100vw - 20px));
+        }
+        .celula-hora .cel-corner {
+          font-size: 8px !important;
+          padding: 1px 5px !important;
+        }
+        #painelAtalhos {
+          right: 10px !important;
+          left: auto;
+          top: 70px !important;
+          max-width: calc(100vw - 20px);
+        }
+        #selectProfissionalRapido { max-width: 140px; }
+      }
+
+      /* Mobile */
+      @media (max-width: 767px) {
+        #agenda-header {
+          padding: 8px 10px !important;
+        }
+        #tituloProfissional {
+          font-size: 14px !important;
+          max-width: 48vw;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        #btnHojeHeader, #btnHojeHeader span { font-size: 11px; }
+        #barraFiltrosGrade {
+          margin-bottom: 6px;
+          max-width: 100%;
+          overflow-x: auto;
+          flex-wrap: nowrap;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        #barraFiltrosGrade::-webkit-scrollbar { display: none; }
+        .filtro-chip {
+          flex-shrink: 0;
+          font-size: 10px;
+          padding: 5px 8px;
+        }
+        #orientacaoGrade {
+          flex-direction: column;
+          align-items: stretch !important;
+          gap: 6px;
+          margin-bottom: 8px;
+        }
+        #labelFaixaSemana {
+          font-size: 12px;
+          text-align: center;
+        }
+        .orientacao-acoes {
+          justify-content: center;
+          width: 100%;
+        }
+        .btn-ir-data, #btnAtalhos {
+          flex: 1;
+          justify-content: center;
+          font-size: 11px;
+          padding: 8px 10px;
+        }
+        #colunas-header .col-header-espaco,
+        .coluna-horas {
+          width: 48px !important;
+          min-width: 48px !important;
+          flex-basis: 48px !important;
+        }
+        .hora-linha {
+          font-size: 10px !important;
+          padding-left: 2px !important;
+        }
+        .col-header-dia {
+          padding: 6px 2px !important;
+          min-height: 48px;
+        }
+        .col-header-dia .dia-semana {
+          font-size: 9px !important;
+          letter-spacing: 0 !important;
+        }
+        .dia-hoje-tag {
+          font-size: 8px;
+          padding: 1px 5px;
+        }
+        .celula-hora .cel-corner {
+          font-size: 7px !important;
+          top: 3px !important;
+          right: 3px !important;
+          padding: 1px 4px !important;
+        }
+        .bloco-agendamento {
+          font-size: 11px;
+          padding: 4px 6px !important;
+          border-radius: 10px !important;
+        }
+        .bloco-agendamento .bloco-nome {
+          font-size: 11px;
+          -webkit-line-clamp: 2;
+        }
+        #badgeDiaFlutuante {
+          font-size: 11px;
+          padding: 5px 10px;
+          top: 4px;
+        }
+        .popup-celula {
+          width: calc(100vw - 16px);
+          left: 8px !important;
+          right: 8px;
+          max-width: none;
+          border-radius: 14px;
+        }
+        #painelAtalhos {
+          left: 8px !important;
+          right: 8px !important;
+          width: auto !important;
+          top: auto !important;
+          bottom: 72px !important; /* acima do footer mobile */
+        }
+        #barraMultiProf {
+          gap: 6px;
+        }
+        #btnToggleMulti, .chip-prof {
+          font-size: 10px;
+          padding: 5px 8px;
+        }
+        #toastMesNovo {
+          top: 64px;
+          font-size: 12px;
+          padding: 10px 14px;
+          width: calc(100vw - 24px);
+          max-width: none;
+        }
+        /* cards 3D um pouco mais compactos no mobile */
+        .celula-hora {
+          box-shadow:
+            0 1px 0 rgba(255,255,255,0.06) inset,
+            0 -1px 0 rgba(0,0,0,0.3) inset,
+            0 3px 8px rgba(0,0,0,0.3) !important;
+        }
+        /* grid-wrap ocupa altura disponível */
+        #grid-wrap {
+          min-height: 0;
+          flex: 1;
+        }
+        #grid-scroll {
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+
+      /* Telas muito pequenas */
+      @media (max-width: 380px) {
+        .col-header-dia .dia-semana { font-size: 8px !important; }
+        #colunas-header .col-header-espaco,
+        .coluna-horas {
+          width: 40px !important;
+          min-width: 40px !important;
+          flex-basis: 40px !important;
+        }
+      }
+
+      /* Desktop grande: mais respiro */
+      @media (min-width: 1280px) {
+        #labelFaixaSemana { font-size: 14px; }
+        .col-header-dia .dia-semana { font-size: 12px !important; }
       }
 `;
     document.head.appendChild(style);
