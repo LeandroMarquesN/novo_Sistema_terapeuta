@@ -78,6 +78,7 @@
     carregandoMais: false,
     contextoAtual: null,
     diaSelecionado: null,
+    horaSelecionada: null,
     filtros: {
       status: 'todos',
       origem: 'todos'
@@ -789,10 +790,17 @@
     const passo = horaAltura() + gapCelula();
     let html = '';
     for (let h = 0; h < 24; h++) {
-      html += '<div class="hora-linha" style="height:' + passo + 'px;min-height:' + passo + 'px">' +
+      html += '<div class="hora-linha" data-hora="' + h + '" style="height:' + passo + 'px;min-height:' + passo + 'px">' +
         String(h).padStart(2, '0') + ':00</div>';
     }
     col.innerHTML = html;
+    col.querySelectorAll('.hora-linha').forEach(hl => {
+      hl.style.cursor = 'pointer';
+      hl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selecionarLinhaHora(hl.dataset.hora);
+      });
+    });
     aplicarVarsLayout();
   }
   montarColunaHoras();
@@ -1072,6 +1080,26 @@
     }
   }
 
+
+  function selecionarLinhaHora(hora) {
+    if (hora === undefined || hora === null || hora === '') return;
+    const h = String(Number(hora)); // normaliza "09" / "9"
+    // limpa seleção anterior de linha
+    $all('.celula-hora.linha-hora-ativa').forEach(el => el.classList.remove('linha-hora-ativa'));
+    $all('.hora-linha.linha-hora-ativa').forEach(el => el.classList.remove('linha-hora-ativa'));
+    // marca todas as células daquela hora em todos os dias
+    $all('.celula-hora[data-hora="' + h + '"]').forEach(el => el.classList.add('linha-hora-ativa'));
+    // também tenta com zero à esquerda se necessário
+    if (h.length === 1) {
+      $all('.celula-hora[data-hora="' + h + '"]').forEach(el => el.classList.add('linha-hora-ativa'));
+    }
+    // marca o rótulo da hora à esquerda
+    const label = document.querySelector('.hora-linha[data-hora="' + h + '"]')
+      || document.querySelector('.hora-linha[data-hora="' + String(hora) + '"]');
+    if (label) label.classList.add('linha-hora-ativa');
+    state.horaSelecionada = h;
+  }
+
   function bindCelulasHora(container, iso, profId) {
     container.querySelectorAll('.celula-hora').forEach(cel => {
       cel.style.position = 'relative';
@@ -1080,7 +1108,9 @@
         if (e.target.closest && e.target.closest('.bloco-agendamento')) return;
         e.stopPropagation();
         selecionarDiaColuna(iso);
-        const hora = String(cel.dataset.hora || '0').padStart(2, '0');
+        const horaNum = cel.dataset.hora || '0';
+        selecionarLinhaHora(horaNum);
+        const hora = String(horaNum).padStart(2, '0');
         const uid = cel.dataset.profId || profId;
         abrirPopupCelula(e, iso, hora, uid, cel);
       });
@@ -2372,6 +2402,27 @@
       @media (min-width: 1280px) {
         #labelFaixaSemana { font-size: 14px; }
         .col-header-dia .dia-semana { font-size: 12px !important; }
+      }
+
+      /* Linha de horário selecionada (todas as células daquela hora) */
+      .celula-hora.linha-hora-ativa {
+        border-color: rgba(34, 211, 238, 0.55) !important;
+        background: linear-gradient(160deg,
+          rgba(14, 80, 95, 0.95) 0%,
+          rgba(10, 40, 52, 0.98) 50%,
+          rgba(6, 28, 38, 1) 100%) !important;
+        box-shadow:
+          0 1px 0 rgba(34,211,238,0.25) inset,
+          0 -2px 0 rgba(0,0,0,0.3) inset,
+          0 4px 14px rgba(0,0,0,0.35),
+          0 0 18px rgba(34,211,238,0.18) !important;
+      }
+      .hora-linha.linha-hora-ativa {
+        color: var(--cyan) !important;
+        font-weight: 800 !important;
+        background: rgba(34, 211, 238, 0.12) !important;
+        border-radius: 8px;
+        box-shadow: inset 3px 0 0 var(--cyan);
       }
 `;
     document.head.appendChild(style);
