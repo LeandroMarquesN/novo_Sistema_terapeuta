@@ -706,7 +706,8 @@
     });
 
     const listaDias = [];
-    for (let i = 0; i < 7; i++) listaDias.push(somarDias(dataInicioSemana, i));
+    // 14 dias (2 semanas) — grade finita, sem scroll infinito automático
+    for (let i = 0; i < 14; i++) listaDias.push(somarDias(dataInicioSemana, i));
     await adicionarColunas(listaDias, 'append');
 
     const scroll = $('#grid-scroll');
@@ -839,14 +840,114 @@
     return col;
   }
 
+
+  function fecharPopupCelula() {
+    const pop = $('#popupCelula');
+    if (pop) pop.remove();
+  }
+
+  function abrirPopupCelula(evento, iso, hora, profId, celEl) {
+    fecharPopupCelula();
+    selecionarDiaColuna(iso);
+    const d = parseLocalDate(iso + 'T00:00:00');
+    const mesNome = isNaN(d.getTime()) ? '' : MESES[d.getMonth()];
+    const diaRotulo = isNaN(d.getTime()) ? iso : formatarRotuloDia(d);
+    const horaLabel = String(hora).padStart(2, '0') + ':00';
+
+    // agendamentos nesta hora (mesma hora cheia)
+    const lista = (state.agendamentosPorDia[iso] || []).filter(a => {
+      if (a.status_agendamento === 'cancelado' && state.filtros.status !== 'cancelado') return false;
+      if (profId && String(a.usuario_id) !== String(profId)) return false;
+      const ad = parseLocalDate(a.data_agendamento);
+      if (isNaN(ad.getTime())) return false;
+      return ad.getHours() === Number(hora);
+    });
+
+    const pop = document.createElement('div');
+    pop.id = 'popupCelula';
+    pop.className = 'popup-celula';
+
+    let bodyAg = '';
+    if (lista.length) {
+      bodyAg = lista.map(a => {
+        const ad = parseLocalDate(a.data_agendamento);
+        const hm = isNaN(ad.getTime()) ? '' : String(ad.getHours()).padStart(2,'0') + ':' + String(ad.getMinutes()).padStart(2,'0');
+        return '<div class="popup-ag-item" data-id="' + a.id + '">' +
+          '<div class="popup-ag-nome">' + escapeHtml(a.nome || 'Paciente') + '</div>' +
+          '<div class="popup-ag-meta">' + hm + (a.tipo_terapia ? ' · ' + escapeHtml(a.tipo_terapia) : '') +
+          (a.status_agendamento ? ' · ' + escapeHtml(a.status_agendamento) : '') + '</div>' +
+          '</div>';
+      }).join('');
+    } else {
+      bodyAg = '<p class="popup-vazio">Nenhum agendamento neste horário.</p>';
+    }
+
+    const profNome = (state.profissionais.find(x => String(x.id) === String(profId)) || {}).nome || '';
+
+    pop.innerHTML =
+      '<div class="popup-celula-cab">' +
+        '<div><strong>' + escapeHtml(diaRotulo) + '</strong>' +
+        (mesNome ? '<span class="popup-mes"> · ' + mesNome + (isNaN(d.getTime()) ? '' : ' ' + d.getFullYear()) + '</span>' : '') +
+        '</div>' +
+        '<button type="button" class="popup-x" aria-label="Fechar"><i class="fas fa-times"></i></button>' +
+      '</div>' +
+      '<div class="popup-celula-hora"><i class="fas fa-clock"></i> ' + horaLabel +
+        (profNome ? ' · ' + escapeHtml(profNome.split(' ')[0]) : '') +
+      '</div>' +
+      '<div class="popup-celula-body">' + bodyAg + '</div>' +
+      '<div class="popup-celula-acoes">' +
+        '<button type="button" class="popup-btn-prim" data-acao="novo"><i class="fas fa-plus"></i> Novo neste horário</button>' +
+      '</div>';
+
+    document.body.appendChild(pop);
+
+    // posiciona próximo à célula
+    const rect = (celEl || evento.target).getBoundingClientRect();
+    const pw = pop.offsetWidth || 260;
+    const ph = pop.offsetHeight || 180;
+    let left = rect.left + rect.width / 2 - pw / 2;
+    let top = rect.bottom + 8;
+    if (left < 8) left = 8;
+    if (left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+    if (top + ph > window.innerHeight - 8) top = Math.max(8, rect.top - ph - 8);
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+
+    pop.querySelector('.popup-x').addEventListener('click', fecharPopupCelula);
+    pop.querySelector('[data-acao="novo"]').addEventListener('click', () => {
+      fecharPopupCelula();
+      abrirModalAgendamento({ novo: true, data: iso, hora: horaLabel, usuarioId: profId });
+    });
+    pop.querySelectorAll('.popup-ag-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const id = item.dataset.id;
+        const a = Object.values(state.agendamentosPorDia).flat().find(x => String(x.id) === String(id));
+        fecharPopupCelula();
+        if (a) abrirMenuContextual({ clientX: left + 40, clientY: top + 40 }, a);
+      });
+    });
+
+    setTimeout(() => {
+      const closer = (ev) => {
+        if (!pop.contains(ev.target)) {
+          fecharPopupCelula();
+          document.removeEventListener('click', closer);
+        }
+      };
+      document.addEventListener('click', closer);
+    }, 0);
+  }
+
   function bindCelulasHora(container, iso, profId) {
     container.querySelectorAll('.celula-hora').forEach(cel => {
       cel.addEventListener('click', (e) => {
-        if (e.target !== cel) return;
+        if (e.target !== cel && !e.target.classList.contains('celula-hora')) return;
+        // se clicou em bloco, o bloco trata o menu
+        if (e.target.closest && e.target.closest('.bloco-agendamento')) return;
         selecionarDiaColuna(iso);
         const hora = String(cel.dataset.hora || '0').padStart(2, '0');
         const uid = cel.dataset.profId || profId;
-        abrirModalAgendamento({ novo: true, data: iso, hora: hora + ':00', usuarioId: uid });
+        abrirPopupCelula(e, iso, hora, uid, cel);
       });
       cel.addEventListener('dragover', (e) => { e.preventDefault(); cel.classList.add('drop-hover'); });
       cel.addEventListener('dragleave', () => cel.classList.remove('drop-hover'));
@@ -941,16 +1042,84 @@
     gridScroll.addEventListener('scroll', () => {
       atualizarIndicadorSync();
       agendarSnapAoCentro();
-      if (state.carregandoMais || !idsAtivosParaGrade().length || !state.colunas.length) return;
-      const w = larguraColunaDia();
-      const proximoDoFim = gridScroll.scrollWidth - (gridScroll.scrollLeft + gridScroll.clientWidth);
-      if (proximoDoFim < w * 2) carregarMaisColunas('proxima');
-      else if (gridScroll.scrollLeft < w * 2) carregarMaisColunas('anterior');
     });
   }
 
+  // Arrastar o cabeçalho de dias para navegar (scroll + carregar semanas ao chegar na borda)
+  (function bindHeaderDrag() {
+    const header = $('#colunas-header') || $('#colunasHeaderConteudo');
+    const scroll = $('#grid-scroll');
+    if (!header || !scroll) return;
+
+    let dragging = false;
+    let startX = 0;
+    let startScroll = 0;
+    let moved = false;
+
+    header.style.cursor = 'grab';
+    header.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startScroll = scroll.scrollLeft;
+      header.style.cursor = 'grabbing';
+      header.classList.add('header-dragging');
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      if (Math.abs(dx) > 4) moved = true;
+      scroll.scrollLeft = startScroll - dx;
+    });
+    window.addEventListener('mouseup', async () => {
+      if (!dragging) return;
+      dragging = false;
+      header.style.cursor = 'grab';
+      header.classList.remove('header-dragging');
+      if (!moved) return;
+      // ao soltar perto da borda, carrega semana seguinte/anterior (navegação controlada)
+      const w = larguraColunaDia();
+      if (scroll.scrollLeft + scroll.clientWidth > scroll.scrollWidth - w * 1.5) {
+        await carregarMaisColunas('proxima');
+      } else if (scroll.scrollLeft < w * 1.2) {
+        await carregarMaisColunas('anterior');
+      }
+      agendarSnapAoCentro();
+    });
+
+    // touch
+    header.addEventListener('touchstart', (e) => {
+      if (!e.touches[0]) return;
+      dragging = true;
+      moved = false;
+      startX = e.touches[0].clientX;
+      startScroll = scroll.scrollLeft;
+    }, { passive: true });
+    header.addEventListener('touchmove', (e) => {
+      if (!dragging || !e.touches[0]) return;
+      const dx = e.touches[0].clientX - startX;
+      if (Math.abs(dx) > 4) moved = true;
+      scroll.scrollLeft = startScroll - dx;
+    }, { passive: true });
+    header.addEventListener('touchend', async () => {
+      if (!dragging) return;
+      dragging = false;
+      if (!moved) return;
+      const w = larguraColunaDia();
+      if (scroll.scrollLeft + scroll.clientWidth > scroll.scrollWidth - w * 1.5) {
+        await carregarMaisColunas('proxima');
+      } else if (scroll.scrollLeft < w * 1.2) {
+        await carregarMaisColunas('anterior');
+      }
+      agendarSnapAoCentro();
+    });
+  })();
+
+
   async function carregarMaisColunas(direcao) {
-    if (state.carregandoMais || !state.profissional || !state.colunas.length) return;
+    if (state.carregandoMais || !idsAtivosParaGrade().length || !state.colunas.length) return;
     state.carregandoMais = true;
     try {
       if (direcao === 'proxima') {
@@ -1534,7 +1703,7 @@
       }
       #btnAtalhos:hover { border-color: rgba(34,211,238,0.4); color: var(--cyan); }
       #painelAtalhos {
-        display: none; position: absolute; right: 12px; top: 52px; z-index: 30;
+        display: none; position: fixed; right: 16px; top: 72px; z-index: 200;
         width: min(320px, calc(100vw - 24px));
         background: rgba(8,18,26,0.98); border: 1px solid var(--border);
         border-radius: 16px; padding: 14px 16px;
@@ -1594,6 +1763,81 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.35);
       }
       #grid-scroll { scroll-behavior: smooth; }
+      #colunas-header, #colunasHeaderConteudo { cursor: grab; user-select: none; }
+      #colunas-header.header-dragging, .header-dragging { cursor: grabbing !important; }
+      .celula-hora {
+        background: rgba(255,255,255,0.015);
+        border-bottom: 1px solid rgba(148,163,184,0.1) !important;
+        transition: background 0.15s, box-shadow 0.15s;
+      }
+      .celula-hora:nth-child(even) {
+        background: rgba(34,211,238,0.03);
+      }
+      .celula-hora:nth-child(odd) {
+        background: rgba(52,211,153,0.025);
+      }
+      .coluna-dia:nth-child(even) .celula-hora:nth-child(odd) {
+        background: rgba(251,191,36,0.04);
+      }
+      .coluna-dia:nth-child(even) .celula-hora:nth-child(even) {
+        background: rgba(255,255,255,0.02);
+      }
+      .celula-hora:hover {
+        background: rgba(52,211,153,0.12) !important;
+        box-shadow: inset 0 0 0 1px rgba(52,211,153,0.35);
+      }
+      .celula-hora.drop-hover {
+        background: rgba(34,211,238,0.18) !important;
+        box-shadow: inset 0 0 0 1px rgba(34,211,238,0.5);
+      }
+      .coluna-dia {
+        background: rgba(255,255,255,0.01);
+      }
+      .coluna-dia.coluna-selecionada {
+        background: rgba(52,211,153,0.06) !important;
+        box-shadow: inset 0 0 0 1px rgba(52,211,153,0.2);
+      }
+      .hora-linha:nth-child(even) {
+        background: rgba(34,211,238,0.04);
+        color: rgba(148,163,184,0.65);
+      }
+      .popup-celula {
+        position: fixed; z-index: 220; width: min(280px, calc(100vw - 16px));
+        background: rgba(8,18,26,0.98); border: 1px solid rgba(52,211,153,0.35);
+        border-radius: 16px; padding: 12px 14px;
+        box-shadow: 0 16px 48px rgba(0,0,0,0.55), 0 0 24px rgba(52,211,153,0.12);
+        backdrop-filter: blur(16px); color: #e2e8f0;
+      }
+      .popup-celula-cab {
+        display: flex; align-items: flex-start; justify-content: space-between; gap: 8px;
+        margin-bottom: 6px; font-size: 14px;
+      }
+      .popup-celula-cab strong { color: #f1f5f9; font-family: 'Space Grotesk', sans-serif; }
+      .popup-mes { color: rgba(148,163,184,0.75); font-size: 12px; }
+      .popup-x {
+        background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+        border-radius: 8px; width: 28px; height: 28px; color: rgba(148,163,184,0.8);
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+      }
+      .popup-celula-hora {
+        font-size: 12px; font-weight: 700; color: var(--cyan); margin-bottom: 10px;
+        display: flex; align-items: center; gap: 6px;
+      }
+      .popup-vazio { font-size: 12px; color: rgba(148,163,184,0.55); margin: 8px 0; }
+      .popup-ag-item {
+        padding: 8px 10px; border-radius: 10px; margin-bottom: 6px; cursor: pointer;
+        background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2);
+      }
+      .popup-ag-item:hover { background: rgba(52,211,153,0.15); }
+      .popup-ag-nome { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+      .popup-ag-meta { font-size: 11px; color: rgba(148,163,184,0.7); margin-top: 2px; }
+      .popup-btn-prim {
+        width: 100%; margin-top: 8px; padding: 10px; border: none; border-radius: 12px;
+        font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 12px;
+        color: #fff; cursor: pointer;
+        background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+      }
+      .popup-btn-prim:hover { box-shadow: 0 0 20px rgba(8,145,178,0.45); }
     `;
     document.head.appendChild(style);
   })();
