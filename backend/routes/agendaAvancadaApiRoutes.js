@@ -1,32 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const agendaAvancadaController = require('../controllers/agendaAvancadaController');
+const ctrl = require('../controllers/agendaAvancadaController');
 const authMiddleware = require('../middleware/authMiddleware');
 
-// ─────────────────────────────────────────────────────────────
-// ROTAS DE API (retornam JSON) da Agenda Avançada
-// Montada em app.js: app.use('/api/agenda-avancada', agendaAvancadaApiRoutes)
-// ─────────────────────────────────────────────────────────────
+// Todas as rotas da API exigem autenticação
+router.use(authMiddleware);
 
 // Camada 1 — profissionais da clínica
-router.get('/profissionais', authMiddleware, agendaAvancadaController.listarProfissionais);
+router.get('/profissionais', ctrl.listarProfissionais);
 
-// Camada 2 — panorama anual (dias com pontinho de indicação)
-router.get('/indicadores-ano', authMiddleware, agendaAvancadaController.indicadoresAno);
+// Camada 2 — indicadores do ano (dias com agendamento)
+router.get('/indicadores-ano', ctrl.indicadoresAno);
 
-// Camada 3 — calendário do mês (contagem por dia)
-router.get('/dias-mes', authMiddleware, agendaAvancadaController.diasDoMes);
+// Camada 3 — dias do mês com contagem
+router.get('/dias-mes', ctrl.diasDoMes);
 
-// Camada 4 — grade de colunas (intervalo de datas)
-router.get('/grade', authMiddleware, agendaAvancadaController.gradeIntervalo);
+// Camada 4 — grade de agendamentos por intervalo
+router.get('/grade', ctrl.gradeIntervalo);
 
-// Botão "Hoje" do rodapé fixo
-router.get('/hoje', authMiddleware, agendaAvancadaController.agendamentosHoje);
+// Agendamentos de hoje (botão "Hoje")
+router.get('/hoje', ctrl.agendamentosHoje);
 
-// CRUD de agendamentos usado pelos modais / drag-and-drop / menu contextual
-router.post('/agendamentos', authMiddleware, agendaAvancadaController.criarAgendamento);
-router.patch('/agendamentos/:id', authMiddleware, agendaAvancadaController.atualizarAgendamento);
-router.post('/agendamentos/:id/duplicar', authMiddleware, agendaAvancadaController.duplicarAgendamento);
-router.delete('/agendamentos/:id', authMiddleware, agendaAvancadaController.cancelarAgendamento);
+// CRUD rápido
+router.post('/agendamentos', ctrl.criarAgendamento);
+router.patch('/agendamentos/:id', ctrl.atualizarAgendamento);
+router.post('/agendamentos/:id/duplicar', ctrl.duplicarAgendamento);
+router.delete('/agendamentos/:id', ctrl.cancelarAgendamento);
 
 module.exports = router;
