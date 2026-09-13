@@ -20,7 +20,7 @@
   const token = localStorage.getItem('token');
   const DIAS_SEMANA = ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'];
   const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const HORA_ALTURA = 64;
+  const HORA_ALTURA = 120; // ~2x — mais espaço para informação
   const COL_LARGURA = 160;
   const SNAP_MINUTOS = 15;           // snap de mercado
   const DURACAO_PADRAO = 50;         // minutos (padrão clínica)
@@ -245,7 +245,10 @@
       scroll.scrollLeft = destino;
     }
     state.diaSelecionado = iso;
-    selecionarDiaColuna(iso);
+    // evita loop: não re-centraliza
+    $all('.col-header-dia').forEach(h => h.classList.toggle('dia-selecionado', h.dataset.iso === iso));
+    $all('.coluna-dia').forEach(c => c.classList.toggle('coluna-selecionada', c.dataset.iso === iso));
+    atualizarIndicadorSync(iso);
     atualizarOrientacaoGrade(iso);
   }
 
@@ -690,9 +693,10 @@
     if (!col) return;
     let html = '';
     for (let h = 0; h < 24; h++) {
-      html += `<div class="hora-linha">${String(h).padStart(2, '0')}:00</div>`;
+      html += `<div class="hora-linha" style="height:${HORA_ALTURA}px;min-height:${HORA_ALTURA}px">${String(h).padStart(2, '0')}:00</div>`;
     }
     col.innerHTML = html;
+    document.documentElement.style.setProperty('--hora-altura', HORA_ALTURA + 'px');
   }
   montarColunaHoras();
 
@@ -979,12 +983,16 @@
   }
 
 
-  function selecionarDiaColuna(iso) {
+  function selecionarDiaColuna(iso, opts) {
     if (!iso) return;
     state.diaSelecionado = iso;
     $all('.col-header-dia').forEach(h => h.classList.toggle('dia-selecionado', h.dataset.iso === iso));
     $all('.coluna-dia').forEach(c => c.classList.toggle('coluna-selecionada', c.dataset.iso === iso));
     atualizarIndicadorSync(iso);
+    // Cabeçalho "acompanha" a célula: centraliza a coluna do dia (como se arrastasse)
+    if (!opts || opts.centralizar !== false) {
+      try { centralizarColunaPorIso(iso, true); } catch (e) {}
+    }
   }
 
   function criarBlocoAgendamento(a, idx) {
@@ -997,7 +1005,7 @@
     const minutosDoDia = d.getHours() * 60 + d.getMinutes();
     const duracaoMin = obterDuracaoMinutos(a);
     const topPx = (minutosDoDia / 60) * HORA_ALTURA;
-    const heightPx = Math.max(28, (duracaoMin / 60) * HORA_ALTURA - 4);
+    const heightPx = Math.max(44, (duracaoMin / 60) * HORA_ALTURA - 6);
 
     if (isNaN(topPx) || isNaN(heightPx)) return null;
 
@@ -1838,7 +1846,64 @@
         background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
       }
       .popup-btn-prim:hover { box-shadow: 0 0 20px rgba(8,145,178,0.45); }
-    `;
+    
+      /* Altura dobrada das células / linhas de hora */
+      .hora-linha, .celula-hora {
+        height: 120px !important;
+        min-height: 120px;
+      }
+      .coluna-horas, #colunaHoras {
+        height: calc(24 * 120px) !important;
+      }
+      .coluna-dia, .subcols-row {
+        min-height: calc(24 * 120px) !important;
+      }
+      /* Chip de data no canto (estilo filtro, menor) */
+      .celula-hora .cel-corner {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        z-index: 2;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        color: rgba(52, 211, 153, 0.75);
+        background: rgba(52, 211, 153, 0.08);
+        border: 1px solid rgba(52, 211, 153, 0.22);
+        border-radius: 99px;
+        padding: 2px 6px;
+        line-height: 1.2;
+        pointer-events: none;
+        font-family: 'Space Grotesk', sans-serif;
+        white-space: nowrap;
+      }
+      .coluna-dia.coluna-selecionada .celula-hora .cel-corner {
+        color: var(--emerald);
+        background: rgba(52, 211, 153, 0.16);
+        border-color: rgba(52, 211, 153, 0.4);
+      }
+      .col-header-dia.hoje-col ~ * .cel-corner,
+      .coluna-dia[data-iso].hoje-col .cel-corner { }
+      /* Blocos adaptam ao conteúdo */
+      .bloco-agendamento {
+        min-height: 40px;
+        padding: 6px 8px !important;
+        overflow: hidden;
+      }
+      .bloco-agendamento .bloco-nome {
+        white-space: normal;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        font-size: 12px;
+        line-height: 1.25;
+      }
+      .bloco-agendamento .bloco-hora {
+        font-size: 10px;
+        margin-bottom: 2px;
+      }
+`;
     document.head.appendChild(style);
   })();
 
