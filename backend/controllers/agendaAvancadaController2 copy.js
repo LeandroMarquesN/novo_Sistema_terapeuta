@@ -181,7 +181,6 @@ async function gradeIntervalo(req, res) {
     const [rows] = await db.query(
       `SELECT a.id, a.paciente_id, a.nome, a.telefone, a.data_agendamento,
               a.status_agendamento, a.tipo_terapia, a.motivo_consulta,
-              a.duracao_minutos,
               p.origem AS origem_paciente
        FROM agendamentos a
        LEFT JOIN pacientes p ON p.id = a.paciente_id
@@ -207,7 +206,7 @@ async function agendamentosHoje(req, res) {
 
   try {
     let sql = `SELECT a.id, a.paciente_id, a.nome, a.telefone, a.data_agendamento,
-                      a.status_agendamento, a.tipo_terapia, a.duracao_minutos, p.origem AS origem_paciente
+                      a.status_agendamento, a.tipo_terapia, p.origem AS origem_paciente
                FROM agendamentos a
                LEFT JOIN pacientes p ON p.id = a.paciente_id
                WHERE a.clinica_id = ? AND DATE(a.data_agendamento) = CURDATE()
@@ -236,7 +235,7 @@ async function criarAgendamento(req, res) {
   const usuarioLogadoId = req.usuario?.id;
   if (!clinicaId) return res.status(401).json({ success: false, message: 'Não autenticado.' });
 
-  const { paciente_id, usuario_id, data_agendamento, tipo_terapia, motivo_consulta, duracao_minutos } = req.body;
+  const { paciente_id, usuario_id, data_agendamento, tipo_terapia, motivo_consulta } = req.body;
 
   if (!paciente_id || !usuario_id || !data_agendamento) {
     return res.status(400).json({ success: false, message: 'Paciente, profissional e data/horário são obrigatórios.' });
@@ -252,14 +251,9 @@ async function criarAgendamento(req, res) {
 
     const [resultado] = await db.query(
       `INSERT INTO agendamentos
-        (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos)
-       VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?)`,
-      [
-        clinicaId, paciente_id, usuario_id, data_agendamento,
-        paciente.nome, paciente.telefone,
-        tipo_terapia || null, motivo_consulta || null,
-        duracao_minutos != null ? Number(duracao_minutos) : 50
-      ]
+        (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta)
+       VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?)`,
+      [clinicaId, paciente_id, usuario_id, data_agendamento, paciente.nome, paciente.telefone, tipo_terapia || null, motivo_consulta || null]
     );
 
     res.status(201).json({ success: true, id: resultado.insertId });
@@ -278,7 +272,7 @@ async function criarAgendamento(req, res) {
 async function atualizarAgendamento(req, res) {
   const clinicaId = req.usuario?.clinica_id;
   const { id } = req.params;
-  const { data_agendamento, tipo_terapia, motivo_consulta, status_agendamento, duracao_minutos } = req.body;
+  const { data_agendamento, tipo_terapia, motivo_consulta, status_agendamento } = req.body;
   if (!clinicaId) return res.status(401).json({ success: false, message: 'Não autenticado.' });
 
   try {
@@ -289,10 +283,6 @@ async function atualizarAgendamento(req, res) {
     if (tipo_terapia !== undefined) { campos.push('tipo_terapia = ?'); valores.push(tipo_terapia); }
     if (motivo_consulta !== undefined) { campos.push('motivo_consulta = ?'); valores.push(motivo_consulta); }
     if (status_agendamento) { campos.push('status_agendamento = ?'); valores.push(status_agendamento); }
-    if (duracao_minutos !== undefined) {
-      campos.push('duracao_minutos = ?');
-      valores.push(duracao_minutos == null ? null : Number(duracao_minutos));
-    }
 
     if (!campos.length) return res.status(400).json({ success: false, message: 'Nada para atualizar.' });
 
@@ -326,7 +316,7 @@ async function duplicarAgendamento(req, res) {
 
   try {
     const [[original]] = await db.query(
-      `SELECT paciente_id, usuario_id, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos
+      `SELECT paciente_id, usuario_id, nome, telefone, tipo_terapia, motivo_consulta
        FROM agendamentos WHERE id = ? AND clinica_id = ?`,
       [id, clinicaId]
     );
@@ -334,9 +324,9 @@ async function duplicarAgendamento(req, res) {
 
     const [resultado] = await db.query(
       `INSERT INTO agendamentos
-        (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta, duracao_minutos)
-       VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?, ?)`,
-      [clinicaId, original.paciente_id, original.usuario_id, nova_data, original.nome, original.telefone, original.tipo_terapia, original.motivo_consulta, original.duracao_minutos]
+        (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, nome, telefone, tipo_terapia, motivo_consulta)
+       VALUES (?, ?, ?, ?, 'aguardando_sinal', ?, ?, ?, ?)`,
+      [clinicaId, original.paciente_id, original.usuario_id, nova_data, original.nome, original.telefone, original.tipo_terapia, original.motivo_consulta]
     );
 
     res.status(201).json({ success: true, id: resultado.insertId });
