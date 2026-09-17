@@ -83,11 +83,6 @@ exports.getDadosPortal = async (req, res) => {
             [pId]
         );
 
-        const [prontuarios] = await db.query(
-            'SELECT * FROM prontuarios WHERE paciente_id = ? ORDER BY data_atendimento DESC',
-            [pId]
-        );
-
         // Documentos do paciente
         const [documentos] = await db.query(
             `SELECT id, nome_original, mime_type, tamanho_bytes, storage_key, criado_em 
