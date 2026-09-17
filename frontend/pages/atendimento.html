@@ -1361,20 +1361,161 @@
             aria-labelledby="tab-receituario"
             class="aba-painel w-full flex-1 glass-panel flex flex-col overflow-hidden min-h-[560px] lg:min-h-0"
           >
-            <div class="p-5 glass-header">
-              <h3 class="text-sm font-black text-white flex items-center gap-2">
-                <i class="fas fa-prescription" style="color: var(--cyan)"></i>
-                Receituário Digital
-              </h3>
+            <!-- Header da aba -->
+            <div class="p-4 sm:p-5 glass-header flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="icon-wrap icon-cyan">
+                  <i class="fas fa-prescription"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-black text-white">Receituário Digital</h3>
+                  <p class="text-[10px] text-slate-500 font-medium">Emita receitas com assinatura eletrônica</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2 text-[11px] font-bold" style="color:var(--cyan)">
+                <i class="fas fa-user-md"></i>
+                <span id="receitaCrmInfo">CRM —</span>
+              </div>
             </div>
-            <div class="flex-1 p-4 sm:p-5 overflow-y-auto">
-              <div
-                class="text-center py-16"
-                style="color: rgba(148, 163, 184, 0.4)"
-              >
-                <i class="fas fa-prescription text-4xl mb-4 block"></i>
-                <p class="text-sm font-bold">Receituário Digital</p>
-                <p class="text-xs mt-1">Em construção — próxima etapa</p>
+
+            <!-- Corpo principal -->
+            <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+
+              <!-- COLUNA ESQUERDA: Formulário + Lista de medicamentos -->
+              <div class="flex-1 flex flex-col overflow-hidden border-b lg:border-b-0 lg:border-r" style="border-color: var(--border)">
+
+                <!-- Formulário de adição de medicamento -->
+                <div class="p-4 sm:p-5 space-y-3 border-b" style="border-color: var(--border)">
+                  <p class="form-label flex items-center gap-1.5">
+                    <i class="fas fa-plus-circle" style="color:var(--emerald)"></i>
+                    Adicionar Medicamento
+                  </p>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="sm:col-span-2">
+                      <label class="form-label block mb-1">Nome do Medicamento *</label>
+                      <input type="text" id="medNome" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: Dipirona, Amoxicilina, Losartana...">
+                    </div>
+
+                    <div>
+                      <label class="form-label block mb-1">Concentração</label>
+                      <input type="text" id="medConcentracao" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 500mg, 10mg/mL">
+                    </div>
+
+                    <div>
+                      <label class="form-label block mb-1">Forma Farmacêutica</label>
+                      <select id="medForma" class="input-premium w-full px-3 py-2.5 text-sm">
+                        <option value="">Selecione...</option>
+                        <option value="Comprimido">Comprimido</option>
+                        <option value="Cápsula">Cápsula</option>
+                        <option value="Xarope">Xarope</option>
+                        <option value="Gotas">Gotas</option>
+                        <option value="Injetável">Injetável</option>
+                        <option value="Pomada">Pomada</option>
+                        <option value="Creme">Creme</option>
+                        <option value="Solução">Solução</option>
+                        <option value="Outro">Outro</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="form-label block mb-1">Quantidade *</label>
+                      <input type="text" id="medQuantidade" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 30 comprimidos">
+                    </div>
+
+                    <div>
+                      <label class="form-label block mb-1">Via de Administração</label>
+                      <select id="medVia" class="input-premium w-full px-3 py-2.5 text-sm">
+                        <option value="Oral">Oral</option>
+                        <option value="Tópica">Tópica</option>
+                        <option value="Intramuscular">Intramuscular</option>
+                        <option value="Subcutânea">Subcutânea</option>
+                        <option value="Intravenosa">Intravenosa</option>
+                        <option value="Inalatória">Inalatória</option>
+                        <option value="Outra">Outra</option>
+                      </select>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                      <label class="form-label block mb-1">Posologia *</label>
+                      <textarea id="medPosologia" rows="2" class="input-premium w-full px-3 py-2.5 text-sm resize-none" placeholder="Ex: Tomar 1 comprimido de 8/8 horas por 7 dias"></textarea>
+                    </div>
+
+                    <div class="sm:col-span-2 flex items-center gap-3">
+                      <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
+                        <input type="checkbox" id="medContinuo" class="rounded border-slate-600 text-emerald-500 focus:ring-emerald-500">
+                        Uso contínuo
+                      </label>
+                    </div>
+                  </div>
+
+                  <button type="button" onclick="adicionarMedicamento()"
+                          class="btn-primary-gradient w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i>
+                    Adicionar à Receita
+                  </button>
+                </div>
+
+                <!-- Lista de medicamentos adicionados -->
+                <div class="flex-1 overflow-y-auto p-4 sm:p-5">
+                  <div class="flex items-center justify-between mb-3">
+                    <p class="form-label flex items-center gap-1.5">
+                      <i class="fas fa-pills" style="color:var(--cyan)"></i>
+                      Medicamentos na Receita
+                    </p>
+                    <span id="contadorMedicamentos" class="badge-count">0</span>
+                  </div>
+
+                  <div id="listaMedicamentos" class="space-y-2">
+                    <div class="text-center py-10" style="color: rgba(148,163,184,0.35)">
+                      <i class="fas fa-prescription-bottle text-3xl mb-3 block"></i>
+                      <p class="text-xs">Nenhum medicamento adicionado ainda</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- COLUNA DIREITA: Observações + Ações + Histórico -->
+              <div class="w-full lg:w-80 xl:w-96 flex flex-col overflow-hidden">
+
+                <!-- Observações gerais -->
+                <div class="p-4 sm:p-5 border-b" style="border-color: var(--border)">
+                  <label class="form-label block mb-1.5">Observações / Orientações</label>
+                  <textarea id="receitaObservacoes" rows="3" class="input-premium w-full px-3 py-2.5 text-sm resize-none" placeholder="Orientações gerais ao paciente..."></textarea>
+
+                  <div class="mt-3">
+                    <label class="form-label block mb-1.5">Validade (dias)</label>
+                    <input type="number" id="receitaValidade" value="30" min="1" max="365" class="input-premium w-24 px-3 py-2 text-sm text-center">
+                  </div>
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="p-4 sm:p-5 border-b space-y-2" style="border-color: var(--border)">
+                  <button type="button" onclick="emitirReceita(false)"
+                          class="btn-secondary w-full px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                    <i class="fas fa-save"></i>
+                    Salvar Rascunho
+                  </button>
+
+                  <button type="button" onclick="emitirReceita(true)"
+                          class="btn-primary-gradient w-full px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                    <i class="fas fa-file-signature"></i>
+                    Emitir e Assinar
+                  </button>
+                </div>
+
+                <!-- Histórico de receitas do paciente -->
+                <div class="flex-1 overflow-y-auto p-4 sm:p-5">
+                  <p class="form-label flex items-center gap-1.5 mb-3">
+                    <i class="fas fa-history" style="color:var(--blue)"></i>
+                    Histórico de Receitas
+                  </p>
+                  <div id="historicoReceitas" class="space-y-2">
+                    <div class="text-center py-6 text-xs" style="color: rgba(148,163,184,0.35)">
+                      Carregando histórico...
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </section>

@@ -542,6 +542,267 @@ function initMenuMobile() {
   });
 }
 
+// =========================================================
+// RECEITUÁRIO DIGITAL
+// =========================================================
+let medicamentosReceita = [];
+
+function atualizarCrmReceita() {
+  try {
+    const tokenLocal = localStorage.getItem('token');
+    if (!tokenLocal) return;
+    const payload = JSON.parse(atob(tokenLocal.split('.')[1]));
+    const el = document.getElementById('receitaCrmInfo');
+    if (el) {
+      if (payload.crm) {
+        el.innerText = payload.uf_crm 
+          ? `CRM ${payload.crm}/${payload.uf_crm}` 
+          : `CRM ${payload.crm}`;
+      } else {
+        el.innerText = 'CRM não cadastrado';
+      }
+    }
+  } catch (e) {}
+}
+
+function adicionarMedicamento() {
+  const nome = document.getElementById('medNome').value.trim();
+  const concentracao = document.getElementById('medConcentracao').value.trim();
+  const forma = document.getElementById('medForma').value;
+  const quantidade = document.getElementById('medQuantidade').value.trim();
+  const via = document.getElementById('medVia').value;
+  const posologia = document.getElementById('medPosologia').value.trim();
+  const continuo = document.getElementById('medContinuo').checked;
+
+  if (!nome || !quantidade || !posologia) {
+    alert('Preencha pelo menos: Nome, Quantidade e Posologia.');
+    return;
+  }
+
+  medicamentosReceita.push({
+    medicamento_nome: nome,
+    concentracao: concentracao || null,
+    forma_farmaceutica: forma || null,
+    quantidade,
+    posologia,
+    via_administracao: via || 'Oral',
+    uso_continuo: continuo
+  });
+
+  // Limpa formulário
+  document.getElementById('medNome').value = '';
+  document.getElementById('medConcentracao').value = '';
+  document.getElementById('medForma').value = '';
+  document.getElementById('medQuantidade').value = '';
+  document.getElementById('medVia').value = 'Oral';
+  document.getElementById('medPosologia').value = '';
+  document.getElementById('medContinuo').checked = false;
+
+  renderizarMedicamentos();
+}
+
+function removerMedicamento(index) {
+  medicamentosReceita.splice(index, 1);
+  renderizarMedicamentos();
+}
+
+function renderizarMedicamentos() {
+  const container = document.getElementById('listaMedicamentos');
+  const contador = document.getElementById('contadorMedicamentos');
+
+  if (contador) contador.innerText = medicamentosReceita.length;
+
+  if (medicamentosReceita.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-10" style="color: rgba(148,163,184,0.35)">
+        <i class="fas fa-prescription-bottle text-3xl mb-3 block"></i>
+        <p class="text-xs">Nenhum medicamento adicionado ainda</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = medicamentosReceita.map((med, i) => `
+    <div class="glass-card p-3 flex gap-3 items-start">
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-black text-white truncate">
+          ${med.medicamento_nome}
+          ${med.concentracao ? `<span class="text-xs font-normal" style="color:var(--cyan)"> ${med.concentracao}</span>` : ''}
+        </p>
+        <p class="text-[11px] mt-0.5" style="color: rgba(148,163,184,0.7)">
+          ${med.forma_farmaceutica || ''} ${med.quantidade} • Via ${med.via_administracao}
+          ${med.uso_continuo ? ' • <span style="color:var(--amber)">Uso contínuo</span>' : ''}
+        </p>
+        <p class="text-[11px] mt-1 italic" style="color: rgba(203,213,225,0.8)">
+          ${med.posologia}
+        </p>
+      </div>
+      <button type="button" onclick="removerMedicamento(${i})"
+              class="text-slate-500 hover:text-red-400 transition p-1.5 rounded-lg"
+              title="Remover">
+        <i class="fas fa-trash-alt text-xs"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+async function emitirReceita(assinar) {
+  const pacienteId = document.getElementById('atendimentoPacienteId')?.value;
+  if (!pacienteId) {
+    alert('Nenhum paciente selecionado.');
+    return;
+  }
+
+  if (medicamentosReceita.length === 0) {
+    alert('Adicione pelo menos um medicamento antes de salvar.');
+    return;
+  }
+
+  let senhaAssinatura = null;
+
+  if (assinar) {
+    // Usa o mesmo modal de assinatura do prontuário
+    return new Promise((resolve) => {
+      window._callbackAssinaturaReceita = async (senha) => {
+        await salvarReceitaNoBackend(true, senha);
+        resolve();
+      };
+      abrirModalAssinatura();
+      // Sobrescreve temporariamente o confirmarAssinatura
+      const original = window.confirmarAssinatura;
+      window.confirmarAssinatura = async function(e) {
+        if (e) e.preventDefault();
+        const senha = document.getElementById('senhaAssinatura').value;
+        if (!senha) {
+          document.getElementById('erroSenhaAssinatura').innerText = 'Digite sua senha.';
+          document.getElementById('erroSenhaAssinatura').classList.remove('hidden');
+          return;
+        }
+        fecharModalAssinatura();
+        window.confirmarAssinatura = original; // restaura
+        await salvarReceitaNoBackend(true, senha);
+      };
+    });
+  } else {
+    await salvarReceitaNoBackend(false, null);
+  }
+}
+
+async function salvarReceitaNoBackend(assinar, senha) {
+  const pacienteId = document.getElementById('atendimentoPacienteId').value;
+  const agendamentoId = document.getElementById('atendimentoAgendamentoId')?.value || null;
+  const observacoes = document.getElementById('receitaObservacoes').value.trim();
+  const validadeDias = parseInt(document.getElementById('receitaValidade').value) || 30;
+
+  const payload = {
+    pacienteId: parseInt(pacienteId),
+    agendamentoId: agendamentoId ? parseInt(agendamentoId) : null,
+    observacoes: observacoes || null,
+    validadeDias,
+    itens: medicamentosReceita,
+    apenasRascunho: !assinar,
+    senhaAssinatura: senha || undefined
+  };
+
+  try {
+    const response = await fetch('/api/receitas/salvar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(assinar ? '✅ Receita emitida e assinada com sucesso!' : '✅ Rascunho salvo com sucesso!');
+      medicamentosReceita = [];
+      renderizarMedicamentos();
+      document.getElementById('receitaObservacoes').value = '';
+      carregarHistoricoReceitas(pacienteId);
+    } else {
+      alert(data.erro || 'Erro ao salvar receita.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão ao salvar receita.');
+  }
+}
+
+async function carregarHistoricoReceitas(pacienteId) {
+  const container = document.getElementById('historicoReceitas');
+  if (!container || !pacienteId) return;
+
+  try {
+    const response = await fetch(`/api/receitas/paciente/${pacienteId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const lista = await response.json();
+
+    if (!lista || lista.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-6 text-xs" style="color: rgba(148,163,184,0.35)">
+          Nenhuma receita encontrada.
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(r => `
+      <div class="glass-card p-3 cursor-pointer hover:border-cyan-500/40 transition"
+           onclick="verDetalheReceita(${r.id})">
+        <div class="flex justify-between items-start gap-2">
+          <div>
+            <p class="text-xs font-black text-white">
+              ${r.total_itens} medicamento${r.total_itens > 1 ? 's' : ''}
+            </p>
+            <p class="text-[10px] mt-0.5" style="color: rgba(148,163,184,0.6)">
+              ${new Date(r.criado_em).toLocaleDateString('pt-BR')}
+            </p>
+          </div>
+          <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full"
+                style="background: ${r.status_receita === 'emitido' ? 'rgba(52,211,153,0.15)' : 'rgba(148,163,184,0.15)'};
+                       color: ${r.status_receita === 'emitido' ? 'var(--emerald)' : '#94a3b8'}">
+            ${r.status_receita}
+          </span>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('Erro ao carregar histórico de receitas:', err);
+    container.innerHTML = `<div class="text-center py-4 text-xs text-red-400">Erro ao carregar</div>`;
+  }
+}
+
+async function verDetalheReceita(id) {
+  try {
+    const response = await fetch(`/api/receitas/detalhe/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const receita = await response.json();
+
+    if (!response.ok) {
+      alert(receita.erro || 'Erro ao carregar receita');
+      return;
+    }
+
+    // Monta um alert simples por enquanto (depois podemos fazer modal bonito)
+    let texto = `Receita #${receita.id} — ${receita.status_receita.toUpperCase()}\n\n`;
+    texto += `Profissional: ${receita.profissional_nome}`;
+    if (receita.profissional_crm) texto += ` — CRM ${receita.profissional_crm}/${receita.profissional_uf_crm || ''}`;
+    texto += `\n\nMedicamentos:\n`;
+    receita.itens.forEach((item, i) => {
+      texto += `${i+1}. ${item.medicamento_nome} ${item.concentracao || ''}\n`;
+      texto += `   ${item.quantidade} — ${item.posologia}\n\n`;
+    });
+    if (receita.observacoes) texto += `Obs: ${receita.observacoes}`;
+
+    alert(texto);
+  } catch (err) {
+    alert('Erro ao carregar detalhes da receita.');
+  }
+}
+
 // ─── EXPORTS GLOBAIS ────────────────────────────────────────────
 window.trocarAba = trocarAba;
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;
@@ -576,3 +837,20 @@ function exibirAvisoSemPaciente() {
     elementosFicha.pacienteHeader.innerText = "SELECIONE UM PACIENTE";
   }
 }
+
+window.adicionarMedicamento = adicionarMedicamento;
+window.removerMedicamento = removerMedicamento;
+window.emitirReceita = emitirReceita;
+window.verDetalheReceita = verDetalheReceita;
+
+// Chama o CRM e o histórico da receita quando a aba for aberta
+// (precisa vir depois de "window.trocarAba = trocarAba" acima, senão seria sobrescrito)
+const originalTrocarAba = window.trocarAba;
+window.trocarAba = function (nomeAba) {
+  originalTrocarAba(nomeAba);
+  if (nomeAba === 'receituario') {
+    atualizarCrmReceita();
+    const pacienteId = document.getElementById('atendimentoPacienteId')?.value;
+    if (pacienteId) carregarHistoricoReceitas(pacienteId);
+  }
+};
