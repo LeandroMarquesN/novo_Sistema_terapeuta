@@ -952,14 +952,17 @@
       <div class="modal-body">
         <input type="hidden" id="tokenPacienteId">
         <p class="text-slate-300 mb-4" id="tokenModalTexto">Deseja enviar o link de acesso ao portal para o paciente?</p>
-        
-        <div class="mb-3">
-          <label class="modal-info-label mb-2">Permitir que o paciente visualize os prontuários no portal?</label>
-          <select id="selectPermitirProntuario" class="search-bar form-control">
-            <option value="1">Sim (Permitir visualização)</option>
-            <option value="0">Não (Ocultar prontuários)</option>
+
+        <div class="mb-4">
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
+            Permitir que o paciente visualize os prontuários no portal
+          </label>
+          <select id="selectPermitirProntuario" class="w-full bg-[#071620] border border-[rgba(148,197,189,0.12)] rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50">
+              <option value="0" selected class="bg-[#071620] text-slate-200">Não — Ocultar prontuários (Padrão seguro)</option>
+              <option value="1" class="bg-[#071620] text-slate-200">Sim — Permitir visualização online</option>
           </select>
-        </div>
+          <p class="text-xs text-slate-400 mt-1.5">Por segurança, a exibição do histórico de atendimento vem bloqueada por padrão.</p>
+      </div>
       </div>
       <div class="modal-footer" style="border-top: 1px solid var(--border);">
         <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
