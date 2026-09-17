@@ -1046,6 +1046,265 @@ window.trocarAba = function (nomeAba) {
     if (pid) carregarHistoricoAtestados(pid);
   }
 };
+// =========================================================
+// SOLICITAÇÃO DE EXAMES
+// =========================================================
+let catalogoExamesCompleto = {};
+let examesSelecionados = [];
+let filtroPacoteAtual = 'todos';
+
+function atualizarCrmExame() {
+  try {
+    const tokenLocal = localStorage.getItem('token');
+    if (!tokenLocal) return;
+    const payload = JSON.parse(atob(tokenLocal.split('.')[1]));
+    const el = document.getElementById('exameCrmInfo');
+    if (el) {
+      el.innerText = payload.crm
+        ? (payload.uf_crm ? `CRM ${payload.crm}/${payload.uf_crm}` : `CRM ${payload.crm}`)
+        : 'CRM não cadastrado';
+    }
+  } catch (e) { }
+}
+
+async function carregarCatalogoExames() {
+  const container = document.getElementById('catalogoExamesContainer');
+  if (!container) return;
+
+  try {
+    const response = await fetch('/api/solicitacoes-exames/catalogo', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const data = await response.json();
+
+    catalogoExamesCompleto = data.exames || {};
+    renderizarCatalogo();
+  } catch (err) {
+    console.error('Erro ao carregar catálogo:', err);
+    container.innerHTML = `
+      <div class="text-center py-10 text-xs text-red-400">
+        Erro ao carregar catálogo de exames.
+      </div>`;
+  }
+}
+
+function filtrarPacoteExame(pacote) {
+  filtroPacoteAtual = pacote;
+  document.querySelectorAll('.pacote-btn').forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  renderizarCatalogo();
+}
+
+function renderizarCatalogo() {
+  const container = document.getElementById('catalogoExamesContainer');
+  if (!container) return;
+
+  const categorias = Object.keys(catalogoExamesCompleto);
+  if (categorias.length === 0) {
+    container.innerHTML = `<div class="text-center py-10 text-xs" style="color:rgba(148,163,184,0.4)">Catálogo vazio</div>`;
+    return;
+  }
+
+  let html = '';
+
+  categorias.forEach(categoria => {
+    let exames = catalogoExamesCompleto[categoria];
+
+    // Filtro por pacote
+    if (filtroPacoteAtual !== 'todos') {
+      exames = exames.filter(e => e.pacote_sugerido === filtroPacoteAtual);
+    }
+
+    if (exames.length === 0) return;
+
+    html += `
+      <div>
+        <p class="form-label mb-2 flex items-center gap-1.5">
+          <i class="fas fa-folder" style="color:var(--amber)"></i>
+          ${categoria}
+        </p>
+        <div class="space-y-1.5">
+          ${exames.map(exame => {
+      const jaSelecionado = examesSelecionados.some(s => s.nome_exame === exame.nome_exame);
+      return `
+              <div class="exame-item glass-card p-2.5 flex items-center gap-3 cursor-pointer ${jaSelecionado ? 'selecionado' : ''}"
+                   onclick="toggleExameSelecionado('${exame.categoria.replace(/'/g, "\\'")}', '${exame.nome_exame.replace(/'/g, "\\'")}', '${(exame.instrucoes_padrao || '').replace(/'/g, "\\'")}', '${exame.codigo_tuss || ''}')">
+                <div class="w-5 h-5 rounded border flex items-center justify-center flex-shrink-0"
+                     style="border-color: ${jaSelecionado ? 'var(--emerald)' : 'rgba(148,163,184,0.3)'}; background: ${jaSelecionado ? 'rgba(52,211,153,0.2)' : 'transparent'}">
+                  ${jaSelecionado ? '<i class="fas fa-check text-[10px]" style="color:var(--emerald)"></i>' : ''}
+                </div>
+                <div class="min-w-0 flex-1">
+                  <p class="text-xs font-bold text-white truncate">${exame.nome_exame}</p>
+                  ${exame.instrucoes_padrao ? `<p class="text-[10px] truncate" style="color:rgba(148,163,184,0.55)">${exame.instrucoes_padrao}</p>` : ''}
+                </div>
+              </div>
+            `;
+    }).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html || `<div class="text-center py-10 text-xs" style="color:rgba(148,163,184,0.4)">Nenhum exame neste filtro</div>`;
+}
+
+function toggleExameSelecionado(categoria, nomeExame, instrucoes, codigoTuss) {
+  const index = examesSelecionados.findIndex(e => e.nome_exame === nomeExame);
+
+  if (index >= 0) {
+    examesSelecionados.splice(index, 1);
+  } else {
+    examesSelecionados.push({
+      categoria,
+      nome_exame: nomeExame,
+      instrucoes: instrucoes || null,
+      codigo_tuss: codigoTuss || null
+    });
+  }
+
+  renderizarCatalogo();
+  renderizarExamesSelecionados();
+}
+
+function renderizarExamesSelecionados() {
+  const container = document.getElementById('listaExamesSelecionados');
+  const contador = document.getElementById('contadorExamesSelecionados');
+
+  if (contador) contador.innerText = examesSelecionados.length;
+
+  if (examesSelecionados.length === 0) {
+    container.innerHTML = `
+      <div class="text-center py-8" style="color: rgba(148,163,184,0.35)">
+        <i class="fas fa-vials text-2xl mb-2 block"></i>
+        <p class="text-xs">Nenhum exame selecionado</p>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = examesSelecionados.map((ex, i) => `
+    <div class="glass-card p-2.5 flex items-start gap-2">
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-bold text-white truncate">${ex.nome_exame}</p>
+        <p class="text-[10px]" style="color:rgba(148,163,184,0.55)">${ex.categoria}</p>
+      </div>
+      <button type="button" onclick="removerExameSelecionado(${i})" class="text-slate-500 hover:text-red-400 p-1">
+        <i class="fas fa-times text-xs"></i>
+      </button>
+    </div>
+  `).join('');
+}
+
+function removerExameSelecionado(index) {
+  examesSelecionados.splice(index, 1);
+  renderizarCatalogo();
+  renderizarExamesSelecionados();
+}
+
+async function emitirSolicitacaoExame(assinar) {
+  const pacienteId = document.getElementById('atendimentoPacienteId')?.value;
+  if (!pacienteId) {
+    alert('Nenhum paciente selecionado.');
+    return;
+  }
+
+  if (examesSelecionados.length === 0) {
+    alert('Selecione pelo menos um exame.');
+    return;
+  }
+
+  if (assinar) {
+    const original = window.confirmarAssinatura;
+    window.confirmarAssinatura = async function (e) {
+      if (e) e.preventDefault();
+      const senha = document.getElementById('senhaAssinatura').value;
+      if (!senha) {
+        document.getElementById('erroSenhaAssinatura').innerText = 'Digite sua senha.';
+        document.getElementById('erroSenhaAssinatura').classList.remove('hidden');
+        return;
+      }
+      fecharModalAssinatura();
+      window.confirmarAssinatura = original;
+      await salvarSolicitacaoNoBackend(true, senha);
+    };
+    abrirModalAssinatura();
+  } else {
+    await salvarSolicitacaoNoBackend(false, null);
+  }
+}
+
+async function salvarSolicitacaoNoBackend(assinar, senha) {
+  const pacienteId = document.getElementById('atendimentoPacienteId').value;
+  const agendamentoId = document.getElementById('atendimentoAgendamentoId')?.value || null;
+
+  const payload = {
+    pacienteId: parseInt(pacienteId),
+    agendamentoId: agendamentoId ? parseInt(agendamentoId) : null,
+    titulo: document.getElementById('exameTitulo').value.trim() || null,
+    observacoes: document.getElementById('exameObservacoes').value.trim() || null,
+    prioridade: document.getElementById('examePrioridade').value || 'rotina',
+    itens: examesSelecionados,
+    apenasRascunho: !assinar,
+    senhaAssinatura: senha || undefined
+  };
+
+  try {
+    const response = await fetch('/api/solicitacoes-exames/salvar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(assinar ? '✅ Solicitação de exames emitida e assinada!' : '✅ Rascunho salvo com sucesso!');
+      examesSelecionados = [];
+      renderizarExamesSelecionados();
+      renderizarCatalogo();
+      document.getElementById('exameTitulo').value = '';
+      document.getElementById('exameObservacoes').value = '';
+      document.getElementById('examePrioridade').value = 'rotina';
+    } else {
+      alert(data.erro || 'Erro ao salvar solicitação.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão ao salvar solicitação.');
+  }
+}
+
+// Integração final com trocarAba
+const __trocarAbaOriginal = window.trocarAba;
+window.trocarAba = function (nomeAba) {
+  __trocarAbaOriginal(nomeAba);
+
+  if (nomeAba === 'receituario') {
+    atualizarCrmReceita();
+    const pid = document.getElementById('atendimentoPacienteId')?.value;
+    if (pid) carregarHistoricoReceitas(pid);
+  }
+
+  if (nomeAba === 'atestado') {
+    atualizarCrmAtestado();
+    selecionarTipoAtestado('afastamento');
+    const pid = document.getElementById('atendimentoPacienteId')?.value;
+    if (pid) carregarHistoricoAtestados(pid);
+  }
+
+  if (nomeAba === 'exames') {
+    atualizarCrmExame();
+    carregarCatalogoExames();
+  }
+};
+
+// Exports
+window.filtrarPacoteExame = filtrarPacoteExame;
+window.toggleExameSelecionado = toggleExameSelecionado;
+window.removerExameSelecionado = removerExameSelecionado;
+window.emitirSolicitacaoExame = emitirSolicitacaoExame;
 
 // Exports
 window.selecionarTipoAtestado = selecionarTipoAtestado;
