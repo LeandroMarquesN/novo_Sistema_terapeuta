@@ -717,6 +717,9 @@ async function salvarReceitaNoBackend(assinar, senha) {
 
     if (response.ok) {
       alert(assinar ? '✅ Receita emitida e assinada com sucesso!' : '✅ Rascunho salvo com sucesso!');
+      if (assinar && data.receitaId) {
+        ultimaReceitaEmitidaId = data.receitaId;
+      }
       medicamentosReceita = [];
       renderizarMedicamentos();
       document.getElementById('receitaObservacoes').value = '';
@@ -940,6 +943,9 @@ async function salvarAtestadoNoBackend(assinar, senha) {
 
     if (response.ok) {
       alert(assinar ? '✅ Atestado emitido e assinado com sucesso!' : '✅ Rascunho salvo com sucesso!');
+      if (assinar && data.atestadoId) {
+        ultimoAtestadoEmitidoId = data.atestadoId;
+      }
       // Limpa formulário
       document.getElementById('atestadoDias').value = 1;
       document.getElementById('atestadoDataInicio').value = '';
@@ -1261,6 +1267,9 @@ async function salvarSolicitacaoNoBackend(assinar, senha) {
 
     if (response.ok) {
       alert(assinar ? '✅ Solicitação de exames emitida e assinada!' : '✅ Rascunho salvo com sucesso!');
+      if (assinar && data.solicitacaoId) {
+        ultimaSolicitacaoEmitidaId = data.solicitacaoId;
+      }
       examesSelecionados = [];
       renderizarExamesSelecionados();
       renderizarCatalogo();
@@ -1273,6 +1282,122 @@ async function salvarSolicitacaoNoBackend(assinar, senha) {
   } catch (err) {
     console.error(err);
     alert('Erro de conexão ao salvar solicitação.');
+  }
+}
+
+// =========================================================
+// ENVIO DE E-MAILS (Receita / Atestado / Exames)
+// =========================================================
+
+let ultimaReceitaEmitidaId = null;
+let ultimoAtestadoEmitidoId = null;
+let ultimaSolicitacaoEmitidaId = null;
+
+async function enviarReceitaEmail() {
+  if (!ultimaReceitaEmitidaId) {
+    alert('Emita uma receita primeiro para poder enviá-la por e-mail.');
+    return;
+  }
+
+  const btn = document.getElementById('btnEnviarReceitaEmail');
+  try {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    const response = await fetch('/api/receitas/enviar-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ receitaId: ultimaReceitaEmitidaId })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert('✅ Receita enviada por e-mail com sucesso!');
+    } else {
+      alert(data.erro || 'Erro ao enviar e-mail da receita.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão ao enviar e-mail.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar por E-mail';
+  }
+}
+
+async function enviarAtestadoEmail() {
+  if (!ultimoAtestadoEmitidoId) {
+    alert('Emita um atestado primeiro para poder enviá-lo por e-mail.');
+    return;
+  }
+
+  const btn = document.getElementById('btnEnviarAtestadoEmail');
+  try {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    const response = await fetch('/api/atestados/enviar-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ atestadoId: ultimoAtestadoEmitidoId })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert('✅ Atestado enviado por e-mail com sucesso!');
+    } else {
+      alert(data.erro || 'Erro ao enviar e-mail do atestado.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão ao enviar e-mail.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar por E-mail';
+  }
+}
+
+async function enviarExamesEmail() {
+  if (!ultimaSolicitacaoEmitidaId) {
+    alert('Emita uma solicitação de exames primeiro para poder enviá-la por e-mail.');
+    return;
+  }
+
+  const btn = document.getElementById('btnEnviarExamesEmail');
+  try {
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+    const response = await fetch('/api/solicitacoes-exames/enviar-email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ solicitacaoId: ultimaSolicitacaoEmitidaId })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert('✅ Solicitação de exames enviada por e-mail com sucesso!');
+    } else {
+      alert(data.erro || 'Erro ao enviar e-mail da solicitação.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão ao enviar e-mail.');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar por E-mail';
   }
 }
 
@@ -1327,3 +1452,7 @@ window.trocarAba = function (nomeAba) {
     if (pacienteId) carregarHistoricoReceitas(pacienteId);
   }
 };
+
+window.enviarReceitaEmail = enviarReceitaEmail;
+window.enviarAtestadoEmail = enviarAtestadoEmail;
+window.enviarExamesEmail = enviarExamesEmail;
