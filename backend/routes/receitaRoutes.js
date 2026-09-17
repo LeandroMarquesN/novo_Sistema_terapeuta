@@ -10,5 +10,6 @@ router.post('/salvar', authMiddleware, authAtendimento, receitaController.salvar
 router.get('/paciente/:pacienteId', authMiddleware, authAtendimento, receitaController.listarReceitas);
 router.get('/detalhe/:id', authMiddleware, authAtendimento, receitaController.obterDetalheReceita);
 router.post('/enviar-email', authMiddleware, authAtendimento, receitaController.enviarReceitaEmail);
+router.post('/enviar-email', authMiddleware, authAtendimento, receitaController.enviarReceitaEmail);
 
 module.exports = router;

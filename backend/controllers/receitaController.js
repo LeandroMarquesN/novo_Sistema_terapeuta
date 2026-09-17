@@ -239,3 +239,65 @@ exports.enviarReceitaEmail = async (req, res) => {
         res.status(500).json({ erro: 'Falha ao enviar e-mail da receita.' });
     }
 };
+// =========================================================
+// 4. ENVIAR RECEITA POR E-MAIL
+// =========================================================
+exports.enviarReceitaEmail = async (req, res) => {
+    const { receitaId } = req.body;
+    const clinicaId = req.usuario.clinica_id;
+    const usuarioId = req.usuario.id;
+
+    try {
+        const [rows] = await db.query(
+            `SELECT r.*, 
+                p.nome AS nome_paciente, 
+                p.email AS email_paciente, 
+                p.token_acesso
+         FROM receitas r
+         JOIN pacientes p ON r.paciente_id = p.id
+         WHERE r.id = ? AND r.clinica_id = ? AND r.status_receita = 'emitido'`,
+            [receitaId, clinicaId]
+        );
+
+        if (!rows.length) {
+            return res.status(404).json({ erro: 'Receita emitida não encontrada.' });
+        }
+
+        const receita = rows[0];
+
+        if (!receita.email_paciente) {
+            return res.status(400).json({ erro: 'Paciente não possui e-mail cadastrado.' });
+        }
+
+        const [itens] = await db.query(
+            `SELECT * FROM receita_itens WHERE receita_id = ? ORDER BY ordem`,
+            [receitaId]
+        );
+
+        // Auditoria
+        await auditService.registrarLog(usuarioId, 'receita', receitaId, 'ENVIOU_EMAIL', {
+            crm: receita.profissional_crm,
+            uf_crm: receita.profissional_uf_crm
+        });
+
+        await notificationService.sendReceitaEmailNotification({
+            nome_paciente: receita.nome_paciente,
+            email_paciente: receita.email_paciente,
+            token_acesso: receita.token_acesso,
+            nome_profissional: receita.profissional_nome,
+            profissional_crm: receita.profissional_crm,
+            profissional_uf_crm: receita.profissional_uf_crm,
+            data_emissao: receita.data_emissao
+                ? new Date(receita.data_emissao).toLocaleDateString('pt-BR')
+                : new Date().toLocaleDateString('pt-BR'),
+            validade_dias: receita.validade_dias || 30,
+            observacoes: receita.observacoes,
+            itens
+        });
+
+        res.json({ success: true, message: 'Receita enviada por e-mail com sucesso!' });
+    } catch (error) {
+        console.error('ERRO NO ENVIO DE RECEITA:', error);
+        res.status(500).json({ erro: 'Falha ao enviar e-mail da receita.' });
+    }
+};

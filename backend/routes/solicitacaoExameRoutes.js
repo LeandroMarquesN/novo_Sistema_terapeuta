@@ -21,4 +21,6 @@ router.get('/detalhe/:id', authMiddleware, authAtendimento, solicitacaoExameCont
 // Cancelar
 router.put('/cancelar/:id', authMiddleware, authAtendimento, solicitacaoExameController.cancelarSolicitacao);
 
+router.post('/enviar-email', authMiddleware, authAtendimento, solicitacaoExameController.enviarExamesEmail);
+
 module.exports = router;

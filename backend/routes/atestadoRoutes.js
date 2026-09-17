@@ -18,4 +18,6 @@ router.get('/detalhe/:id', authMiddleware, authAtendimento, atestadoController.o
 // Cancelar atestado
 router.put('/cancelar/:id', authMiddleware, authAtendimento, atestadoController.cancelarAtestado);
 
+router.post('/enviar-email', authMiddleware, authAtendimento, atestadoController.enviarAtestadoEmail);
+
 module.exports = router;

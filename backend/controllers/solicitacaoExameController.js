@@ -4,6 +4,7 @@
  */
 const db = require('../config/db');
 const auditService = require('../services/auditService');
+const notificationService = require('../services/notificationService');
 
 // =========================================================
 // 1. BUSCAR CATÁLOGO DE EXAMES (global + da clínica)
@@ -291,5 +292,70 @@ exports.cancelarSolicitacao = async (req, res) => {
     } catch (err) {
         console.error('ERRO AO CANCELAR SOLICITAÇÃO:', err);
         res.status(500).json({ erro: 'Erro ao cancelar solicitação.' });
+    }
+};
+
+
+
+// =========================================================
+// 6. ENVIAR SOLICITAÇÃO DE EXAMES POR E-MAIL
+// =========================================================
+exports.enviarExamesEmail = async (req, res) => {
+    const { solicitacaoId } = req.body;
+    const clinicaId = req.usuario.clinica_id;
+    const usuarioId = req.usuario.id;
+
+    try {
+        const [rows] = await db.query(
+            `SELECT s.*, 
+              p.nome AS nome_paciente, 
+              p.email AS email_paciente, 
+              p.token_acesso
+       FROM solicitacoes_exames s
+       JOIN pacientes p ON s.paciente_id = p.id
+       WHERE s.id = ? AND s.clinica_id = ? AND s.status_solicitacao = 'emitido'`,
+            [solicitacaoId, clinicaId]
+        );
+
+        if (!rows.length) {
+            return res.status(404).json({ erro: 'Solicitação emitida não encontrada.' });
+        }
+
+        const solicitacao = rows[0];
+
+        if (!solicitacao.email_paciente) {
+            return res.status(400).json({ erro: 'Paciente não possui e-mail cadastrado.' });
+        }
+
+        const [itens] = await db.query(
+            `SELECT * FROM solicitacao_exame_itens WHERE solicitacao_id = ? ORDER BY ordem`,
+            [solicitacaoId]
+        );
+
+        await auditService.registrarLog(usuarioId, 'solicitacao_exame', solicitacaoId, 'ENVIOU_EMAIL', {
+            crm: solicitacao.profissional_crm,
+            uf_crm: solicitacao.profissional_uf_crm
+        });
+
+        await notificationService.sendExamesEmailNotification({
+            nome_paciente: solicitacao.nome_paciente,
+            email_paciente: solicitacao.email_paciente,
+            token_acesso: solicitacao.token_acesso,
+            nome_profissional: solicitacao.profissional_nome,
+            profissional_crm: solicitacao.profissional_crm,
+            profissional_uf_crm: solicitacao.profissional_uf_crm,
+            data_emissao: solicitacao.data_emissao
+                ? new Date(solicitacao.data_emissao).toLocaleDateString('pt-BR')
+                : new Date().toLocaleDateString('pt-BR'),
+            titulo: solicitacao.titulo,
+            prioridade: solicitacao.prioridade,
+            observacoes: solicitacao.observacoes,
+            itens
+        });
+
+        res.json({ success: true, message: 'Solicitação de exames enviada por e-mail com sucesso!' });
+    } catch (error) {
+        console.error('ERRO NO ENVIO DE EXAMES:', error);
+        res.status(500).json({ erro: 'Falha ao enviar e-mail da solicitação de exames.' });
     }
 };

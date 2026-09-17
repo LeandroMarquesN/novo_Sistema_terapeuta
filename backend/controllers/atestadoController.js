@@ -4,6 +4,7 @@
  */
 const db = require('../config/db');
 const auditService = require('../services/auditService');
+const notificationService = require('../services/notificationService');
 
 // =========================================================
 // 1. SALVAR / EMITIR ATESTADO
@@ -246,5 +247,68 @@ exports.cancelarAtestado = async (req, res) => {
     } catch (err) {
         console.error('ERRO AO CANCELAR ATESTADO:', err);
         res.status(500).json({ erro: 'Erro ao cancelar atestado.' });
+    }
+};
+
+
+
+// =========================================================
+// 5. ENVIAR ATESTADO POR E-MAIL
+// =========================================================
+exports.enviarAtestadoEmail = async (req, res) => {
+    const { atestadoId } = req.body;
+    const clinicaId = req.usuario.clinica_id;
+    const usuarioId = req.usuario.id;
+
+    try {
+        const [rows] = await db.query(
+            `SELECT a.*, 
+              p.nome AS nome_paciente, 
+              p.email AS email_paciente, 
+              p.token_acesso
+       FROM atestados a
+       JOIN pacientes p ON a.paciente_id = p.id
+       WHERE a.id = ? AND a.clinica_id = ? AND a.status_atestado = 'emitido'`,
+            [atestadoId, clinicaId]
+        );
+
+        if (!rows.length) {
+            return res.status(404).json({ erro: 'Atestado emitido não encontrado.' });
+        }
+
+        const atestado = rows[0];
+
+        if (!atestado.email_paciente) {
+            return res.status(400).json({ erro: 'Paciente não possui e-mail cadastrado.' });
+        }
+
+        await auditService.registrarLog(usuarioId, 'atestado', atestadoId, 'ENVIOU_EMAIL', {
+            crm: atestado.profissional_crm,
+            uf_crm: atestado.profissional_uf_crm
+        });
+
+        await notificationService.sendAtestadoEmailNotification({
+            nome_paciente: atestado.nome_paciente,
+            email_paciente: atestado.email_paciente,
+            token_acesso: atestado.token_acesso,
+            nome_profissional: atestado.profissional_nome,
+            profissional_crm: atestado.profissional_crm,
+            profissional_uf_crm: atestado.profissional_uf_crm,
+            tipo_atestado: atestado.tipo_atestado,
+            data_emissao: atestado.data_emissao
+                ? new Date(atestado.data_emissao).toLocaleDateString('pt-BR')
+                : new Date().toLocaleDateString('pt-BR'),
+            dias_afastamento: atestado.dias_afastamento,
+            data_inicio: atestado.data_inicio,
+            data_fim: atestado.data_fim,
+            cid: atestado.cid,
+            local_atendimento: atestado.local_atendimento,
+            texto_livre: atestado.texto_livre
+        });
+
+        res.json({ success: true, message: 'Atestado enviado por e-mail com sucesso!' });
+    } catch (error) {
+        console.error('ERRO NO ENVIO DE ATESTADO:', error);
+        res.status(500).json({ erro: 'Falha ao enviar e-mail do atestado.' });
     }
 };
