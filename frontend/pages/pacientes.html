@@ -490,6 +490,149 @@
       background: rgba(255,255,255,0.05) !important; border: 1px solid var(--border) !important;
       color: rgba(148,163,184,0.7) !important; border-radius: 11px !important; font-weight: 700;
     }
+
+    /* ── Modal Token / Permissão de Prontuário (elegante + responsivo) ── */
+    #modalTokenPermissao .modal-dialog {
+      max-width: 440px;
+      width: 100%;
+      margin: 1rem auto;
+    }
+    .token-perm-modal {
+      background: rgba(2,12,18,0.98) !important;
+      border: 1px solid rgba(167,139,250,0.28) !important;
+      border-radius: 22px !important;
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.45), 0 0 40px rgba(167,139,250,0.08);
+      overflow: hidden;
+      color: #e2e8f0;
+    }
+    .token-perm-header {
+      border-bottom: 1px solid rgba(167,139,250,0.15) !important;
+      background: linear-gradient(180deg, rgba(167,139,250,0.08), transparent) !important;
+      padding: 18px 20px !important;
+      border-radius: 22px 22px 0 0 !important;
+    }
+    .token-perm-icon {
+      width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(167,139,250,0.25), rgba(139,92,246,0.15));
+      border: 1px solid rgba(167,139,250,0.35);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--purple); font-size: 16px;
+      box-shadow: 0 0 18px rgba(167,139,250,0.2);
+    }
+    .token-perm-header .modal-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px; font-weight: 800; color: #f1f5f9 !important;
+      letter-spacing: -0.01em;
+    }
+    .token-perm-sub {
+      font-size: 11px; font-weight: 600; color: rgba(148,163,184,0.55);
+      margin-top: 2px;
+    }
+    .token-perm-body { padding: 20px 20px 8px !important; }
+    .token-perm-texto {
+      font-size: 14px; color: rgba(203,213,225,0.85); line-height: 1.55;
+      margin-bottom: 18px;
+    }
+    .token-perm-option-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(167,139,250,0.18);
+      border-radius: 16px;
+      padding: 16px;
+    }
+    .token-perm-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.06em; color: rgba(167,139,250,0.9);
+      margin-bottom: 10px;
+    }
+    .token-perm-label i { font-size: 13px; }
+    .token-perm-select {
+      width: 100%;
+      background: rgba(7,22,32,0.9);
+      border: 1px solid rgba(148,197,189,0.18);
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 13px; font-weight: 600;
+      color: #e2e8f0;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a78bfa' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .token-perm-select:focus {
+      border-color: rgba(167,139,250,0.5);
+      box-shadow: 0 0 0 3px rgba(167,139,250,0.12);
+    }
+    .token-perm-select option {
+      background: #071620; color: #e2e8f0;
+    }
+    .token-perm-hint {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 11px; color: rgba(148,163,184,0.6);
+      line-height: 1.5; margin: 12px 0 0;
+    }
+    .token-perm-hint i {
+      color: var(--emerald); margin-top: 2px; flex-shrink: 0; font-size: 12px;
+    }
+    .token-perm-footer {
+      border-top: 1px solid rgba(167,139,250,0.12) !important;
+      background: rgba(255,255,255,0.02) !important;
+      border-radius: 0 0 22px 22px !important;
+      padding: 14px 20px !important;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: flex-end;
+    }
+    .token-perm-btn-cancel {
+      flex: 1 1 auto; min-width: 110px;
+      padding: 12px 18px; border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      color: rgba(148,163,184,0.75);
+      font-weight: 700; font-size: 13px; cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+    }
+    .token-perm-btn-cancel:hover {
+      background: rgba(255,255,255,0.08);
+      color: #e2e8f0;
+    }
+    .token-perm-btn-send {
+      flex: 1 1 auto; min-width: 150px;
+      padding: 12px 18px; border-radius: 12px;
+      background: linear-gradient(135deg, #7c3aed, #6366f1);
+      border: none; color: #fff;
+      font-weight: 800; font-size: 13px; cursor: pointer;
+      font-family: 'Space Grotesk', sans-serif;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 8px 24px rgba(124,58,237,0.3);
+      transition: all 0.22s;
+    }
+    .token-perm-btn-send:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(124,58,237,0.4);
+    }
+    @media (max-width: 480px) {
+      #modalTokenPermissao .modal-dialog {
+        margin: 0.75rem auto;
+        max-width: calc(100% - 24px);
+      }
+      .token-perm-header { padding: 16px !important; }
+      .token-perm-body { padding: 16px 16px 6px !important; }
+      .token-perm-footer {
+        padding: 12px 16px !important;
+        flex-direction: column-reverse;
+      }
+      .token-perm-btn-cancel,
+      .token-perm-btn-send { width: 100%; min-width: 0; }
+      .token-perm-header .modal-title { font-size: 15px; }
+      .token-perm-icon { width: 38px; height: 38px; font-size: 14px; }
+    }
+
     .modal-prontuario-avatar {
       width: 90px; height: 90px; border-radius: 50%; object-fit: cover;
       border: 2px solid rgba(52,211,153,0.3); box-shadow: 0 0 20px rgba(52,211,153,0.15);
@@ -943,31 +1086,44 @@
 
   <!-- Modal: Enviar Token de Acesso e Permissão de Prontuário -->
 <div class="modal fade" id="modalTokenPermissao" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content" style="background: rgba(2,12,18,0.97); border: 1px solid var(--border); border-radius: 22px;">
-      <div class="modal-header" style="border-bottom: 1px solid var(--border);">
-        <h5 class="modal-title text-white"><i class="fas fa-key text-purple" style="color: var(--purple);"></i> Enviar Acesso ao Portal</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable px-3">
+    <div class="modal-content token-perm-modal">
+      <div class="modal-header token-perm-header">
+        <div class="d-flex align-items-center gap-3">
+          <div class="token-perm-icon">
+            <i class="fas fa-key"></i>
+          </div>
+          <div>
+            <h5 class="modal-title mb-0">Enviar Acesso ao Portal</h5>
+            <p class="token-perm-sub mb-0">Link seguro por e-mail</p>
+          </div>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body token-perm-body">
         <input type="hidden" id="tokenPacienteId">
-        <p class="text-slate-300 mb-4" id="tokenModalTexto">Deseja enviar o link de acesso ao portal para o paciente?</p>
+        <p class="token-perm-texto" id="tokenModalTexto">Deseja enviar o link de acesso ao portal para o paciente?</p>
 
-        <div class="mb-4">
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">
-            Permitir que o paciente visualize os prontuários no portal
+        <div class="token-perm-option-card">
+          <label class="token-perm-label" for="selectPermitirProntuario">
+            <i class="fas fa-file-medical-alt"></i>
+            Visualização de prontuários no portal
           </label>
-          <select id="selectPermitirProntuario" class="w-full bg-[#071620] border border-[rgba(148,197,189,0.12)] rounded-xl px-3.5 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50">
-              <option value="0" selected class="bg-[#071620] text-slate-200">Não — Ocultar prontuários (Padrão seguro)</option>
-              <option value="1" class="bg-[#071620] text-slate-200">Sim — Permitir visualização online</option>
+          <select id="selectPermitirProntuario" class="token-perm-select">
+            <option value="0" selected>Não — Ocultar prontuários (padrão seguro)</option>
+            <option value="1">Sim — Permitir visualização online</option>
           </select>
-          <p class="text-xs text-slate-400 mt-1.5">Por segurança, a exibição do histórico de atendimento vem bloqueada por padrão.</p>
+          <p class="token-perm-hint">
+            <i class="fas fa-shield-alt"></i>
+            Por segurança, o histórico clínico fica bloqueado por padrão. O paciente continua vendo agendamentos e dados cadastrais.
+          </p>
+        </div>
       </div>
-      </div>
-      <div class="modal-footer" style="border-top: 1px solid var(--border);">
-        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn-action-atender" style="flex:none" onclick="confirmarEnvioToken()">
-          <i class="fas fa-paper-plane"></i> Confirmar e Enviar
+      <div class="modal-footer token-perm-footer">
+        <button type="button" class="token-perm-btn-cancel" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="token-perm-btn-send" onclick="confirmarEnvioToken()">
+          <i class="fas fa-paper-plane"></i>
+          <span>Confirmar e Enviar</span>
         </button>
       </div>
     </div>
@@ -1113,7 +1269,7 @@
                     <button class="btn-action-outline" onclick="abrirEdicaoPaciente(${p.id})" title="Atualizar Cadastro">
                       <i class="fas fa-user-edit"></i>
                     </button>
-                    <button class="btn-action-purple" onclick="enviarTokenAcesso(${p.id}, '${nomeEsc}', ${p.permitir_ver_prontuario ?? 1})" title="Enviar Token de Acesso">
+                    <button class="btn-action-purple" onclick="enviarTokenAcesso(${p.id}, '${nomeEsc}', ${p.permitir_ver_prontuario ?? 0})" title="Enviar Token de Acesso">
                         <i class="fas fa-key"></i>
                     </button>
                     <button class="btn-action-outline" onclick="abrirSeletorFoto(${p.id})" title="Foto do paciente">
@@ -1579,12 +1735,13 @@
     // ── ENVIAR TOKEN DE ACESSO ────────────────────────────
     let modalTokenInstance = null;
 
-function enviarTokenAcesso(id, nome, permissaoAtual = 1) {
+function enviarTokenAcesso(id, nome, permissaoAtual = 0) {
     document.getElementById('tokenPacienteId').value = id;
     document.getElementById('tokenModalTexto').innerHTML = `Enviar link de acesso ao portal para <strong style="color:#f1f5f9">${nome}</strong>?`;
     
     const select = document.getElementById('selectPermitirProntuario');
-    if (select) select.value = String(permissaoAtual);
+    // Padrão seguro: 0 = não permitir visualização de prontuários
+    if (select) select.value = String(permissaoAtual ?? 0);
 
     if (!modalTokenInstance) {
         modalTokenInstance = new bootstrap.Modal(document.getElementById('modalTokenPermissao'));
