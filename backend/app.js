@@ -35,6 +35,11 @@ const landingPageRoutes = require('./routes/lading_pageRoutes');
 const recuperarSenhaRoutes = require('./routes/recuperarSenhaRoutes')
 const notificacoesRoutes = require('./routes/notificacoesRoutes');
 const marketingRoutes = require('./routes/marketingRoutes');
+
+const receitaRoutes = require('./routes/receitaRoutes');
+const atestadoRoutes = require('./routes/atestadoRoutes');
+const solicitacaoExameRoutes = require('./routes/solicitacaoExameRoutes');
+
 // ...
 
 // importação Middleware
@@ -103,6 +108,10 @@ app.use('/programa-fundadores', landingPageRoutes)
 
 app.use('/', agendaAvancadaRoutes);
 app.use('/api/agenda-avancada', agendaAvancadaApiRoutes);
+app.use('/api/receitas', receitaRoutes);
+app.use('/api/atestados', atestadoRoutes);
+app.use('/api/solicitacoes-exames', solicitacaoExameRoutes);
+
 
 console.log("Rota /programa-fundadores montada com sucesso!");
 

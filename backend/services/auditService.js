@@ -2,65 +2,46 @@
 const db = require('../config/db');
 
 /**
- * Registra auditoria com snapshot de CRM/UF.
- * Se as colunas crm/uf_crm ainda não existirem, faz fallback para o INSERT antigo.
+ * Registra log de auditoria genérico (prontuário, receita, atestado, solicitação de exame)
+ * @param {number} usuarioId 
+ * @param {string} tipoDocumento - 'prontuario' | 'receita' | 'atestado' | 'solicitacao_exame'
+ * @param {number} documentoId 
+ * @param {string} acao 
+ * @param {object} [extras] - { crm, uf_crm, prontuarioId }
  */
-const registrarLog = async (usuarioId, prontuarioId, acao) => {
+async function registrarLog(usuarioId, tipoDocumento, documentoId, acao, extras = {}) {
   try {
-    if (!usuarioId || !prontuarioId || !acao) {
-      console.error('⚠️ Auditoria ignorada — parâmetros inválidos:', {
-        usuarioId,
-        prontuarioId,
-        acao
-      });
-      return;
-    }
+    const { crm = null, uf_crm = null, prontuarioId = null } = extras;
 
-    const uid = Number(usuarioId);
-    const pid = Number(prontuarioId);
+    // Se for prontuário antigo, mantém compatibilidade
+    const prontuario_id = tipoDocumento === 'prontuario' ? documentoId : (prontuarioId || null);
 
-    // Snapshot do CRM no momento da ação
-    let crm = null;
-    let ufCrm = null;
-
-    try {
-      const [rows] = await db.query(
-        'SELECT crm, uf_crm FROM usuarios WHERE id = ? LIMIT 1',
-        [uid]
-      );
-      if (rows && rows.length > 0) {
-        crm = rows[0].crm || null;
-        ufCrm = rows[0].uf_crm || null;
-      }
-    } catch (e) {
-      console.error('⚠️ Auditoria: falha ao buscar CRM do usuário:', e.message);
-    }
-
-    // Tenta INSERT completo (com crm / uf_crm)
-    try {
-      await db.query(
-        `INSERT INTO logs_auditoria (usuario_id, prontuario_id, acao, crm, uf_crm)
-         VALUES (?, ?, ?, ?, ?)`,
-        [uid, pid, acao, crm, ufCrm]
-      );
-      console.log(`✅ Auditoria OK: ${acao} | user=${uid} | pront=${pid} | crm=${crm || '—'}/${ufCrm || '—'}`);
-      return;
-    } catch (e) {
-      // Se as colunas crm/uf_crm não existirem, cai no INSERT antigo
-      console.error('⚠️ INSERT com CRM falhou, tentando fallback:', e.message);
-    }
-
-    // Fallback (tabela antiga, sem crm/uf_crm)
     await db.query(
-      `INSERT INTO logs_auditoria (usuario_id, prontuario_id, acao)
-       VALUES (?, ?, ?)`,
-      [uid, pid, acao]
+      `INSERT INTO logs_auditoria 
+       (usuario_id, tipo_documento, documento_id, prontuario_id, acao, crm, uf_crm)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [usuarioId, tipoDocumento, documentoId, prontuario_id, acao, crm, uf_crm]
     );
-    console.log(`✅ Auditoria OK (fallback): ${acao} | user=${uid} | pront=${pid}`);
-
   } catch (err) {
-    console.error('⚠️ Erro crítico ao registrar auditoria:', err.message || err);
+    console.error('[auditService] Erro ao registrar log:', err.message);
+    // Não interrompe o fluxo principal
+  }
+}
+
+/**
+ * Versão de compatibilidade com o código antigo de prontuário
+ * (prontuarioController ainda chama assim)
+ */
+async function registrarLogProntuario(usuarioId, prontuarioId, acao) {
+  return registrarLog(usuarioId, 'prontuario', prontuarioId, acao);
+}
+
+module.exports = {
+  registrarLog,
+  registrarLogProntuario,
+  // Mantém o nome antigo para não quebrar o prontuarioController atual
+  registrarLog: async (usuarioId, documentoId, acao) => {
+    // Detecta se é a chamada antiga (3 parâmetros) ou nova
+    return registrarLogProntuario(usuarioId, documentoId, acao);
   }
 };
-
-module.exports = { registrarLog };

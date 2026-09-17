@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS lista_espera (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+
 -- 3. TABELA DE CLÍNICAS
 CREATE TABLE IF NOT EXISTS clinicas (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -39,14 +40,19 @@ CREATE TABLE IF NOT EXISTS clinicas (
   senha_master VARCHAR(255) NOT NULL,
   plano_id INT NOT NULL,
   
+  -- Novas colunas integradas
   gateway_id VARCHAR(255) NULL,
+
   tipo_plano ENUM('FUNDADOR', 'PADRAO') DEFAULT 'PADRAO',
   data_inicio_trial DATE NULL,
   asaas_customer_id VARCHAR(100) NULL,
   asaas_subscription_id VARCHAR(100) NULL,
   status_pagamento ENUM('trial', 'ativo', 'inadimplente', 'cancelado') DEFAULT 'trial',
+
+  -- novas colunas
   data_fim_gratuidade DATE NULL,
   data_fim_promocao DATE NULL,
+
   valor_atual DECIMAL(10,2) DEFAULT 89.90,
   status ENUM('ativo', 'inadimplente', 'suspenso', 'cancelado') DEFAULT 'ativo',
   data_cadastro DATE DEFAULT (CURRENT_DATE),
@@ -57,16 +63,20 @@ CREATE TABLE IF NOT EXISTS clinicas (
   CONSTRAINT fk_clinica_plano FOREIGN KEY (plano_id) REFERENCES planos(id)
 ) ENGINE=InnoDB;
 
--- 4. TABELA DE USUÁRIOS
+
+-- 4. TABELA DE USUÁRIOS (Atualizada com a nova gama de profissionais)
 CREATE TABLE IF NOT EXISTS usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     clinica_id INT NULL,
     nome VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     senha VARCHAR(255) NOT NULL,
+
+    -- 🔑 Novas colunas adicionadas para o "Esqueci minha senha"
     reset_token VARCHAR(255) DEFAULT NULL,
     reset_expires DATETIME DEFAULT NULL,
     current_session_token VARCHAR(255) DEFAULT NULL,
+
     cargo ENUM(
         'dono',
         'admin',
@@ -79,13 +89,15 @@ CREATE TABLE IF NOT EXISTS usuarios (
         'fonoaudiologo',
         'profissional da saude'
     ) DEFAULT 'terapeuta',
+
     crm VARCHAR(20) NULL,
     uf_crm CHAR(2) NULL,
+
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_usuario_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 5. PACIENTES
+-- 5. PACIENTES (Versão Atualizada com Sistema de Tokens)
 CREATE TABLE IF NOT EXISTS pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -103,18 +115,29 @@ CREATE TABLE IF NOT EXISTS pacientes (
   altura DECIMAL(5,2),
   condicoes_preexistentes TEXT,
   foto_perfil VARCHAR(255),
+  
   permitir_ver_prontuario TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = Permite ver prontuários, 0 = Oculta',
+
   aceite_lgpd TINYINT(1) NOT NULL DEFAULT 0,
   data_aceite_lgpd TIMESTAMP NULL DEFAULT NULL,
+ 
   ativo TINYINT(1) NOT NULL DEFAULT 1,
   arquivado_em DATETIME NULL,
   arquivado_por INT NULL,
   motivo_arquivamento VARCHAR(255) NULL,
+  
+  -- Novas colunas para o Portal do Paciente
   token_acesso VARCHAR(128) DEFAULT NULL,
   token_expiracao DATETIME DEFAULT NULL,
+
+  -- Preferência de marketing por email (LGPD)
   aceita_marketing TINYINT(1) NOT NULL DEFAULT 1,
+
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
+  -- Índice para busca rápida de tokens
   INDEX idx_token_acesso (token_acesso),
+  
   CONSTRAINT fk_paciente_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
@@ -154,16 +177,21 @@ CREATE TABLE IF NOT EXISTS agendamentos (
   tipo_sanguineo VARCHAR(5),
   condicoes TEXT,
   duracao_minutos INT UNSIGNED NULL DEFAULT 50 COMMENT 'Duração em minutos (Agenda Avançada)',
+  -- Coluna gerada: só tem valor se o agendamento estiver ATIVO (não cancelado)
+  -- Cancelados viram NULL e não contam pra unicidade (NULL != NULL no MySQL)
   slot_ativo DATETIME GENERATED ALWAYS AS (
     CASE WHEN status_agendamento <> 'cancelado' THEN data_agendamento ELSE NULL END
   ) STORED,
+
   CONSTRAINT fk_agend_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_agend_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_agend_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+
+  -- A trava real: impossível existir 2 registros ativos na mesma clínica + horário
   UNIQUE KEY uq_agend_clinica_horario_ativo (clinica_id, slot_ativo)
 ) ENGINE=InnoDB;
 
--- CONFIGURAÇÕES
+-- CONFIGURAÇÕES (Corrigida a vírgula do valor_sinal)
 CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -178,7 +206,7 @@ CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 7. FEATURE FLAGS
+-- 7. TABELAS DE FEATURE FLAGS (Funcionalidades)
 CREATE TABLE IF NOT EXISTS features (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome_tecnico VARCHAR(50) NOT NULL UNIQUE,
@@ -203,25 +231,26 @@ CREATE TABLE IF NOT EXISTS clinica_features (
     CONSTRAINT fk_clinica_feat_feature FOREIGN KEY (feature_id) REFERENCES features(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 7. FINANCEIRO
+-- 7. FINANCEIRO (Refatorado para Extrato Completo e Lançamentos Avulsos)
 CREATE TABLE IF NOT EXISTS financeiro (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
-  usuario_id INT NULL,
+  usuario_id INT NULL, -- Quem da equipe realizou/registrou o lançamento
   gateway_id VARCHAR(255) NULL,
   paciente_id INT NOT NULL,
-  agendamento_id INT NULL,
+  agendamento_id INT NULL, -- Fica NULL se for um gasto avulso (sem consulta atrelada)
   tipo ENUM('receita', 'despesa') NOT NULL DEFAULT 'receita',
-  categoria VARCHAR(100) NOT NULL DEFAULT 'Consulta',
+  categoria VARCHAR(100) NOT NULL DEFAULT 'Consulta', -- Ex: 'Consulta', 'Material', 'Retorno', 'Multa'
   descricao VARCHAR(255) NOT NULL,
   valor DECIMAL(10,2) NOT NULL,
   data_vencimento DATE NOT NULL,
   data_pagamento DATE NULL,
   status_pagamento ENUM('aberto', 'pago', 'atrasado', 'estornado', 'cancelado') DEFAULT 'aberto',
   metodo_pagamento ENUM('pix', 'cartao', 'dinheiro', 'boleto'),
-  observacoes TEXT NULL,
+  observacoes TEXT NULL, -- Para anotações e histórico do terapeuta
   link_pagamento TEXT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
   CONSTRAINT fk_fin_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_fin_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
@@ -256,39 +285,42 @@ CREATE TABLE IF NOT EXISTS anexos (
   CONSTRAINT fk_anexo_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 10. PRONTUÁRIOS
+-- 10. PRONTUÁRIOS / EVOLUÇÕES CLÍNICAS (Padrão de Mercado & Segurança Jurídica)
 CREATE TABLE IF NOT EXISTS prontuarios (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
   paciente_id INT NOT NULL,
-  usuario_id INT NOT NULL,
-  agendamento_id INT NULL,
-  texto_evolucao LONGTEXT NOT NULL,
-  diagnostico_cid VARCHAR(10) NULL,
-  status_prontuario ENUM('rascunho', 'finalizado') DEFAULT 'rascunho',
-  data_atendimento DATETIME NOT NULL,
+  usuario_id INT NOT NULL,      -- O profissional logado que realizou o atendimento
+  agendamento_id INT NULL,      -- Vincula à consulta da agenda (opcional, caso seja um atendimento avulso)
+
+  texto_evolucao LONGTEXT NOT NULL, -- Conteúdo da sessão (suporta HTML do editor Rich Text)
+  diagnostico_cid VARCHAR(10) NULL, -- Código CID-10/CID-11 se for aplicável
+
+  status_prontuario ENUM('rascunho', 'finalizado') DEFAULT 'rascunho', -- Trava jurídica
+  data_atendimento DATETIME NOT NULL, -- Data/Hora informada do atendimento
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  -- ÍNDICES DE PERFORMANCE (Agiliza a busca da timeline do paciente)
   INDEX idx_prontuario_paciente (paciente_id),
   INDEX idx_prontuario_clinica (clinica_id),
+
+  -- TRAVAS DE INTEGRIDADE (Chaves Estrangeiras)
   CONSTRAINT fk_pront_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_pront_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_pront_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
   CONSTRAINT fk_pront_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- 🛡️ AUDITORIA (já modernizada)
+-- 🛡️ [AUDITORIA] Módulo de Segurança e Rastreabilidade
 CREATE TABLE IF NOT EXISTS logs_auditoria (
   id INT AUTO_INCREMENT PRIMARY KEY,
   usuario_id INT NOT NULL,
-  tipo_documento ENUM('prontuario','receita','atestado','solicitacao_exame') NOT NULL DEFAULT 'prontuario',
-  documento_id INT NULL,
-  prontuario_id INT NULL,                    -- mantido por compatibilidade
+  prontuario_id INT NOT NULL,
   acao VARCHAR(50) NOT NULL,
   data_acesso TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   crm VARCHAR(30) NULL,
   uf_crm CHAR(2) NULL,
-  INDEX idx_log_tipo_doc (tipo_documento, documento_id),
   CONSTRAINT fk_log_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
   CONSTRAINT fk_log_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id)
 ) ENGINE=InnoDB;
@@ -299,17 +331,19 @@ CREATE TABLE IF NOT EXISTS notificacoes (
   tipo ENUM('agendamento', 'documento', 'sistema') NOT NULL DEFAULT 'sistema',
   titulo VARCHAR(150) NOT NULL,
   mensagem VARCHAR(500) NOT NULL,
-  referencia_id INT NULL,
+  referencia_id INT NULL,          -- id do agendamento ou do documento
   paciente_id INT NULL,
   lida TINYINT(1) NOT NULL DEFAULT 0,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  
   INDEX idx_clinica_lida (clinica_id, lida),
   INDEX idx_clinica_criado (clinica_id, criado_em DESC),
+  
   CONSTRAINT fk_notif_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_notif_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- 11. MARKETING
+-- 11. MARKETING — Campanhas de email (individuais ou em massa)
 CREATE TABLE IF NOT EXISTS marketing_campanhas (
   id INT AUTO_INCREMENT PRIMARY KEY,
   clinica_id INT NOT NULL,
@@ -343,150 +377,7 @@ CREATE TABLE IF NOT EXISTS marketing_envios (
   CONSTRAINT fk_mkt_envio_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ============================================================
--- 12. RECEITUÁRIO DIGITAL
--- ============================================================
-CREATE TABLE IF NOT EXISTS receitas (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  clinica_id INT NOT NULL,
-  paciente_id INT NOT NULL,
-  usuario_id INT NOT NULL,
-  agendamento_id INT NULL,
-  prontuario_id INT NULL,
-  profissional_nome VARCHAR(100) NOT NULL,
-  profissional_crm VARCHAR(20) NULL,
-  profissional_uf_crm CHAR(2) NULL,
-  observacoes TEXT NULL,
-  validade_dias INT UNSIGNED DEFAULT 30,
-  status_receita ENUM('rascunho', 'emitido', 'cancelado') NOT NULL DEFAULT 'rascunho',
-  data_emissao DATETIME NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_receita_clinica (clinica_id),
-  INDEX idx_receita_paciente (paciente_id),
-  INDEX idx_receita_usuario (usuario_id),
-  INDEX idx_receita_status (status_receita),
-  CONSTRAINT fk_receita_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
-  CONSTRAINT fk_receita_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_receita_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-  CONSTRAINT fk_receita_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
-  CONSTRAINT fk_receita_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS receita_itens (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  receita_id INT NOT NULL,
-  ordem INT UNSIGNED NOT NULL DEFAULT 1,
-  medicamento_nome VARCHAR(200) NOT NULL,
-  concentracao VARCHAR(100) NULL,
-  forma_farmaceutica VARCHAR(80) NULL,
-  quantidade VARCHAR(50) NOT NULL,
-  posologia TEXT NOT NULL,
-  via_administracao VARCHAR(50) NULL,
-  uso_continuo TINYINT(1) NOT NULL DEFAULT 0,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_item_receita (receita_id),
-  CONSTRAINT fk_item_receita FOREIGN KEY (receita_id) REFERENCES receitas(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- ============================================================
--- 13. ATESTADOS MÉDICOS
--- ============================================================
-CREATE TABLE IF NOT EXISTS atestados (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  clinica_id INT NOT NULL,
-  paciente_id INT NOT NULL,
-  usuario_id INT NOT NULL,
-  agendamento_id INT NULL,
-  prontuario_id INT NULL,
-  profissional_nome VARCHAR(100) NOT NULL,
-  profissional_crm VARCHAR(20) NULL,
-  profissional_uf_crm CHAR(2) NULL,
-  tipo_atestado ENUM('afastamento', 'comparecimento', 'acompanhante', 'outro') NOT NULL DEFAULT 'afastamento',
-  dias_afastamento INT UNSIGNED NULL,
-  data_inicio DATE NULL,
-  data_fim DATE NULL,
-  cid VARCHAR(10) NULL,
-  texto_livre TEXT NULL,
-  local_atendimento VARCHAR(150) NULL,
-  status_atestado ENUM('rascunho', 'emitido', 'cancelado') NOT NULL DEFAULT 'rascunho',
-  data_emissao DATETIME NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_atestado_clinica (clinica_id),
-  INDEX idx_atestado_paciente (paciente_id),
-  INDEX idx_atestado_status (status_atestado),
-  CONSTRAINT fk_atestado_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
-  CONSTRAINT fk_atestado_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_atestado_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-  CONSTRAINT fk_atestado_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
-  CONSTRAINT fk_atestado_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
-
--- ============================================================
--- 14. SOLICITAÇÃO DE EXAMES / VITAMINAS
--- ============================================================
-CREATE TABLE IF NOT EXISTS solicitacoes_exames (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  clinica_id INT NOT NULL,
-  paciente_id INT NOT NULL,
-  usuario_id INT NOT NULL,
-  agendamento_id INT NULL,
-  prontuario_id INT NULL,
-  profissional_nome VARCHAR(100) NOT NULL,
-  profissional_crm VARCHAR(20) NULL,
-  profissional_uf_crm CHAR(2) NULL,
-  titulo VARCHAR(150) NULL,
-  observacoes TEXT NULL,
-  prioridade ENUM('rotina', 'urgente') NOT NULL DEFAULT 'rotina',
-  status_solicitacao ENUM('rascunho', 'emitido', 'cancelado') NOT NULL DEFAULT 'rascunho',
-  data_emissao DATETIME NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  INDEX idx_sol_clinica (clinica_id),
-  INDEX idx_sol_paciente (paciente_id),
-  INDEX idx_sol_status (status_solicitacao),
-  CONSTRAINT fk_sol_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
-  CONSTRAINT fk_sol_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
-  CONSTRAINT fk_sol_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
-  CONSTRAINT fk_sol_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
-  CONSTRAINT fk_sol_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id) ON DELETE SET NULL
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS solicitacao_exame_itens (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  solicitacao_id INT NOT NULL,
-  ordem INT UNSIGNED NOT NULL DEFAULT 1,
-  categoria VARCHAR(80) NOT NULL,
-  nome_exame VARCHAR(200) NOT NULL,
-  codigo_tuss VARCHAR(20) NULL,
-  instrucoes TEXT NULL,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_item_sol (solicitacao_id),
-  CONSTRAINT fk_item_sol FOREIGN KEY (solicitacao_id) REFERENCES solicitacoes_exames(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- ============================================================
--- 15. CATÁLOGO INTELIGENTE DE EXAMES
--- ============================================================
-CREATE TABLE IF NOT EXISTS catalogo_exames (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  clinica_id INT NULL,
-  categoria VARCHAR(80) NOT NULL,
-  nome_exame VARCHAR(200) NOT NULL,
-  codigo_tuss VARCHAR(20) NULL,
-  instrucoes_padrao TEXT NULL,
-  pacote_sugerido VARCHAR(100) NULL,
-  ativo TINYINT(1) NOT NULL DEFAULT 1,
-  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_cat_categoria (categoria),
-  INDEX idx_cat_pacote (pacote_sugerido),
-  CONSTRAINT fk_cat_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
--- ============================================================
--- INSERTS DE TESTE
--- ============================================================
+-- INSERTS DE TESTE (Adicionado SLUG para não dar erro)
 INSERT IGNORE INTO clinicas (id, nome_clinica, slug, dono_nome, telefone_clinica, telefone_dono, email_master, senha_master, plano_id, data_expiracao)
 VALUES (1, 'Clínica Experimental', 'clinica-experimental', 'Leandro Marques', '1199999999', '1188888888', 'admin@sistema.com', '123456', 1, '2026-12-31');
 
@@ -496,51 +387,18 @@ VALUES (1, 'Leandro Marques', 'leandro@teste.com', '123456', 'dono');
 INSERT IGNORE INTO usuarios (clinica_id, nome, email, senha, cargo)
 VALUES (NULL, 'Administrador MedLM', 'admin@medlm.com', 'mariarosa', 'dono');
 
+-- 8. INSERTS DE CONFIGURAÇÃO
 INSERT IGNORE INTO features (nome_tecnico, descricao) VALUES
 ('portal_paciente', 'Permite acesso ao portal de agendamento'),
 ('notificacao_whatsapp', 'Envio automático de lembretes'),
 ('relatorios_avancados', 'Dashboards financeiros completos');
 
+-- 9. POPULANDO AS FEATURE FLAGS (Opcional, mas recomendado para testes)
+-- Exemplo: Libera tudo para Enterprise, e apenas o básico para o Trial
 INSERT IGNORE INTO plano_features (plano_id, feature_id, is_enabled) VALUES
+-- TRIAL (Plano 1): Tem apenas portal_paciente
 (1, 1, true), (1, 2, false), (1, 3, false),
+-- PREMIUM (Plano 2): Tem portal e whatsapp
 (2, 1, true), (2, 2, true), (2, 3, false),
+-- ENTERPRISE (Plano 3): Tem tudo
 (3, 1, true), (3, 2, true), (3, 3, true);
-
--- ============================================================
--- SEED DO CATÁLOGO DE EXAMES (Clínico Geral)
--- ============================================================
-INSERT IGNORE INTO catalogo_exames (clinica_id, categoria, nome_exame, instrucoes_padrao, pacote_sugerido) VALUES
-(NULL, 'Hemograma', 'Hemograma completo', 'Jejum não obrigatório', 'Check-up Básico'),
-(NULL, 'Hemograma', 'Contagem de plaquetas', NULL, 'Check-up Básico'),
-(NULL, 'Bioquímica', 'Glicemia de jejum', 'Jejum de 8–12 horas', 'Check-up Básico'),
-(NULL, 'Bioquímica', 'Ureia', 'Jejum de 8 horas', 'Check-up Básico'),
-(NULL, 'Bioquímica', 'Creatinina', 'Jejum de 8 horas', 'Check-up Básico'),
-(NULL, 'Bioquímica', 'Ácido úrico', 'Jejum de 8 horas', NULL),
-(NULL, 'Bioquímica', 'TGO (AST)', 'Jejum de 8 horas', 'Check-up Básico'),
-(NULL, 'Bioquímica', 'TGP (ALT)', 'Jejum de 8 horas', 'Check-up Básico'),
-(NULL, 'Bioquímica', 'Gama-GT', 'Jejum de 8 horas', NULL),
-(NULL, 'Bioquímica', 'Fosfatase alcalina', 'Jejum de 8 horas', NULL),
-(NULL, 'Bioquímica', 'Bilirrubinas totais e frações', 'Jejum de 8 horas', NULL),
-(NULL, 'Perfil Lipídico', 'Colesterol total', 'Jejum de 12 horas', 'Check-up Básico'),
-(NULL, 'Perfil Lipídico', 'HDL-colesterol', 'Jejum de 12 horas', 'Check-up Básico'),
-(NULL, 'Perfil Lipídico', 'LDL-colesterol', 'Jejum de 12 horas', 'Check-up Básico'),
-(NULL, 'Perfil Lipídico', 'Triglicerídeos', 'Jejum de 12 horas', 'Check-up Básico'),
-(NULL, 'Vitaminas e Minerais', 'Vitamina D (25-OH)', 'Jejum não obrigatório', 'Painel Vitaminas'),
-(NULL, 'Vitaminas e Minerais', 'Vitamina B12', 'Jejum de 8 horas', 'Painel Vitaminas'),
-(NULL, 'Vitaminas e Minerais', 'Ácido fólico', 'Jejum de 8 horas', 'Painel Vitaminas'),
-(NULL, 'Vitaminas e Minerais', 'Ferro sérico', 'Jejum de 8 horas', 'Painel Vitaminas'),
-(NULL, 'Vitaminas e Minerais', 'Ferritina', 'Jejum de 8 horas', 'Painel Vitaminas'),
-(NULL, 'Vitaminas e Minerais', 'Zinco', 'Jejum de 8 horas', NULL),
-(NULL, 'Vitaminas e Minerais', 'Magnésio', 'Jejum de 8 horas', NULL),
-(NULL, 'Tireoide', 'TSH', 'Jejum não obrigatório', 'Painel Tireoide'),
-(NULL, 'Tireoide', 'T4 livre', 'Jejum não obrigatório', 'Painel Tireoide'),
-(NULL, 'Tireoide', 'T3 livre', 'Jejum não obrigatório', 'Painel Tireoide'),
-(NULL, 'Sorologias', 'HIV (anti-HIV)', 'Jejum não obrigatório', 'Painel DST'),
-(NULL, 'Sorologias', 'VDRL / Sífilis', 'Jejum não obrigatório', 'Painel DST'),
-(NULL, 'Sorologias', 'HBsAg (Hepatite B)', 'Jejum não obrigatório', 'Painel DST'),
-(NULL, 'Sorologias', 'Anti-HCV (Hepatite C)', 'Jejum não obrigatório', 'Painel DST'),
-(NULL, 'Sorologias', 'Anti-HBs', 'Jejum não obrigatório', NULL),
-(NULL, 'Urina e Fezes', 'EAS (Urina tipo I)', 'Primeira urina da manhã', 'Check-up Básico'),
-(NULL, 'Urina e Fezes', 'Cultura de urina', 'Coleta asséptica', NULL),
-(NULL, 'Urina e Fezes', 'Parasitológico de fezes', 'Amostra fresca', 'Check-up Básico'),
-(NULL, 'Urina e Fezes', 'Pesquisa de sangue oculto nas fezes', 'Dieta prévia se necessário', NULL);
