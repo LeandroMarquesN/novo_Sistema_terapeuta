@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_usuario_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
 -- 5. PACIENTES (Versão Atualizada com Sistema de Tokens)
 CREATE TABLE IF NOT EXISTS pacientes (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -114,6 +115,7 @@ CREATE TABLE IF NOT EXISTS pacientes (
   altura DECIMAL(5,2),
   condicoes_preexistentes TEXT,
   foto_perfil VARCHAR(255),
+  permitir_ver_prontuario TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 = Permite ver prontuários, 0 = Oculta',
 
   aceite_lgpd TINYINT(1) NOT NULL DEFAULT 0,
   data_aceite_lgpd TIMESTAMP NULL DEFAULT NULL,

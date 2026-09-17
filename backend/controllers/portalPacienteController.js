@@ -63,6 +63,16 @@ exports.getDadosPortal = async (req, res) => {
             return res.status(401).json({ error: "Paciente não encontrado." });
         }
 
+        // Verifica se a clínica/paciente tem permissão de exibir prontuários
+        let prontuarios = [];
+        if (paciente[0].permitir_ver_prontuario === 1) {
+            const [rowsProntuarios] = await db.query(
+                'SELECT * FROM prontuarios WHERE paciente_id = ? ORDER BY data_atendimento DESC',
+                [pId]
+            );
+            prontuarios = rowsProntuarios;
+        }
+
         const [config] = await db.query(
             'SELECT * FROM clinica_configuracoes WHERE clinica_id = ?',
             [cId]

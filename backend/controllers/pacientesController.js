@@ -450,6 +450,7 @@ exports.enviarTokenAcesso = async (req, res) => {
 
     const { id } = req.params;
     const clinicaId = req.usuario.clinica_id;
+    const { permitir_ver_prontuario } = req.body; // <--- Captura a escolha do modal
 
     try {
         const [pacienteRows] = await db.query(
@@ -469,32 +470,37 @@ exports.enviarTokenAcesso = async (req, res) => {
             });
         }
 
+        // Atualiza a permissão de ver prontuários se foi enviada na requisição
+        if (permitir_ver_prontuario !== undefined) {
+            await db.query(
+                'UPDATE pacientes SET permitir_ver_prontuario = ? WHERE id = ? AND clinica_id = ?',
+                [permitir_ver_prontuario ? 1 : 0, id, clinicaId]
+            );
+        }
+
         const [clinicaRows] = await db.query(
             'SELECT nome_clinica, slug, telefone_clinica FROM clinicas WHERE id = ?',
             [clinicaId]
         );
 
-        // <-- COLOQUE O TRECHO EXATAMENTE AQUI -->
         if (!clinicaRows || clinicaRows.length === 0) {
             return res.status(404).json({ success: false, message: 'Clínica não encontrada.' });
         }
 
         const clinica = clinicaRows[0];
-
         const token = crypto.randomBytes(32).toString('hex');
-        const expiraEm = new Date(Date.now() + 24 * 60 * 60 * 1000); // válido por 24h
-
+        const expiraExpiraEm = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
 
         await db.query(
             'UPDATE pacientes SET token_acesso = ?, token_expiracao = ? WHERE id = ? AND clinica_id = ?',
-            [token, expiraEm, id, clinicaId]
+            [token, expiraExpiraEm, id, clinicaId]
         );
 
         await sendTokenAcessoEmail(clinica, { ...paciente, token_acesso: token });
 
         return res.json({
             success: true,
-            message: `Token de acesso enviado para ${paciente.email}.`
+            message: `Token de acesso enviado com sucesso para ${paciente.email}.`
         });
     } catch (err) {
         console.error('Erro ao enviar token de acesso:', err);

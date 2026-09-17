@@ -760,9 +760,18 @@
 
                     renderDocumentos(data.documentos || []);
 
+                   
                     const timelineDiv = document.getElementById('timeline-prontuarios');
-                    if (timelineDiv && data.prontuarios) {
-                        if (data.prontuarios.length === 0) {
+                    if (timelineDiv) {
+                        // Verifica se a visualização de prontuários foi desativada pela clínica/paciente
+                        if (data.paciente.permitir_ver_prontuario === 0) {
+                            timelineDiv.innerHTML = `
+                                <div class="empty-state p-6 text-center" style="border: 1px dashed rgba(248,113,113,0.3); background: rgba(248,113,113,0.03);">
+                                    <div class="text-3xl mb-2">🔒</div>
+                                    <p class="text-sm font-semibold text-rose-300">Visualização de prontuários indisponível</p>
+                                    <p class="text-xs text-slate-400 mt-1">Por diretrizes de atendimento desta clínica, os prontuários não estão liberados para visualização online.</p>
+                                </div>`;
+                        } else if (!data.prontuarios || data.prontuarios.length === 0) {
                             timelineDiv.innerHTML = `
                                 <div class="empty-state p-6 text-center">
                                     <p class="text-sm text-slate-500">Nenhum registro de prontuário ainda.</p>
