@@ -555,14 +555,14 @@ function atualizarCrmReceita() {
     const el = document.getElementById('receitaCrmInfo');
     if (el) {
       if (payload.crm) {
-        el.innerText = payload.uf_crm 
-          ? `CRM ${payload.crm}/${payload.uf_crm}` 
+        el.innerText = payload.uf_crm
+          ? `CRM ${payload.crm}/${payload.uf_crm}`
           : `CRM ${payload.crm}`;
       } else {
         el.innerText = 'CRM não cadastrado';
       }
     }
-  } catch (e) {}
+  } catch (e) { }
 }
 
 function adicionarMedicamento() {
@@ -669,7 +669,7 @@ async function emitirReceita(assinar) {
       abrirModalAssinatura();
       // Sobrescreve temporariamente o confirmarAssinatura
       const original = window.confirmarAssinatura;
-      window.confirmarAssinatura = async function(e) {
+      window.confirmarAssinatura = async function (e) {
         if (e) e.preventDefault();
         const senha = document.getElementById('senhaAssinatura').value;
         if (!senha) {
@@ -792,7 +792,7 @@ async function verDetalheReceita(id) {
     if (receita.profissional_crm) texto += ` — CRM ${receita.profissional_crm}/${receita.profissional_uf_crm || ''}`;
     texto += `\n\nMedicamentos:\n`;
     receita.itens.forEach((item, i) => {
-      texto += `${i+1}. ${item.medicamento_nome} ${item.concentracao || ''}\n`;
+      texto += `${i + 1}. ${item.medicamento_nome} ${item.concentracao || ''}\n`;
       texto += `   ${item.quantidade} — ${item.posologia}\n\n`;
     });
     if (receita.observacoes) texto += `Obs: ${receita.observacoes}`;
@@ -837,6 +837,220 @@ function exibirAvisoSemPaciente() {
     elementosFicha.pacienteHeader.innerText = "SELECIONE UM PACIENTE";
   }
 }
+// =========================================================
+// ATESTADOS MÉDICOS
+// =========================================================
+let tipoAtestadoAtual = 'afastamento';
+
+function selecionarTipoAtestado(tipo) {
+  tipoAtestadoAtual = tipo;
+
+  document.querySelectorAll('.tipo-atestado-btn').forEach(btn => btn.classList.remove('active'));
+  const btn = document.getElementById('tipo-' + tipo);
+  if (btn) btn.classList.add('active');
+
+  // Mostra/esconde campos de dias
+  const campoDias = document.getElementById('campoDiasAfastamento');
+  if (campoDias) {
+    campoDias.style.display = (tipo === 'afastamento') ? 'grid' : 'none';
+  }
+}
+
+function atualizarCrmAtestado() {
+  try {
+    const tokenLocal = localStorage.getItem('token');
+    if (!tokenLocal) return;
+    const payload = JSON.parse(atob(tokenLocal.split('.')[1]));
+    const el = document.getElementById('atestadoCrmInfo');
+    if (el) {
+      el.innerText = payload.crm
+        ? (payload.uf_crm ? `CRM ${payload.crm}/${payload.uf_crm}` : `CRM ${payload.crm}`)
+        : 'CRM não cadastrado';
+    }
+  } catch (e) { }
+}
+
+async function emitirAtestado(assinar) {
+  const pacienteId = document.getElementById('atendimentoPacienteId')?.value;
+  if (!pacienteId) {
+    alert('Nenhum paciente selecionado.');
+    return;
+  }
+
+  if (tipoAtestadoAtual === 'afastamento') {
+    const dias = parseInt(document.getElementById('atestadoDias').value);
+    if (!dias || dias < 1) {
+      alert('Informe a quantidade de dias de afastamento.');
+      return;
+    }
+  }
+
+  if (assinar) {
+    // Reutiliza o modal de assinatura
+    const original = window.confirmarAssinatura;
+    window.confirmarAssinatura = async function (e) {
+      if (e) e.preventDefault();
+      const senha = document.getElementById('senhaAssinatura').value;
+      if (!senha) {
+        document.getElementById('erroSenhaAssinatura').innerText = 'Digite sua senha.';
+        document.getElementById('erroSenhaAssinatura').classList.remove('hidden');
+        return;
+      }
+      fecharModalAssinatura();
+      window.confirmarAssinatura = original;
+      await salvarAtestadoNoBackend(true, senha);
+    };
+    abrirModalAssinatura();
+  } else {
+    await salvarAtestadoNoBackend(false, null);
+  }
+}
+
+async function salvarAtestadoNoBackend(assinar, senha) {
+  const pacienteId = document.getElementById('atendimentoPacienteId').value;
+  const agendamentoId = document.getElementById('atendimentoAgendamentoId')?.value || null;
+
+  const payload = {
+    pacienteId: parseInt(pacienteId),
+    agendamentoId: agendamentoId ? parseInt(agendamentoId) : null,
+    tipoAtestado: tipoAtestadoAtual,
+    diasAfastamento: tipoAtestadoAtual === 'afastamento'
+      ? parseInt(document.getElementById('atestadoDias').value)
+      : null,
+    dataInicio: document.getElementById('atestadoDataInicio').value || null,
+    dataFim: document.getElementById('atestadoDataFim').value || null,
+    cid: document.getElementById('atestadoCid').value.trim().toUpperCase() || null,
+    textoLivre: document.getElementById('atestadoTextoLivre').value.trim() || null,
+    localAtendimento: document.getElementById('atestadoLocal').value.trim() || null,
+    apenasRascunho: !assinar,
+    senhaAssinatura: senha || undefined
+  };
+
+  try {
+    const response = await fetch('/api/atestados/salvar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert(assinar ? '✅ Atestado emitido e assinado com sucesso!' : '✅ Rascunho salvo com sucesso!');
+      // Limpa formulário
+      document.getElementById('atestadoDias').value = 1;
+      document.getElementById('atestadoDataInicio').value = '';
+      document.getElementById('atestadoDataFim').value = '';
+      document.getElementById('atestadoCid').value = '';
+      document.getElementById('atestadoTextoLivre').value = '';
+      document.getElementById('atestadoLocal').value = '';
+      carregarHistoricoAtestados(pacienteId);
+    } else {
+      alert(data.erro || 'Erro ao salvar atestado.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro de conexão ao salvar atestado.');
+  }
+}
+
+async function carregarHistoricoAtestados(pacienteId) {
+  const container = document.getElementById('historicoAtestados');
+  if (!container || !pacienteId) return;
+
+  try {
+    const response = await fetch(`/api/atestados/paciente/${pacienteId}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const lista = await response.json();
+
+    if (!lista || lista.length === 0) {
+      container.innerHTML = `
+        <div class="text-center py-6 text-xs" style="color: rgba(148,163,184,0.35)">
+          Nenhum atestado encontrado.
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = lista.map(a => `
+      <div class="glass-card p-3 cursor-pointer hover:border-emerald-500/40 transition"
+           onclick="verDetalheAtestado(${a.id})">
+        <div class="flex justify-between items-start gap-2">
+          <div>
+            <p class="text-xs font-black text-white capitalize">${a.tipo_atestado}</p>
+            <p class="text-[10px] mt-0.5" style="color: rgba(148,163,184,0.6)">
+              ${a.dias_afastamento ? a.dias_afastamento + ' dia(s) • ' : ''}
+              ${new Date(a.criado_em).toLocaleDateString('pt-BR')}
+            </p>
+          </div>
+          <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full"
+                style="background: ${a.status_atestado === 'emitido' ? 'rgba(52,211,153,0.15)' : 'rgba(148,163,184,0.15)'};
+                       color: ${a.status_atestado === 'emitido' ? 'var(--emerald)' : '#94a3b8'}">
+            ${a.status_atestado}
+          </span>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = `<div class="text-center py-4 text-xs text-red-400">Erro ao carregar</div>`;
+  }
+}
+
+async function verDetalheAtestado(id) {
+  try {
+    const response = await fetch(`/api/atestados/detalhe/${id}`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    const a = await response.json();
+
+    if (!response.ok) {
+      alert(a.erro || 'Erro ao carregar atestado');
+      return;
+    }
+
+    let texto = `Atestado #${a.id} — ${a.status_atestado.toUpperCase()}\n\n`;
+    texto += `Tipo: ${a.tipo_atestado}\n`;
+    if (a.dias_afastamento) texto += `Dias: ${a.dias_afastamento}\n`;
+    if (a.data_inicio) texto += `Início: ${a.data_inicio}\n`;
+    if (a.data_fim) texto += `Fim: ${a.data_fim}\n`;
+    if (a.cid) texto += `CID: ${a.cid}\n`;
+    texto += `\nProfissional: ${a.profissional_nome}`;
+    if (a.profissional_crm) texto += ` — CRM ${a.profissional_crm}/${a.profissional_uf_crm || ''}`;
+    if (a.texto_livre) texto += `\n\n${a.texto_livre}`;
+
+    alert(texto);
+  } catch (err) {
+    alert('Erro ao carregar detalhes do atestado.');
+  }
+}
+
+// Integra com a função trocarAba
+const _trocarAbaOriginal = window.trocarAba;
+window.trocarAba = function (nomeAba) {
+  _trocarAbaOriginal(nomeAba);
+
+  if (nomeAba === 'receituario') {
+    atualizarCrmReceita();
+    const pid = document.getElementById('atendimentoPacienteId')?.value;
+    if (pid) carregarHistoricoReceitas(pid);
+  }
+
+  if (nomeAba === 'atestado') {
+    atualizarCrmAtestado();
+    selecionarTipoAtestado('afastamento'); // reseta para o padrão
+    const pid = document.getElementById('atendimentoPacienteId')?.value;
+    if (pid) carregarHistoricoAtestados(pid);
+  }
+};
+
+// Exports
+window.selecionarTipoAtestado = selecionarTipoAtestado;
+window.emitirAtestado = emitirAtestado;
+window.verDetalheAtestado = verDetalheAtestado;
 
 window.adicionarMedicamento = adicionarMedicamento;
 window.removerMedicamento = removerMedicamento;
