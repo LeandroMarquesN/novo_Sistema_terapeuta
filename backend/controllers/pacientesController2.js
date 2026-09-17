@@ -471,18 +471,10 @@ exports.enviarTokenAcesso = async (req, res) => {
         }
 
         // Atualiza a permissão de ver prontuários se foi enviada na requisição
-        // ATENÇÃO: o select envia string "0" ou "1". Em JS, "0" é truthy — NÃO usar if (valor).
-        // Padrão seguro: só libera se for explicitamente 1 / "1" / true.
-        if (permitir_ver_prontuario !== undefined && permitir_ver_prontuario !== null) {
-            const permitir = (
-                permitir_ver_prontuario === true ||
-                permitir_ver_prontuario === 1 ||
-                String(permitir_ver_prontuario).trim() === '1'
-            ) ? 1 : 0;
-
+        if (permitir_ver_prontuario !== undefined) {
             await db.query(
                 'UPDATE pacientes SET permitir_ver_prontuario = ? WHERE id = ? AND clinica_id = ?',
-                [permitir, id, clinicaId]
+                [permitir_ver_prontuario ? 1 : 0, id, clinicaId]
             );
         }
 
