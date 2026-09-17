@@ -5,6 +5,7 @@
  * + CRM/UF e Cargo do profissional no cabeçalho
  * + Documentos do paciente
  * + Menu mobile
+ * + Sistema de Abas (Prontuário / Receituário / Atestados / Exames)
  */
 
 const token = localStorage.getItem('token');
@@ -42,7 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (pacienteId) {
     if (elementosFicha.pacienteIdHidden) elementosFicha.pacienteIdHidden.value = pacienteId;
-    if (elementosFicha.agendamentoIdHidden && agendamentoId) elementosFicha.agendamentoIdHidden.value = agendamentoId;
+    if (elementosFicha.agendamentoIdHidden && agendamentoId) {
+      elementosFicha.agendamentoIdHidden.value = agendamentoId;
+    }
 
     carregarDadosSessaoSaaS();
     carregarFichaPaciente(pacienteId);
@@ -52,9 +55,27 @@ document.addEventListener('DOMContentLoaded', () => {
     exibirAvisoSemPaciente();
   }
 
-  // Menu mobile
   initMenuMobile();
 });
+
+// ─── SISTEMA DE ABAS ────────────────────────────────────────────
+function trocarAba(nomeAba) {
+  // Remove active de todas as tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+  // Esconde todos os painéis
+  document.querySelectorAll('.aba-painel').forEach(painel => {
+    painel.classList.remove('ativa');
+  });
+
+  // Ativa a tab clicada
+  const tab = document.getElementById('tab-' + nomeAba);
+  if (tab) tab.classList.add('active');
+
+  // Mostra o painel correspondente
+  const painel = document.getElementById('painel-' + nomeAba);
+  if (painel) painel.classList.add('ativa');
+}
 
 // ─── CRM no cabeçalho ───────────────────────────────────────────
 function atualizarCrmNoHeader(crm, ufCrm) {
@@ -106,9 +127,11 @@ async function carregarFichaPaciente(pacienteId) {
     if (!response.ok) throw new Error('Dados não encontrados');
     const p = await response.json();
 
-    if (elementosFicha.pacienteHeader) elementosFicha.pacienteHeader.innerText = p.nome?.toUpperCase() || '---';
+    if (elementosFicha.pacienteHeader) {
+      elementosFicha.pacienteHeader.innerText = p.nome?.toUpperCase() || '---';
+    }
 
-    // Foto do paciente (Cloudinary) — cai no ícone padrão se não houver foto ou se o link falhar
+    // Foto do paciente
     if (elementosFicha.fotoPaciente && elementosFicha.fotoPacienteFallback) {
       if (p.foto_perfil) {
         elementosFicha.fotoPaciente.src = p.foto_perfil;
@@ -174,21 +197,34 @@ async function carregarTimelineProntuarios(pacienteId) {
     });
     const historico = await response.json();
 
-    if (elementosFicha.contadorEvolucoes) elementosFicha.contadorEvolucoes.innerText = historico.length;
+    if (elementosFicha.contadorEvolucoes) {
+      elementosFicha.contadorEvolucoes.innerText = historico.length;
+    }
     if (!elementosFicha.timeline) return;
 
     if (historico.length === 0) {
-      elementosFicha.timeline.innerHTML = `<div class="text-center text-xs py-8" style="color: rgba(148,163,184,0.4)">Nenhum histórico encontrado.</div>`;
+      elementosFicha.timeline.innerHTML = `
+        <div class="text-center text-xs py-8" style="color: rgba(148,163,184,0.4)">
+          Nenhum histórico encontrado.
+        </div>`;
       return;
     }
 
     elementosFicha.timeline.innerHTML = historico.map(evo => `
-      <div class="glass-card p-3 rounded-xl text-left cursor-pointer transition" style="cursor:pointer" onclick="visualizarEvolucaoAntiga(${evo.id})">
+      <div class="glass-card p-3 rounded-xl text-left cursor-pointer transition"
+           onclick="visualizarEvolucaoAntiga(${evo.id})">
         <div class="flex justify-between pb-1 mb-1" style="border-bottom: 1px solid var(--border)">
-          <span class="font-black" style="color:#e2e8f0">${new Date(evo.data_registro).toLocaleDateString('pt-BR')}</span>
-          <span class="px-1.5 rounded text-[9px] uppercase font-black" style="background: rgba(96,165,250,0.15); color: var(--blue)">${evo.codigo_cid || '---'}</span>
+          <span class="font-black" style="color:#e2e8f0">
+            ${new Date(evo.data_registro).toLocaleDateString('pt-BR')}
+          </span>
+          <span class="px-1.5 rounded text-[9px] uppercase font-black"
+                style="background: rgba(96,165,250,0.15); color: var(--blue)">
+            ${evo.codigo_cid || '---'}
+          </span>
         </div>
-        <p class="text-xs truncate" style="color: rgba(148,163,184,0.7)">${extrairTextoLimpo(evo.relato_clinico)}</p>
+        <p class="text-xs truncate" style="color: rgba(148,163,184,0.7)">
+          ${extrairTextoLimpo(evo.relato_clinico)}
+        </p>
       </div>
     `).join('');
   } catch (err) {
@@ -226,19 +262,22 @@ async function carregarDocumentosPaciente(pacienteId) {
       const data = new Date(doc.criado_em).toLocaleDateString('pt-BR');
 
       return `
-        <a href="${doc.url || '#'}" 
-           target="_blank" 
-           rel="noopener"
+        <a href="${doc.url || '#'}" target="_blank" rel="noopener"
            class="glass-card p-3 flex items-center gap-3 hover:border-emerald-500/40 transition group"
            style="text-decoration:none;">
           <div class="icon-wrap" style="background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.25); color: ${cor};">
             <i class="fas ${icon} text-sm"></i>
           </div>
           <div class="min-w-0 flex-1">
-            <p class="text-xs font-bold text-white truncate group-hover:text-emerald-300 transition">${doc.nome_original}</p>
-            <p class="text-[10px]" style="color: rgba(148,163,184,0.55)">${tamanho} • ${data}</p>
+            <p class="text-xs font-bold text-white truncate group-hover:text-emerald-300 transition">
+              ${doc.nome_original}
+            </p>
+            <p class="text-[10px]" style="color: rgba(148,163,184,0.55)">
+              ${tamanho} • ${data}
+            </p>
           </div>
-          <i class="fas fa-external-link-alt text-[10px] opacity-40 group-hover:opacity-100 transition" style="color: var(--emerald)"></i>
+          <i class="fas fa-external-link-alt text-[10px] opacity-40 group-hover:opacity-100 transition"
+             style="color: var(--emerald)"></i>
         </a>
       `;
     }).join('');
@@ -307,7 +346,10 @@ async function confirmarAssinatura(event) {
 
     const response = await fetch('/api/prontuarios/salvar', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
       body: JSON.stringify(payload)
     });
 
@@ -340,6 +382,9 @@ async function visualizarEvolucaoAntiga(prontuarioId) {
     if (!response.ok) throw new Error('Erro ao buscar detalhes');
 
     const prontuario = await response.json();
+
+    // Garante que a aba de prontuário esteja ativa
+    trocarAba('prontuario');
 
     if (elementosFicha.diagnosticoCid) {
       elementosFicha.diagnosticoCid.value = prontuario.diagnostico_cid || '';
@@ -442,16 +487,16 @@ async function abrirModalAuditoria() {
 
     return `
       <div class="flex justify-between items-start audit-item gap-3">
-          <div class="min-w-0">
-              <p class="text-[11px] font-black" style="color:#e2e8f0">${log.acao}</p>
-              <p class="text-[9px] mt-0.5" style="color: rgba(148,163,184,0.6)">
-                  Por: <span style="color:#e2e8f0; font-weight:700">${log.usuario_nome || '—'}</span>
-              </p>
-              ${crmTexto ? `<p class="text-[9px] font-mono mt-0.5" style="color: var(--cyan)">${crmTexto}</p>` : ''}
-          </div>
-          <span class="text-[10px] font-bold shrink-0" style="color: rgba(148,163,184,0.5)">
-              ${new Date(log.data_acesso).toLocaleString('pt-BR')}
-          </span>
+        <div class="min-w-0">
+          <p class="text-[11px] font-black" style="color:#e2e8f0">${log.acao}</p>
+          <p class="text-[9px] mt-0.5" style="color: rgba(148,163,184,0.6)">
+            Por: <span style="color:#e2e8f0; font-weight:700">${log.usuario_nome || '—'}</span>
+          </p>
+          ${crmTexto ? `<p class="text-[9px] font-mono mt-0.5" style="color: var(--cyan)">${crmTexto}</p>` : ''}
+        </div>
+        <span class="text-[10px] font-bold shrink-0" style="color: rgba(148,163,184,0.5)">
+          ${new Date(log.data_acesso).toLocaleString('pt-BR')}
+        </span>
       </div>
     `;
   }).join('');
@@ -498,6 +543,7 @@ function initMenuMobile() {
 }
 
 // ─── EXPORTS GLOBAIS ────────────────────────────────────────────
+window.trocarAba = trocarAba;
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;
 window.salvarEvolucao = salvarEvolucao;
 window.confirmarAssinatura = confirmarAssinatura;
@@ -526,5 +572,7 @@ function extrairTextoLimpo(html) {
 }
 
 function exibirAvisoSemPaciente() {
-  if (elementosFicha.pacienteHeader) elementosFicha.pacienteHeader.innerText = "SELECIONE UM PACIENTE";
+  if (elementosFicha.pacienteHeader) {
+    elementosFicha.pacienteHeader.innerText = "SELECIONE UM PACIENTE";
+  }
 }
