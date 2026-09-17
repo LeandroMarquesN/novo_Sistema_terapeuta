@@ -400,3 +400,168 @@ exports.sendFluxoCaixaEmail = async (clinica, dados) => {
     throw error;
   }
 };
+
+// =========================================================================
+// 11. RECEITA DIGITAL
+// =========================================================================
+exports.sendReceitaEmailNotification = async (dados) => {
+  try {
+    const templatePath = path.join(__dirname, '..', 'templates', 'emailReceitaTemplate.html');
+    let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+    const linkPortal = dados.token_acesso ? `${URL_PORTAL_BASE}${dados.token_acesso}` : '#';
+
+    // Monta a lista de medicamentos em HTML
+    const listaMedicamentos = (dados.itens || []).map(item => `
+      <div class="med-item">
+        <div class="med-nome">${item.medicamento_nome}${item.concentracao ? ' — ' + item.concentracao : ''}</div>
+        <div class="med-detalhe">
+          ${item.forma_farmaceutica || ''} ${item.quantidade} • Via ${item.via_administracao || 'Oral'}
+          ${item.uso_continuo ? ' • Uso contínuo' : ''}<br>
+          <em>${item.posologia}</em>
+        </div>
+      </div>
+    `).join('');
+
+    const observacoesBloco = dados.observacoes
+      ? `<p style="margin-top:20px;"><strong>Observações:</strong><br>${dados.observacoes}</p>`
+      : '';
+
+    const crmInfo = dados.profissional_crm
+      ? `(CRM ${dados.profissional_crm}${dados.profissional_uf_crm ? '/' + dados.profissional_uf_crm : ''})`
+      : '';
+
+    htmlTemplate = replacePlaceholders(htmlTemplate, {
+      nome_paciente: dados.nome_paciente,
+      nome_profissional: dados.nome_profissional,
+      crm_info: crmInfo,
+      data_emissao: dados.data_emissao,
+      validade_dias: dados.validade_dias || 30,
+      lista_medicamentos: listaMedicamentos,
+      observacoes_bloco: observacoesBloco,
+      link_portal_paciente: linkPortal,
+      ano_atual: new Date().getFullYear()
+    });
+
+    await transporter.sendMail({
+      from: `"MedLM Clínico" <${process.env.EMAIL_USER}>`,
+      to: dados.email_paciente,
+      subject: `Receita Digital - ${dados.nome_paciente}`,
+      html: htmlTemplate
+    });
+    return true;
+  } catch (error) {
+    console.error("❌ Erro ao enviar receita:", error);
+    throw error;
+  }
+};
+
+// =========================================================================
+// 12. ATESTADO MÉDICO
+// =========================================================================
+exports.sendAtestadoEmailNotification = async (dados) => {
+  try {
+    const templatePath = path.join(__dirname, '..', 'templates', 'emailAtestadoTemplate.html');
+    let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+    const linkPortal = dados.token_acesso ? `${URL_PORTAL_BASE}${dados.token_acesso}` : '#';
+
+    const crmInfo = dados.profissional_crm
+      ? `(CRM ${dados.profissional_crm}${dados.profissional_uf_crm ? '/' + dados.profissional_uf_crm : ''})`
+      : '';
+
+    const diasBloco = dados.dias_afastamento
+      ? `<div class="info-item"><strong>🗓️ Dias de Afastamento:</strong> ${dados.dias_afastamento}</div>`
+      : '';
+
+    const periodoBloco = (dados.data_inicio || dados.data_fim)
+      ? `<div class="info-item"><strong>📆 Período:</strong> ${dados.data_inicio || '—'} até ${dados.data_fim || '—'}</div>`
+      : '';
+
+    const cidBloco = dados.cid
+      ? `<div class="info-item"><strong>📂 CID:</strong> ${dados.cid}</div>`
+      : '';
+
+    const localBloco = dados.local_atendimento
+      ? `<div class="info-item"><strong>📍 Local:</strong> ${dados.local_atendimento}</div>`
+      : '';
+
+    const textoLivreBloco = dados.texto_livre
+      ? `<div class="texto-livre"><strong>Observações:</strong><br>${dados.texto_livre}</div>`
+      : '';
+
+    htmlTemplate = replacePlaceholders(htmlTemplate, {
+      nome_paciente: dados.nome_paciente,
+      nome_profissional: dados.nome_profissional,
+      crm_info: crmInfo,
+      tipo_atestado: dados.tipo_atestado,
+      data_emissao: dados.data_emissao,
+      dias_bloco: diasBloco,
+      periodo_bloco: periodoBloco,
+      cid_bloco: cidBloco,
+      local_bloco: localBloco,
+      texto_livre_bloco: textoLivreBloco,
+      link_portal_paciente: linkPortal,
+      ano_atual: new Date().getFullYear()
+    });
+
+    await transporter.sendMail({
+      from: `"MedLM Clínico" <${process.env.EMAIL_USER}>`,
+      to: dados.email_paciente,
+      subject: `Atestado Médico - ${dados.nome_paciente}`,
+      html: htmlTemplate
+    });
+    return true;
+  } catch (error) {
+    console.error("❌ Erro ao enviar atestado:", error);
+    throw error;
+  }
+};
+
+// =========================================================================
+// 13. SOLICITAÇÃO DE EXAMES
+// =========================================================================
+exports.sendExamesEmailNotification = async (dados) => {
+  try {
+    const templatePath = path.join(__dirname, '..', 'templates', 'emailExamesTemplate.html');
+    let htmlTemplate = await fs.readFile(templatePath, 'utf-8');
+    const linkPortal = dados.token_acesso ? `${URL_PORTAL_BASE}${dados.token_acesso}` : '#';
+
+    const crmInfo = dados.profissional_crm
+      ? `(CRM ${dados.profissional_crm}${dados.profissional_uf_crm ? '/' + dados.profissional_uf_crm : ''})`
+      : '';
+
+    const listaExames = (dados.itens || []).map(item => `
+      <div class="exame-item">
+        <div class="exame-nome">${item.nome_exame}</div>
+        <div class="exame-cat">${item.categoria}${item.instrucoes ? ' • ' + item.instrucoes : ''}</div>
+      </div>
+    `).join('');
+
+    const observacoesBloco = dados.observacoes
+      ? `<p style="margin-top:20px;"><strong>Orientações:</strong><br>${dados.observacoes}</p>`
+      : '';
+
+    htmlTemplate = replacePlaceholders(htmlTemplate, {
+      nome_paciente: dados.nome_paciente,
+      nome_profissional: dados.nome_profissional,
+      crm_info: crmInfo,
+      data_emissao: dados.data_emissao,
+      titulo: dados.titulo || 'Solicitação de Exames',
+      prioridade: dados.prioridade === 'urgente' ? 'Urgente' : 'Rotina',
+      lista_exames: listaExames,
+      observacoes_bloco: observacoesBloco,
+      link_portal_paciente: linkPortal,
+      ano_atual: new Date().getFullYear()
+    });
+
+    await transporter.sendMail({
+      from: `"MedLM Clínico" <${process.env.EMAIL_USER}>`,
+      to: dados.email_paciente,
+      subject: `Solicitação de Exames - ${dados.nome_paciente}`,
+      html: htmlTemplate
+    });
+    return true;
+  } catch (error) {
+    console.error("❌ Erro ao enviar solicitação de exames:", error);
+    throw error;
+  }
+};

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+  <title>Atestado Médico - MedLM</title>
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #f4f7f9; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: 20px auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .header { background: linear-gradient(135deg, #059669 0%, #1d4ed8 100%); padding: 30px; text-align: center; }
+    .logo-img { max-width: 200px; height: auto; }
+    .content { padding: 40px; color: #444; line-height: 1.6; }
+    .content h2 { color: #065f46; margin-top: 0; font-weight: 600; }
+    .info-box { background-color: #f0fdf4; border-left: 4px solid #065f46; padding: 20px; margin: 25px 0; border-radius: 4px; }
+    .info-item { margin-bottom: 8px; font-size: 15px; }
+    .info-item strong { color: #065f46; }
+    .texto-livre { background: #ffffff; border: 1px solid #e1e8ed; padding: 18px; border-radius: 8px; margin-top: 15px; font-style: italic; color: #555; }
+    .footer { background: #f4f7f9; padding: 25px; text-align: center; color: #888; font-size: 12px; }
+    .btn { display: inline-block; padding: 12px 25px; background: #065f46; color: #ffffff !important; text-decoration: none; border-radius: 6px; font-weight: 500; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.imgur.com/5pjegDN.png" alt="MedLM Logo" class="logo-img">
+    </div>
+    <div class="content">
+      <h2>Olá, {{nome_paciente}}!</h2>
+      <p>Um <strong>atestado médico</strong> foi emitido para você pelo profissional <strong>{{nome_profissional}}</strong>.</p>
+
+      <div class="info-box">
+        <div class="info-item"><strong>📋 Tipo:</strong> {{tipo_atestado}}</div>
+        <div class="info-item"><strong>📅 Data de Emissão:</strong> {{data_emissao}}</div>
+        {{dias_bloco}}
+        {{periodo_bloco}}
+        {{cid_bloco}}
+        <div class="info-item"><strong>👨‍⚕️ Profissional:</strong> {{nome_profissional}} {{crm_info}}</div>
+        {{local_bloco}}
+      </div>
+
+      {{texto_livre_bloco}}
+
+      <p style="margin-top: 30px;">Acesse seu portal para visualizar o documento completo:</p>
+      <div style="text-align: center;">
+        <a href="{{link_portal_paciente}}" class="btn">Acessar Meu Portal</a>
+      </div>
+    </div>
+    <div class="footer">
+      © {{ano_atual}} MedLM - Gestão Inteligente para Clínicas.<br>
+      Este é um e-mail automático, por favor não responda.
+    </div>
+  </div>
+</body>
+</html>
