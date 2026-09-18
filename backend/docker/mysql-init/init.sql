@@ -67,6 +67,13 @@ CREATE TABLE IF NOT EXISTS usuarios (
     reset_token VARCHAR(255) DEFAULT NULL,
     reset_expires DATETIME DEFAULT NULL,
     current_session_token VARCHAR(255) DEFAULT NULL,
+
+    certificado_a1_blob LONGBLOB NULL COMMENT 'Arquivo .pfx do certificado digital',
+    certificado_senha VARCHAR(255) NULL COMMENT 'Senha de uso do certificado A1',
+    certificado_vencimento DATETIME NULL COMMENT 'Data de expiração do certificado',
+    tipo_assinatura ENUM('a1', 'nuvem') DEFAULT 'a1' COMMENT 'Modelo de assinatura escolhido pelo profissional',
+    cloud_token_ref VARCHAR(255) NULL COMMENT 'Token ou ID de referência para API de assinatura em nuvem',
+
     cargo ENUM(
         'dono',
         'admin',
