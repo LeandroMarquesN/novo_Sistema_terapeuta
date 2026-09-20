@@ -140,11 +140,15 @@ async function index(req, res) {
               AND YEAR(data_agendamento) = YEAR(CURDATE())
           `;
 
-    // Executa as duas buscas em paralelo no MySQL (ganho de performance)
-    const [[rowsTabela], [rowsMetricas]] = await Promise.all([
+    // Executa as buscas em paralelo no MySQL (ganho de performance)
+    // Inclui consulta de configuração da clínica para verificar se a agenda já foi configurada
+    const [[rowsTabela], [rowsMetricas], [configRows]] = await Promise.all([
       db.execute(queryTabela, [clinicaId]),
-      db.execute(queryMetricasGerais, [clinicaId])
+      db.execute(queryMetricasGerais, [clinicaId]),
+      db.execute('SELECT * FROM clinica_configuracoes WHERE clinica_id = ?', [clinicaId])
     ]);
+
+    const configuracao = configRows[0] || null;
 
     console.log(`SUCESSO: ${rowsTabela.length} agendamentos renderizados na tabela.`);
     console.log(`METRICAS: ${rowsMetricas.length} registros processados para os gráficos.`);
@@ -228,7 +232,8 @@ async function index(req, res) {
       filtroAtivo: filtro,
       resumoMensal: resumoMensal,
       dadosGrafico: dadosGrafico,
-      dadosComparativoMensal: dadosComparativoMensal
+      dadosComparativoMensal: dadosComparativoMensal,
+      precisaConfigurarAgenda: !configuracao || !configuracao.dias_semana
     });
 
   } catch (error) {
