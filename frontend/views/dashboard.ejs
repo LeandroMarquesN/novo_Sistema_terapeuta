@@ -2607,31 +2607,26 @@
             </div>
         </div>
     </div>
-    <!-- MOdal de treinamento de configurações de atendimento da clinica -->
-    <!-- Modal de Orientação / Pré-treinamento da Agenda (Glassmorphism) -->
+    <!-- Modal de Orientação / Pré-treinamento da Agenda (só se ainda não configurou horários) -->
 <% if (locals.precisaConfigurarAgenda) { %>
 <div id="modalOnboardingAgenda" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-md transition-all">
     <div class="relative w-full max-w-md p-6 bg-[#020c12]/80 backdrop-blur-xl border border-emerald-500/30 rounded-2xl shadow-2xl text-white mx-4">
         
-        <!-- Botão Fechar (X) -->
         <button onclick="fecharModalOnboarding()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1" aria-label="Fechar">
             <i class="fas fa-times text-lg"></i>
         </button>
 
-        <!-- Cabeçalho do Modal -->
         <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-lg shadow-emerald-500/10">
                 <i class="fas fa-calendar-alt text-base"></i>
             </div>
-            <h3 class="text-lg font-bold font-display text-white">Configure sua Agenda 🗓️</h3>
+            <h3 class="text-lg font-bold font-display text-white">Configure sua Agenda</h3>
         </div>
 
-        <!-- Explicação / Pré-treinamento -->
         <p class="text-sm text-slate-300 mb-6 leading-relaxed">
             Olá! Para começarmos a receber seus atendimentos da melhor forma, vá até a aba <span class="font-semibold text-white">Configurações</span> no menu de navegação. Lá você poderá determinar seus horários de atendimento, definir horários de intervalo e selecionar os dias que não vai atender.
         </p>
 
-        <!-- Ações -->
         <div class="flex gap-3">
             <button onclick="fecharModalOnboarding()" class="flex-1 px-4 py-2.5 bg-white/5 hover:bg-white/10 transition rounded-xl text-sm font-medium border border-white/10 text-slate-300 hover:text-white text-center">
                 Entendi
@@ -2642,28 +2637,144 @@
         </div>
     </div>
 </div>
+<% } %>
+
+    <!-- Modal de Boas-vindas (somente no primeiro acesso) -->
+<div id="modalBoasVindas" class="fixed inset-0 z-[201] hidden items-center justify-center bg-black/65 backdrop-blur-md p-4">
+    <div class="relative w-full max-w-lg bg-[#020c12]/92 backdrop-blur-xl border border-emerald-500/25 rounded-2xl shadow-2xl text-white overflow-hidden">
+        <!-- topo gradiente sutil -->
+        <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-400/60 to-transparent"></div>
+
+        <div class="p-6 sm:p-8">
+            <button type="button" onclick="fecharModalBoasVindas()" class="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors p-1" aria-label="Fechar">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 border border-emerald-500/30 flex items-center justify-center shadow-lg shadow-emerald-500/10">
+                    <i class="fas fa-heartbeat text-emerald-400 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-[10px] uppercase tracking-[0.14em] text-emerald-400/80 font-bold mb-0.5">Bem-vindo ao MedLM</p>
+                    <h3 class="text-xl font-bold font-display text-white leading-tight">Sua clínica, em um só lugar</h3>
+                </div>
+            </div>
+
+            <p class="text-sm text-slate-300/90 leading-relaxed mb-6">
+                Obrigado por escolher o MedLM. Aqui está o essencial para começar:
+            </p>
+
+            <ul class="space-y-3 mb-7">
+                <li class="flex gap-3 items-start">
+                    <span class="mt-0.5 w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                        <i class="fas fa-calendar-check text-emerald-400 text-xs"></i>
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Agenda e pacientes</p>
+                        <p class="text-xs text-slate-400 leading-relaxed">Agende atendimentos, cadastre pacientes e acompanhe o dia a dia da clínica.</p>
+                    </div>
+                </li>
+                <li class="flex gap-3 items-start">
+                    <span class="mt-0.5 w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/25 flex items-center justify-center shrink-0">
+                        <i class="fas fa-file-medical text-cyan-400 text-xs"></i>
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Prontuário e evolução</p>
+                        <p class="text-xs text-slate-400 leading-relaxed">Registre atendimentos, evoluções e documentos clínicos com segurança.</p>
+                    </div>
+                </li>
+                <li class="flex gap-3 items-start">
+                    <span class="mt-0.5 w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/25 flex items-center justify-center shrink-0">
+                        <i class="fas fa-chart-line text-amber-400 text-xs"></i>
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Financeiro e indicadores</p>
+                        <p class="text-xs text-slate-400 leading-relaxed">Controle receitas, despesas e veja o desempenho da clínica no dashboard.</p>
+                    </div>
+                </li>
+                <li class="flex gap-3 items-start">
+                    <span class="mt-0.5 w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center shrink-0">
+                        <i class="fas fa-users-cog text-emerald-400 text-xs"></i>
+                    </span>
+                    <div>
+                        <p class="text-sm font-semibold text-white">Equipe e permissões</p>
+                        <p class="text-xs text-slate-400 leading-relaxed">Convide colaboradores e defina o que cada perfil pode acessar.</p>
+                    </div>
+                </li>
+            </ul>
+
+            <p class="text-xs text-slate-500 mb-5 leading-relaxed">
+                Dica: comece configurando os <span class="text-slate-300">horários de atendimento</span> e depois cadastre seu primeiro paciente.
+            </p>
+
+            <button type="button" onclick="fecharModalBoasVindas()"
+                class="w-full py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-cyan-600 to-emerald-600 hover:from-cyan-500 hover:to-emerald-500 shadow-lg shadow-emerald-900/30 transition">
+                Começar a usar
+            </button>
+        </div>
+    </div>
+</div>
 
 <script>
   function fecharModalOnboarding() {
     const modal = document.getElementById('modalOnboardingAgenda');
     if (modal) {
       modal.style.opacity = '0';
-      setTimeout(() => modal.remove(), 300);
+      setTimeout(() => {
+        modal.remove();
+        // Depois de fechar o modal da agenda, mostra as boas-vindas (se for o 1º acesso)
+        tentarExibirBoasVindas();
+      }, 280);
+    } else {
+      tentarExibirBoasVindas();
     }
     localStorage.setItem('medlm_onboarding_agenda_visto', 'true');
   }
 
-  // Caso o usuário prefira fechar clicando fora do card do modal
+  function fecharModalBoasVindas() {
+    const modal = document.getElementById('modalBoasVindas');
+    if (!modal) return;
+    modal.style.opacity = '0';
+    setTimeout(() => {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      modal.style.opacity = '';
+    }, 250);
+    localStorage.setItem('medlm_boas_vindas_visto', 'true');
+  }
+
+  function tentarExibirBoasVindas() {
+    if (localStorage.getItem('medlm_boas_vindas_visto') === 'true') return;
+    const modal = document.getElementById('modalBoasVindas');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    modal.style.opacity = '0';
+    requestAnimationFrame(() => {
+      modal.style.transition = 'opacity 0.3s ease';
+      modal.style.opacity = '1';
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    const modal = document.getElementById('modalOnboardingAgenda');
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) fecharModalOnboarding();
+    const modalAgenda = document.getElementById('modalOnboardingAgenda');
+    if (modalAgenda) {
+      modalAgenda.addEventListener('click', (e) => {
+        if (e.target === modalAgenda) fecharModalOnboarding();
+      });
+    } else {
+      // Agenda já configurada: se for 1º acesso, mostra boas-vindas direto
+      tentarExibirBoasVindas();
+    }
+
+    const modalBv = document.getElementById('modalBoasVindas');
+    if (modalBv) {
+      modalBv.addEventListener('click', (e) => {
+        if (e.target === modalBv) fecharModalBoasVindas();
       });
     }
   });
 </script>
-<% } %>
 
     <!-- Data bridges preserved exactly -->
     <script>
