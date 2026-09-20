@@ -83,4 +83,69 @@ router.put('/clinica/atualizar-completo', authAdmin, async (req, res) => {
   }
 });
 
+/**
+ * ROTA: PATCH /api/admin/clinica/email
+ * OBJETIVO: Altera email_master da clínica E o email do usuário dono (cargo = 'dono')
+ * Body: { id: number, email: string }
+ */
+router.patch('/clinica/email', authAdmin, async (req, res) => {
+  const id = parseInt(req.body.id);
+  const email = (req.body.email || '').trim().toLowerCase();
+
+  if (!id || !email || !email.includes('@')) {
+    return res.status(400).json({ error: 'ID e e-mail válidos são obrigatórios.' });
+  }
+
+  try {
+    // 1. E-mail já usado por OUTRA clínica?
+    const [clinicasComEmail] = await db.execute(
+      'SELECT id FROM clinicas WHERE email_master = ? AND id != ?',
+      [email, id]
+    );
+    if (clinicasComEmail.length > 0) {
+      return res.status(409).json({ error: 'Este e-mail já está em uso por outra clínica.' });
+    }
+
+    // 2. E-mail já usado por outro usuário (de outra clínica ou admin global)?
+    const [usuariosComEmail] = await db.execute(
+      'SELECT id, clinica_id FROM usuarios WHERE email = ? AND (clinica_id IS NULL OR clinica_id != ?)',
+      [email, id]
+    );
+    if (usuariosComEmail.length > 0) {
+      return res.status(409).json({ error: 'Este e-mail já está em uso por outro usuário.' });
+    }
+
+    // 3. Atualiza email_master na tabela clinicas
+    const [resultClinica] = await db.execute(
+      'UPDATE clinicas SET email_master = ? WHERE id = ?',
+      [email, id]
+    );
+
+    if (resultClinica.affectedRows === 0) {
+      return res.status(404).json({ error: 'Clínica não encontrada.' });
+    }
+
+    // 4. Atualiza email do usuário DONO dessa clínica
+    const [resultDono] = await db.execute(
+      `UPDATE usuarios SET email = ? WHERE clinica_id = ? AND cargo = 'dono'`,
+      [email, id]
+    );
+
+    return res.json({
+      success: true,
+      message: resultDono.affectedRows > 0
+        ? 'E-mail atualizado na clínica e no usuário dono.'
+        : 'E-mail atualizado na clínica. Nenhum usuário dono encontrado para sincronizar.',
+      donoAtualizado: resultDono.affectedRows > 0
+    });
+
+  } catch (error) {
+    console.error('Erro ao atualizar e-mail da clínica:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({ error: 'E-mail duplicado. Já existe no sistema.' });
+    }
+    return res.status(500).json({ error: 'Erro interno ao atualizar e-mail.' });
+  }
+});
+
 module.exports = router;
