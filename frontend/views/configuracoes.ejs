@@ -893,6 +893,14 @@
                             <select name="duracao_atendimento" id="duracao_atendimento" class="input-premium w-full p-4 font-semibold">
                                 <option value="30">30 min</option>
                                 <option value="60">1 hora</option>
+                                <option value="120">2 horas</option>
+                                <option value="180">3 horas</option>
+                                <option value="240">4 horas</option>
+                                <option value="300">5 horas</option>
+                                <option value="360">6 horas</option>
+                                <option value="420">7 horas</option>
+                                <option value="480">8 horas</option>
+                                <option value="540">9 horas</option>
                             </select>
                         </div>
                     </div>
@@ -1062,6 +1070,27 @@
             </form>
         </div>
     </main>
+    <!-- ─── Modal de Aviso / Análise de Impacto do Expediente ─── -->
+<div id="modalAvisoImpacto" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(2,12,18,0.7);backdrop-filter:blur(8px)"></div>
+
+    <div class="glass-card relative w-full max-w-md p-8 text-center scale-90 opacity-0 transition-all duration-300 ease-out" id="modalAvisoCard">
+        <div class="modal-success-icon" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.3);color:var(--amber);box-shadow:0 0 24px rgba(251,191,36,0.2)">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="modal-success-title mb-2">Atenção ao Expediente</h3>
+        <p class="modal-success-text mb-6" id="textoImpactoAviso" style="text-align: left; line-height: 1.5; color: #cbd5e1;"></p>
+
+        <div class="flex gap-3">
+            <button onclick="fecharModalAviso()" class="w-full py-3 px-4 rounded-xl font-bold font-['Space_Grotesk'] text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 transition">
+                Revisar Horários
+            </button>
+            <button onclick="confirmarSalvarConfiguracao()" class="w-full py-3 px-4 rounded-xl font-bold font-['Space_Grotesk'] text-slate-900 bg-amber-400 hover:bg-amber-300 transition shadow-lg shadow-amber-400/25">
+                Concordar e Salvar
+            </button>
+        </div>
+    </div>
+</div>
 
     <!-- ─── Modal de Sucesso ─── -->
     <div id="modalSucesso" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
@@ -1085,6 +1114,113 @@
     <script src="../ScriptGlobal/logout.js"></script>
 
     <script>
+        let dadosFormularioPendente = null;
+
+function abrirModalAviso(analise) {
+    const textoEl = document.getElementById('textoImpactoAviso');
+    textoEl.innerHTML = `
+        Com base na sua janela de expediente das <b>${analise.abertura}</b> às <b>${analise.fechamento}</b> (${analise.horasExpediente}h totais) e uma duração de atendimento de <b>${analise.horasDuracao}h</b> (${analise.duracaoMinutos} min):<br><br>
+        • Cada profissional conseguirá realizar no máximo <b>${analise.maxAtendimentosPorDia} atendimento(s) contínuo(s)</b> por dia.<br>
+        • Janela útil de atendimento: <b>${analise.horasUteis}h</b>.<br>
+        ${analise.avisoTamanho ? '<br><span style="color:var(--amber)"><i class="fas fa-info-circle"></i> Atenção: A duração do atendimento é alta em relação ao expediente total. Verifique se os encaixes atendem à rotina da clínica.</span>' : ''}
+    `;
+
+    const modalAviso = document.getElementById('modalAvisoImpacto');
+    const modalAvisoCard = document.getElementById('modalAvisoCard');
+    modalAviso.classList.remove('hidden');
+    setTimeout(() => {
+        modalAvisoCard.classList.remove('scale-90', 'opacity-0');
+        modalAvisoCard.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function fecharModalAviso() {
+    const modalAviso = document.getElementById('modalAvisoImpacto');
+    const modalAvisoCard = document.getElementById('modalAvisoCard');
+    modalAvisoCard.classList.remove('scale-100', 'opacity-100');
+    modalAvisoCard.classList.add('scale-90', 'opacity-0');
+    setTimeout(() => {
+        modalAviso.classList.add('hidden');
+    }, 300);
+}
+
+// Intercepta o submit do formulário para validar antes de salvar
+document.getElementById('formConfig').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    atualizarDiasSemanaHidden();
+    sincronizarPeriodosHidden();
+    sincronizarPausasHidden();
+
+    const abertura = document.getElementById('horario_abertura').value || '08:00';
+    const fechamento = document.getElementById('horario_fechamento').value || '18:00';
+    const duracaoMinutos = parseInt(document.getElementById('duracao_atendimento').value) || 30;
+
+    // Cálculo analítico do impacto do atendimento
+    const [hA, mA] = abertura.split(':').map(Number);
+    const [hF, mF] = fechamento.split(':').map(Number);
+    const minAbertura = hA * 60 + mA;
+    const minFechamento = hF * 60 + mF;
+    const minExpedienteTotal = Math.max(0, minFechamento - minAbertura);
+    const horasExpediente = (minExpedienteTotal / 60).toFixed(1);
+    const horasDuracao = (duracaoMinutos / 60).toFixed(1);
+    
+    // Calcula quantos atendimentos cabem na janela
+    const maxAtendimentosPorDia = Math.floor(minExpedienteTotal / duracaoMinutos);
+    const avisoTamanho = duracaoMinutos >= minExpedienteTotal;
+
+    dadosFormularioPendente = {
+        horario_abertura: abertura,
+        horario_fechamento: fechamento,
+        duracao_atendimento: duracaoMinutos,
+        valor_sinal: document.getElementById('valor_sinal').value,
+        dias_semana: document.getElementById('dias_semana').value || '1,2,3,4,5',
+        periodos_fechados: document.getElementById('periodos_fechados').value || '[]',
+        intervalos_pausa: document.getElementById('intervalos_pausa')?.value || '[]'
+    };
+
+    // Abre o primeiro modal informando a situação real
+    abrirModalAviso({
+        abertura,
+        fechamento,
+        horasExpediente,
+        horasDuracao,
+        duracaoMinutos,
+        maxAtendimentosPorDia: maxAtendimentosPorDia > 0 ? maxAtendimentosPorDia : 1,
+        horasUteis: (minExpedienteTotal / 60).toFixed(1),
+        avisoTamanho
+    });
+});
+
+// Executado quando o usuário concorda com a situação no primeiro modal
+async function confirmarSalvarConfiguracao() {
+    fecharModalAviso();
+
+    if (!dadosFormularioPendente) return;
+
+    try {
+        const response = await fetch('/api/config/salvar-configuracao', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify(dadosFormularioPendente)
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            await carregarConfiguracoes();
+            abrirModal(); // Abre o segundo modal de sucesso informando que foi salvo!
+        } else {
+            alert('Erro ao salvar: ' + (result.message || result.error || 'Erro no servidor'));
+        }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro de conexão ao salvar configurações.');
+    }
+}
         // ─── Modal de sucesso (lógica original preservada) ───
         const modal = document.getElementById('modalSucesso');
         const modalCard = document.getElementById('modalCard');
