@@ -591,6 +591,110 @@
 </div>
 
 
+
+<!-- ── MODAL CONFIRMAÇÃO DE DADOS ──────────────────────────── -->
+<div id="modalConfirmacao" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,12,18,0.92); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); z-index:998; justify-content:center; align-items:center; overflow-y:auto; padding:20px;">
+    <div class="modal-card bg-slate-900/95 rounded-3xl p-7 sm:p-8 max-w-lg w-full shadow-2xl border border-white/10 text-white">
+
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto mb-5">
+            <i class="fas fa-clipboard-check text-amber-400 text-2xl"></i>
+        </div>
+
+        <h2 style="font-family:'Space Grotesk',sans-serif" class="text-2xl font-black text-white text-center tracking-tight">
+            Confirme seus dados
+        </h2>
+        <p class="text-white/45 text-sm text-center mt-2 mb-6">
+            Revise com atenção antes de criar a clínica. Depois não dá para desfazer facilmente.
+        </p>
+
+        <!-- Resumo dos dados -->
+        <div class="space-y-3 mb-5">
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <i class="fas fa-hospital text-emerald-400 text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Nome da Clínica</p>
+                    <p id="confNomeClinica" class="text-sm font-semibold text-white break-words"></p>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                    <i class="fas fa-user-md text-emerald-400 text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Responsável</p>
+                    <p id="confDonoNome" class="text-sm font-semibold text-white break-words"></p>
+                </div>
+            </div>
+
+            <!-- E-MAIL — DESTAQUE FORTE -->
+            <div class="p-4 rounded-xl bg-amber-500/10 border-2 border-amber-400/50 shadow-[0_0_24px_rgba(251,191,36,0.12)]">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center shrink-0">
+                        <i class="fas fa-envelope text-amber-300 text-base"></i>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[10px] uppercase tracking-wider text-amber-300/90 font-black mb-1">
+                            <i class="fas fa-exclamation-triangle mr-1"></i> E-mail da clínica — confira com cuidado
+                        </p>
+                        <p id="confEmail" class="text-base sm:text-lg font-black text-amber-200 break-all font-mono tracking-wide"></p>
+                        <p class="text-xs text-amber-200/70 mt-2 leading-relaxed">
+                            <strong class="text-amber-200">Seu e-mail está correto?</strong>
+                            Você receberá os <strong>dados de acesso</strong> neste endereço.
+                            Se estiver errado, você <strong>não receberá</strong> o e-mail de confirmação.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="flex items-start gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <i class="fab fa-whatsapp text-emerald-400 text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[10px] uppercase tracking-wider text-white/40 font-bold">WhatsApp Clínica</p>
+                        <p id="confTelClinica" class="text-sm font-semibold text-white break-words"></p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center shrink-0">
+                        <i class="fas fa-mobile-alt text-emerald-400 text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Seu Celular</p>
+                        <p id="confTelDono" class="text-sm font-semibold text-white break-words"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 p-3 rounded-xl bg-white/[0.04] border border-white/[0.07]">
+                <div class="w-9 h-9 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center shrink-0">
+                    <i class="fas fa-star text-cyan-400 text-sm"></i>
+                </div>
+                <div class="min-w-0">
+                    <p class="text-[10px] uppercase tracking-wider text-white/40 font-bold">Plano escolhido</p>
+                    <p id="confPlano" class="text-sm font-semibold text-white"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ações -->
+        <div class="flex flex-col sm:flex-row gap-3 mt-2">
+            <button type="button" id="btnCorrigirDados"
+                class="flex-1 py-3.5 rounded-xl border border-white/15 bg-white/[0.05] text-white/80 font-bold text-sm hover:bg-white/10 hover:text-white transition flex items-center justify-center gap-2">
+                <i class="fas fa-pen"></i> Corrigir dados
+            </button>
+            <button type="button" id="btnConfirmarCadastro"
+                class="flex-1 py-3.5 rounded-xl font-black text-sm uppercase tracking-wider text-slate-900 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-400 hover:to-cyan-400 shadow-lg transition hover:scale-[1.02] flex items-center justify-center gap-2">
+                <i class="fas fa-check"></i> Confirmar e criar
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- ── MODAL SUCESSO ────────────────────────────────────────── -->
 <div id="modalSucesso" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(2,12,18,0.90); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); z-index:999; justify-content:center; align-items:center; overflow-y:auto; padding:20px;">
     <div class="modal-card bg-slate-900/95 rounded-3xl p-8 text-center max-w-lg w-full shadow-2xl border border-white/10 text-white">
@@ -640,31 +744,63 @@
 </div>
 
     <script>
-        document.getElementById('formCadastro').addEventListener('submit', async (e) => {
+        const PLANOS_LABEL = { '1': 'Trial (até 3 membros)', '2': 'Premium (até 10 membros)', '3': 'Enterprise (ilimitado)' };
+        let dadosPendentes = null;
+
+        document.getElementById('formCadastro').addEventListener('submit', (e) => {
             e.preventDefault();
-            const btnSubmit = document.getElementById('btnSubmit');
-            const originalHTML = btnSubmit.innerHTML;
-            btnSubmit.disabled = true;
-            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Criando sua conta...</span>';
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
 
+            // Preenche o modal de confirmação
+            document.getElementById('confNomeClinica').textContent = data.nome_clinica || '—';
+            document.getElementById('confDonoNome').textContent = data.dono_nome || '—';
+            document.getElementById('confEmail').textContent = data.email_master || '—';
+            document.getElementById('confTelClinica').textContent = data.telefone_clinica || '—';
+            document.getElementById('confTelDono').textContent = data.telefone_dono || '—';
+            document.getElementById('confPlano').textContent = PLANOS_LABEL[data.plano_id] || ('Plano ' + (data.plano_id || '—'));
 
-            /*
-               IMPORTANTE: Como usamos cards personalizados para os planos,
-               o 'plano_id' será enviado automaticamente porque os inputs
-               radio têm o name="plano_id".
-            */
+            dadosPendentes = data;
+            document.getElementById('modalConfirmacao').style.display = 'flex';
+        });
+
+        document.getElementById('btnCorrigirDados').addEventListener('click', () => {
+            document.getElementById('modalConfirmacao').style.display = 'none';
+            dadosPendentes = null;
+            // Foco no e-mail para facilitar correção
+            const emailInput = document.querySelector('input[name="email_master"]');
+            if (emailInput) {
+                emailInput.focus();
+                emailInput.select();
+            }
+        });
+
+        document.getElementById('btnConfirmarCadastro').addEventListener('click', async () => {
+            if (!dadosPendentes) return;
+
+            const btnConfirm = document.getElementById('btnConfirmarCadastro');
+            const btnCorrigir = document.getElementById('btnCorrigirDados');
+            const btnSubmit = document.getElementById('btnSubmit');
+            const originalConfirm = btnConfirm.innerHTML;
+            const originalSubmit = btnSubmit.innerHTML;
+
+            btnConfirm.disabled = true;
+            btnCorrigir.disabled = true;
+            btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i><span>Criando sua conta...</span>';
+
             try {
                 const response = await fetch('/api/clinicas/register-clinica', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(dadosPendentes)
                 });
                 const result = await response.json();
                 if (response.ok) {
+                    document.getElementById('modalConfirmacao').style.display = 'none';
                     const slug = result.portalUrl;
-                    const nomeDono = data.dono_nome.split(' ')[0];
+                    const nomeDono = (dadosPendentes.dono_nome || '').split(' ')[0];
                     const urlCompleta = window.location.origin + slug;
                     document.getElementById('nomeDonoModal').innerText = nomeDono;
                     document.getElementById('linkPortal').value = urlCompleta;
@@ -678,14 +814,24 @@
                     document.getElementById('modalSucesso').style.display = 'flex';
                 } else {
                     alert(result.error || "Ocorreu um erro ao processar seu cadastro.");
+                    document.getElementById('modalConfirmacao').style.display = 'none';
+                    btnConfirm.disabled = false;
+                    btnCorrigir.disabled = false;
+                    btnConfirm.innerHTML = originalConfirm;
                     btnSubmit.disabled = false;
-                    btnSubmit.innerHTML = originalHTML;
+                    btnSubmit.innerHTML = originalSubmit;
+                    dadosPendentes = null;
                 }
             } catch (error) {
                 console.error("Erro na conexão:", error);
                 alert("Erro crítico de conexão. O servidor está ligado?");
+                document.getElementById('modalConfirmacao').style.display = 'none';
+                btnConfirm.disabled = false;
+                btnCorrigir.disabled = false;
+                btnConfirm.innerHTML = originalConfirm;
                 btnSubmit.disabled = false;
-                btnSubmit.innerHTML = originalHTML;
+                btnSubmit.innerHTML = originalSubmit;
+                dadosPendentes = null;
             }
         });
        
