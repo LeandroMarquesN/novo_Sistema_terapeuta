@@ -1110,6 +1110,72 @@
         </div>
     </div>
 
+    <!-- ─── Card de Gestão de Plano ─── -->
+<div class="glass-card p-8">
+    <div class="card-center-head">
+        <div class="card-icon-wrap" style="background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.25)">
+            <i class="fas fa-crown" style="color:var(--cyan)"></i>
+        </div>
+        <h2 class="card-title">Plano da Clínica</h2>
+        <p class="card-desc">Gerencie ou altere o plano contratado. Esta alteração exige validação das credenciais do Dono.</p>
+    </div>
+    
+    <div class="max-w-md mx-auto space-y-4">
+        <div>
+            <label class="form-label" style="text-align:center">Plano Atual</label>
+            <input type="text" id="plano_atual_txt" class="input-premium w-full p-4 font-bold text-center text-cyan-400" readonly value="Carregando...">
+        </div>
+        <div>
+            <label class="form-label" style="text-align:center">Novo Plano Desejado</label>
+            <select id="novo_plano_id" class="input-premium w-full p-4 font-semibold text-center">
+                <option value="1">Trial (R$ 89,90)</option>
+                <option value="2">Premium (R$ 89,90)</option>
+                <option value="3">Enterprise (R$ 269,90)</option>
+            </select>
+        </div>
+        <div class="pt-2">
+            <button type="button" onclick="abrirModalAuthPlano()" class="w-full py-4 rounded-xl font-bold font-['Space_Grotesk'] text-slate-900 bg-cyan-400 hover:bg-cyan-300 transition shadow-lg shadow-cyan-400/25 flex items-center justify-center gap-2">
+                <i class="fas fa-exchange-alt"></i> Solicitar Troca de Plano
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ─── Modal de Autenticação do Dono para Troca de Plano ─── -->
+<div id="modalAuthPlano" class="fixed inset-0 z-[100] flex items-center justify-center hidden">
+    <div class="absolute inset-0" style="background:rgba(2,12,18,0.7);backdrop-filter:blur(8px)"></div>
+
+    <div class="glass-card relative w-full max-w-md p-8 scale-90 opacity-0 transition-all duration-300 ease-out" id="modalAuthCard">
+        <div class="card-center-head mb-6">
+            <div class="card-icon-wrap card-icon-cyan"><i class="fas fa-lock"></i></div>
+            <h3 class="modal-success-title">Autorização do Dono</h3>
+            <p class="modal-success-text">Para alterar o plano da clínica, digite as credenciais de acesso do Dono (Master).</p>
+        </div>
+
+        <form id="formAuthPlano" class="space-y-4">
+            <div>
+                <label class="form-label">E-mail do Dono</label>
+                <input type="email" id="auth_email" class="input-premium w-full p-4 font-medium" placeholder="dono@clinica.com" required>
+            </div>
+            <div>
+                <label class="form-label">Senha de Acesso</label>
+                <input type="password" id="auth_senha" class="input-premium w-full p-4 font-medium" placeholder="••••••••" required>
+            </div>
+
+            <p id="authErroMsg" class="text-xs text-red-400 text-center" style="display:none;"></p>
+
+            <div class="flex gap-3 pt-4">
+                <button type="button" onclick="fecharModalAuthPlano()" class="w-full py-3 px-4 rounded-xl font-bold font-['Space_Grotesk'] text-slate-300 bg-white/5 border border-white/10 hover:bg-white/10 transition">
+                    Cancelar
+                </button>
+                <button type="submit" class="w-full py-3 px-4 rounded-xl font-bold font-['Space_Grotesk'] text-slate-900 bg-emerald-400 hover:bg-emerald-300 transition shadow-lg shadow-emerald-400/25">
+                    Confirmar e Alterar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
     <!-- JS Dark Mode original (preservado) -->
     <script src="../ScriptGlobal/darkModeConfiguracao.js"></script>
     <script src="../ScriptGlobal/logout.js"></script>
@@ -1661,6 +1727,68 @@
             if (scrollEl) scrollEl.addEventListener('scroll', aoRolar, { passive: true });
             window.addEventListener('scroll', aoRolar, { passive: true });
         })();
+
+        let planoAtualIdOriginal = null;
+
+// Funções de controle do Modal de Autenticação do Plano
+function abrirModalAuthPlano() {
+    const modal = document.getElementById('modalAuthPlano');
+    const card = document.getElementById('modalAuthCard');
+    document.getElementById('authErroMsg').style.display = 'none';
+    document.getElementById('auth_email').value = '';
+    document.getElementById('auth_senha').value = '';
+    
+    modal.classList.remove('hidden');
+    setTimeout(() => {
+        card.classList.remove('scale-90', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+    }, 10);
+}
+
+function fecharModalAuthPlano() {
+    const modal = document.getElementById('modalAuthPlano');
+    const card = document.getElementById('modalAuthCard');
+    card.classList.remove('scale-100', 'opacity-100');
+    card.classList.add('scale-90', 'opacity-0');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
+}
+
+// Submissão da credencial do dono para alteração de plano
+document.getElementById('formAuthPlano').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('auth_email').value.trim();
+    const senha = document.getElementById('auth_senha').value;
+    const novoPlanoId = document.getElementById('novo_plano_id').value;
+    const erroEl = document.getElementById('authErroMsg');
+
+    try {
+        const response = await fetch('/api/config/alterar-plano', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            },
+            body: JSON.stringify({ email, senha, novo_plano_id: novoPlanoId })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+            fecharModalAuthPlano();
+            alert('Plano alterado com sucesso!');
+            carregarConfiguracoes(); // Recarrega os dados atualizados
+        } else {
+            erroEl.textContent = result.message || 'Credenciais inválidas ou acesso negado.';
+            erroEl.style.display = 'block';
+        }
+    } catch (error) {
+        console.error('Erro ao alterar plano:', error);
+        erroEl.textContent = 'Erro de conexão ao processar solicitação.';
+        erroEl.style.display = 'block';
+    }
+});
     </script>
 
 </body>

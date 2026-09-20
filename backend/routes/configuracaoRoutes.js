@@ -28,5 +28,15 @@ router.post(
   authMiddleware, // O segurança também protege o salvamento
   configuracaoController.updateConfiguracoes
 );
+/**
+ * @route   POST /api/config/alterar-plano
+ * @desc    Valida credenciais do dono e atualiza o plano da clínica
+ * @access  Privado
+ */
+router.post(
+  '/alterar-plano',
+  authMiddleware,
+  configuracaoController.alterarPlano
+);
 
 module.exports = router;

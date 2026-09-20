@@ -200,3 +200,51 @@ exports.updateConfiguracoes = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+exports.alterarPlano = async (req, res) => {
+  const clinicaId = req.usuario?.clinica_id;
+  const { email, senha, novo_plano_id } = req.body;
+
+  if (!clinicaId) {
+    return res.status(401).json({ success: false, message: "Sessão inválida." });
+  }
+
+  if (!email || !senha || !novo_plano_id) {
+    return res.status(400).json({ success: false, message: "Preencha todas as credenciais do Dono e selecione o plano." });
+  }
+
+  try {
+    // 1. Valida se o e-mail e senha correspondem ao dono/master da clínica logada
+    const [clinicaRows] = await db.execute(
+      `SELECT id, email_master, senha_master FROM clinicas WHERE id = ?`,
+      [clinicaId]
+    );
+
+    if (clinicaRows.length === 0) {
+      return res.status(404).json({ success: false, message: "Clínica não encontrada." });
+    }
+
+    const clinica = clinicaRows[0];
+
+    // Validação estrita das credenciais Master do Dono
+    if (clinica.email_master !== email || clinica.senha_master !== senha) {
+      return res.status(403).json({ success: false, message: "Credenciais incorretas. Apenas o Dono pode alterar o plano." });
+    }
+
+    // 2. Valida se o plano desejado existe na tabela de planos
+    const [planoRows] = await db.execute(`SELECT id FROM planos WHERE id = ?`, [novo_plano_id]);
+    if (planoRows.length === 0) {
+      return res.status(400).json({ success: false, message: "Plano selecionado é inválido." });
+    }
+
+    // 3. Atualiza o plano da clínica no banco de dados
+    await db.execute(
+      `UPDATE clinicas SET plano_id = ? WHERE id = ?`,
+      [novo_plano_id, clinicaId]
+    );
+
+    res.json({ success: true, message: "Plano alterado com sucesso!" });
+  } catch (error) {
+    console.error("ERRO AO ALTERAR PLANO:", error);
+    res.status(500).json({ success: false, message: "Erro interno no servidor ao alterar o plano." });
+  }
+};
