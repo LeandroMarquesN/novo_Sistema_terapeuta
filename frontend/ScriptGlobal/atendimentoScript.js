@@ -279,7 +279,8 @@ async function carregarTimelineProntuarios(pacienteId) {
 }
 
 /**
- * Abre detalhe de anamnese a partir da timeline de evolução
+ * Visualiza anamnese em janela flutuante (mesmo esquema das seções maximizadas).
+ * Fallback: modal glass se abrirJanelaConteudo não estiver disponível.
  */
 async function visualizarAnamneseTimeline(anamneseId) {
   try {
@@ -291,35 +292,118 @@ async function visualizarAnamneseTimeline(anamneseId) {
     const data = await response.json();
     const a = data.anamnese || data;
     const respostas = a.respostas || {};
-
-    if (typeof trocarAba === 'function') {
-      try { trocarAba('anamnese'); } catch (_) {}
-    }
-
-    const linhas = Object.keys(respostas).map((k) => {
-      const v = respostas[k];
-      if (v === true) return '☑ ' + k;
-      if (v === false || v === '' || v == null) return null;
-      return k + ': ' + v;
-    }).filter(Boolean);
-
     const dataFmt = a.data_preenchimento
       ? new Date(a.data_preenchimento).toLocaleString('pt-BR')
       : '—';
+    const status = a.status_anamnese || 'rascunho';
+    const statusCor = status === 'finalizado' ? 'var(--emerald)' : 'var(--amber)';
+    const statusBg = status === 'finalizado' ? 'rgba(52,211,153,0.15)' : 'rgba(251,191,36,0.15)';
+    const tituloJanela = (a.modelo_nome || 'Anamnese') + ' · #' + a.id;
 
-    let texto = 'Anamnese #' + a.id + ' — ' + (a.modelo_nome || 'Modelo').toUpperCase() + '\n';
-    texto += 'Status: ' + (a.status_anamnese || '—') + '\n';
-    texto += 'Data: ' + dataFmt + '\n';
-    texto += 'Profissional: ' + (a.profissional_nome || '—') + '\n';
-    if (a.prontuario_id) texto += 'Prontuário vinculado: #' + a.prontuario_id + '\n';
-    texto += '\n── Respostas ──\n';
-    texto += linhas.length ? linhas.join('\n') : '(sem respostas registradas)';
+    // Monta lista de respostas
+    let respostasHtml = '';
+    const keys = Object.keys(respostas);
+    if (!keys.length) {
+      respostasHtml = '<p style="color:rgba(148,163,184,0.5);font-size:12px;padding:12px 0">Nenhuma resposta registrada.</p>';
+    } else {
+      keys.forEach((k) => {
+        const v = respostas[k];
+        if (v === false || v === '' || v == null) return;
+        if (v === true) {
+          respostasHtml += `
+            <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(52,211,153,0.1)">
+              <i class="fas fa-check-circle" style="color:var(--emerald);font-size:12px"></i>
+              <span style="color:#e2e8f0;font-size:13px;font-weight:600">${escHtmlAnamnese(k)}</span>
+            </div>`;
+        } else {
+          respostasHtml += `
+            <div style="padding:10px 0;border-bottom:1px solid rgba(52,211,153,0.1)">
+              <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:rgba(148,163,184,0.5);margin-bottom:4px">${escHtmlAnamnese(k)}</div>
+              <div style="color:#e2e8f0;font-size:13px;line-height:1.45;white-space:pre-wrap">${escHtmlAnamnese(String(v))}</div>
+            </div>`;
+        }
+      });
+    }
 
-    alert(texto);
+    const corpo = document.createElement('div');
+    corpo.className = 'anamnese-detalhe-view';
+    corpo.style.cssText = 'padding:4px 2px 12px;';
+    corpo.innerHTML = `
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <span style="font-size:10px;font-weight:800;text-transform:uppercase;padding:4px 10px;border-radius:99px;background:${statusBg};color:${statusCor}">${escHtmlAnamnese(status)}</span>
+        <span style="font-size:11px;color:rgba(148,163,184,0.7);display:flex;align-items:center;gap:6px">
+          <i class="fas fa-calendar-alt" style="color:var(--cyan)"></i> ${escHtmlAnamnese(dataFmt)}
+        </span>
+        ${a.profissional_nome ? `
+        <span style="font-size:11px;color:rgba(148,163,184,0.7);display:flex;align-items:center;gap:6px">
+          <i class="fas fa-user-md" style="color:var(--emerald)"></i> ${escHtmlAnamnese(a.profissional_nome)}
+        </span>` : ''}
+        ${a.prontuario_id ? `
+        <span style="font-size:11px;color:rgba(148,163,184,0.7);display:flex;align-items:center;gap:6px">
+          <i class="fas fa-link" style="color:var(--blue)"></i> Prontuário #${a.prontuario_id}
+        </span>` : ''}
+      </div>
+      <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:rgba(148,163,184,0.45);margin-bottom:8px">Respostas</div>
+      <div>${respostasHtml}</div>
+      ${a.prontuario_id ? `
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(52,211,153,0.15)">
+        <button type="button" class="btn-secondary px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider"
+                onclick="visualizarEvolucaoAntiga(${a.prontuario_id})">
+          <i class="fas fa-notes-medical"></i> Abrir prontuário vinculado
+        </button>
+      </div>` : ''}
+    `;
+
+    if (typeof window.abrirJanelaConteudo === 'function') {
+      window.abrirJanelaConteudo('anamnese-view-' + anamneseId, tituloJanela, corpo);
+    } else {
+      // Fallback modal glass
+      abrirModalAnamneseFallback(tituloJanela, corpo);
+    }
   } catch (err) {
     console.error('Erro ao visualizar anamnese:', err);
     alert('Não foi possível carregar esta anamnese.');
   }
+}
+
+function escHtmlAnamnese(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function abrirModalAnamneseFallback(titulo, corpoEl) {
+  let overlay = document.getElementById('modalAnamneseDetalhe');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'modalAnamneseDetalhe';
+    overlay.className = 'fixed inset-0 z-[200] flex items-center justify-center p-4';
+    overlay.style.background = 'rgba(2,12,18,0.72)';
+    overlay.innerHTML = `
+      <div class="modal-panel glass-panel w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden rounded-2xl">
+        <div class="glass-header px-5 py-3 flex items-center justify-between shrink-0">
+          <h3 id="modalAnamneseTitulo" class="text-sm font-black text-white truncate pr-3"></h3>
+          <button type="button" id="btnFecharModalAnamnese" class="btn-secondary w-8 h-8 rounded-lg flex items-center justify-center">
+            <i class="fas fa-times text-xs"></i>
+          </button>
+        </div>
+        <div id="modalAnamneseBody" class="flex-1 overflow-y-auto px-5 py-4"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) overlay.classList.add('hidden');
+    });
+    document.getElementById('btnFecharModalAnamnese').addEventListener('click', () => {
+      overlay.classList.add('hidden');
+    });
+  }
+  document.getElementById('modalAnamneseTitulo').textContent = titulo;
+  const body = document.getElementById('modalAnamneseBody');
+  body.innerHTML = '';
+  body.appendChild(corpoEl);
+  overlay.classList.remove('hidden');
 }
 
 // ─── 4. DOCUMENTOS DO PACIENTE ──────────────────────────────────
