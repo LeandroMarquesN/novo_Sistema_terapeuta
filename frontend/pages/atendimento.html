@@ -725,6 +725,16 @@
         min-height: 0;
         animation: fadeInAba 0.22s ease;
       }
+      /* Painel em janela flutuante permanece visível mesmo sem ser a aba ativa */
+      .aba-painel.em-janela-flutuante {
+        display: flex !important;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        height: 100% !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+      }
       @keyframes fadeInAba {
         from {
           opacity: 0;
@@ -884,10 +894,15 @@
         flex-direction: column;
       }
       .janela-body > .aba-painel,
-      .janela-body > section {
+      .janela-body > section,
+      .janela-body > .aba-painel.em-janela-flutuante {
+        display: flex !important;
+        flex-direction: column;
         flex: 1;
         min-height: 100%;
-        height: 100%;
+        height: 100% !important;
+        visibility: visible !important;
+        opacity: 1 !important;
         border-radius: 0 !important;
         border: none !important;
         box-shadow: none !important;
@@ -2250,12 +2265,14 @@
           const btn = document.getElementById("tab-" + aba);
           const painel = document.getElementById("painel-" + aba);
           const ativa = aba === nome;
+          // Painéis em janela flutuante não perdem visibilidade ao trocar de aba
+          const emJanela = painel && painel.classList.contains("em-janela-flutuante");
 
           if (btn) {
             btn.classList.toggle("active", ativa);
             btn.setAttribute("aria-selected", ativa ? "true" : "false");
           }
-          if (painel) {
+          if (painel && !emJanela) {
             painel.classList.toggle("ativa", ativa);
           }
         });
@@ -2263,7 +2280,9 @@
         // Em telas pequenas/médias, leva o usuário para o topo do painel trocado
         if (window.innerWidth < 1024) {
           const painelAtivo = document.getElementById("painel-" + nome);
-          painelAtivo?.scrollIntoView({ behavior: "smooth", block: "start" });
+          if (painelAtivo && !painelAtivo.classList.contains("em-janela-flutuante")) {
+            painelAtivo.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
         }
       }
 
@@ -2550,6 +2569,10 @@
           if (!info) return;
 
           const painel = document.getElementById(painelId);
+          if (painel) {
+            painel.classList.remove("em-janela-flutuante");
+            painel.style.display = "";
+          }
           if (painel && info.parent) {
             if (info.placeholder && info.placeholder.parentNode === info.parent) {
               info.parent.insertBefore(painel, info.placeholder);
@@ -2558,6 +2581,15 @@
               info.parent.insertBefore(painel, info.next);
             } else {
               info.parent.appendChild(painel);
+            }
+            // Restaura regra de abas: só fica visível se for a aba ativa no momento
+            const nomeAba = painelId.replace("painel-", "");
+            const tabAtiva = document.getElementById("tab-" + nomeAba);
+            const estaAtivaNaBarra = tabAtiva && tabAtiva.classList.contains("active");
+            if (estaAtivaNaBarra) {
+              painel.classList.add("ativa");
+            } else {
+              painel.classList.remove("ativa");
             }
           } else if (info.placeholder) {
             info.placeholder.remove();
@@ -2604,7 +2636,9 @@
           const shell = criarShell(painelId, titulo);
           const body = shell.querySelector(".janela-body");
           body.appendChild(painel);
-          painel.classList.add("ativa");
+          // Garante visibilidade permanente enquanto estiver flutuando
+          // (independente da aba ativa no sistema de tabs)
+          painel.classList.add("ativa", "em-janela-flutuante");
           painel.style.display = "flex";
 
           root.appendChild(shell);
