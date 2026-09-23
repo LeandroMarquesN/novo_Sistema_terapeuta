@@ -750,6 +750,92 @@
         outline-offset: 2px;
       }
 
+      /* ─── Modal aviso tela inadequada (celular/tablet; só libera desktop ≥1024px) ─── */
+      #modalTelaPequena {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(2, 12, 18, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+      #modalTelaPequena.visivel {
+        display: flex;
+      }
+      #modalTelaPequena .modal-tela-card {
+        width: 100%;
+        max-width: 400px;
+        background: rgba(4, 16, 24, 0.98);
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        border-radius: 24px;
+        padding: 28px 24px 24px;
+        text-align: center;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55),
+          0 0 40px rgba(251, 191, 36, 0.08);
+        animation: modalTelaIn 0.35s ease-out;
+      }
+      @keyframes modalTelaIn {
+        from { opacity: 0; transform: scale(0.92) translateY(12px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      #modalTelaPequena .modal-tela-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(251, 191, 36, 0.12);
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        color: var(--amber);
+        font-size: 28px;
+        box-shadow: 0 0 24px rgba(251, 191, 36, 0.2);
+      }
+      #modalTelaPequena .modal-tela-titulo {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 20px;
+        font-weight: 800;
+        color: #f1f5f9;
+        margin-bottom: 10px;
+      }
+      #modalTelaPequena .modal-tela-texto {
+        font-size: 13px;
+        line-height: 1.55;
+        color: rgba(148, 163, 184, 0.75);
+        margin-bottom: 22px;
+      }
+      #modalTelaPequena .modal-tela-texto strong {
+        color: var(--amber);
+        font-weight: 700;
+      }
+      #modalTelaPequena .btn-modal-tela {
+        width: 100%;
+        padding: 14px 18px;
+        border-radius: 14px;
+        border: none;
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 800;
+        font-size: 14px;
+        cursor: pointer;
+        background: linear-gradient(135deg, rgba(251, 191, 36, 0.95), #d97706);
+        color: #020c12;
+        box-shadow: 0 0 20px rgba(251, 191, 36, 0.25);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      #modalTelaPequena .btn-modal-tela:active {
+        transform: scale(0.97);
+      }
+      #modalTelaPequena .modal-tela-hint {
+        margin-top: 14px;
+        font-size: 11px;
+        color: rgba(148, 163, 184, 0.45);
+      }
+
       /* Responsividade das abas */
       @media (max-width: 640px) {
         .tab-btn {
@@ -1902,6 +1988,27 @@
       </div>
     </div>
 
+    <!-- MODAL: tela inadequada (celular/tablet — só libera desktop ≥1024px) -->
+    <div id="modalTelaPequena" role="dialog" aria-modal="true" aria-labelledby="modalTelaTitulo" aria-describedby="modalTelaTexto">
+      <div class="modal-tela-card">
+        <div class="modal-tela-icon">
+          <i class="fas fa-laptop"></i>
+        </div>
+        <h3 id="modalTelaTitulo" class="modal-tela-titulo">Tela inadequada para atendimento</h3>
+        <p id="modalTelaTexto" class="modal-tela-texto">
+          Detectamos que você está em um celular ou tablet.
+          <strong>Não é possível realizar um atendimento completo nesta tela</strong>
+          — os painéis e dados ficam misturados e a experiência deixa de ser segura e confortável.
+          <br /><br />
+          Faça login em um <strong>computador ou notebook</strong> (tela a partir de 1024&nbsp;px) para continuar o atendimento com tranquilidade.
+        </p>
+        <button type="button" class="btn-modal-tela" id="btnFecharModalTela" onclick="fecharModalTelaPequena()">
+          Entendi
+        </button>
+        <p class="modal-tela-hint">Recomendamos largura mínima de 1024&nbsp;px (desktop ou notebook).</p>
+      </div>
+    </div>
+
     <script>
       const quill = new Quill("#editorEvolucao", {
         theme: "snow",
@@ -2096,6 +2203,46 @@
 
         document.addEventListener("click", (e) => {
           if (!e.target.closest(".cid-wrap")) lista.classList.remove("open");
+        });
+      })();
+
+      // ─── Aviso: só libera atendimento em desktop/notebook (≥ 1024px) ───
+      (function () {
+        const LIMITE_TELA_ADEQUADA = 1024;
+        const modal = document.getElementById("modalTelaPequena");
+        if (!modal) return;
+
+        function ehTelaInadequada() {
+          return window.innerWidth < LIMITE_TELA_ADEQUADA;
+        }
+
+        function abrirModalTelaPequena() {
+          if (!ehTelaInadequada()) return;
+          modal.classList.add("visivel");
+          document.body.style.overflow = "hidden";
+        }
+
+        window.fecharModalTelaPequena = function () {
+          modal.classList.remove("visivel");
+          document.body.style.overflow = "";
+        };
+
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", abrirModalTelaPequena);
+        } else {
+          abrirModalTelaPequena();
+        }
+
+        let resizeTimer = null;
+        window.addEventListener("resize", function () {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(function () {
+            if (ehTelaInadequada()) {
+              abrirModalTelaPequena();
+            } else {
+              window.fecharModalTelaPequena();
+            }
+          }, 150);
         });
       })();
     </script>

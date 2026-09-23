@@ -750,90 +750,160 @@
         outline-offset: 2px;
       }
 
-      /* ─── Modal aviso tela inadequada (celular/tablet; só libera desktop ≥1024px) ─── */
-      #modalTelaPequena {
+      /* ─── Maximizar painel (somente desktop ≥1024px) ─── */
+      .btn-maximizar-painel {
+        display: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 11px;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        color: rgba(148, 163, 184, 0.7);
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 13px;
+      }
+      .btn-maximizar-painel:hover {
+        color: var(--cyan);
+        border-color: rgba(34, 211, 238, 0.35);
+        background: rgba(34, 211, 238, 0.1);
+        box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
+      }
+      @media (min-width: 1024px) {
+        .btn-maximizar-painel {
+          display: inline-flex;
+        }
+      }
+
+      #modalMaximizarPainel {
         position: fixed;
         inset: 0;
-        z-index: 200;
+        z-index: 160;
         display: none;
         align-items: center;
         justify-content: center;
-        padding: 20px;
-        background: rgba(2, 12, 18, 0.85);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        padding: 24px;
+        background: rgba(2, 12, 18, 0.55);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
       }
-      #modalTelaPequena.visivel {
+      #modalMaximizarPainel.visivel {
         display: flex;
       }
-      #modalTelaPequena .modal-tela-card {
-        width: 100%;
-        max-width: 400px;
+      #modalMaximizarShell {
+        position: relative;
+        width: min(1100px, 92vw);
+        height: min(860px, 88vh);
+        min-width: 640px;
+        min-height: 420px;
+        max-width: 98vw;
+        max-height: 96vh;
+        display: flex;
+        flex-direction: column;
         background: rgba(4, 16, 24, 0.98);
-        border: 1px solid rgba(251, 191, 36, 0.35);
-        border-radius: 24px;
-        padding: 28px 24px 24px;
-        text-align: center;
-        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55),
-          0 0 40px rgba(251, 191, 36, 0.08);
-        animation: modalTelaIn 0.35s ease-out;
+        border: 1px solid rgba(34, 211, 238, 0.28);
+        border-radius: 22px;
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55),
+          0 0 40px rgba(34, 211, 238, 0.08);
+        overflow: hidden;
+        resize: both;
       }
-      @keyframes modalTelaIn {
-        from { opacity: 0; transform: scale(0.92) translateY(12px); }
-        to   { opacity: 1; transform: scale(1) translateY(0); }
+      #modalMaximizarShell.fullscreen {
+        width: 98vw !important;
+        height: 96vh !important;
+        max-width: 98vw;
+        max-height: 96vh;
+        border-radius: 16px;
+        resize: none;
       }
-      #modalTelaPequena .modal-tela-icon {
-        width: 72px;
-        height: 72px;
-        margin: 0 auto 18px;
-        border-radius: 50%;
+      .modal-max-header {
         display: flex;
         align-items: center;
-        justify-content: center;
-        background: rgba(251, 191, 36, 0.12);
-        border: 1px solid rgba(251, 191, 36, 0.35);
-        color: var(--amber);
-        font-size: 28px;
-        box-shadow: 0 0 24px rgba(251, 191, 36, 0.2);
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid var(--border);
+        cursor: move;
+        user-select: none;
+        flex-shrink: 0;
       }
-      #modalTelaPequena .modal-tela-titulo {
+      .modal-max-titulo {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 20px;
-        font-weight: 800;
-        color: #f1f5f9;
-        margin-bottom: 10px;
-      }
-      #modalTelaPequena .modal-tela-texto {
-        font-size: 13px;
-        line-height: 1.55;
-        color: rgba(148, 163, 184, 0.75);
-        margin-bottom: 22px;
-      }
-      #modalTelaPequena .modal-tela-texto strong {
-        color: var(--amber);
-        font-weight: 700;
-      }
-      #modalTelaPequena .btn-modal-tela {
-        width: 100%;
-        padding: 14px 18px;
-        border-radius: 14px;
-        border: none;
-        font-family: "Space Grotesk", sans-serif;
-        font-weight: 800;
         font-size: 14px;
+        font-weight: 800;
+        color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .modal-max-titulo i {
+        color: var(--cyan);
+      }
+      .modal-max-acoes {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .modal-max-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        color: rgba(148, 163, 184, 0.75);
         cursor: pointer;
-        background: linear-gradient(135deg, rgba(251, 191, 36, 0.95), #d97706);
-        color: #020c12;
-        box-shadow: 0 0 20px rgba(251, 191, 36, 0.25);
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: all 0.2s;
+        font-size: 12px;
       }
-      #modalTelaPequena .btn-modal-tela:active {
-        transform: scale(0.97);
+      .modal-max-btn:hover {
+        color: var(--emerald);
+        border-color: rgba(52, 211, 153, 0.35);
       }
-      #modalTelaPequena .modal-tela-hint {
-        margin-top: 14px;
-        font-size: 11px;
-        color: rgba(148, 163, 184, 0.45);
+      .modal-max-btn.btn-fechar-max:hover {
+        color: var(--red);
+        border-color: rgba(248, 113, 113, 0.35);
+        background: rgba(248, 113, 113, 0.1);
+      }
+      #modalMaximizarBody {
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+      }
+      #modalMaximizarBody > .aba-painel,
+      #modalMaximizarBody > section {
+        flex: 1;
+        min-height: 100%;
+        height: 100%;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      #modalMaximizarBody .btn-maximizar-painel {
+        display: none !important;
+      }
+      .painel-placeholder {
+        display: none !important;
+      }
+      .resize-hint {
+        position: absolute;
+        right: 8px;
+        bottom: 6px;
+        font-size: 10px;
+        color: rgba(148, 163, 184, 0.35);
+        pointer-events: none;
+        font-weight: 600;
+      }
+      #modalMaximizarShell.fullscreen .resize-hint {
+        display: none;
       }
 
       /* Responsividade das abas */
@@ -1362,6 +1432,11 @@
                       >-</span
                     >
                   </div>
+                  <button type="button" class="btn-maximizar-painel" title="Maximizar prontuário"
+                          onclick="maximizarPainel('painel-prontuario', 'Prontuário')"
+                          aria-label="Maximizar prontuário">
+                    <i class="fas fa-expand"></i>
+                  </button>
                 </div>
               </div>
 
@@ -1473,9 +1548,16 @@
                   <p class="text-[10px] text-slate-500 font-medium">Emita receitas com assinatura eletrônica</p>
                 </div>
               </div>
-              <div class="flex items-center gap-2 text-[11px] font-bold" style="color:var(--cyan)">
-                <i class="fas fa-user-md"></i>
-                <span id="receitaCrmInfo">CRM —</span>
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 text-[11px] font-bold" style="color:var(--cyan)">
+                  <i class="fas fa-user-md"></i>
+                  <span id="receitaCrmInfo">CRM —</span>
+                </div>
+                <button type="button" class="btn-maximizar-painel" title="Maximizar receituário"
+                        onclick="maximizarPainel('painel-receituario', 'Receituário')"
+                        aria-label="Maximizar receituário">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
             </div>
 
@@ -1645,9 +1727,16 @@
                   <p class="text-[10px] text-slate-500 font-medium">Afastamento, comparecimento e acompanhante</p>
                 </div>
               </div>
-              <div class="flex items-center gap-2 text-[11px] font-bold" style="color:var(--emerald)">
-                <i class="fas fa-user-md"></i>
-                <span id="atestadoCrmInfo">CRM —</span>
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 text-[11px] font-bold" style="color:var(--emerald)">
+                  <i class="fas fa-user-md"></i>
+                  <span id="atestadoCrmInfo">CRM —</span>
+                </div>
+                <button type="button" class="btn-maximizar-painel" title="Maximizar atestado"
+                        onclick="maximizarPainel('painel-atestado', 'Atestados')"
+                        aria-label="Maximizar atestado">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
             </div>
 
@@ -1781,9 +1870,16 @@
                   <p class="text-[10px] text-slate-500 font-medium">Catálogo inteligente + pacotes de check-up</p>
                 </div>
               </div>
-              <div class="flex items-center gap-2 text-[11px] font-bold" style="color:var(--amber)">
-                <i class="fas fa-user-md"></i>
-                <span id="exameCrmInfo">CRM —</span>
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 text-[11px] font-bold" style="color:var(--amber)">
+                  <i class="fas fa-user-md"></i>
+                  <span id="exameCrmInfo">CRM —</span>
+                </div>
+                <button type="button" class="btn-maximizar-painel" title="Maximizar exames"
+                        onclick="maximizarPainel('painel-exames', 'Exames')"
+                        aria-label="Maximizar exames">
+                  <i class="fas fa-expand"></i>
+                </button>
               </div>
             </div>
 
@@ -1988,24 +2084,25 @@
       </div>
     </div>
 
-    <!-- MODAL: tela inadequada (celular/tablet — só libera desktop ≥1024px) -->
-    <div id="modalTelaPequena" role="dialog" aria-modal="true" aria-labelledby="modalTelaTitulo" aria-describedby="modalTelaTexto">
-      <div class="modal-tela-card">
-        <div class="modal-tela-icon">
-          <i class="fas fa-laptop"></i>
+    <!-- MODAL flutuante: maximizar seção (prontuário / receita / atestado / exames) -->
+    <div id="modalMaximizarPainel" role="dialog" aria-modal="true" aria-labelledby="modalMaxTitulo">
+      <div id="modalMaximizarShell">
+        <div class="modal-max-header" id="modalMaxDragHandle">
+          <div class="modal-max-titulo">
+            <i class="fas fa-expand-arrows-alt"></i>
+            <span id="modalMaxTitulo">Seção ampliada</span>
+          </div>
+          <div class="modal-max-acoes">
+            <button type="button" class="modal-max-btn" id="btnToggleFullscreenMax" title="Tela cheia / Restaurar tamanho" aria-label="Alternar tela cheia">
+              <i class="fas fa-compress" id="iconFullscreenMax"></i>
+            </button>
+            <button type="button" class="modal-max-btn btn-fechar-max" title="Fechar e voltar" onclick="restaurarPainelMaximizado()" aria-label="Fechar">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
         </div>
-        <h3 id="modalTelaTitulo" class="modal-tela-titulo">Tela inadequada para atendimento</h3>
-        <p id="modalTelaTexto" class="modal-tela-texto">
-          Detectamos que você está em um celular ou tablet.
-          <strong>Não é possível realizar um atendimento completo nesta tela</strong>
-          — os painéis e dados ficam misturados e a experiência deixa de ser segura e confortável.
-          <br /><br />
-          Faça login em um <strong>computador ou notebook</strong> (tela a partir de 1024&nbsp;px) para continuar o atendimento com tranquilidade.
-        </p>
-        <button type="button" class="btn-modal-tela" id="btnFecharModalTela" onclick="fecharModalTelaPequena()">
-          Entendi
-        </button>
-        <p class="modal-tela-hint">Recomendamos largura mínima de 1024&nbsp;px (desktop ou notebook).</p>
+        <div id="modalMaximizarBody"></div>
+        <span class="resize-hint"><i class="fas fa-grip-lines"></i> arraste o canto para redimensionar</span>
       </div>
     </div>
 
@@ -2206,43 +2303,158 @@
         });
       })();
 
-      // ─── Aviso: só libera atendimento em desktop/notebook (≥ 1024px) ───
+      // ─── Maximizar painéis (somente desktop ≥1024px) ───
       (function () {
-        const LIMITE_TELA_ADEQUADA = 1024;
-        const modal = document.getElementById("modalTelaPequena");
-        if (!modal) return;
+        const LIMITE_DESKTOP = 1024;
+        let painelOriginalParent = null;
+        let painelOriginalNext = null;
+        let painelAtualId = null;
 
-        function ehTelaInadequada() {
-          return window.innerWidth < LIMITE_TELA_ADEQUADA;
-        }
+        const modal = document.getElementById("modalMaximizarPainel");
+        const shell = document.getElementById("modalMaximizarShell");
+        const body = document.getElementById("modalMaximizarBody");
+        const tituloEl = document.getElementById("modalMaxTitulo");
+        const btnFs = document.getElementById("btnToggleFullscreenMax");
+        const iconFs = document.getElementById("iconFullscreenMax");
 
-        function abrirModalTelaPequena() {
-          if (!ehTelaInadequada()) return;
+        if (!modal || !shell || !body) return;
+
+        window.maximizarPainel = function (painelId, titulo) {
+          if (window.innerWidth < LIMITE_DESKTOP) return;
+          if (painelAtualId) {
+            window.restaurarPainelMaximizado();
+          }
+
+          const painel = document.getElementById(painelId);
+          if (!painel) return;
+
+          painelOriginalParent = painel.parentNode;
+          painelOriginalNext = painel.nextSibling;
+          painelAtualId = painelId;
+
+          // Mantém o espaço no layout para não quebrar a coluna
+          const placeholder = document.createElement("div");
+          placeholder.id = "painel-placeholder-max";
+          placeholder.className = "painel-placeholder";
+          placeholder.style.cssText =
+            "min-height:200px;flex:1;border:1px dashed rgba(52,211,153,0.15);border-radius:28px;display:flex;align-items:center;justify-content:center;color:rgba(148,163,184,0.35);font-size:12px;font-weight:700;";
+          placeholder.innerHTML =
+            '<span><i class="fas fa-expand-arrows-alt"></i> Seção aberta em modo ampliado</span>';
+          painelOriginalParent.insertBefore(placeholder, painel);
+
+          body.appendChild(painel);
+          painel.classList.add("ativa");
+          painel.style.display = "flex";
+
+          if (tituloEl) tituloEl.textContent = titulo || "Seção ampliada";
+          shell.classList.remove("fullscreen");
+          shell.style.width = "";
+          shell.style.height = "";
+          if (iconFs) iconFs.className = "fas fa-expand";
+
           modal.classList.add("visivel");
           document.body.style.overflow = "hidden";
-        }
 
-        window.fecharModalTelaPequena = function () {
-          modal.classList.remove("visivel");
-          document.body.style.overflow = "";
+          // Quill precisa recalcular altura ao mudar de container
+          try {
+            if (typeof quill !== "undefined" && painelId === "painel-prontuario") {
+              setTimeout(function () {
+                quill.root.style.minHeight = "280px";
+              }, 50);
+            }
+          } catch (_) {}
         };
 
-        if (document.readyState === "loading") {
-          document.addEventListener("DOMContentLoaded", abrirModalTelaPequena);
-        } else {
-          abrirModalTelaPequena();
+        window.restaurarPainelMaximizado = function () {
+          if (!painelAtualId) return;
+          const painel = document.getElementById(painelAtualId);
+          const placeholder = document.getElementById("painel-placeholder-max");
+
+          if (painel && painelOriginalParent) {
+            if (placeholder && placeholder.parentNode === painelOriginalParent) {
+              painelOriginalParent.insertBefore(painel, placeholder);
+              placeholder.remove();
+            } else if (painelOriginalNext && painelOriginalNext.parentNode === painelOriginalParent) {
+              painelOriginalParent.insertBefore(painel, painelOriginalNext);
+            } else {
+              painelOriginalParent.appendChild(painel);
+            }
+          } else if (placeholder) {
+            placeholder.remove();
+          }
+
+          modal.classList.remove("visivel");
+          document.body.style.overflow = "";
+          shell.classList.remove("fullscreen");
+          painelAtualId = null;
+          painelOriginalParent = null;
+          painelOriginalNext = null;
+        };
+
+        if (btnFs) {
+          btnFs.addEventListener("click", function () {
+            const full = shell.classList.toggle("fullscreen");
+            if (iconFs) {
+              iconFs.className = full ? "fas fa-compress" : "fas fa-expand";
+            }
+            if (!full) {
+              shell.style.width = "";
+              shell.style.height = "";
+            }
+          });
         }
 
-        let resizeTimer = null;
+        // Fecha com Escape
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && modal.classList.contains("visivel")) {
+            window.restaurarPainelMaximizado();
+          }
+        });
+
+        // Clique no backdrop fecha
+        modal.addEventListener("click", function (e) {
+          if (e.target === modal) window.restaurarPainelMaximizado();
+        });
+
+        // Arrastar o shell pelo header
+        (function enableDrag() {
+          const handle = document.getElementById("modalMaxDragHandle");
+          if (!handle) return;
+          let dragging = false;
+          let startX = 0, startY = 0, origLeft = 0, origTop = 0;
+
+          handle.addEventListener("mousedown", function (e) {
+            if (e.target.closest("button")) return;
+            if (shell.classList.contains("fullscreen")) return;
+            dragging = true;
+            const rect = shell.getBoundingClientRect();
+            shell.style.position = "fixed";
+            shell.style.left = rect.left + "px";
+            shell.style.top = rect.top + "px";
+            shell.style.margin = "0";
+            startX = e.clientX;
+            startY = e.clientY;
+            origLeft = rect.left;
+            origTop = rect.top;
+            e.preventDefault();
+          });
+
+          document.addEventListener("mousemove", function (e) {
+            if (!dragging) return;
+            shell.style.left = origLeft + (e.clientX - startX) + "px";
+            shell.style.top = origTop + (e.clientY - startY) + "px";
+          });
+
+          document.addEventListener("mouseup", function () {
+            dragging = false;
+          });
+        })();
+
+        // Se a janela encolher para < 1024, restaura automaticamente
         window.addEventListener("resize", function () {
-          clearTimeout(resizeTimer);
-          resizeTimer = setTimeout(function () {
-            if (ehTelaInadequada()) {
-              abrirModalTelaPequena();
-            } else {
-              window.fecharModalTelaPequena();
-            }
-          }, 150);
+          if (window.innerWidth < LIMITE_DESKTOP && painelAtualId) {
+            window.restaurarPainelMaximizado();
+          }
         });
       })();
     </script>
