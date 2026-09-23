@@ -3015,7 +3015,8 @@
             nutricionista: "Nutricionista",
             dentista: "Dentista",
             terapeuta: "Terapeuta",
-            esteticista: "Esteticista"
+            esteticista: "Esteticista",
+            fonoaudiologo: "Fonoaudiólogo"
           };
           return map[p] || p;
         }
@@ -3284,6 +3285,10 @@
             null;
           const agendamentoId =
             document.getElementById("atendimentoAgendamentoId")?.value || null;
+          const prontuarioId =
+            document.getElementById("idDoProntuarioAtual")?.value ||
+            window.prontuarioAtualId ||
+            null;
 
           if (!pacienteId) {
             alert("Selecione um paciente no atendimento antes de salvar a anamnese.");
@@ -3294,6 +3299,7 @@
           const payload = {
             paciente_id: Number(pacienteId),
             agendamento_id: agendamentoId ? Number(agendamentoId) : null,
+            prontuario_id: prontuarioId ? Number(prontuarioId) : null,
             modelo_id: modelo.id,
             respostas: respostas,
             status_anamnese: status

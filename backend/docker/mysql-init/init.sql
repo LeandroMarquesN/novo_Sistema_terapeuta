@@ -590,6 +590,7 @@ CREATE TABLE IF NOT EXISTS anamneses_preenchidas (
   paciente_id INT NOT NULL,
   usuario_id INT NOT NULL,
   agendamento_id INT NULL,
+  prontuario_id INT NULL,
   modelo_id INT NOT NULL,
   respostas JSON NOT NULL,
   status_anamnese ENUM('rascunho','finalizado') NOT NULL DEFAULT 'rascunho',
@@ -599,10 +600,12 @@ CREATE TABLE IF NOT EXISTS anamneses_preenchidas (
   INDEX idx_anamnese_paciente (paciente_id),
   INDEX idx_anamnese_clinica (clinica_id),
   INDEX idx_anamnese_modelo (modelo_id),
+  INDEX idx_anamnese_prontuario (prontuario_id),
   CONSTRAINT fk_anamnese_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
   CONSTRAINT fk_anamnese_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
   CONSTRAINT fk_anamnese_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
   CONSTRAINT fk_anamnese_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
+  CONSTRAINT fk_anamnese_prontuario FOREIGN KEY (prontuario_id) REFERENCES prontuarios(id) ON DELETE SET NULL,
   CONSTRAINT fk_anamnese_modelo FOREIGN KEY (modelo_id) REFERENCES modelos_anamnese(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
@@ -612,7 +615,10 @@ INSERT IGNORE INTO modelos_anamnese (id, clinica_id, profissao, nome, descricao,
 (2, NULL, 'psicologo', 'Psicologia / Psicanálise', 'Queixa, humor, sono, suporte e histórico emocional', 'fa-brain', 2),
 (3, NULL, 'fisioterapeuta', 'Fisioterapia', 'Dor (EVA), postura, amplitude e histórico ortopédico', 'fa-walking', 3),
 (4, NULL, 'nutricionista', 'Nutrição', 'Recordatório, alergias, objetivos e hábitos', 'fa-apple-alt', 4),
-(5, NULL, 'dentista', 'Odontologia', 'Queixa oral, higiene, alergias e antecedentes', 'fa-tooth', 5);
+(5, NULL, 'dentista', 'Odontologia', 'Queixa oral, higiene, alergias e antecedentes', 'fa-tooth', 5),
+(6, NULL, 'terapeuta', 'Terapia / Holístico', 'Queixa, objetivos, histórico emocional e hábitos de vida', 'fa-hands-helping', 6),
+(7, NULL, 'esteticista', 'Estética', 'Queixa estética, pele, procedimentos e contraindicações', 'fa-spa', 7),
+(8, NULL, 'fonoaudiologo', 'Fonoaudiologia', 'Comunicação, deglutição, audição e desenvolvimento', 'fa-comment-medical', 8);
 
 -- Campos: Clínico Geral (modelo 1)
 INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
@@ -684,3 +690,41 @@ INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, plac
 (5, 'Antecedentes', 'checkbox', 'Hipertensão', NULL, NULL, 0, 23),
 (5, 'Antecedentes', 'textarea', 'Cirurgias / tratamentos odontológicos prévios', NULL, NULL, 0, 24),
 (5, 'Observações', 'textarea', 'Observações clínicas', NULL, NULL, 0, 30);
+
+-- Campos: Terapeuta (6)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(6, 'Queixa e objetivos', 'textarea', 'Queixa / motivo da busca', NULL, NULL, 1, 1),
+(6, 'Queixa e objetivos', 'textarea', 'Objetivos com o processo terapêutico', NULL, NULL, 1, 2),
+(6, 'Histórico', 'textarea', 'Histórico emocional / eventos relevantes', NULL, NULL, 0, 10),
+(6, 'Histórico', 'select', 'Já realizou terapia antes?', NULL, '["Não","Sim, breve","Sim, prolongada"]', 0, 11),
+(6, 'Estado atual', 'escala', 'Nível de estresse (0–10)', NULL, NULL, 0, 20),
+(6, 'Estado atual', 'select', 'Qualidade do sono', NULL, '["Boa","Regular","Ruim"]', 0, 21),
+(6, 'Estado atual', 'checkbox', 'Uso de medicação psicoativa', NULL, NULL, 0, 22),
+(6, 'Hábitos', 'textarea', 'Hábitos de vida / rotina', NULL, NULL, 0, 30),
+(6, 'Observações', 'textarea', 'Observações do terapeuta', NULL, NULL, 0, 40);
+
+-- Campos: Esteticista (7)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(7, 'Queixa', 'textarea', 'Queixa estética principal', 'Acne, manchas, flacidez, pelos...', NULL, 1, 1),
+(7, 'Queixa', 'select', 'Área de interesse', NULL, '["Rosto","Corpo","Capilar","Mãos/Pés","Múltiplas"]', 0, 2),
+(7, 'Pele e histórico', 'select', 'Tipo de pele', NULL, '["Oleosa","Seca","Mista","Sensível","Normal"]', 0, 10),
+(7, 'Pele e histórico', 'checkbox', 'Alergia a cosméticos / ativos', NULL, NULL, 0, 11),
+(7, 'Pele e histórico', 'checkbox', 'Uso de ácidos / retinoides', NULL, NULL, 0, 12),
+(7, 'Pele e histórico', 'checkbox', 'Gestante ou lactante', NULL, NULL, 0, 13),
+(7, 'Pele e histórico', 'textarea', 'Procedimentos estéticos prévios', NULL, NULL, 0, 14),
+(7, 'Contraindicações', 'checkbox', 'Herpes ativo / lesões abertas', NULL, NULL, 0, 20),
+(7, 'Contraindicações', 'checkbox', 'Uso de isotretinoína (últimos 6 meses)', NULL, NULL, 0, 21),
+(7, 'Objetivo', 'textarea', 'Expectativa com o tratamento', NULL, NULL, 0, 30);
+
+-- Campos: Fonoaudiólogo (8)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(8, 'Queixa', 'textarea', 'Queixa principal (fala, voz, deglutição, audição)', NULL, NULL, 1, 1),
+(8, 'Queixa', 'select', 'Área predominante', NULL, '["Linguagem","Fala","Voz","Deglutição","Audição","Motricidade orofacial"]', 0, 2),
+(8, 'Histórico', 'textarea', 'Início e evolução do problema', NULL, NULL, 1, 10),
+(8, 'Histórico', 'checkbox', 'Atraso de desenvolvimento de linguagem', NULL, NULL, 0, 11),
+(8, 'Histórico', 'checkbox', 'Otites de repetição / perda auditiva', NULL, NULL, 0, 12),
+(8, 'Histórico', 'checkbox', 'Cirurgias de cabeça/pescoço', NULL, NULL, 0, 13),
+(8, 'Avaliação funcional', 'select', 'Inteligibilidade da fala', NULL, '["Boa","Reduzida","Muito reduzida","Não se aplica"]', 0, 20),
+(8, 'Avaliação funcional', 'select', 'Deglutição', NULL, '["Normal","Engasgos ocasionais","Disfagia","Não avaliado"]', 0, 21),
+(8, 'Contexto', 'textarea', 'Ambiente / demanda escolar ou profissional', NULL, NULL, 0, 30),
+(8, 'Observações', 'textarea', 'Observações fonoaudiológicas', NULL, NULL, 0, 40);

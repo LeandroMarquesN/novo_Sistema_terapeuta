@@ -68,18 +68,61 @@ exports.salvarProntuario = async (req, res) => {
   }
 };
 
-// 2. LISTAR HISTÓRICO
+// 2. LISTAR HISTÓRICO (prontuários + anamneses unificados na timeline)
 exports.listarHistorico = async (req, res) => {
   const { pacienteId } = req.params;
   const clinicaId = req.usuario.clinica_id;
   try {
-    const sql = `
-      SELECT id, data_atendimento AS data_registro, texto_evolucao AS relato_clinico, diagnostico_cid AS codigo_cid
-      FROM prontuarios
-      WHERE paciente_id = ? AND clinica_id = ?
-      ORDER BY data_atendimento DESC
+    const sqlPront = `
+      SELECT
+        p.id,
+        'prontuario' AS tipo,
+        p.data_atendimento AS data_registro,
+        p.texto_evolucao AS relato_clinico,
+        p.diagnostico_cid AS codigo_cid,
+        p.status_prontuario AS status,
+        u.nome AS profissional_nome,
+        NULL AS modelo_nome,
+        NULL AS modelo_icone,
+        NULL AS prontuario_id_ref
+      FROM prontuarios p
+      LEFT JOIN usuarios u ON u.id = p.usuario_id
+      WHERE p.paciente_id = ? AND p.clinica_id = ?
     `;
-    const [historico] = await db.query(sql, [pacienteId, clinicaId]);
+
+    const sqlAnam = `
+      SELECT
+        a.id,
+        'anamnese' AS tipo,
+        a.data_preenchimento AS data_registro,
+        NULL AS relato_clinico,
+        NULL AS codigo_cid,
+        a.status_anamnese AS status,
+        u.nome AS profissional_nome,
+        m.nome AS modelo_nome,
+        m.icone AS modelo_icone,
+        a.prontuario_id AS prontuario_id_ref
+      FROM anamneses_preenchidas a
+      JOIN modelos_anamnese m ON m.id = a.modelo_id
+      JOIN usuarios u ON u.id = a.usuario_id
+      WHERE a.paciente_id = ? AND a.clinica_id = ?
+    `;
+
+    const [prontuarios] = await db.query(sqlPront, [pacienteId, clinicaId]);
+    let anamneses = [];
+    try {
+      const [aRows] = await db.query(sqlAnam, [pacienteId, clinicaId]);
+      anamneses = aRows;
+    } catch (e) {
+      console.warn('[prontuario] listarHistorico anamneses:', e.message);
+    }
+
+    const historico = [...prontuarios, ...anamneses].sort((a, b) => {
+      const da = new Date(a.data_registro || 0).getTime();
+      const dbts = new Date(b.data_registro || 0).getTime();
+      return dbts - da;
+    });
+
     res.json(historico);
   } catch (err) {
     res.status(500).json({ erro: err.message });

@@ -189,7 +189,7 @@ async function carregarFichaPaciente(pacienteId) {
   }
 }
 
-// ─── 3. TIMELINE ────────────────────────────────────────────────
+// ─── 3. TIMELINE (prontuários + anamneses unificados) ───────────
 async function carregarTimelineProntuarios(pacienteId) {
   try {
     const response = await fetch(`/api/prontuarios/historico/${pacienteId}`, {
@@ -198,11 +198,11 @@ async function carregarTimelineProntuarios(pacienteId) {
     const historico = await response.json();
 
     if (elementosFicha.contadorEvolucoes) {
-      elementosFicha.contadorEvolucoes.innerText = historico.length;
+      elementosFicha.contadorEvolucoes.innerText = Array.isArray(historico) ? historico.length : 0;
     }
     if (!elementosFicha.timeline) return;
 
-    if (historico.length === 0) {
+    if (!Array.isArray(historico) || historico.length === 0) {
       elementosFicha.timeline.innerHTML = `
         <div class="text-center text-xs py-8" style="color: rgba(148,163,184,0.4)">
           Nenhum histórico encontrado.
@@ -210,25 +210,115 @@ async function carregarTimelineProntuarios(pacienteId) {
       return;
     }
 
-    elementosFicha.timeline.innerHTML = historico.map(evo => `
-      <div class="glass-card p-3 rounded-xl text-left cursor-pointer transition"
-           onclick="visualizarEvolucaoAntiga(${evo.id})">
-        <div class="flex justify-between pb-1 mb-1" style="border-bottom: 1px solid var(--border)">
-          <span class="font-black" style="color:#e2e8f0">
-            ${new Date(evo.data_registro).toLocaleDateString('pt-BR')}
-          </span>
-          <span class="px-1.5 rounded text-[9px] uppercase font-black"
-                style="background: rgba(96,165,250,0.15); color: var(--blue)">
-            ${evo.codigo_cid || '---'}
-          </span>
+    elementosFicha.timeline.innerHTML = historico.map((evo) => {
+      const tipo = evo.tipo || 'prontuario';
+      const dataFmt = evo.data_registro
+        ? new Date(evo.data_registro).toLocaleDateString('pt-BR')
+        : '—';
+
+      if (tipo === 'anamnese') {
+        const icone = evo.modelo_icone || 'fa-clipboard-list';
+        const titulo = evo.modelo_nome || 'Anamnese';
+        const status = evo.status || 'rascunho';
+        const badgeBg = status === 'finalizado'
+          ? 'rgba(52,211,153,0.15)'
+          : 'rgba(251,191,36,0.15)';
+        const badgeCor = status === 'finalizado' ? 'var(--emerald)' : 'var(--amber)';
+        const vinculo = evo.prontuario_id_ref
+          ? ' · vinculada ao prontuário #' + evo.prontuario_id_ref
+          : '';
+
+        return `
+          <div class="glass-card p-3 rounded-xl text-left cursor-pointer transition"
+               style="border-left: 3px solid var(--blue)"
+               onclick="visualizarAnamneseTimeline(${evo.id})">
+            <div class="flex justify-between pb-1 mb-1" style="border-bottom: 1px solid var(--border)">
+              <span class="font-black flex items-center gap-1.5" style="color:#e2e8f0">
+                <i class="fas ${icone} text-[10px]" style="color:var(--blue)"></i>
+                ${dataFmt}
+              </span>
+              <span class="px-1.5 rounded text-[9px] uppercase font-black"
+                    style="background: ${badgeBg}; color: ${badgeCor}">
+                ${status}
+              </span>
+            </div>
+            <p class="text-xs font-bold truncate" style="color: #cbd5e1">${titulo}</p>
+            <p class="text-[10px] mt-0.5 truncate" style="color: rgba(148,163,184,0.55)">
+              ${evo.profissional_nome || 'Profissional'} · Anamnese${vinculo}
+            </p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="glass-card p-3 rounded-xl text-left cursor-pointer transition"
+             onclick="visualizarEvolucaoAntiga(${evo.id})">
+          <div class="flex justify-between pb-1 mb-1" style="border-bottom: 1px solid var(--border)">
+            <span class="font-black flex items-center gap-1.5" style="color:#e2e8f0">
+              <i class="fas fa-notes-medical text-[10px]" style="color:var(--emerald)"></i>
+              ${dataFmt}
+            </span>
+            <span class="px-1.5 rounded text-[9px] uppercase font-black"
+                  style="background: rgba(96,165,250,0.15); color: var(--blue)">
+              ${evo.codigo_cid || '---'}
+            </span>
+          </div>
+          <p class="text-xs truncate" style="color: rgba(148,163,184,0.7)">
+            ${extrairTextoLimpo(evo.relato_clinico)}
+          </p>
+          ${evo.profissional_nome ? `
+            <p class="text-[10px] mt-0.5 truncate" style="color: rgba(148,163,184,0.45)">
+              ${evo.profissional_nome}
+            </p>` : ''}
         </div>
-        <p class="text-xs truncate" style="color: rgba(148,163,184,0.7)">
-          ${extrairTextoLimpo(evo.relato_clinico)}
-        </p>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (err) {
     console.error('Erro timeline:', err);
+  }
+}
+
+/**
+ * Abre detalhe de anamnese a partir da timeline de evolução
+ */
+async function visualizarAnamneseTimeline(anamneseId) {
+  try {
+    const response = await fetch(`/api/anamnese/detalhe/${anamneseId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Falha ao carregar anamnese');
+
+    const data = await response.json();
+    const a = data.anamnese || data;
+    const respostas = a.respostas || {};
+
+    if (typeof trocarAba === 'function') {
+      try { trocarAba('anamnese'); } catch (_) {}
+    }
+
+    const linhas = Object.keys(respostas).map((k) => {
+      const v = respostas[k];
+      if (v === true) return '☑ ' + k;
+      if (v === false || v === '' || v == null) return null;
+      return k + ': ' + v;
+    }).filter(Boolean);
+
+    const dataFmt = a.data_preenchimento
+      ? new Date(a.data_preenchimento).toLocaleString('pt-BR')
+      : '—';
+
+    let texto = 'Anamnese #' + a.id + ' — ' + (a.modelo_nome || 'Modelo').toUpperCase() + '\n';
+    texto += 'Status: ' + (a.status_anamnese || '—') + '\n';
+    texto += 'Data: ' + dataFmt + '\n';
+    texto += 'Profissional: ' + (a.profissional_nome || '—') + '\n';
+    if (a.prontuario_id) texto += 'Prontuário vinculado: #' + a.prontuario_id + '\n';
+    texto += '\n── Respostas ──\n';
+    texto += linhas.length ? linhas.join('\n') : '(sem respostas registradas)';
+
+    alert(texto);
+  } catch (err) {
+    console.error('Erro ao visualizar anamnese:', err);
+    alert('Não foi possível carregar esta anamnese.');
   }
 }
 
@@ -809,6 +899,8 @@ async function verDetalheReceita(id) {
 // ─── EXPORTS GLOBAIS ────────────────────────────────────────────
 window.trocarAba = trocarAba;
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;
+window.visualizarAnamneseTimeline = visualizarAnamneseTimeline;
+window.carregarTimelineProntuarios = carregarTimelineProntuarios;
 window.salvarEvolucao = salvarEvolucao;
 window.confirmarAssinatura = confirmarAssinatura;
 window.fecharModalAssinatura = fecharModalAssinatura;
@@ -1422,6 +1514,13 @@ window.trocarAba = function (nomeAba) {
   if (nomeAba === 'exames') {
     atualizarCrmExame();
     carregarCatalogoExames();
+  }
+
+  if (nomeAba === 'anamnese') {
+    const pid = document.getElementById('atendimentoPacienteId')?.value;
+    if (pid && typeof carregarHistoricoAnamneses === 'function') {
+      carregarHistoricoAnamneses(pid);
+    }
   }
 };
 
