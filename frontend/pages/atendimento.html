@@ -424,7 +424,55 @@
         color: rgba(148, 163, 184, 0.5);
         font-size: 11px;
       }
-
+      
+      /* ─── Autocomplete de medicamentos (Receituário) ─── */
+.med-wrap {
+  position: relative;
+}
+.med-lista {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  min-width: 220px;
+  background: rgba(12, 28, 36, 0.97); /* mais claro que o --slate-bg, mas ainda escuro */
+  border: 1px solid var(--border-cy);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.75);
+  max-height: 240px;
+  overflow-y: auto;
+  z-index: 40;
+  display: none;
+}
+.med-lista.open {
+  display: block;
+}
+.med-item {
+  padding: 9px 14px;
+  cursor: pointer;
+  font-family: "Arial Black", Arial, sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0.2px;
+  color: #2dd4bf; /* verde-ciano neon */
+  text-shadow: 0 0 6px rgba(45, 212, 191, 0.45);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s, color 0.15s;
+}
+.med-item:last-child {
+  border-bottom: none;
+}
+.med-item:hover {
+  background: rgba(45, 212, 191, 0.1);
+  color: var(--cyan);
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.7);
+}
+.med-vazio {
+  padding: 14px;
+  text-align: center;
+  color: rgba(148, 163, 184, 0.5);
+  font-size: 11px;
+}
+      /* fim do auto complete */
       .btn-primary-gradient {
         background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
         color: #fff;
@@ -1964,56 +2012,66 @@
                     Adicionar Medicamento
                   </p>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div class="sm:col-span-2">
-                      <label class="form-label block mb-1">Nome do Medicamento *</label>
-                      <input type="text" id="medNome" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: Dipirona, Amoxicilina, Losartana...">
+                  <div class="sm:col-span-2">
+                    <label class="form-label block mb-1">Nome do Medicamento *</label>
+                    <div class="med-wrap">
+                      <input type="text" id="medNome" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: Dipirona, Amoxicilina, Losartana...">
+                      <div id="medNomeLista" class="med-lista"></div>
                     </div>
-
-                    <div>
-                      <label class="form-label block mb-1">Concentração</label>
-                      <input type="text" id="medConcentracao" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 500mg, 10mg/mL">
+                  </div>
+                  
+                  <div>
+                    <label class="form-label block mb-1">Concentração</label>
+                    <div class="med-wrap">
+                      <input type="text" id="medConcentracao" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 500mg, 10mg/mL">
+                      <div id="medConcentracaoLista" class="med-lista"></div>
                     </div>
-
-                    <div>
-                      <label class="form-label block mb-1">Forma Farmacêutica</label>
-                      <select id="medForma" class="input-premium w-full px-3 py-2.5 text-sm">
-                        <option value="">Selecione...</option>
-                        <option value="Comprimido">Comprimido</option>
-                        <option value="Cápsula">Cápsula</option>
-                        <option value="Xarope">Xarope</option>
-                        <option value="Gotas">Gotas</option>
-                        <option value="Injetável">Injetável</option>
-                        <option value="Pomada">Pomada</option>
-                        <option value="Creme">Creme</option>
-                        <option value="Solução">Solução</option>
-                        <option value="Outro">Outro</option>
-                      </select>
+                  </div>
+                  
+                  <div>
+                    <label class="form-label block mb-1">Forma Farmacêutica</label>
+                    <select id="medForma" class="input-premium w-full px-3 py-2.5 text-sm">
+                      <option value="">Selecione...</option>
+                      <option value="Comprimido">Comprimido</option>
+                      <option value="Cápsula">Cápsula</option>
+                      <option value="Xarope">Xarope</option>
+                      <option value="Gotas">Gotas</option>
+                      <option value="Injetável">Injetável</option>
+                      <option value="Pomada">Pomada</option>
+                      <option value="Creme">Creme</option>
+                      <option value="Solução">Solução</option>
+                      <option value="Outro">Outro</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label class="form-label block mb-1">Quantidade *</label>
+                    <div class="med-wrap">
+                      <input type="text" id="medQuantidade" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 30 comprimidos">
+                      <div id="medQuantidadeLista" class="med-lista"></div>
                     </div>
-
-                    <div>
-                      <label class="form-label block mb-1">Quantidade *</label>
-                      <input type="text" id="medQuantidade" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 30 comprimidos">
+                  </div>
+                  
+                  <div>
+                    <label class="form-label block mb-1">Via de Administração</label>
+                    <select id="medVia" class="input-premium w-full px-3 py-2.5 text-sm">
+                      <option value="Oral">Oral</option>
+                      <option value="Tópica">Tópica</option>
+                      <option value="Intramuscular">Intramuscular</option>
+                      <option value="Subcutânea">Subcutânea</option>
+                      <option value="Intravenosa">Intravenosa</option>
+                      <option value="Inalatória">Inalatória</option>
+                      <option value="Outra">Outra</option>
+                    </select>
+                  </div>
+                  
+                  <div class="sm:col-span-2">
+                    <label class="form-label block mb-1">Posologia *</label>
+                    <div class="med-wrap">
+                      <textarea id="medPosologia" rows="2" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm resize-none" placeholder="Ex: Tomar 1 comprimido de 8/8 horas por 7 dias"></textarea>
+                      <div id="medPosologiaLista" class="med-lista"></div>
                     </div>
-
-                    <div>
-                      <label class="form-label block mb-1">Via de Administração</label>
-                      <select id="medVia" class="input-premium w-full px-3 py-2.5 text-sm">
-                        <option value="Oral">Oral</option>
-                        <option value="Tópica">Tópica</option>
-                        <option value="Intramuscular">Intramuscular</option>
-                        <option value="Subcutânea">Subcutânea</option>
-                        <option value="Intravenosa">Intravenosa</option>
-                        <option value="Inalatória">Inalatória</option>
-                        <option value="Outra">Outra</option>
-                      </select>
-                    </div>
-
-                    <div class="sm:col-span-2">
-                      <label class="form-label block mb-1">Posologia *</label>
-                      <textarea id="medPosologia" rows="2" class="input-premium w-full px-3 py-2.5 text-sm resize-none" placeholder="Ex: Tomar 1 comprimido de 8/8 horas por 7 dias"></textarea>
-                    </div>
-
+                  </div>
                     <div class="sm:col-span-2 flex items-center gap-3">
                       <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
                         <input type="checkbox" id="medContinuo" class="rounded border-slate-600 text-emerald-500 focus:ring-emerald-500">
@@ -2890,7 +2948,87 @@ class="fixed inset-0 z-[99999] hidden items-center justify-center p-4
           if (!e.target.closest(".cid-wrap")) lista.classList.remove("open");
         });
       })();
+      // ─── Autocomplete de medicamentos (Receituário) ───
+const MEDICAMENTOS_COMUNS = [
+  "Dipirona Sódica", "Paracetamol", "Ibuprofeno", "Amoxicilina",
+  "Amoxicilina + Clavulanato", "Azitromicina", "Losartana Potássica",
+  "Enalapril", "Metformina", "Sinvastatina", "Omeprazol", "Pantoprazol",
+  "Cloridrato de Sertralina", "Fluoxetina", "Escitalopram", "Clonazepam",
+  "Diazepam", "Prednisona", "Loratadina", "Dexclorfeniramina",
+  "Ranitidina", "Ondansetrona", "Ciprofloxacino", "Cefalexina",
+  "Nimesulida", "Diclofenaco Sódico", "Levotiroxina Sódica",
+  "Hidroclorotiazida", "Atenolol", "Captopril", "Insulina NPH",
+  "Insulina Regular", "Salbutamol (spray)", "Budesonida (spray nasal)"
+];
 
+const CONCENTRACOES_COMUNS = [
+  "20mg", "50mg", "100mg", "150mg", "250mg", "500mg", "750mg", "1g",
+  "5mg/mL", "10mg/mL", "20mg/mL", "1mg/mL"
+];
+
+const QUANTIDADES_COMUNS = [
+  "10 comprimidos", "20 comprimidos", "30 comprimidos", "60 comprimidos",
+  "1 caixa", "2 caixas", "1 frasco", "2 frascos", "30 cápsulas",
+  "60 cápsulas", "1 tubo", "1 frasco-ampola", "Uso contínuo"
+];
+
+const POSOLOGIAS_COMUNS = [
+  "Tomar 1 comprimido de 8/8 horas por 7 dias",
+  "Tomar 1 comprimido de 12/12 horas por 7 dias",
+  "Tomar 1 comprimido ao dia, pela manhã",
+  "Tomar 1 comprimido ao dia, em jejum",
+  "Tomar 1 comprimido à noite, ao deitar",
+  "Aplicar na área afetada 2 vezes ao dia",
+  "Uso contínuo — não interromper sem orientação médica",
+  "Tomar 20 gotas diluídas em água, de 8/8 horas",
+  "1 aplicação nasal em cada narina, 2 vezes ao dia"
+];
+
+function criarAutocompleteMedicamento(inputId, listaId, opcoes) {
+  const campo = document.getElementById(inputId);
+  const lista = document.getElementById(listaId);
+  if (!campo || !lista) return;
+
+  function renderizar(termo) {
+    const t = termo.trim().toLowerCase();
+    const resultados = t.length === 0
+      ? opcoes.slice(0, 20)
+      : opcoes.filter((o) => o.toLowerCase().includes(t)).slice(0, 20);
+
+    if (!resultados.length) {
+      lista.innerHTML = '<div class="med-vazio">Nenhuma sugestão encontrada.<br>Pode digitar livremente.</div>';
+    } else {
+      lista.innerHTML = resultados
+        .map((o) => `<div class="med-item" data-valor="${o.replace(/"/g, '&quot;')}">${o}</div>`)
+        .join('');
+    }
+    lista.classList.add('open');
+  }
+
+  campo.addEventListener('focus', () => {
+    if (!campo.disabled) renderizar(campo.value);
+  });
+  campo.addEventListener('input', () => renderizar(campo.value));
+
+  lista.addEventListener('click', (e) => {
+    const item = e.target.closest('.med-item');
+    if (!item) return;
+    campo.value = item.dataset.valor;
+    lista.classList.remove('open');
+    campo.focus();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest(`#${inputId}`) && !e.target.closest(`#${listaId}`)) {
+      lista.classList.remove('open');
+    }
+  });
+}
+
+criarAutocompleteMedicamento('medNome', 'medNomeLista', MEDICAMENTOS_COMUNS);
+criarAutocompleteMedicamento('medConcentracao', 'medConcentracaoLista', CONCENTRACOES_COMUNS);
+criarAutocompleteMedicamento('medQuantidade', 'medQuantidadeLista', QUANTIDADES_COMUNS);
+criarAutocompleteMedicamento('medPosologia', 'medPosologiaLista', POSOLOGIAS_COMUNS);
       // ─── Janelas flutuantes multi-painel (várias abertas ao mesmo tempo) ───
       (function () {
         const LIMITE_DESKTOP = 1024;
