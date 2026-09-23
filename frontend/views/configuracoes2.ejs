@@ -540,112 +540,6 @@
         }
         .pausa-horario i { font-size: 9px; }
 
-        /* ─── Section nav (âncoras) ─── */
-        .config-section-nav {
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            right: auto;
-            z-index: 55;
-            max-width: min(720px, calc(100vw - 32px));
-            width: max-content;
-            max-width: min(720px, calc(100vw - 32px));
-            background: rgba(4, 16, 24, 0.72);
-            border: 1px solid rgba(52, 211, 153, 0.18);
-            border-radius: 16px;
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            box-shadow:
-                0 8px 28px rgba(0, 0, 0, 0.35),
-                0 0 0 1px rgba(255, 255, 255, 0.03) inset;
-            padding: 6px;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-            transition: opacity 0.28s ease, transform 0.28s ease, visibility 0.28s;
-            opacity: 1;
-            transform: translateY(0);
-            visibility: visible;
-            pointer-events: auto;
-        }
-        .config-section-nav::-webkit-scrollbar { display: none; }
-        .config-section-nav.is-hidden {
-            opacity: 0;
-            transform: translateY(-12px);
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .config-section-nav .nav-sec-item {
-            flex-shrink: 0;
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 9px 14px;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 700;
-            font-family: 'Space Grotesk', sans-serif;
-            color: rgba(148, 163, 184, 0.7);
-            text-decoration: none;
-            white-space: nowrap;
-            border: 1px solid transparent;
-            transition: all 0.2s;
-            cursor: pointer;
-            background: transparent;
-        }
-        .config-section-nav .nav-sec-item i {
-            font-size: 11px;
-            opacity: 0.85;
-        }
-        .config-section-nav .nav-sec-item:hover {
-            color: var(--emerald);
-            background: rgba(52, 211, 153, 0.08);
-        }
-        .config-section-nav .nav-sec-item.active {
-            color: #e2e8f0;
-            background: linear-gradient(135deg, rgba(8, 145, 178, 0.28), rgba(5, 150, 105, 0.2));
-            border-color: rgba(52, 211, 153, 0.35);
-            box-shadow: 0 0 12px rgba(52, 211, 153, 0.12);
-        }
-        @media (max-width: 1023px) {
-            .config-section-nav {
-                top: 72px;
-                left: 12px;
-                max-width: calc(100vw - 24px);
-                border-radius: 14px;
-                padding: 5px;
-            }
-            .config-section-nav .nav-sec-item {
-                padding: 8px 11px;
-                font-size: 11px;
-            }
-            .config-section-nav .nav-sec-item .nav-sec-label {
-                display: none;
-            }
-            .config-section-nav .nav-sec-item i {
-                font-size: 14px;
-                margin: 0;
-            }
-        }
-        @media (min-width: 641px) and (max-width: 1023px) {
-            .config-section-nav .nav-sec-item .nav-sec-label {
-                display: inline;
-            }
-        }
-        /* espaçamento extra no topo do conteúdo para não ficar sob a nav fixa */
-        .config-content-offset {
-            scroll-margin-top: 88px;
-        }
-        @media (max-width: 1023px) {
-            .config-content-offset {
-                scroll-margin-top: 140px;
-            }
-        }
-
         /* ─── Planos (cards) ─── */
         .plano-atual-resumo {
             max-width: 420px;
@@ -719,8 +613,12 @@
             border-color: rgba(52,211,153,0.5);
             box-shadow: 0 0 24px rgba(52,211,153,0.18);
         }
-        .plano-card.is-current { border-color: rgba(34,211,238,0.4); }
-        .plano-card.is-current:not(.selected) { opacity: 0.85; }
+        .plano-card.is-current {
+            border-color: rgba(34,211,238,0.4);
+        }
+        .plano-card.is-current:not(.selected) {
+            opacity: 0.85;
+        }
         .plano-card-badge-atual {
             position: absolute; top: 10px; right: 10px;
             font-size: 9px; font-weight: 800;
@@ -774,7 +672,9 @@
             width: 100%;
         }
         .plano-card-limite i { color: var(--cyan); margin-right: 4px; font-size: 10px; }
-        .plano-card.selected .plano-card-check { display: flex; }
+        .plano-card.selected .plano-card-check {
+            display: flex;
+        }
         .plano-card-check {
             display: none;
             position: absolute; top: 10px; left: 10px;
@@ -1096,16 +996,6 @@
     <div class="orb orb-3"></div>
     <div class="hero-grid"></div>
 
-    <!-- ─── Barra de seções (fixa, some ao scroll) ─── -->
-    <nav id="configSectionNav" class="config-section-nav" aria-label="Navegação das configurações">
-        <a href="#sec-expediente" class="nav-sec-item active" data-section="sec-expediente"><i class="fas fa-clock"></i><span class="nav-sec-label">Expediente</span></a>
-        <a href="#sec-dias" class="nav-sec-item" data-section="sec-dias"><i class="fas fa-calendar-week"></i><span class="nav-sec-label">Dias</span></a>
-        <a href="#sec-recessos" class="nav-sec-item" data-section="sec-recessos"><i class="fas fa-umbrella-beach"></i><span class="nav-sec-label">Recessos</span></a>
-        <a href="#sec-pausas" class="nav-sec-item" data-section="sec-pausas"><i class="fas fa-coffee"></i><span class="nav-sec-label">Pausas</span></a>
-        <a href="#sec-sinal" class="nav-sec-item" data-section="sec-sinal"><i class="fas fa-wallet"></i><span class="nav-sec-label">Sinal</span></a>
-        <a href="#sec-plano" class="nav-sec-item" data-section="sec-plano"><i class="fas fa-crown"></i><span class="nav-sec-label">Plano</span></a>
-    </nav>
-
     <main class="flex-1 p-6 md:p-10">
 
         <!-- Header -->
@@ -1129,7 +1019,7 @@
             <form id="formConfig" class="space-y-8">
 
                 <!-- ─── Card de Horários ─── -->
-                <div id="sec-expediente" class="glass-card p-8 config-content-offset">
+                <div class="glass-card p-8">
                     <div class="card-center-head">
                         <div class="card-icon-wrap card-icon-cyan"><i class="fas fa-clock"></i></div>
                         <h2 class="card-title">Expediente</h2>
@@ -1163,7 +1053,7 @@
                 </div>
 
                 <!-- ─── Card de Dias da Semana (NOVO) ─── -->
-                <div id="sec-dias" class="glass-card p-8 config-content-offset">
+                <div class="glass-card p-8">
                     <div class="card-center-head">
                         <div class="card-icon-wrap card-icon-emerald"><i class="fas fa-calendar-week"></i></div>
                         <h2 class="card-title">Dias de Atendimento</h2>
@@ -1218,7 +1108,7 @@
                 </div>
 
                 <!-- ─── Card de Recessos / Feriados Prolongados (NOVO) ─── -->
-                <div id="sec-recessos" class="glass-card p-8 config-content-offset">
+                <div class="glass-card p-8">
                     <div class="card-center-head">
                         <div class="card-icon-wrap" style="background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.25)">
                             <i class="fas fa-umbrella-beach" style="color:var(--amber)"></i>
@@ -1265,7 +1155,7 @@
 
 
                 <!-- ─── Card de Intervalos de Pausa (almoço / bloqueios diários) ─── -->
-                <div id="sec-pausas" class="glass-card p-8 config-content-offset">
+                <div class="glass-card p-8">
                     <div class="card-center-head">
                         <div class="card-icon-wrap card-icon-cyan"><i class="fas fa-coffee"></i></div>
                         <h2 class="card-title">Intervalos de Pausa</h2>
@@ -1306,7 +1196,7 @@
                 </div>
 
                 <!-- ─── Card de Pagamento ─── -->
-                <div id="sec-sinal" class="glass-card p-8 config-content-offset">
+                <div class="glass-card p-8">
                     <div class="card-center-head">
                         <div class="card-icon-wrap card-icon-amber"><i class="fas fa-wallet"></i></div>
                         <h2 class="card-title">Taxa de Sinal</h2>
@@ -1317,9 +1207,8 @@
                         <input type="number" step="0.01" name="valor_sinal" id="valor_sinal" class="input-premium w-full p-4 font-bold text-xl text-center">
                     </div>
                 </div>
-
                            <!-- ─── Card de Gestão de Plano ─── -->
-                <div id="sec-plano" class="glass-card p-8 config-content-offset">
+                <div class="glass-card p-8">
                     <div class="card-center-head">
                         <div class="card-icon-wrap" style="background:rgba(8,145,178,0.1);border:1px solid rgba(8,145,178,0.25)">
                             <i class="fas fa-crown" style="color:var(--cyan)"></i>
@@ -1328,6 +1217,7 @@
                         <p class="card-desc">Gerencie ou altere o plano contratado. Esta alteração exige validação das credenciais do Dono.</p>
                     </div>
 
+                    <!-- Resumo do plano atual -->
                     <div id="planoAtualResumo" class="plano-atual-resumo">
                         <div class="plano-atual-badge">
                             <i class="fas fa-check-circle"></i>
@@ -2003,66 +1893,6 @@
             window.addEventListener('scroll', aoRolar, { passive: true });
         })();
 
-        // ─── Navegação por seções (some ao scroll, reaparece ao parar) ───
-        (function () {
-            const nav = document.getElementById('configSectionNav');
-            if (!nav) return;
-
-            const links = Array.from(nav.querySelectorAll('.nav-sec-item'));
-            const sections = links
-                .map(l => document.getElementById(l.dataset.section))
-                .filter(Boolean);
-
-            let scrollTimer = null;
-            let isProgrammaticScroll = false;
-
-            function esconderNav() {
-                nav.classList.add('is-hidden');
-            }
-            function mostrarNav() {
-                nav.classList.remove('is-hidden');
-            }
-
-            function onScroll() {
-                if (!isProgrammaticScroll) {
-                    esconderNav();
-                    clearTimeout(scrollTimer);
-                    scrollTimer = setTimeout(mostrarNav, 280);
-                }
-                atualizarLinkAtivo();
-            }
-
-            function atualizarLinkAtivo() {
-                const offset = window.innerWidth <= 1023 ? 150 : 100;
-                let current = sections[0];
-                for (const sec of sections) {
-                    const top = sec.getBoundingClientRect().top;
-                    if (top - offset <= 0) current = sec;
-                }
-                if (!current) return;
-                links.forEach(l => {
-                    l.classList.toggle('active', l.dataset.section === current.id);
-                });
-            }
-
-            links.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const target = document.getElementById(link.dataset.section);
-                    if (!target) return;
-                    isProgrammaticScroll = true;
-                    mostrarNav();
-                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    links.forEach(l => l.classList.toggle('active', l === link));
-                    setTimeout(() => { isProgrammaticScroll = false; }, 700);
-                });
-            });
-
-            window.addEventListener('scroll', onScroll, { passive: true });
-            document.querySelector('main')?.addEventListener('scroll', onScroll, { passive: true });
-            atualizarLinkAtivo();
-        })();
-
         let planoAtualIdOriginal = null;
         let planosDisponiveis = [];
         let planoSelecionadoId = null;
@@ -2158,7 +1988,7 @@
                 return `
                     <div class="plano-card ${isCurrent ? 'is-current' : ''}"
                          data-id="${p.id}" data-nome="${String(p.nome || '').toLowerCase()}"
-                         role="button" tabindex="0">
+                         role="button" tabindex="0" aria-pressed="false">
                         ${isCurrent ? '<span class="plano-card-badge-atual">Atual</span>' : ''}
                         <div class="plano-card-check"><i class="fas fa-check"></i></div>
                         <div class="plano-card-icon"><i class="fas ${iconePlano(p.nome)}"></i></div>
