@@ -47,7 +47,12 @@ exports.getConfiguracoes = async (req, res) => {
          LIMIT 1`,
         [clinicaId]
       );
+
     }
+    // testando
+
+
+    // final
 
     if (rows.length === 0) {
       return res.status(200).json({ message: "Nenhuma configuração encontrada. Use os padrões.", useDefault: true });
