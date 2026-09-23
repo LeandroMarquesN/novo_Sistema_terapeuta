@@ -1,0 +1,24 @@
+Credenciasi de producao do mercado pago:
+
+plublic key:
+APP_USR-248e0dca-a1f8-46e0-b6bb-ba5ad0e1d679
+
+
+acess tolken
+APP_USR-7341604133305626-092319-a5705c423a65d5962ae345fbdbf1cf96-3710136485
+
+client id:
+7341604133305626
+
+cliente secret:
+fvNnnY6YmuIGGmCS1TqBe4Xws7IroMOj
+
+
+variavei s que estouusando no renderon:
+
+MP_ACCESS_TOKEN 
+APP_USR-7341604133305626-092319-a5705c423a65d5962ae345fbdbf1cf96-3710136485
+
+MP_PUBLIC_KEY
+APP_USR-248e0dca-a1f8-46e0-b6bb-ba5ad0e1d679
+

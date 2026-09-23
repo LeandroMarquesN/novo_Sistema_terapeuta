@@ -53,6 +53,7 @@ CREATE TABLE IF NOT EXISTS clinicas (
   data_expiracao DATE NOT NULL,
   data_cancelamento DATE DEFAULT NULL,
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  whatsapp_creditos INT NOT NULL DEFAULT 0 AFTER plano_id,
   
   CONSTRAINT fk_clinica_plano FOREIGN KEY (plano_id) REFERENCES planos(id)
 ) ENGINE=InnoDB;
@@ -183,6 +184,18 @@ CREATE TABLE IF NOT EXISTS clinica_configuracoes (
   periodos_fechados JSON DEFAULT NULL,
   UNIQUE KEY uq_config_clinica (clinica_id),
   CONSTRAINT fk_config_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- WHATSAPP COMPRAS DE CREDITO PARA WHATSAPP
+CREATE TABLE IF NOT EXISTS whatsapp_compras_creditos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  quantidade_creditos INT NOT NULL,
+  valor_total DECIMAL(10,2) NOT NULL,
+  status_pagamento VARCHAR(30) DEFAULT 'pendente',
+  gateway_payment_id VARCHAR(255) NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_wa_compras_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 -- 7. FEATURE FLAGS
