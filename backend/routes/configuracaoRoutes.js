@@ -29,6 +29,17 @@ router.post(
   configuracaoController.updateConfiguracoes
 );
 /**
+ * @route   GET /api/config/planos
+ * @desc    Lista planos disponíveis e o plano atual da clínica logada (multitenancy)
+ * @access  Privado
+ */
+router.get(
+  '/planos',
+  authMiddleware,
+  configuracaoController.getPlanos
+);
+
+/**
  * @route   POST /api/config/alterar-plano
  * @desc    Valida credenciais do dono e atualiza o plano da clínica
  * @access  Privado

@@ -205,6 +205,69 @@ exports.updateConfiguracoes = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+/**
+ * Lista todos os planos disponíveis + plano atual da clínica logada (multitenancy via clinica_id).
+ */
+exports.getPlanos = async (req, res) => {
+  const clinicaId = req.usuario?.clinica_id;
+
+  if (!clinicaId) {
+    return res.status(401).json({ success: false, message: "Usuário não autenticado." });
+  }
+
+  try {
+    const [planos] = await db.execute(
+      `SELECT id, nome_plano, valor_base, valor_promocional, limite_membros
+       FROM planos
+       ORDER BY id ASC`
+    );
+
+    const [clinicaRows] = await db.execute(
+      `SELECT c.plano_id, c.valor_atual, c.tipo_plano, c.status_pagamento,
+              c.data_fim_promocao, c.data_fim_gratuidade, c.status,
+              p.nome_plano AS plano_nome, p.valor_base, p.valor_promocional, p.limite_membros
+       FROM clinicas c
+       LEFT JOIN planos p ON p.id = c.plano_id
+       WHERE c.id = ?
+       LIMIT 1`,
+      [clinicaId]
+    );
+
+    if (clinicaRows.length === 0) {
+      return res.status(404).json({ success: false, message: "Clínica não encontrada." });
+    }
+
+    const clinica = clinicaRows[0];
+
+    res.json({
+      success: true,
+      planos: planos.map((p) => ({
+        id: p.id,
+        nome: p.nome_plano,
+        valor_base: Number(p.valor_base),
+        valor_promocional: Number(p.valor_promocional),
+        limite_membros: p.limite_membros
+      })),
+      plano_atual: {
+        plano_id: clinica.plano_id,
+        nome: clinica.plano_nome,
+        valor_atual: clinica.valor_atual != null ? Number(clinica.valor_atual) : null,
+        valor_base: clinica.valor_base != null ? Number(clinica.valor_base) : null,
+        valor_promocional: clinica.valor_promocional != null ? Number(clinica.valor_promocional) : null,
+        limite_membros: clinica.limite_membros,
+        tipo_plano: clinica.tipo_plano,
+        status_pagamento: clinica.status_pagamento,
+        status: clinica.status,
+        data_fim_promocao: clinica.data_fim_promocao,
+        data_fim_gratuidade: clinica.data_fim_gratuidade
+      }
+    });
+  } catch (error) {
+    console.error("ERRO AO BUSCAR PLANOS:", error);
+    res.status(500).json({ success: false, message: "Erro ao carregar planos.", details: error.message });
+  }
+};
+
 exports.alterarPlano = async (req, res) => {
   const clinicaId = req.usuario?.clinica_id;
   const { email, senha, novo_plano_id } = req.body;
@@ -218,9 +281,8 @@ exports.alterarPlano = async (req, res) => {
   }
 
   try {
-    // 1. Valida se o e-mail e senha correspondem ao dono/master da clínica logada
     const [clinicaRows] = await db.execute(
-      `SELECT id, email_master, senha_master FROM clinicas WHERE id = ?`,
+      `SELECT id, email_master, senha_master, plano_id FROM clinicas WHERE id = ?`,
       [clinicaId]
     );
 
@@ -230,24 +292,36 @@ exports.alterarPlano = async (req, res) => {
 
     const clinica = clinicaRows[0];
 
-    // Validação estrita das credenciais Master do Dono
     if (clinica.email_master !== email || clinica.senha_master !== senha) {
       return res.status(403).json({ success: false, message: "Credenciais incorretas. Apenas o Dono pode alterar o plano." });
     }
 
-    // 2. Valida se o plano desejado existe na tabela de planos
-    const [planoRows] = await db.execute(`SELECT id FROM planos WHERE id = ?`, [novo_plano_id]);
+    const [planoRows] = await db.execute(
+      `SELECT id, nome_plano, valor_base, valor_promocional FROM planos WHERE id = ?`,
+      [novo_plano_id]
+    );
     if (planoRows.length === 0) {
       return res.status(400).json({ success: false, message: "Plano selecionado é inválido." });
     }
 
-    // 3. Atualiza o plano da clínica no banco de dados
+    const novoPlano = planoRows[0];
+
     await db.execute(
-      `UPDATE clinicas SET plano_id = ? WHERE id = ?`,
-      [novo_plano_id, clinicaId]
+      `UPDATE clinicas
+       SET plano_id = ?, valor_atual = ?
+       WHERE id = ?`,
+      [novo_plano_id, novoPlano.valor_promocional, clinicaId]
     );
 
-    res.json({ success: true, message: "Plano alterado com sucesso!" });
+    res.json({
+      success: true,
+      message: "Plano alterado com sucesso!",
+      plano: {
+        id: novoPlano.id,
+        nome: novoPlano.nome_plano,
+        valor_atual: Number(novoPlano.valor_promocional)
+      }
+    });
   } catch (error) {
     console.error("ERRO AO ALTERAR PLANO:", error);
     res.status(500).json({ success: false, message: "Erro interno no servidor ao alterar o plano." });

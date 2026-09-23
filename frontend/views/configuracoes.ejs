@@ -540,6 +540,152 @@
         }
         .pausa-horario i { font-size: 9px; }
 
+        /* ─── Planos (cards) ─── */
+        .plano-atual-resumo {
+            max-width: 420px;
+            margin: 0 auto 8px;
+            padding: 18px 22px;
+            background: linear-gradient(135deg, rgba(8,145,178,0.12), rgba(5,150,105,0.08));
+            border: 1px solid rgba(34,211,238,0.22);
+            border-radius: 18px;
+            text-align: center;
+        }
+        .plano-atual-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            color: var(--cyan);
+            margin-bottom: 8px;
+        }
+        .plano-atual-badge i { font-size: 11px; }
+        .plano-atual-nome {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px; font-weight: 800; color: #f1f5f9;
+            text-transform: capitalize;
+            margin-bottom: 6px;
+        }
+        .plano-atual-meta {
+            font-size: 12px; color: rgba(148,163,184,0.65);
+            font-weight: 600;
+            display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 4px 8px;
+        }
+        .plano-atual-sep { opacity: 0.4; }
+
+        .planos-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+        @media (max-width: 900px) {
+            .planos-cards-grid { grid-template-columns: 1fr; max-width: 420px; }
+        }
+
+        .planos-loading {
+            grid-column: 1 / -1;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 32px; color: rgba(148,163,184,0.5); font-size: 13px;
+        }
+        .planos-loading i { color: var(--cyan); }
+
+        .plano-card {
+            position: relative;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px 18px 20px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+            user-select: none;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 200px;
+        }
+        .plano-card:hover {
+            border-color: rgba(52,211,153,0.35);
+            background: rgba(52,211,153,0.05);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+        }
+        .plano-card.selected {
+            background: linear-gradient(160deg, rgba(8,145,178,0.22), rgba(5,150,105,0.14));
+            border-color: rgba(52,211,153,0.5);
+            box-shadow: 0 0 24px rgba(52,211,153,0.18);
+        }
+        .plano-card.is-current {
+            border-color: rgba(34,211,238,0.4);
+        }
+        .plano-card.is-current:not(.selected) {
+            opacity: 0.85;
+        }
+        .plano-card-badge-atual {
+            position: absolute; top: 10px; right: 10px;
+            font-size: 9px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.06em;
+            background: rgba(34,211,238,0.15);
+            border: 1px solid rgba(34,211,238,0.35);
+            color: var(--cyan);
+            padding: 3px 8px; border-radius: 99px;
+        }
+        .plano-card-icon {
+            width: 48px; height: 48px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 12px; font-size: 18px;
+            background: rgba(52,211,153,0.1);
+            border: 1px solid rgba(52,211,153,0.25);
+            color: var(--emerald);
+        }
+        .plano-card[data-nome="trial"] .plano-card-icon {
+            background: rgba(148,163,184,0.1); border-color: rgba(148,163,184,0.25); color: #94a3b8;
+        }
+        .plano-card[data-nome="premium"] .plano-card-icon {
+            background: rgba(34,211,238,0.12); border-color: rgba(34,211,238,0.3); color: var(--cyan);
+        }
+        .plano-card[data-nome="enterprise"] .plano-card-icon {
+            background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.3); color: var(--amber);
+        }
+        .plano-card-nome {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 17px; font-weight: 800; color: #f1f5f9;
+            text-transform: capitalize; margin-bottom: 6px;
+        }
+        .plano-card-preco {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 26px; font-weight: 800; color: var(--emerald);
+            line-height: 1.1; margin-bottom: 2px;
+        }
+        .plano-card-preco span {
+            font-size: 12px; font-weight: 600; color: rgba(148,163,184,0.55);
+        }
+        .plano-card-base {
+            font-size: 11px; color: rgba(148,163,184,0.4);
+            text-decoration: line-through; margin-bottom: 10px;
+            min-height: 16px;
+        }
+        .plano-card-limite {
+            font-size: 11px; font-weight: 600;
+            color: rgba(148,163,184,0.55);
+            margin-top: auto;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            width: 100%;
+        }
+        .plano-card-limite i { color: var(--cyan); margin-right: 4px; font-size: 10px; }
+        .plano-card.selected .plano-card-check {
+            display: flex;
+        }
+        .plano-card-check {
+            display: none;
+            position: absolute; top: 10px; left: 10px;
+            width: 22px; height: 22px; border-radius: 50%;
+            background: var(--emerald);
+            color: #020c12;
+            align-items: center; justify-content: center;
+            font-size: 11px;
+            box-shadow: 0 0 10px rgba(52,211,153,0.4);
+        }
+
         /* ─── Mobile nav (topbar + drawer + tabbar) – igual ao dashboard ─── */
         .mobile-topbar,
         .mobile-bottom-tabbar,
@@ -1070,25 +1216,39 @@
                         <h2 class="card-title">Plano da Clínica</h2>
                         <p class="card-desc">Gerencie ou altere o plano contratado. Esta alteração exige validação das credenciais do Dono.</p>
                     </div>
-                    
-                    <div class="max-w-md mx-auto space-y-4">
-                        <div>
-                            <label class="form-label" style="text-align:center">Plano Atual</label>
-                            <input type="text" id="plano_atual_txt" class="input-premium w-full p-4 font-bold text-center text-cyan-400" readonly value="Carregando...">
+
+                    <!-- Resumo do plano atual -->
+                    <div id="planoAtualResumo" class="plano-atual-resumo">
+                        <div class="plano-atual-badge">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Plano atual</span>
                         </div>
-                        <div>
-                            <label class="form-label" style="text-align:center">Novo Plano Desejado</label>
-                            <select id="novo_plano_id" class="input-premium w-full p-4 font-semibold text-center">
-                                <option value="1">Trial (R$ 89,90)</option>
-                                <option value="2">Premium (R$ 89,90)</option>
-                                <option value="3">Enterprise (R$ 269,90)</option>
-                            </select>
+                        <div class="plano-atual-nome" id="plano_atual_nome">Carregando...</div>
+                        <div class="plano-atual-meta">
+                            <span id="plano_atual_valor">—</span>
+                            <span class="plano-atual-sep">·</span>
+                            <span id="plano_atual_membros">—</span>
+                            <span class="plano-atual-sep">·</span>
+                            <span id="plano_atual_status">—</span>
                         </div>
-                        <div class="pt-2">
-                            <button type="button" onclick="abrirModalAuthPlano()" class="w-full py-4 rounded-xl font-bold font-['Space_Grotesk'] text-slate-900 bg-cyan-400 hover:bg-cyan-300 transition shadow-lg shadow-cyan-400/25 flex items-center justify-center gap-2">
-                                <i class="fas fa-exchange-alt"></i> Solicitar Troca de Plano
-                            </button>
+                    </div>
+
+                    <input type="hidden" id="novo_plano_id" value="">
+
+                    <p class="form-label text-center" style="text-align:center;margin:28px 0 14px">Escolha o novo plano</p>
+                    <div id="planosCardsGrid" class="planos-cards-grid">
+                        <div class="planos-loading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Carregando planos...</span>
                         </div>
+                    </div>
+
+                    <div class="pt-6 max-w-md mx-auto">
+                        <button type="button" id="btnSolicitarTrocaPlano" onclick="abrirModalAuthPlano()" disabled
+                            class="w-full py-4 rounded-xl font-bold font-['Space_Grotesk'] text-slate-900 bg-cyan-400 hover:bg-cyan-300 transition shadow-lg shadow-cyan-400/25 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-cyan-400">
+                            <i class="fas fa-exchange-alt"></i>
+                            <span id="btnTrocaPlanoLabel">Selecione um plano</span>
+                        </button>
                     </div>
                 </div>
 
@@ -1666,7 +1826,10 @@
             } catch (error) { console.error('Erro ao carregar:', error); }
         }
 
-        window.onload = carregarConfiguracoes;
+        window.onload = function () {
+            carregarConfiguracoes();
+            carregarPlanos();
+        };
     </script>
 
     <!-- Mobile drawer + tabbar scroll hide -->
@@ -1731,66 +1894,226 @@
         })();
 
         let planoAtualIdOriginal = null;
+        let planosDisponiveis = [];
+        let planoSelecionadoId = null;
 
-// Funções de controle do Modal de Autenticação do Plano
-function abrirModalAuthPlano() {
-    const modal = document.getElementById('modalAuthPlano');
-    const card = document.getElementById('modalAuthCard');
-    document.getElementById('authErroMsg').style.display = 'none';
-    document.getElementById('auth_email').value = '';
-    document.getElementById('auth_senha').value = '';
-    
-    modal.classList.remove('hidden');
-    setTimeout(() => {
-        card.classList.remove('scale-90', 'opacity-0');
-        card.classList.add('scale-100', 'opacity-100');
-    }, 10);
-}
-
-function fecharModalAuthPlano() {
-    const modal = document.getElementById('modalAuthPlano');
-    const card = document.getElementById('modalAuthCard');
-    card.classList.remove('scale-100', 'opacity-100');
-    card.classList.add('scale-90', 'opacity-0');
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
-}
-
-// Submissão da credencial do dono para alteração de plano
-document.getElementById('formAuthPlano').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('auth_email').value.trim();
-    const senha = document.getElementById('auth_senha').value;
-    const novoPlanoId = document.getElementById('novo_plano_id').value;
-    const erroEl = document.getElementById('authErroMsg');
-
-    try {
-        const response = await fetch('/api/config/alterar-plano', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({ email, senha, novo_plano_id: novoPlanoId })
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-            fecharModalAuthPlano();
-            alert('Plano alterado com sucesso!');
-            carregarConfiguracoes(); // Recarrega os dados atualizados
-        } else {
-            erroEl.textContent = result.message || 'Credenciais inválidas ou acesso negado.';
-            erroEl.style.display = 'block';
+        function formatarMoedaBR(valor) {
+            if (valor == null || isNaN(valor)) return '—';
+            return 'R$ ' + Number(valor).toFixed(2).replace('.', ',');
         }
-    } catch (error) {
-        console.error('Erro ao alterar plano:', error);
-        erroEl.textContent = 'Erro de conexão ao processar solicitação.';
-        erroEl.style.display = 'block';
-    }
-});
+
+        function capitalizarPlano(nome) {
+            if (!nome) return '—';
+            return String(nome).charAt(0).toUpperCase() + String(nome).slice(1).toLowerCase();
+        }
+
+        function iconePlano(nome) {
+            const n = String(nome || '').toLowerCase();
+            if (n === 'enterprise') return 'fa-building';
+            if (n === 'premium') return 'fa-star';
+            return 'fa-seedling';
+        }
+
+        function labelStatusPagamento(status) {
+            const map = {
+                trial: 'Trial',
+                ativo: 'Ativo',
+                inadimplente: 'Inadimplente',
+                cancelado: 'Cancelado'
+            };
+            return map[status] || (status || '—');
+        }
+
+        function atualizarBotaoTroca() {
+            const btn = document.getElementById('btnSolicitarTrocaPlano');
+            const label = document.getElementById('btnTrocaPlanoLabel');
+            const hidden = document.getElementById('novo_plano_id');
+            if (!btn || !label || !hidden) return;
+
+            if (!planoSelecionadoId || Number(planoSelecionadoId) === Number(planoAtualIdOriginal)) {
+                btn.disabled = true;
+                label.textContent = 'Selecione um plano diferente';
+                hidden.value = '';
+                return;
+            }
+
+            const plano = planosDisponiveis.find(p => Number(p.id) === Number(planoSelecionadoId));
+            btn.disabled = false;
+            label.textContent = plano
+                ? `Trocar para ${capitalizarPlano(plano.nome)}`
+                : 'Solicitar Troca de Plano';
+            hidden.value = String(planoSelecionadoId);
+        }
+
+        function selecionarPlanoCard(id) {
+            planoSelecionadoId = id;
+            document.querySelectorAll('.plano-card').forEach(card => {
+                card.classList.toggle('selected', Number(card.dataset.id) === Number(id));
+            });
+            atualizarBotaoTroca();
+        }
+
+        function renderizarResumoPlanoAtual(atual) {
+            const nomeEl = document.getElementById('plano_atual_nome');
+            const valorEl = document.getElementById('plano_atual_valor');
+            const membrosEl = document.getElementById('plano_atual_membros');
+            const statusEl = document.getElementById('plano_atual_status');
+            if (!nomeEl) return;
+
+            nomeEl.textContent = capitalizarPlano(atual?.nome);
+            const valorExibir = atual?.valor_atual != null
+                ? atual.valor_atual
+                : (atual?.valor_promocional != null ? atual.valor_promocional : atual?.valor_base);
+            valorEl.textContent = formatarMoedaBR(valorExibir) + '/mês';
+            membrosEl.textContent = atual?.limite_membros
+                ? `até ${atual.limite_membros} membros`
+                : '—';
+            statusEl.textContent = labelStatusPagamento(atual?.status_pagamento || atual?.status);
+        }
+
+        function renderizarCardsPlanos(planos, planoAtualId) {
+            const grid = document.getElementById('planosCardsGrid');
+            if (!grid) return;
+
+            if (!planos || planos.length === 0) {
+                grid.innerHTML = '<div class="planos-loading"><span>Nenhum plano disponível.</span></div>';
+                return;
+            }
+
+            grid.innerHTML = planos.map(p => {
+                const isCurrent = Number(p.id) === Number(planoAtualId);
+                const promo = Number(p.valor_promocional);
+                const base = Number(p.valor_base);
+                const mostrarBase = base > promo;
+                return `
+                    <div class="plano-card ${isCurrent ? 'is-current' : ''}"
+                         data-id="${p.id}" data-nome="${String(p.nome || '').toLowerCase()}"
+                         role="button" tabindex="0" aria-pressed="false">
+                        ${isCurrent ? '<span class="plano-card-badge-atual">Atual</span>' : ''}
+                        <div class="plano-card-check"><i class="fas fa-check"></i></div>
+                        <div class="plano-card-icon"><i class="fas ${iconePlano(p.nome)}"></i></div>
+                        <div class="plano-card-nome">${capitalizarPlano(p.nome)}</div>
+                        <div class="plano-card-preco">${formatarMoedaBR(promo)} <span>/mês</span></div>
+                        <div class="plano-card-base">${mostrarBase ? formatarMoedaBR(base) : ''}</div>
+                        <div class="plano-card-limite"><i class="fas fa-users"></i> até ${p.limite_membros} membros</div>
+                    </div>
+                `;
+            }).join('');
+
+            grid.querySelectorAll('.plano-card').forEach(card => {
+                const ativar = () => selecionarPlanoCard(card.dataset.id);
+                card.addEventListener('click', ativar);
+                card.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        ativar();
+                    }
+                });
+            });
+        }
+
+        async function carregarPlanos() {
+            const grid = document.getElementById('planosCardsGrid');
+            try {
+                const response = await fetch('/api/config/planos', {
+                    headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+                });
+                if (!response.ok) throw new Error('Falha ao buscar planos');
+
+                const data = await response.json();
+                if (!data.success) throw new Error(data.message || 'Erro ao carregar planos');
+
+                planosDisponiveis = data.planos || [];
+                const atual = data.plano_atual || {};
+                planoAtualIdOriginal = atual.plano_id;
+                planoSelecionadoId = null;
+
+                renderizarResumoPlanoAtual(atual);
+                renderizarCardsPlanos(planosDisponiveis, planoAtualIdOriginal);
+                atualizarBotaoTroca();
+            } catch (error) {
+                console.error('Erro ao carregar planos:', error);
+                if (grid) {
+                    grid.innerHTML = `
+                        <div class="planos-loading" style="color:var(--red)">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Não foi possível carregar os planos.</span>
+                        </div>`;
+                }
+                const nomeEl = document.getElementById('plano_atual_nome');
+                if (nomeEl) nomeEl.textContent = 'Indisponível';
+            }
+        }
+
+        function abrirModalAuthPlano() {
+            const novoId = document.getElementById('novo_plano_id')?.value;
+            if (!novoId || Number(novoId) === Number(planoAtualIdOriginal)) {
+                alert('Selecione um plano diferente do atual para continuar.');
+                return;
+            }
+
+            const modal = document.getElementById('modalAuthPlano');
+            const card = document.getElementById('modalAuthCard');
+            document.getElementById('authErroMsg').style.display = 'none';
+            document.getElementById('auth_email').value = '';
+            document.getElementById('auth_senha').value = '';
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                card.classList.remove('scale-90', 'opacity-0');
+                card.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function fecharModalAuthPlano() {
+            const modal = document.getElementById('modalAuthPlano');
+            const card = document.getElementById('modalAuthCard');
+            card.classList.remove('scale-100', 'opacity-100');
+            card.classList.add('scale-90', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        document.getElementById('formAuthPlano').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth_email').value.trim();
+            const senha = document.getElementById('auth_senha').value;
+            const novoPlanoId = document.getElementById('novo_plano_id').value;
+            const erroEl = document.getElementById('authErroMsg');
+
+            if (!novoPlanoId) {
+                erroEl.textContent = 'Selecione um plano antes de confirmar.';
+                erroEl.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/config/alterar-plano', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    },
+                    body: JSON.stringify({ email, senha, novo_plano_id: novoPlanoId })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    fecharModalAuthPlano();
+                    alert('Plano alterado com sucesso!');
+                    carregarPlanos();
+                } else {
+                    erroEl.textContent = result.message || 'Credenciais inválidas ou acesso negado.';
+                    erroEl.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Erro ao alterar plano:', error);
+                erroEl.textContent = 'Erro de conexão ao processar solicitação.';
+                erroEl.style.display = 'block';
+            }
+        });
     </script>
 
 </body>
