@@ -750,7 +750,7 @@
         outline-offset: 2px;
       }
 
-      /* ─── Modal aviso tela pequena (somente smartphones) ─── */
+      /* ─── Modal aviso tela inadequada (celular/tablet; só libera desktop ≥1024px) ─── */
       #modalTelaPequena {
         position: fixed;
         inset: 0;
@@ -768,7 +768,7 @@
       }
       #modalTelaPequena .modal-tela-card {
         width: 100%;
-        max-width: 380px;
+        max-width: 400px;
         background: rgba(4, 16, 24, 0.98);
         border: 1px solid rgba(251, 191, 36, 0.35);
         border-radius: 24px;
@@ -779,14 +779,8 @@
         animation: modalTelaIn 0.35s ease-out;
       }
       @keyframes modalTelaIn {
-        from {
-          opacity: 0;
-          transform: scale(0.92) translateY(12px);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
+        from { opacity: 0; transform: scale(0.92) translateY(12px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
       }
       #modalTelaPequena .modal-tela-icon {
         width: 72px;
@@ -1994,24 +1988,24 @@
       </div>
     </div>
 
-    <!-- MODAL: tela muito pequena (somente smartphones) -->
+    <!-- MODAL: tela inadequada (celular/tablet — só libera desktop ≥1024px) -->
     <div id="modalTelaPequena" role="dialog" aria-modal="true" aria-labelledby="modalTelaTitulo" aria-describedby="modalTelaTexto">
       <div class="modal-tela-card">
         <div class="modal-tela-icon">
-          <i class="fas fa-mobile-alt"></i>
+          <i class="fas fa-laptop"></i>
         </div>
-        <h3 id="modalTelaTitulo" class="modal-tela-titulo">Tela muito pequena</h3>
+        <h3 id="modalTelaTitulo" class="modal-tela-titulo">Tela inadequada para atendimento</h3>
         <p id="modalTelaTexto" class="modal-tela-texto">
-          Detectamos que você está em um dispositivo com tela reduzida.
-          <strong>Não é possível realizar um atendimento completo neste tamanho de tela</strong>
-          — os dados ficam misturados e a experiência fica desconfortável.
+          Detectamos que você está em um celular ou tablet.
+          <strong>Não é possível realizar um atendimento completo nesta tela</strong>
+          — os painéis e dados ficam misturados e a experiência deixa de ser segura e confortável.
           <br /><br />
-          Acesse pelo computador, tablet ou um smartphone em modo paisagem com tela maior para continuar com segurança.
+          Faça login em um <strong>computador ou notebook</strong> (tela a partir de 1024&nbsp;px) para continuar o atendimento com tranquilidade.
         </p>
         <button type="button" class="btn-modal-tela" id="btnFecharModalTela" onclick="fecharModalTelaPequena()">
           Entendi
         </button>
-        <p class="modal-tela-hint">Recomendamos largura mínima de 640&nbsp;px (tablet ou desktop).</p>
+        <p class="modal-tela-hint">Recomendamos largura mínima de 1024&nbsp;px (desktop ou notebook).</p>
       </div>
     </div>
 
@@ -2212,18 +2206,18 @@
         });
       })();
 
-      // ─── Aviso de tela pequena (somente smartphones, < 640px) ───
+      // ─── Aviso: só libera atendimento em desktop/notebook (≥ 1024px) ───
       (function () {
-        const LIMITE_TELA_PEQUENA = 640; // abaixo disso = smartphone
+        const LIMITE_TELA_ADEQUADA = 1024;
         const modal = document.getElementById("modalTelaPequena");
         if (!modal) return;
 
-        function ehTelaPequena() {
-          return window.innerWidth < LIMITE_TELA_PEQUENA;
+        function ehTelaInadequada() {
+          return window.innerWidth < LIMITE_TELA_ADEQUADA;
         }
 
         function abrirModalTelaPequena() {
-          if (!ehTelaPequena()) return;
+          if (!ehTelaInadequada()) return;
           modal.classList.add("visivel");
           document.body.style.overflow = "hidden";
         }
@@ -2233,19 +2227,17 @@
           document.body.style.overflow = "";
         };
 
-        // Abre ao carregar se a tela for pequena
         if (document.readyState === "loading") {
           document.addEventListener("DOMContentLoaded", abrirModalTelaPequena);
         } else {
           abrirModalTelaPequena();
         }
 
-        // Se redimensionar para tablet/desktop, fecha; se voltar para celular, reabre
         let resizeTimer = null;
         window.addEventListener("resize", function () {
           clearTimeout(resizeTimer);
           resizeTimer = setTimeout(function () {
-            if (ehTelaPequena()) {
+            if (ehTelaInadequada()) {
               abrirModalTelaPequena();
             } else {
               window.fecharModalTelaPequena();
