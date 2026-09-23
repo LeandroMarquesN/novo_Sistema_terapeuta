@@ -1,5 +1,5 @@
 // controllers/anamneseController.js
-const db = require('../config/db');
+const db = require('../config/db'); // ajuste o path se o projeto usar outro módulo de conexão
 
 /**
  * Lista modelos ativos (sistema + da clínica)
@@ -59,6 +59,7 @@ exports.obterModelo = async (req, res) => {
       [modeloId]
     );
 
+    // Normaliza opcoes JSON
     const camposNorm = campos.map((c) => {
       let opcoes = c.opcoes;
       if (typeof opcoes === 'string') {
@@ -77,7 +78,7 @@ exports.obterModelo = async (req, res) => {
 /**
  * Salvar anamnese preenchida
  * POST /api/anamnese/salvar
- * body: { paciente_id, agendamento_id?, prontuario_id?, modelo_id, respostas, status_anamnese? }
+ * body: { paciente_id, agendamento_id?, modelo_id, respostas, status_anamnese? }
  */
 exports.salvarAnamnese = async (req, res) => {
   try {
@@ -101,10 +102,14 @@ exports.salvarAnamnese = async (req, res) => {
       return res.status(400).json({ erro: 'paciente_id, modelo_id e respostas são obrigatórios.' });
     }
 
+    // Resolve prontuário vinculado
     let prontuarioIdValido = null;
+
     if (prontuario_id) {
       const [pr] = await db.execute(
-        `SELECT id FROM prontuarios WHERE id = ? AND clinica_id = ? AND paciente_id = ? LIMIT 1`,
+        `SELECT id FROM prontuarios
+         WHERE id = ? AND clinica_id = ? AND paciente_id = ?
+         LIMIT 1`,
         [prontuario_id, clinicaId, paciente_id]
       );
       if (!pr.length) {
@@ -113,13 +118,38 @@ exports.salvarAnamnese = async (req, res) => {
       prontuarioIdValido = pr[0].id;
     }
 
+    // Auto-vínculo: mesmo agendamento
+    if (!prontuarioIdValido && agendamento_id) {
+      const [pr] = await db.execute(
+        `SELECT id FROM prontuarios
+         WHERE clinica_id = ? AND paciente_id = ? AND agendamento_id = ?
+         ORDER BY id DESC LIMIT 1`,
+        [clinicaId, paciente_id, agendamento_id]
+      );
+      if (pr.length) prontuarioIdValido = pr[0].id;
+    }
+
+    // Auto-vínculo: prontuário mais recente do paciente (últimas 24h)
+    if (!prontuarioIdValido) {
+      const [pr] = await db.execute(
+        `SELECT id FROM prontuarios
+         WHERE clinica_id = ? AND paciente_id = ?
+           AND data_atendimento >= (NOW() - INTERVAL 1 DAY)
+         ORDER BY data_atendimento DESC, id DESC
+         LIMIT 1`,
+        [clinicaId, paciente_id]
+      );
+      if (pr.length) prontuarioIdValido = pr[0].id;
+    }
+
     const status = status_anamnese === 'finalizado' ? 'finalizado' : 'rascunho';
     const respostasJson = typeof respostas === 'string' ? respostas : JSON.stringify(respostas);
 
     if (id) {
       const [result] = await db.execute(
         `UPDATE anamneses_preenchidas
-         SET respostas = ?, status_anamnese = ?, prontuario_id = COALESCE(?, prontuario_id),
+         SET respostas = ?, status_anamnese = ?,
+             prontuario_id = COALESCE(?, prontuario_id),
              atualizado_em = CURRENT_TIMESTAMP
          WHERE id = ? AND clinica_id = ? AND status_anamnese = 'rascunho'`,
         [respostasJson, status, prontuarioIdValido, id, clinicaId]
@@ -158,47 +188,7 @@ exports.salvarAnamnese = async (req, res) => {
   }
 };
 
-/**
- * Vincular anamnese a um prontuário existente
- * PUT /api/anamnese/:id/vincular-prontuario
- */
-exports.vincularProntuario = async (req, res) => {
-  try {
-    const clinicaId = req.usuario?.clinica_id;
-    const anamneseId = parseInt(req.params.id, 10);
-    const { prontuario_id } = req.body || {};
 
-    if (!clinicaId || !anamneseId || !prontuario_id) {
-      return res.status(400).json({ erro: 'Parâmetros inválidos.' });
-    }
-
-    const [aRows] = await db.execute(
-      `SELECT id, paciente_id FROM anamneses_preenchidas WHERE id = ? AND clinica_id = ? LIMIT 1`,
-      [anamneseId, clinicaId]
-    );
-    if (!aRows.length) {
-      return res.status(404).json({ erro: 'Anamnese não encontrada.' });
-    }
-
-    const [pRows] = await db.execute(
-      `SELECT id FROM prontuarios WHERE id = ? AND clinica_id = ? AND paciente_id = ? LIMIT 1`,
-      [prontuario_id, clinicaId, aRows[0].paciente_id]
-    );
-    if (!pRows.length) {
-      return res.status(400).json({ erro: 'Prontuário não pertence a este paciente.' });
-    }
-
-    await db.execute(
-      `UPDATE anamneses_preenchidas SET prontuario_id = ? WHERE id = ? AND clinica_id = ?`,
-      [prontuario_id, anamneseId, clinicaId]
-    );
-
-    res.json({ ok: true, id: anamneseId, prontuario_id });
-  } catch (err) {
-    console.error('[anamnese] vincularProntuario:', err);
-    res.status(500).json({ erro: 'Falha ao vincular anamnese ao prontuário.' });
-  }
-};
 
 /**
  * Listar anamneses de um paciente
@@ -213,8 +203,7 @@ exports.listarPorPaciente = async (req, res) => {
     }
 
     const [rows] = await db.execute(
-      `SELECT a.id, a.modelo_id, a.prontuario_id, a.status_anamnese,
-              a.data_preenchimento, a.criado_em,
+      `SELECT a.id, a.modelo_id, a.status_anamnese, a.data_preenchimento, a.criado_em,
               m.nome AS modelo_nome, m.profissao, m.icone,
               u.nome AS profissional_nome
        FROM anamneses_preenchidas a
@@ -245,11 +234,9 @@ exports.obterDetalhe = async (req, res) => {
     }
 
     const [rows] = await db.execute(
-      `SELECT a.*, m.nome AS modelo_nome, m.profissao, m.icone,
-              u.nome AS profissional_nome
+      `SELECT a.*, m.nome AS modelo_nome, m.profissao, m.icone
        FROM anamneses_preenchidas a
        JOIN modelos_anamnese m ON m.id = a.modelo_id
-       JOIN usuarios u ON u.id = a.usuario_id
        WHERE a.id = ? AND a.clinica_id = ?
        LIMIT 1`,
       [id, clinicaId]

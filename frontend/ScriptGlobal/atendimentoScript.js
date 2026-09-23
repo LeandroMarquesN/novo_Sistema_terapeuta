@@ -279,8 +279,7 @@ async function carregarTimelineProntuarios(pacienteId) {
 }
 
 /**
- * Visualiza anamnese em janela flutuante (mesmo esquema das seções maximizadas).
- * Fallback: modal glass se abrirJanelaConteudo não estiver disponível.
+ * Abre anamnese em janela flutuante (mesmo esquema das seções maximizadas).
  */
 async function visualizarAnamneseTimeline(anamneseId) {
   try {
@@ -299,8 +298,8 @@ async function visualizarAnamneseTimeline(anamneseId) {
     const statusCor = status === 'finalizado' ? 'var(--emerald)' : 'var(--amber)';
     const statusBg = status === 'finalizado' ? 'rgba(52,211,153,0.15)' : 'rgba(251,191,36,0.15)';
     const tituloJanela = (a.modelo_nome || 'Anamnese') + ' · #' + a.id;
+    const pidVinculo = a.prontuario_id ? Number(a.prontuario_id) : null;
 
-    // Monta lista de respostas
     let respostasHtml = '';
     const keys = Object.keys(respostas);
     if (!keys.length) {
@@ -338,31 +337,106 @@ async function visualizarAnamneseTimeline(anamneseId) {
         <span style="font-size:11px;color:rgba(148,163,184,0.7);display:flex;align-items:center;gap:6px">
           <i class="fas fa-user-md" style="color:var(--emerald)"></i> ${escHtmlAnamnese(a.profissional_nome)}
         </span>` : ''}
-        ${a.prontuario_id ? `
+        ${pidVinculo ? `
         <span style="font-size:11px;color:rgba(148,163,184,0.7);display:flex;align-items:center;gap:6px">
-          <i class="fas fa-link" style="color:var(--blue)"></i> Prontuário #${a.prontuario_id}
+          <i class="fas fa-link" style="color:var(--blue)"></i> Prontuário #${pidVinculo}
         </span>` : ''}
       </div>
       <div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:rgba(148,163,184,0.45);margin-bottom:8px">Respostas</div>
       <div>${respostasHtml}</div>
-      ${a.prontuario_id ? `
+      ${pidVinculo ? `
       <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(52,211,153,0.15)">
-        <button type="button" class="btn-secondary px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider"
-                onclick="visualizarEvolucaoAntiga(${a.prontuario_id})">
-          <i class="fas fa-notes-medical"></i> Abrir prontuário vinculado
+        <button type="button" id="btnAbrirProntVinculo_${anamneseId}"
+                class="btn-secondary px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider">
+          <i class="fas fa-notes-medical"></i> Abrir prontuário vinculado #${pidVinculo}
         </button>
-      </div>` : ''}
+      </div>` : `
+      <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(52,211,153,0.15)">
+        <p style="font-size:11px;color:rgba(148,163,184,0.5)">Esta anamnese ainda não está vinculada a um prontuário.</p>
+      </div>`}
     `;
 
     if (typeof window.abrirJanelaConteudo === 'function') {
       window.abrirJanelaConteudo('anamnese-view-' + anamneseId, tituloJanela, corpo);
     } else {
-      // Fallback modal glass
       abrirModalAnamneseFallback(tituloJanela, corpo);
+    }
+
+    // Bind botão DEPOIS de inserir no DOM (evita onclick quebrado / id errado)
+    if (pidVinculo) {
+      setTimeout(() => {
+        const btn = document.getElementById('btnAbrirProntVinculo_' + anamneseId);
+        if (btn) {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            abrirProntuarioVinculado(pidVinculo);
+          });
+        }
+      }, 50);
     }
   } catch (err) {
     console.error('Erro ao visualizar anamnese:', err);
     alert('Não foi possível carregar esta anamnese.');
+  }
+}
+
+/**
+ * Abre o prontuário correto pelo ID, validando paciente do atendimento.
+ */
+async function abrirProntuarioVinculado(prontuarioId) {
+  const id = Number(prontuarioId);
+  if (!id) {
+    alert('Prontuário vinculado inválido.');
+    return;
+  }
+
+  const pacienteAtual = document.getElementById('atendimentoPacienteId')?.value;
+
+  try {
+    const response = await fetch(`/api/prontuarios/detalhe/${id}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!response.ok) throw new Error('Prontuário não encontrado');
+
+    const prontuario = await response.json();
+
+    // Segurança: não abrir prontuário de outro paciente
+    if (pacienteAtual && prontuario.paciente_id && String(prontuario.paciente_id) !== String(pacienteAtual)) {
+      alert('Este prontuário não pertence ao paciente do atendimento atual.');
+      return;
+    }
+
+    // Garante aba de prontuário ativa (HTML e script)
+    if (typeof trocarAba === 'function') trocarAba('prontuario');
+    if (typeof window.trocarAba === 'function') window.trocarAba('prontuario');
+
+    if (elementosFicha.diagnosticoCid) {
+      elementosFicha.diagnosticoCid.value = prontuario.diagnostico_cid || '';
+    }
+
+    if (typeof quill !== 'undefined' && quill) {
+      quill.clipboard.dangerouslyPasteHTML(prontuario.texto_evolucao || '');
+    }
+
+    const inputHidden = document.getElementById('idDoProntuarioAtual');
+    if (inputHidden) inputHidden.value = String(id);
+
+    if (typeof aplicarEstadoProntuario === 'function') {
+      aplicarEstadoProntuario(prontuario.status_prontuario);
+    }
+
+    if (elementosFicha.usuario && prontuario.nome_profissional) {
+      elementosFicha.usuario.innerText = prontuario.nome_profissional;
+    }
+    atualizarCrmNoHeader(prontuario.crm_profissional, prontuario.uf_crm_profissional);
+
+    // Scroll suave até o editor
+    const painel = document.getElementById('painel-prontuario');
+    if (painel) painel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (err) {
+    console.error('Erro ao abrir prontuário vinculado:', err);
+    alert('Não foi possível abrir o prontuário #' + id + '.');
   }
 }
 
@@ -531,6 +605,12 @@ async function confirmarAssinatura(event) {
 
     if (response.ok) {
       fecharModalAssinatura();
+      if (data.prontuarioId) {
+        window.ultimoProntuarioId = data.prontuarioId;
+        const inputHidden = document.getElementById('idDoProntuarioAtual');
+        if (inputHidden) inputHidden.value = String(data.prontuarioId);
+        try { localStorage.setItem('ultimoProntuarioId_' + payload.pacienteId, String(data.prontuarioId)); } catch (_) {}
+      }
       alert("✅ Evolução assinada com sucesso!");
       location.reload();
     } else {
@@ -984,6 +1064,7 @@ async function verDetalheReceita(id) {
 window.trocarAba = trocarAba;
 window.visualizarEvolucaoAntiga = visualizarEvolucaoAntiga;
 window.visualizarAnamneseTimeline = visualizarAnamneseTimeline;
+window.abrirProntuarioVinculado = abrirProntuarioVinculado;
 window.carregarTimelineProntuarios = carregarTimelineProntuarios;
 window.salvarEvolucao = salvarEvolucao;
 window.confirmarAssinatura = confirmarAssinatura;

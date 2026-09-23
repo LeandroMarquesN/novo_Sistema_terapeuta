@@ -3015,8 +3015,7 @@
             nutricionista: "Nutricionista",
             dentista: "Dentista",
             terapeuta: "Terapeuta",
-            esteticista: "Esteticista",
-            fonoaudiologo: "Fonoaudiólogo"
+            esteticista: "Esteticista"
           };
           return map[p] || p;
         }
@@ -3285,10 +3284,17 @@
             null;
           const agendamentoId =
             document.getElementById("atendimentoAgendamentoId")?.value || null;
-          const prontuarioId =
+
+          // Resolve prontuário vinculado (prioridade: campo atual → sessão → localStorage)
+          let prontuarioId =
             document.getElementById("idDoProntuarioAtual")?.value ||
-            window.prontuarioAtualId ||
+            window.ultimoProntuarioId ||
             null;
+          if (!prontuarioId && pacienteId) {
+            try {
+              prontuarioId = localStorage.getItem("ultimoProntuarioId_" + pacienteId);
+            } catch (_) {}
+          }
 
           if (!pacienteId) {
             alert("Selecione um paciente no atendimento antes de salvar a anamnese.");
@@ -3318,6 +3324,9 @@
               alert(status === "finalizado" ? "Anamnese finalizada." : "Rascunho salvo.");
               if (typeof carregarHistoricoAnamneses === "function") {
                 carregarHistoricoAnamneses(pacienteId);
+              }
+              if (typeof carregarTimelineProntuarios === "function") {
+                carregarTimelineProntuarios(pacienteId);
               }
             } else {
               const err = await res.json().catch(function () {

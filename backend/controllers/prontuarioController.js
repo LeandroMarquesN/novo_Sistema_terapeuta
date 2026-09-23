@@ -68,7 +68,7 @@ exports.salvarProntuario = async (req, res) => {
   }
 };
 
-// 2. LISTAR HISTÓRICO (prontuários + anamneses unificados na timeline)
+// 2. LISTAR HISTÓRICO (prontuários + anamneses unificados)
 exports.listarHistorico = async (req, res) => {
   const { pacienteId } = req.params;
   const clinicaId = req.usuario.clinica_id;
