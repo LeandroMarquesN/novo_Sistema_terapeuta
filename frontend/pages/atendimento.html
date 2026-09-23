@@ -989,48 +989,242 @@
         gap: 8px;
       }
 
-      /* Cards de modelos de anamnese */
-      .card-modelo-anamnese {
-        cursor: pointer;
-        padding: 14px 16px;
+      /* ─── Modelos de Anamnese — cards premium por profissão ─── */
+      .filtro-prof-wrap {
         display: flex;
-        flex-direction: column;
+        flex-wrap: wrap;
         gap: 8px;
+        margin-bottom: 4px;
+      }
+      .filtro-prof-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 7px 12px;
+        border-radius: 99px;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(255, 255, 255, 0.03);
+        color: rgba(148, 163, 184, 0.7);
         transition: all 0.2s;
       }
+      .filtro-prof-chip:hover {
+        border-color: rgba(52, 211, 153, 0.35);
+        color: #e2e8f0;
+      }
+      .filtro-prof-chip.active {
+        background: rgba(52, 211, 153, 0.12);
+        border-color: rgba(52, 211, 153, 0.4);
+        color: var(--emerald);
+        box-shadow: 0 0 14px rgba(52, 211, 153, 0.12);
+      }
+
+      .card-modelo-anamnese {
+        cursor: pointer;
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+        position: relative;
+        min-height: 168px;
+      }
+      .card-modelo-anamnese::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--cm-accent, var(--blue));
+        opacity: 0.85;
+      }
       .card-modelo-anamnese:hover {
-        border-color: rgba(96, 165, 250, 0.4);
-        box-shadow: 0 0 18px rgba(96, 165, 250, 0.12);
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--cm-accent, #60a5fa) 45%, transparent);
+        box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.55),
+          0 0 24px color-mix(in srgb, var(--cm-accent, #60a5fa) 18%, transparent);
+      }
+      .card-modelo-anamnese .cm-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px 16px 10px;
       }
       .card-modelo-anamnese .cm-icon {
-        width: 40px;
-        height: 40px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--cm-accent, #60a5fa) 14%, transparent);
+        border: 1px solid color-mix(in srgb, var(--cm-accent, #60a5fa) 32%, transparent);
+        color: var(--cm-accent, var(--blue));
+        font-size: 18px;
+        flex-shrink: 0;
+        box-shadow: 0 0 18px color-mix(in srgb, var(--cm-accent, #60a5fa) 12%, transparent);
+      }
+      .card-modelo-anamnese .cm-meta {
+        flex: 1;
+        min-width: 0;
+      }
+      .card-modelo-anamnese .cm-prof {
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--cm-accent, var(--blue));
+        margin-bottom: 4px;
+      }
+      .card-modelo-anamnese .cm-titulo {
+        font-size: 14px;
+        font-weight: 800;
+        color: #f1f5f9;
+        font-family: "Space Grotesk", sans-serif;
+        line-height: 1.25;
+      }
+      .card-modelo-anamnese .cm-body {
+        padding: 0 16px 12px;
+        flex: 1;
+      }
+      .card-modelo-anamnese .cm-desc {
+        font-size: 11px;
+        color: rgba(148, 163, 184, 0.6);
+        line-height: 1.45;
+      }
+      .card-modelo-anamnese .cm-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        margin-top: 10px;
+      }
+      .card-modelo-anamnese .cm-tag {
+        font-size: 9px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: rgba(148, 163, 184, 0.75);
+      }
+      .card-modelo-anamnese .cm-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        background: rgba(0, 0, 0, 0.15);
+      }
+      .card-modelo-anamnese .cm-cta {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--cm-accent, var(--blue));
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .card-modelo-anamnese:hover .cm-cta {
+        gap: 10px;
+      }
+
+      /* Temas por profissão */
+      .cm-tema-medico { --cm-accent: #60a5fa; }
+      .cm-tema-psicologo { --cm-accent: #a78bfa; }
+      .cm-tema-fisioterapeuta { --cm-accent: #34d399; }
+      .cm-tema-nutricionista { --cm-accent: #4ade80; }
+      .cm-tema-dentista { --cm-accent: #22d3ee; }
+      .cm-tema-terapeuta { --cm-accent: #fbbf24; }
+      .cm-tema-esteticista { --cm-accent: #f472b6; }
+      .cm-tema-fonoaudiologo { --cm-accent: #fb923c; }
+      .cm-tema-default { --cm-accent: #94a3b8; }
+
+      /* Formulário anamnese aprimorado */
+      .anamnese-form-wrap .anamnese-hero {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--cm-accent, #60a5fa) 10%, transparent);
+        border: 1px solid color-mix(in srgb, var(--cm-accent, #60a5fa) 28%, transparent);
+      }
+      .anamnese-form-wrap .anamnese-hero-icon {
+        width: 42px;
+        height: 42px;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(96, 165, 250, 0.1);
-        border: 1px solid rgba(96, 165, 250, 0.25);
-        color: var(--blue);
+        background: color-mix(in srgb, var(--cm-accent, #60a5fa) 18%, transparent);
+        color: var(--cm-accent, var(--blue));
         font-size: 16px;
       }
-      .card-modelo-anamnese .cm-titulo {
-        font-size: 13px;
-        font-weight: 800;
-        color: #e2e8f0;
-        font-family: "Space Grotesk", sans-serif;
+      .anamnese-escala-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
       }
-      .card-modelo-anamnese .cm-desc {
+      .anamnese-escala-nums {
+        display: flex;
+        justify-content: space-between;
+        gap: 4px;
+      }
+      .anamnese-escala-btn {
+        flex: 1;
+        min-width: 28px;
+        height: 34px;
+        border-radius: 8px;
         font-size: 11px;
-        color: rgba(148, 163, 184, 0.55);
-        line-height: 1.4;
+        font-weight: 800;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        background: rgba(255, 255, 255, 0.03);
+        color: #94a3b8;
+        cursor: pointer;
+        transition: all 0.15s;
       }
-      .card-modelo-anamnese .cm-prof {
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--blue);
+      .anamnese-escala-btn:hover {
+        border-color: color-mix(in srgb, var(--cm-accent, #60a5fa) 50%, transparent);
+        color: #e2e8f0;
+      }
+      .anamnese-escala-btn.active {
+        background: color-mix(in srgb, var(--cm-accent, #60a5fa) 25%, transparent);
+        border-color: var(--cm-accent, #60a5fa);
+        color: #fff;
+        box-shadow: 0 0 12px color-mix(in srgb, var(--cm-accent, #60a5fa) 25%, transparent);
+      }
+      .anamnese-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        background: rgba(255, 255, 255, 0.02);
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-bottom: 6px;
+      }
+      .anamnese-check:hover {
+        border-color: color-mix(in srgb, var(--cm-accent, #60a5fa) 35%, transparent);
+        background: color-mix(in srgb, var(--cm-accent, #60a5fa) 6%, transparent);
+      }
+      .anamnese-check input {
+        accent-color: var(--cm-accent, #60a5fa);
+        width: 16px;
+        height: 16px;
+      }
+      .anamnese-check span {
+        font-size: 12px;
+        color: #cbd5e1;
+        font-weight: 600;
       }
 
       .anamnese-form-wrap {
@@ -2202,28 +2396,33 @@
               </button>
             </div>
 
-            <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-              <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
-                <div class="flex-1">
-                  <label class="form-label block mb-1.5" for="selectModeloAnamnese">Modelo disponível</label>
-                  <select id="selectModeloAnamnese" class="input-premium w-full px-3 py-2.5 text-sm">
-                    <option value="">Carregando modelos...</option>
-                  </select>
+            <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-5">
+              <div>
+                <p class="form-label mb-2.5">Filtrar por especialidade</p>
+                <div id="filtroProfAnamnese" class="filtro-prof-wrap">
+                  <button type="button" class="filtro-prof-chip active" data-prof="todos" onclick="filtrarModelosAnamnese('todos')">
+                    <i class="fas fa-th-large"></i> Todos
+                  </button>
                 </div>
-                <button type="button" id="btnAbrirModeloAnamnese"
-                        onclick="abrirModeloAnamneseSelecionado()"
-                        class="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 whitespace-nowrap">
-                  <i class="fas fa-external-link-alt"></i>
-                  Abrir modelo
-                </button>
               </div>
 
-              <div id="gridModelosAnamnese" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
-                <!-- cards preenchidos via JS -->
+              <div id="gridModelosAnamnese" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3.5">
+                <div class="col-span-full text-center py-10 text-xs" style="color:rgba(148,163,184,0.4)">
+                  <i class="fas fa-spinner fa-spin text-lg mb-2 block"></i>
+                  Carregando modelos...
+                </div>
               </div>
+
+              <!-- select oculto (compatibilidade / atalho) -->
+              <select id="selectModeloAnamnese" class="hidden" aria-hidden="true">
+                <option value="">—</option>
+              </select>
 
               <div class="glass-card p-4">
-                <p class="form-label mb-2">Histórico de anamneses deste paciente</p>
+                <div class="flex items-center gap-2 mb-3">
+                  <i class="fas fa-history text-xs" style="color:var(--cyan)"></i>
+                  <p class="form-label mb-0">Histórico de anamneses deste paciente</p>
+                </div>
                 <div id="listaAnamnesesPaciente" class="space-y-2 text-xs text-slate-400">
                   <p class="timeline-empty py-4">Nenhuma anamnese registrada ainda.</p>
                 </div>
@@ -3015,9 +3214,156 @@
             nutricionista: "Nutricionista",
             dentista: "Dentista",
             terapeuta: "Terapeuta",
-            esteticista: "Esteticista"
+            esteticista: "Esteticista",
+            fonoaudiologo: "Fonoaudiólogo"
           };
           return map[p] || p;
+        }
+
+        function temaProfissao(p) {
+          const known = [
+            "medico", "psicologo", "fisioterapeuta", "nutricionista",
+            "dentista", "terapeuta", "esteticista", "fonoaudiologo"
+          ];
+          return known.includes(p) ? "cm-tema-" + p : "cm-tema-default";
+        }
+
+        function iconeProfissao(p, fallback) {
+          const map = {
+            medico: "fa-user-md",
+            psicologo: "fa-brain",
+            fisioterapeuta: "fa-walking",
+            nutricionista: "fa-apple-alt",
+            dentista: "fa-tooth",
+            terapeuta: "fa-hands-helping",
+            esteticista: "fa-spa",
+            fonoaudiologo: "fa-comment-medical"
+          };
+          return map[p] || fallback || "fa-clipboard-list";
+        }
+
+        function tagsModelo(m) {
+          const tags = {
+            medico: ["Queixa", "HDA", "Antecedentes", "Hábitos"],
+            psicologo: ["Humor", "Ansiedade", "Sono", "Suporte"],
+            fisioterapeuta: ["EVA", "Postura", "ADM", "Reabilitação"],
+            nutricionista: ["Recordatório", "Alergias", "Objetivos"],
+            dentista: ["Higiene", "Alergias", "Oral"],
+            terapeuta: ["Objetivos", "Estresse", "Rotina"],
+            esteticista: ["Pele", "Procedimentos", "Contraindicações"],
+            fonoaudiologo: ["Fala", "Voz", "Deglutição"]
+          };
+          return tags[m.profissao] || ["Formulário clínico"];
+        }
+
+        let filtroProfAtual = "todos";
+
+        window.filtrarModelosAnamnese = function (prof) {
+          filtroProfAtual = prof || "todos";
+          document.querySelectorAll("#filtroProfAnamnese .filtro-prof-chip").forEach(function (chip) {
+            chip.classList.toggle("active", chip.getAttribute("data-prof") === filtroProfAtual);
+          });
+          renderGridModelos();
+        };
+
+        function renderFiltrosProf() {
+          const wrap = document.getElementById("filtroProfAnamnese");
+          if (!wrap) return;
+          const profs = [];
+          const seen = {};
+          modelosCache.forEach(function (m) {
+            if (!seen[m.profissao]) {
+              seen[m.profissao] = true;
+              profs.push(m.profissao);
+            }
+          });
+          let html =
+            '<button type="button" class="filtro-prof-chip' +
+            (filtroProfAtual === "todos" ? " active" : "") +
+            '" data-prof="todos" onclick="filtrarModelosAnamnese(\'todos\')">' +
+            '<i class="fas fa-th-large"></i> Todos</button>';
+          profs.forEach(function (pr) {
+            const ic = iconeProfissao(pr);
+            html +=
+              '<button type="button" class="filtro-prof-chip' +
+              (filtroProfAtual === pr ? " active" : "") +
+              '" data-prof="' +
+              pr +
+              '" onclick="filtrarModelosAnamnese(\'' +
+              pr +
+              '\')">' +
+              '<i class="fas ' +
+              ic +
+              '"></i> ' +
+              labelProfissao(pr) +
+              "</button>";
+          });
+          wrap.innerHTML = html;
+        }
+
+        function renderGridModelos() {
+          const grid = document.getElementById("gridModelosAnamnese");
+          if (!grid) return;
+          const lista =
+            filtroProfAtual === "todos"
+              ? modelosCache
+              : modelosCache.filter(function (m) {
+                  return m.profissao === filtroProfAtual;
+                });
+
+          if (!lista.length) {
+            grid.innerHTML =
+              '<div class="col-span-full text-center py-10 text-xs" style="color:rgba(148,163,184,0.45)">' +
+              '<i class="fas fa-inbox text-2xl mb-2 block opacity-40"></i>' +
+              "Nenhum modelo nesta especialidade.</div>";
+            return;
+          }
+
+          grid.innerHTML = lista
+            .map(function (m) {
+              const tema = temaProfissao(m.profissao);
+              const icone = m.icone || iconeProfissao(m.profissao);
+              const tags = tagsModelo(m)
+                .map(function (tg) {
+                  return '<span class="cm-tag">' + tg + "</span>";
+                })
+                .join("");
+              return (
+                '<div class="glass-card card-modelo-anamnese ' +
+                tema +
+                '" data-modelo-id="' +
+                m.id +
+                '" data-prof="' +
+                (m.profissao || "") +
+                '" onclick="abrirModeloAnamnesePorId(' +
+                m.id +
+                ')">' +
+                '<div class="cm-top">' +
+                '<div class="cm-icon"><i class="fas ' +
+                icone +
+                '"></i></div>' +
+                '<div class="cm-meta">' +
+                '<div class="cm-prof">' +
+                labelProfissao(m.profissao) +
+                "</div>" +
+                '<div class="cm-titulo">' +
+                (m.nome || "Modelo") +
+                "</div>" +
+                "</div></div>" +
+                '<div class="cm-body">' +
+                '<div class="cm-desc">' +
+                (m.descricao || "Formulário de anamnese especializado") +
+                "</div>" +
+                '<div class="cm-tags">' +
+                tags +
+                "</div></div>" +
+                '<div class="cm-foot">' +
+                '<span class="cm-cta">Abrir formulário <i class="fas fa-arrow-right text-[9px]"></i></span>' +
+                '<i class="fas fa-expand text-[10px] opacity-30"></i>' +
+                "</div></div>"
+              );
+            })
+            .join("");
         }
 
         async function carregarModelos() {
@@ -3059,32 +3405,8 @@
                 .join("");
           }
 
-          if (grid) {
-            grid.innerHTML = modelosCache
-              .map(function (m) {
-                return (
-                  '<div class="glass-card card-modelo-anamnese" data-modelo-id="' +
-                  m.id +
-                  '" onclick="abrirModeloAnamnesePorId(' +
-                  m.id +
-                  ')">' +
-                  '<div class="cm-icon"><i class="fas ' +
-                  (m.icone || "fa-clipboard-list") +
-                  '"></i></div>' +
-                  '<div class="cm-prof">' +
-                  labelProfissao(m.profissao) +
-                  "</div>" +
-                  '<div class="cm-titulo">' +
-                  m.nome +
-                  "</div>" +
-                  '<div class="cm-desc">' +
-                  (m.descricao || "") +
-                  "</div>" +
-                  "</div>"
-                );
-              })
-              .join("");
-          }
+          renderFiltrosProf();
+          renderGridModelos();
         }
 
         async function obterCamposModelo(modeloId) {
@@ -3182,7 +3504,40 @@
             );
           }
 
-          if (campo.tipo === "escala" || campo.tipo === "numero") {
+          if (campo.tipo === "escala") {
+            let btns = "";
+            for (let n = 0; n <= 10; n++) {
+              btns +=
+                '<button type="button" class="anamnese-escala-btn" data-val="' +
+                n +
+                '">' +
+                n +
+                "</button>";
+            }
+            return (
+              '<div class="anamnese-campo anamnese-escala-wrap"><label>' +
+              escapeHtml(campo.rotulo) +
+              req +
+              '</label><input type="hidden" id="' +
+              id +
+              '" name="' +
+              nome +
+              '" value="" data-rotulo="' +
+              escapeAttr(campo.rotulo) +
+              '" />' +
+              '<div class="anamnese-escala-nums">' +
+              btns +
+              "</div>" +
+              (campo.placeholder
+                ? '<p class="text-[10px] mt-1" style="color:rgba(148,163,184,0.45)">' +
+                  escapeHtml(campo.placeholder) +
+                  "</p>"
+                : "") +
+              "</div>"
+            );
+          }
+
+          if (campo.tipo === "numero") {
             return (
               '<div class="anamnese-campo"><label for="' +
               id +
@@ -3231,15 +3586,34 @@
 
         function montarFormulario(modelo, campos) {
           const wrap = document.createElement("div");
-          wrap.className = "anamnese-form-wrap";
+          const tema = temaProfissao(modelo.profissao);
+          wrap.className = "anamnese-form-wrap " + tema;
           wrap.dataset.modeloId = modelo.id;
+          wrap.style.setProperty(
+            "--cm-accent",
+            getComputedStyle(document.documentElement).getPropertyValue("--cm-accent") || ""
+          );
 
-          let html = "";
+          const icone = modelo.icone || iconeProfissao(modelo.profissao);
+          let html =
+            '<div class="anamnese-hero">' +
+            '<div class="anamnese-hero-icon"><i class="fas ' +
+            icone +
+            '"></i></div>' +
+            "<div><div style=\"font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--cm-accent,var(--blue))\">" +
+            escapeHtml(labelProfissao(modelo.profissao)) +
+            '</div><div style="font-size:14px;font-weight:800;color:#f1f5f9;font-family:Space Grotesk,sans-serif">' +
+            escapeHtml(modelo.nome || "Anamnese") +
+            "</div></div></div>";
+
           let secaoAtual = null;
           campos.forEach(function (c, idx) {
             if (c.secao && c.secao !== secaoAtual) {
               secaoAtual = c.secao;
-              html += '<div class="anamnese-secao-titulo">' + escapeHtml(secaoAtual) + "</div>";
+              html +=
+                '<div class="anamnese-secao-titulo"><i class="fas fa-layer-group" style="opacity:0.5;margin-right:6px"></i>' +
+                escapeHtml(secaoAtual) +
+                "</div>";
             }
             html += renderCampo(c, idx);
           });
@@ -3253,6 +3627,20 @@
             "</div>";
 
           wrap.innerHTML = html;
+
+          // Escala 0–10: botões interativos
+          wrap.querySelectorAll(".anamnese-escala-wrap").forEach(function (box) {
+            const hidden = box.querySelector('input[type="hidden"]');
+            box.querySelectorAll(".anamnese-escala-btn").forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                box.querySelectorAll(".anamnese-escala-btn").forEach(function (b) {
+                  b.classList.remove("active");
+                });
+                btn.classList.add("active");
+                if (hidden) hidden.value = btn.getAttribute("data-val");
+              });
+            });
+          });
 
           wrap.querySelector('[data-acao="rascunho"]').addEventListener("click", function () {
             salvarAnamneseForm(wrap, modelo, "rascunho");
@@ -3285,17 +3673,6 @@
           const agendamentoId =
             document.getElementById("atendimentoAgendamentoId")?.value || null;
 
-          // Resolve prontuário vinculado (prioridade: campo atual → sessão → localStorage)
-          let prontuarioId =
-            document.getElementById("idDoProntuarioAtual")?.value ||
-            window.ultimoProntuarioId ||
-            null;
-          if (!prontuarioId && pacienteId) {
-            try {
-              prontuarioId = localStorage.getItem("ultimoProntuarioId_" + pacienteId);
-            } catch (_) {}
-          }
-
           if (!pacienteId) {
             alert("Selecione um paciente no atendimento antes de salvar a anamnese.");
             return;
@@ -3305,7 +3682,6 @@
           const payload = {
             paciente_id: Number(pacienteId),
             agendamento_id: agendamentoId ? Number(agendamentoId) : null,
-            prontuario_id: prontuarioId ? Number(prontuarioId) : null,
             modelo_id: modelo.id,
             respostas: respostas,
             status_anamnese: status
@@ -3324,9 +3700,6 @@
               alert(status === "finalizado" ? "Anamnese finalizada." : "Rascunho salvo.");
               if (typeof carregarHistoricoAnamneses === "function") {
                 carregarHistoricoAnamneses(pacienteId);
-              }
-              if (typeof carregarTimelineProntuarios === "function") {
-                carregarTimelineProntuarios(pacienteId);
               }
             } else {
               const err = await res.json().catch(function () {
