@@ -750,7 +750,7 @@
         outline-offset: 2px;
       }
 
-      /* ─── Maximizar painel (somente desktop ≥1024px) ─── */
+      /* ─── Janelas flutuantes multi-painel (desktop ≥1024px) ─── */
       .btn-maximizar-painel {
         display: none;
         width: 36px;
@@ -772,85 +772,90 @@
         background: rgba(34, 211, 238, 0.1);
         box-shadow: 0 0 12px rgba(34, 211, 238, 0.15);
       }
+      .btn-maximizar-painel.is-open {
+        color: var(--emerald);
+        border-color: rgba(52, 211, 153, 0.4);
+        background: rgba(52, 211, 153, 0.12);
+      }
       @media (min-width: 1024px) {
-        .btn-maximizar-painel {
-          display: inline-flex;
-        }
+        .btn-maximizar-painel { display: inline-flex; }
       }
 
-      #modalMaximizarPainel {
+      #janelasFlutuantesRoot {
         position: fixed;
         inset: 0;
         z-index: 160;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 24px;
-        /* Fundo transparente sem blur — outras colunas permanecem legíveis */
-        background: transparent;
         pointer-events: none;
       }
-      #modalMaximizarPainel.visivel {
-        display: flex;
-      }
-      #modalMaximizarShell {
-        position: relative;
-        width: min(1100px, 92vw);
-        height: min(860px, 88vh);
-        min-width: 640px;
-        min-height: 420px;
-        max-width: 98vw;
-        max-height: 96vh;
+
+      .janela-flutuante {
+        position: fixed;
         display: flex;
         flex-direction: column;
         background: rgba(4, 16, 24, 0.98);
         border: 1px solid rgba(34, 211, 238, 0.28);
-        border-radius: 22px;
-        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.55),
-          0 0 40px rgba(34, 211, 238, 0.08);
+        border-radius: 18px;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5),
+          0 0 28px rgba(34, 211, 238, 0.08);
         overflow: hidden;
-        resize: both;
         pointer-events: auto;
+        min-width: 420px;
+        min-height: 320px;
+        z-index: 161;
       }
-      #modalMaximizarShell.fullscreen {
+      .janela-flutuante.em-foco {
+        z-index: 170;
+        border-color: rgba(52, 211, 153, 0.45);
+        box-shadow: 0 28px 72px rgba(0, 0, 0, 0.55),
+          0 0 32px rgba(52, 211, 153, 0.12);
+      }
+      .janela-flutuante.fullscreen {
+        left: 1vw !important;
+        top: 1vh !important;
         width: 98vw !important;
-        height: 96vh !important;
-        max-width: 98vw;
-        max-height: 96vh;
-        border-radius: 16px;
-        resize: none;
+        height: 98vh !important;
+        border-radius: 14px;
+        z-index: 175;
       }
-      .modal-max-header {
+
+      .janela-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 12px;
-        padding: 12px 16px;
+        gap: 10px;
+        padding: 10px 12px;
         background: rgba(255, 255, 255, 0.03);
         border-bottom: 1px solid var(--border);
         cursor: move;
         user-select: none;
         flex-shrink: 0;
       }
-      .modal-max-titulo {
+      .janela-titulo {
         font-family: "Space Grotesk", sans-serif;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 800;
         color: #e2e8f0;
         display: flex;
         align-items: center;
         gap: 8px;
+        min-width: 0;
       }
-      .modal-max-titulo i { color: var(--cyan); }
-      .modal-max-acoes {
+      .janela-titulo i { color: var(--cyan); flex-shrink: 0; }
+      .janela-titulo span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .janela-acoes {
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
+        flex-shrink: 0;
       }
-      .modal-max-btn {
-        width: 34px;
-        height: 34px;
-        border-radius: 10px;
+      .janela-btn {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -859,26 +864,27 @@
         color: rgba(148, 163, 184, 0.75);
         cursor: pointer;
         transition: all 0.2s;
-        font-size: 12px;
+        font-size: 11px;
       }
-      .modal-max-btn:hover {
+      .janela-btn:hover {
         color: var(--emerald);
         border-color: rgba(52, 211, 153, 0.35);
       }
-      .modal-max-btn.btn-fechar-max:hover {
+      .janela-btn.btn-fechar:hover {
         color: var(--red);
         border-color: rgba(248, 113, 113, 0.35);
         background: rgba(248, 113, 113, 0.1);
       }
-      #modalMaximizarBody {
+
+      .janela-body {
         flex: 1;
         min-height: 0;
         overflow: auto;
         display: flex;
         flex-direction: column;
       }
-      #modalMaximizarBody > .aba-painel,
-      #modalMaximizarBody > section {
+      .janela-body > .aba-painel,
+      .janela-body > section {
         flex: 1;
         min-height: 100%;
         height: 100%;
@@ -886,23 +892,86 @@
         border: none !important;
         box-shadow: none !important;
       }
-      #modalMaximizarBody .btn-maximizar-painel {
+      .janela-body .btn-maximizar-painel {
         display: none !important;
       }
-      .painel-placeholder {
-        display: none !important;
-      }
-      .resize-hint {
+
+      /* Handles de redimensionamento nos 4 cantos + 4 lados */
+      .janela-rh {
         position: absolute;
-        right: 8px;
-        bottom: 6px;
-        font-size: 10px;
-        color: rgba(148, 163, 184, 0.35);
-        pointer-events: none;
-        font-weight: 600;
+        z-index: 5;
+        background: transparent;
       }
-      #modalMaximizarShell.fullscreen .resize-hint {
+      .janela-rh-n  { top: 0; left: 12px; right: 12px; height: 6px; cursor: n-resize; }
+      .janela-rh-s  { bottom: 0; left: 12px; right: 12px; height: 6px; cursor: s-resize; }
+      .janela-rh-e  { right: 0; top: 12px; bottom: 12px; width: 6px; cursor: e-resize; }
+      .janela-rh-w  { left: 0; top: 12px; bottom: 12px; width: 6px; cursor: w-resize; }
+      .janela-rh-ne { top: 0; right: 0; width: 14px; height: 14px; cursor: ne-resize; }
+      .janela-rh-nw { top: 0; left: 0; width: 14px; height: 14px; cursor: nw-resize; }
+      .janela-rh-se { bottom: 0; right: 0; width: 14px; height: 14px; cursor: se-resize; }
+      .janela-rh-sw { bottom: 0; left: 0; width: 14px; height: 14px; cursor: sw-resize; }
+      .janela-flutuante.fullscreen .janela-rh { display: none; }
+
+      /* Barra "Fechar todas" */
+      #barraJanelasFlutuantes {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 180;
         display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: rgba(4, 16, 24, 0.92);
+        border: 1px solid rgba(52, 211, 153, 0.25);
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        pointer-events: auto;
+      }
+      #barraJanelasFlutuantes.visivel {
+        display: flex;
+      }
+      #barraJanelasFlutuantes .bjf-count {
+        font-size: 11px;
+        font-weight: 700;
+        color: rgba(148, 163, 184, 0.7);
+        font-family: "Space Grotesk", sans-serif;
+      }
+      #barraJanelasFlutuantes .bjf-count strong {
+        color: var(--emerald);
+      }
+      #btnFecharTodasJanelas {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(248, 113, 113, 0.3);
+        background: rgba(248, 113, 113, 0.12);
+        color: var(--red);
+        font-size: 11px;
+        font-weight: 800;
+        font-family: "Space Grotesk", sans-serif;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      #btnFecharTodasJanelas:hover {
+        background: rgba(248, 113, 113, 0.22);
+        box-shadow: 0 0 14px rgba(248, 113, 113, 0.2);
+      }
+
+      .painel-placeholder-flutuante {
+        min-height: 160px;
+        flex: 1;
+        border: 1px dashed rgba(52, 211, 153, 0.18);
+        border-radius: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(148, 163, 184, 0.35);
+        font-size: 12px;
+        font-weight: 700;
+        gap: 8px;
       }
 
       /* Responsividade das abas */
@@ -1431,7 +1500,7 @@
                       >-</span
                     >
                   </div>
-                  <button type="button" class="btn-maximizar-painel" title="Maximizar prontuário"
+                  <button type="button" class="btn-maximizar-painel" data-painel="painel-prontuario" title="Abrir em janela flutuante"
                           onclick="maximizarPainel('painel-prontuario', 'Prontuário')"
                           aria-label="Maximizar prontuário">
                     <i class="fas fa-expand"></i>
@@ -1552,7 +1621,7 @@
                   <i class="fas fa-user-md"></i>
                   <span id="receitaCrmInfo">CRM —</span>
                 </div>
-                <button type="button" class="btn-maximizar-painel" title="Maximizar receituário"
+                <button type="button" class="btn-maximizar-painel" data-painel="painel-receituario" title="Abrir em janela flutuante"
                         onclick="maximizarPainel('painel-receituario', 'Receituário')"
                         aria-label="Maximizar receituário">
                   <i class="fas fa-expand"></i>
@@ -1731,7 +1800,7 @@
                   <i class="fas fa-user-md"></i>
                   <span id="atestadoCrmInfo">CRM —</span>
                 </div>
-                <button type="button" class="btn-maximizar-painel" title="Maximizar atestado"
+                <button type="button" class="btn-maximizar-painel" data-painel="painel-atestado" title="Abrir em janela flutuante"
                         onclick="maximizarPainel('painel-atestado', 'Atestados')"
                         aria-label="Maximizar atestado">
                   <i class="fas fa-expand"></i>
@@ -1874,7 +1943,7 @@
                   <i class="fas fa-user-md"></i>
                   <span id="exameCrmInfo">CRM —</span>
                 </div>
-                <button type="button" class="btn-maximizar-painel" title="Maximizar exames"
+                <button type="button" class="btn-maximizar-painel" data-painel="painel-exames" title="Abrir em janela flutuante"
                         onclick="maximizarPainel('painel-exames', 'Exames')"
                         aria-label="Maximizar exames">
                   <i class="fas fa-expand"></i>
@@ -2083,26 +2152,13 @@
       </div>
     </div>
 
-    <!-- MODAL flutuante: maximizar seção (sem blur no fundo) -->
-    <div id="modalMaximizarPainel" role="dialog" aria-modal="true" aria-labelledby="modalMaxTitulo">
-      <div id="modalMaximizarShell">
-        <div class="modal-max-header" id="modalMaxDragHandle">
-          <div class="modal-max-titulo">
-            <i class="fas fa-expand-arrows-alt"></i>
-            <span id="modalMaxTitulo">Seção ampliada</span>
-          </div>
-          <div class="modal-max-acoes">
-            <button type="button" class="modal-max-btn" id="btnToggleFullscreenMax" title="Tela cheia / Restaurar tamanho" aria-label="Alternar tela cheia">
-              <i class="fas fa-compress" id="iconFullscreenMax"></i>
-            </button>
-            <button type="button" class="modal-max-btn btn-fechar-max" title="Fechar e voltar" onclick="restaurarPainelMaximizado()" aria-label="Fechar">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-        <div id="modalMaximizarBody"></div>
-        <span class="resize-hint"><i class="fas fa-grip-lines"></i> arraste o canto para redimensionar</span>
-      </div>
+    <!-- Root das janelas flutuantes + barra fechar todas -->
+    <div id="janelasFlutuantesRoot" aria-live="polite"></div>
+    <div id="barraJanelasFlutuantes">
+      <span class="bjf-count"><strong id="bjfContador">0</strong> janela(s) aberta(s)</span>
+      <button type="button" id="btnFecharTodasJanelas" onclick="fecharTodasJanelasFlutuantes()">
+        <i class="fas fa-times-circle"></i> Fechar todas
+      </button>
     </div>
 
     <script>
@@ -2302,146 +2358,288 @@
         });
       })();
 
-      // ─── Maximizar painéis (desktop ≥1024px; fundo sem blur) ───
+      // ─── Janelas flutuantes multi-painel (várias abertas ao mesmo tempo) ───
       (function () {
         const LIMITE_DESKTOP = 1024;
-        let painelOriginalParent = null;
-        let painelOriginalNext = null;
-        let painelAtualId = null;
+        const MIN_W = 420;
+        const MIN_H = 320;
+        const OFFSET_STEP = 28;
+        let zCounter = 161;
+        let openCountOffset = 0;
 
-        const modal = document.getElementById("modalMaximizarPainel");
-        const shell = document.getElementById("modalMaximizarShell");
-        const body = document.getElementById("modalMaximizarBody");
-        const tituloEl = document.getElementById("modalMaxTitulo");
-        const btnFs = document.getElementById("btnToggleFullscreenMax");
-        const iconFs = document.getElementById("iconFullscreenMax");
+        /** @type {Map<string, {shell: HTMLElement, placeholder: HTMLElement, parent: Node, next: Node|null}>} */
+        const janelas = new Map();
 
-        if (!modal || !shell || !body) return;
+        const root = document.getElementById("janelasFlutuantesRoot");
+        const barra = document.getElementById("barraJanelasFlutuantes");
+        const contador = document.getElementById("bjfContador");
 
-        window.maximizarPainel = function (painelId, titulo) {
-          if (window.innerWidth < LIMITE_DESKTOP) return;
-          if (painelAtualId) window.restaurarPainelMaximizado();
+        if (!root) return;
 
-          const painel = document.getElementById(painelId);
-          if (!painel) return;
+        function atualizarBarra() {
+          const n = janelas.size;
+          if (contador) contador.textContent = String(n);
+          if (barra) barra.classList.toggle("visivel", n > 0);
+        }
 
-          painelOriginalParent = painel.parentNode;
-          painelOriginalNext = painel.nextSibling;
-          painelAtualId = painelId;
-
-          const placeholder = document.createElement("div");
-          placeholder.id = "painel-placeholder-max";
-          placeholder.className = "painel-placeholder";
-          placeholder.style.cssText =
-            "min-height:200px;flex:1;border:1px dashed rgba(52,211,153,0.15);border-radius:28px;display:flex;align-items:center;justify-content:center;color:rgba(148,163,184,0.35);font-size:12px;font-weight:700;";
-          placeholder.innerHTML =
-            '<span><i class="fas fa-expand-arrows-alt"></i> Seção aberta em modo ampliado</span>';
-          painelOriginalParent.insertBefore(placeholder, painel);
-
-          body.appendChild(painel);
-          painel.classList.add("ativa");
-          painel.style.display = "flex";
-
-          if (tituloEl) tituloEl.textContent = titulo || "Seção ampliada";
-          shell.classList.remove("fullscreen");
-          shell.style.width = "";
-          shell.style.height = "";
-          shell.style.left = "";
-          shell.style.top = "";
-          shell.style.position = "";
-          shell.style.margin = "";
-          if (iconFs) iconFs.className = "fas fa-expand";
-
-          modal.classList.add("visivel");
-
-          try {
-            if (typeof quill !== "undefined" && painelId === "painel-prontuario") {
-              setTimeout(function () {
-                quill.root.style.minHeight = "280px";
-              }, 50);
-            }
-          } catch (_) {}
-        };
-
-        window.restaurarPainelMaximizado = function () {
-          if (!painelAtualId) return;
-          const painel = document.getElementById(painelAtualId);
-          const placeholder = document.getElementById("painel-placeholder-max");
-
-          if (painel && painelOriginalParent) {
-            if (placeholder && placeholder.parentNode === painelOriginalParent) {
-              painelOriginalParent.insertBefore(painel, placeholder);
-              placeholder.remove();
-            } else if (painelOriginalNext && painelOriginalNext.parentNode === painelOriginalParent) {
-              painelOriginalParent.insertBefore(painel, painelOriginalNext);
-            } else {
-              painelOriginalParent.appendChild(painel);
-            }
-          } else if (placeholder) {
-            placeholder.remove();
-          }
-
-          modal.classList.remove("visivel");
-          shell.classList.remove("fullscreen");
-          painelAtualId = null;
-          painelOriginalParent = null;
-          painelOriginalNext = null;
-        };
-
-        if (btnFs) {
-          btnFs.addEventListener("click", function () {
-            const full = shell.classList.toggle("fullscreen");
-            if (iconFs) iconFs.className = full ? "fas fa-compress" : "fas fa-expand";
-            if (!full) {
-              shell.style.width = "";
-              shell.style.height = "";
-            }
+        function marcarBotao(painelId, aberto) {
+          document.querySelectorAll('.btn-maximizar-painel[data-painel="' + painelId + '"]').forEach(function (btn) {
+            btn.classList.toggle("is-open", aberto);
+            const icon = btn.querySelector("i");
+            if (icon) icon.className = aberto ? "fas fa-window-restore" : "fas fa-expand";
           });
         }
 
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape" && modal.classList.contains("visivel")) {
-            window.restaurarPainelMaximizado();
-          }
-        });
+        function trazerParaFrente(shell) {
+          zCounter += 1;
+          shell.style.zIndex = String(zCounter);
+          document.querySelectorAll(".janela-flutuante").forEach(function (j) {
+            j.classList.toggle("em-foco", j === shell);
+          });
+        }
 
-        // Arrastar pelo header
-        (function enableDrag() {
-          const handle = document.getElementById("modalMaxDragHandle");
-          if (!handle) return;
+        function posicaoInicial() {
+          const idx = openCountOffset % 6;
+          openCountOffset += 1;
+          const baseLeft = Math.max(40, (window.innerWidth - 900) / 2);
+          const baseTop = Math.max(40, (window.innerHeight - 700) / 2);
+          return {
+            left: baseLeft + idx * OFFSET_STEP,
+            top: baseTop + idx * OFFSET_STEP,
+            width: Math.min(900, window.innerWidth - 80),
+            height: Math.min(700, window.innerHeight - 80)
+          };
+        }
+
+        function criarShell(painelId, titulo) {
+          const shell = document.createElement("div");
+          shell.className = "janela-flutuante";
+          shell.dataset.painelId = painelId;
+
+          const pos = posicaoInicial();
+          shell.style.left = pos.left + "px";
+          shell.style.top = pos.top + "px";
+          shell.style.width = pos.width + "px";
+          shell.style.height = pos.height + "px";
+
+          shell.innerHTML =
+            '<div class="janela-header">' +
+              '<div class="janela-titulo"><i class="fas fa-window-maximize"></i><span></span></div>' +
+              '<div class="janela-acoes">' +
+                '<button type="button" class="janela-btn btn-fs" title="Tela cheia"><i class="fas fa-expand"></i></button>' +
+                '<button type="button" class="janela-btn btn-fechar" title="Fechar"><i class="fas fa-times"></i></button>' +
+              "</div>" +
+            "</div>" +
+            '<div class="janela-body"></div>' +
+            '<div class="janela-rh janela-rh-n" data-dir="n"></div>' +
+            '<div class="janela-rh janela-rh-s" data-dir="s"></div>' +
+            '<div class="janela-rh janela-rh-e" data-dir="e"></div>' +
+            '<div class="janela-rh janela-rh-w" data-dir="w"></div>' +
+            '<div class="janela-rh janela-rh-ne" data-dir="ne"></div>' +
+            '<div class="janela-rh janela-rh-nw" data-dir="nw"></div>' +
+            '<div class="janela-rh janela-rh-se" data-dir="se"></div>' +
+            '<div class="janela-rh janela-rh-sw" data-dir="sw"></div>';
+
+          shell.querySelector(".janela-titulo span").textContent = titulo || "Seção";
+
+          // Fechar
+          shell.querySelector(".btn-fechar").addEventListener("click", function () {
+            fecharJanela(painelId);
+          });
+
+          // Fullscreen
+          shell.querySelector(".btn-fs").addEventListener("click", function () {
+            const full = shell.classList.toggle("fullscreen");
+            const icon = this.querySelector("i");
+            if (icon) icon.className = full ? "fas fa-compress" : "fas fa-expand";
+          });
+
+          // Foco ao clicar
+          shell.addEventListener("mousedown", function () {
+            trazerParaFrente(shell);
+          });
+
+          // Drag
+          enableDrag(shell, shell.querySelector(".janela-header"));
+
+          // Resize 4 corners + 4 sides
+          shell.querySelectorAll(".janela-rh").forEach(function (handle) {
+            enableResize(shell, handle, handle.dataset.dir);
+          });
+
+          return shell;
+        }
+
+        function enableDrag(shell, handle) {
           let dragging = false;
-          let startX = 0, startY = 0, origLeft = 0, origTop = 0;
+          let sx = 0, sy = 0, ol = 0, ot = 0;
 
           handle.addEventListener("mousedown", function (e) {
             if (e.target.closest("button")) return;
             if (shell.classList.contains("fullscreen")) return;
             dragging = true;
+            trazerParaFrente(shell);
             const rect = shell.getBoundingClientRect();
-            shell.style.position = "fixed";
-            shell.style.left = rect.left + "px";
-            shell.style.top = rect.top + "px";
-            shell.style.margin = "0";
-            startX = e.clientX;
-            startY = e.clientY;
-            origLeft = rect.left;
-            origTop = rect.top;
+            sx = e.clientX;
+            sy = e.clientY;
+            ol = rect.left;
+            ot = rect.top;
             e.preventDefault();
           });
 
           document.addEventListener("mousemove", function (e) {
             if (!dragging) return;
-            shell.style.left = origLeft + (e.clientX - startX) + "px";
-            shell.style.top = origTop + (e.clientY - startY) + "px";
+            shell.style.left = ol + (e.clientX - sx) + "px";
+            shell.style.top = ot + (e.clientY - sy) + "px";
           });
 
           document.addEventListener("mouseup", function () {
             dragging = false;
           });
-        })();
+        }
+
+        function enableResize(shell, handle, dir) {
+          let resizing = false;
+          let sx = 0, sy = 0, ol = 0, ot = 0, ow = 0, oh = 0;
+
+          handle.addEventListener("mousedown", function (e) {
+            if (shell.classList.contains("fullscreen")) return;
+            resizing = true;
+            trazerParaFrente(shell);
+            const rect = shell.getBoundingClientRect();
+            sx = e.clientX;
+            sy = e.clientY;
+            ol = rect.left;
+            ot = rect.top;
+            ow = rect.width;
+            oh = rect.height;
+            e.preventDefault();
+            e.stopPropagation();
+          });
+
+          document.addEventListener("mousemove", function (e) {
+            if (!resizing) return;
+            const dx = e.clientX - sx;
+            const dy = e.clientY - sy;
+            let left = ol, top = ot, width = ow, height = oh;
+
+            if (dir.indexOf("e") !== -1) width = Math.max(MIN_W, ow + dx);
+            if (dir.indexOf("s") !== -1) height = Math.max(MIN_H, oh + dy);
+            if (dir.indexOf("w") !== -1) {
+              width = Math.max(MIN_W, ow - dx);
+              left = ol + (ow - width);
+            }
+            if (dir.indexOf("n") !== -1) {
+              height = Math.max(MIN_H, oh - dy);
+              top = ot + (oh - height);
+            }
+
+            shell.style.left = left + "px";
+            shell.style.top = top + "px";
+            shell.style.width = width + "px";
+            shell.style.height = height + "px";
+          });
+
+          document.addEventListener("mouseup", function () {
+            resizing = false;
+          });
+        }
+
+        function fecharJanela(painelId) {
+          const info = janelas.get(painelId);
+          if (!info) return;
+
+          const painel = document.getElementById(painelId);
+          if (painel && info.parent) {
+            if (info.placeholder && info.placeholder.parentNode === info.parent) {
+              info.parent.insertBefore(painel, info.placeholder);
+              info.placeholder.remove();
+            } else if (info.next && info.next.parentNode === info.parent) {
+              info.parent.insertBefore(painel, info.next);
+            } else {
+              info.parent.appendChild(painel);
+            }
+          } else if (info.placeholder) {
+            info.placeholder.remove();
+          }
+
+          if (info.shell && info.shell.parentNode) {
+            info.shell.parentNode.removeChild(info.shell);
+          }
+
+          janelas.delete(painelId);
+          marcarBotao(painelId, false);
+          atualizarBarra();
+        }
+
+        window.fecharTodasJanelasFlutuantes = function () {
+          Array.from(janelas.keys()).forEach(fecharJanela);
+          openCountOffset = 0;
+        };
+
+        window.maximizarPainel = function (painelId, titulo) {
+          if (window.innerWidth < LIMITE_DESKTOP) return;
+
+          // Já aberta → traz para frente
+          if (janelas.has(painelId)) {
+            const info = janelas.get(painelId);
+            trazerParaFrente(info.shell);
+            return;
+          }
+
+          const painel = document.getElementById(painelId);
+          if (!painel) return;
+
+          const parent = painel.parentNode;
+          const next = painel.nextSibling;
+
+          const placeholder = document.createElement("div");
+          placeholder.className = "painel-placeholder-flutuante";
+          placeholder.innerHTML =
+            '<i class="fas fa-window-maximize"></i> <span>' +
+            (titulo || "Seção") +
+            " em janela flutuante</span>";
+          parent.insertBefore(placeholder, painel);
+
+          const shell = criarShell(painelId, titulo);
+          const body = shell.querySelector(".janela-body");
+          body.appendChild(painel);
+          painel.classList.add("ativa");
+          painel.style.display = "flex";
+
+          root.appendChild(shell);
+          janelas.set(painelId, { shell: shell, placeholder: placeholder, parent: parent, next: next });
+          marcarBotao(painelId, true);
+          trazerParaFrente(shell);
+          atualizarBarra();
+
+          try {
+            if (typeof quill !== "undefined" && painelId === "painel-prontuario") {
+              setTimeout(function () {
+                quill.root.style.minHeight = "240px";
+              }, 50);
+            }
+          } catch (_) {}
+        };
+
+        // Escape fecha a janela em foco
+        document.addEventListener("keydown", function (e) {
+          if (e.key !== "Escape" || janelas.size === 0) return;
+          let topShell = null;
+          let topZ = 0;
+          janelas.forEach(function (info) {
+            const z = parseInt(info.shell.style.zIndex || "0", 10);
+            if (z >= topZ) {
+              topZ = z;
+              topShell = info.shell;
+            }
+          });
+          if (topShell) fecharJanela(topShell.dataset.painelId);
+        });
 
         window.addEventListener("resize", function () {
-          if (window.innerWidth < LIMITE_DESKTOP && painelAtualId) {
-            window.restaurarPainelMaximizado();
+          if (window.innerWidth < LIMITE_DESKTOP && janelas.size > 0) {
+            window.fecharTodasJanelasFlutuantes();
           }
         });
       })();
