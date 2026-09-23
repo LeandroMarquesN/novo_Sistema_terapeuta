@@ -786,9 +786,9 @@
         align-items: center;
         justify-content: center;
         padding: 24px;
-        background: rgba(2, 12, 18, 0.55);
-        backdrop-filter: blur(6px);
-        -webkit-backdrop-filter: blur(6px);
+        /* Fundo transparente sem blur — outras colunas permanecem legíveis */
+        background: transparent;
+        pointer-events: none;
       }
       #modalMaximizarPainel.visivel {
         display: flex;
@@ -810,6 +810,7 @@
           0 0 40px rgba(34, 211, 238, 0.08);
         overflow: hidden;
         resize: both;
+        pointer-events: auto;
       }
       #modalMaximizarShell.fullscreen {
         width: 98vw !important;
@@ -840,9 +841,7 @@
         align-items: center;
         gap: 8px;
       }
-      .modal-max-titulo i {
-        color: var(--cyan);
-      }
+      .modal-max-titulo i { color: var(--cyan); }
       .modal-max-acoes {
         display: flex;
         align-items: center;
@@ -2084,7 +2083,7 @@
       </div>
     </div>
 
-    <!-- MODAL flutuante: maximizar seção (prontuário / receita / atestado / exames) -->
+    <!-- MODAL flutuante: maximizar seção (sem blur no fundo) -->
     <div id="modalMaximizarPainel" role="dialog" aria-modal="true" aria-labelledby="modalMaxTitulo">
       <div id="modalMaximizarShell">
         <div class="modal-max-header" id="modalMaxDragHandle">
@@ -2303,7 +2302,7 @@
         });
       })();
 
-      // ─── Maximizar painéis (somente desktop ≥1024px) ───
+      // ─── Maximizar painéis (desktop ≥1024px; fundo sem blur) ───
       (function () {
         const LIMITE_DESKTOP = 1024;
         let painelOriginalParent = null;
@@ -2321,9 +2320,7 @@
 
         window.maximizarPainel = function (painelId, titulo) {
           if (window.innerWidth < LIMITE_DESKTOP) return;
-          if (painelAtualId) {
-            window.restaurarPainelMaximizado();
-          }
+          if (painelAtualId) window.restaurarPainelMaximizado();
 
           const painel = document.getElementById(painelId);
           if (!painel) return;
@@ -2332,7 +2329,6 @@
           painelOriginalNext = painel.nextSibling;
           painelAtualId = painelId;
 
-          // Mantém o espaço no layout para não quebrar a coluna
           const placeholder = document.createElement("div");
           placeholder.id = "painel-placeholder-max";
           placeholder.className = "painel-placeholder";
@@ -2350,12 +2346,14 @@
           shell.classList.remove("fullscreen");
           shell.style.width = "";
           shell.style.height = "";
+          shell.style.left = "";
+          shell.style.top = "";
+          shell.style.position = "";
+          shell.style.margin = "";
           if (iconFs) iconFs.className = "fas fa-expand";
 
           modal.classList.add("visivel");
-          document.body.style.overflow = "hidden";
 
-          // Quill precisa recalcular altura ao mudar de container
           try {
             if (typeof quill !== "undefined" && painelId === "painel-prontuario") {
               setTimeout(function () {
@@ -2384,7 +2382,6 @@
           }
 
           modal.classList.remove("visivel");
-          document.body.style.overflow = "";
           shell.classList.remove("fullscreen");
           painelAtualId = null;
           painelOriginalParent = null;
@@ -2394,9 +2391,7 @@
         if (btnFs) {
           btnFs.addEventListener("click", function () {
             const full = shell.classList.toggle("fullscreen");
-            if (iconFs) {
-              iconFs.className = full ? "fas fa-compress" : "fas fa-expand";
-            }
+            if (iconFs) iconFs.className = full ? "fas fa-compress" : "fas fa-expand";
             if (!full) {
               shell.style.width = "";
               shell.style.height = "";
@@ -2404,19 +2399,13 @@
           });
         }
 
-        // Fecha com Escape
         document.addEventListener("keydown", function (e) {
           if (e.key === "Escape" && modal.classList.contains("visivel")) {
             window.restaurarPainelMaximizado();
           }
         });
 
-        // Clique no backdrop fecha
-        modal.addEventListener("click", function (e) {
-          if (e.target === modal) window.restaurarPainelMaximizado();
-        });
-
-        // Arrastar o shell pelo header
+        // Arrastar pelo header
         (function enableDrag() {
           const handle = document.getElementById("modalMaxDragHandle");
           if (!handle) return;
@@ -2450,7 +2439,6 @@
           });
         })();
 
-        // Se a janela encolher para < 1024, restaura automaticamente
         window.addEventListener("resize", function () {
           if (window.innerWidth < LIMITE_DESKTOP && painelAtualId) {
             window.restaurarPainelMaximizado();
