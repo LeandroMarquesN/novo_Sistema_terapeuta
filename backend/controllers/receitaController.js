@@ -5,6 +5,7 @@
 const db = require('../config/db');
 const auditService = require('../services/auditService');
 const notificationService = require('../services/notificationService');
+const crypto = require('crypto');
 
 // =========================================================
 // 1. SALVAR / EMITIR RECEITA (com itens)
@@ -250,9 +251,9 @@ exports.enviarReceitaEmail = async (req, res) => {
     try {
         const [rows] = await db.query(
             `SELECT r.*, 
+                p.id AS paciente_id_ref,
                 p.nome AS nome_paciente, 
-                p.email AS email_paciente, 
-                p.token_acesso
+                p.email AS email_paciente
          FROM receitas r
          JOIN pacientes p ON r.paciente_id = p.id
          WHERE r.id = ? AND r.clinica_id = ? AND r.status_receita = 'emitido'`,
@@ -274,7 +275,14 @@ exports.enviarReceitaEmail = async (req, res) => {
             [receitaId]
         );
 
-        // Auditoria
+        // 🔑 gera token novo + 24h
+        const novoToken = crypto.randomBytes(32).toString('hex');
+        const novaExpiracao = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await db.query(
+            'UPDATE pacientes SET token_acesso = ?, token_expiracao = ? WHERE id = ? AND clinica_id = ?',
+            [novoToken, novaExpiracao, receita.paciente_id_ref, clinicaId]
+        );
+
         await auditService.registrarLog(usuarioId, 'receita', receitaId, 'ENVIOU_EMAIL', {
             crm: receita.profissional_crm,
             uf_crm: receita.profissional_uf_crm
@@ -283,7 +291,7 @@ exports.enviarReceitaEmail = async (req, res) => {
         await notificationService.sendReceitaEmailNotification({
             nome_paciente: receita.nome_paciente,
             email_paciente: receita.email_paciente,
-            token_acesso: receita.token_acesso,
+            token_acesso: novoToken, // ✅
             nome_profissional: receita.profissional_nome,
             profissional_crm: receita.profissional_crm,
             profissional_uf_crm: receita.profissional_uf_crm,

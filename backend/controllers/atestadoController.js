@@ -5,6 +5,7 @@
 const db = require('../config/db');
 const auditService = require('../services/auditService');
 const notificationService = require('../services/notificationService');
+const crypto = require('crypto');
 
 // =========================================================
 // 1. SALVAR / EMITIR ATESTADO
@@ -255,6 +256,8 @@ exports.cancelarAtestado = async (req, res) => {
 // =========================================================
 // 5. ENVIAR ATESTADO POR E-MAIL
 // =========================================================
+
+
 exports.enviarAtestadoEmail = async (req, res) => {
     const { atestadoId } = req.body;
     const clinicaId = req.usuario.clinica_id;
@@ -263,9 +266,9 @@ exports.enviarAtestadoEmail = async (req, res) => {
     try {
         const [rows] = await db.query(
             `SELECT a.*, 
+              p.id AS paciente_id_ref,
               p.nome AS nome_paciente, 
-              p.email AS email_paciente, 
-              p.token_acesso
+              p.email AS email_paciente
        FROM atestados a
        JOIN pacientes p ON a.paciente_id = p.id
        WHERE a.id = ? AND a.clinica_id = ? AND a.status_atestado = 'emitido'`,
@@ -282,6 +285,14 @@ exports.enviarAtestadoEmail = async (req, res) => {
             return res.status(400).json({ erro: 'Paciente não possui e-mail cadastrado.' });
         }
 
+        // 🔑 gera token novo + 24h, mesmo padrão do enviarTokenAcesso
+        const novoToken = crypto.randomBytes(32).toString('hex');
+        const novaExpiracao = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await db.query(
+            'UPDATE pacientes SET token_acesso = ?, token_expiracao = ? WHERE id = ? AND clinica_id = ?',
+            [novoToken, novaExpiracao, atestado.paciente_id_ref, clinicaId]
+        );
+
         await auditService.registrarLog(usuarioId, 'atestado', atestadoId, 'ENVIOU_EMAIL', {
             crm: atestado.profissional_crm,
             uf_crm: atestado.profissional_uf_crm
@@ -290,7 +301,7 @@ exports.enviarAtestadoEmail = async (req, res) => {
         await notificationService.sendAtestadoEmailNotification({
             nome_paciente: atestado.nome_paciente,
             email_paciente: atestado.email_paciente,
-            token_acesso: atestado.token_acesso,
+            token_acesso: novoToken, // ✅
             nome_profissional: atestado.profissional_nome,
             profissional_crm: atestado.profissional_crm,
             profissional_uf_crm: atestado.profissional_uf_crm,

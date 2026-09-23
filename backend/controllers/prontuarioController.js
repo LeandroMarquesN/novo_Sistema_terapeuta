@@ -8,6 +8,9 @@ const fs = require('fs').promises;
 const path = require('path');
 const notificationService = require('../services/notificationService');
 const auditService = require('../services/auditService');
+const crypto = require('crypto');
+
+
 
 // 1. SALVAR PRONTUÁRIO (assinatura eletrônica por senha)
 exports.salvarProntuario = async (req, res) => {
@@ -203,6 +206,7 @@ exports.atualizarProntuario = async (req, res) => {
 };
 
 // 5. ENVIO DE EMAIL (com token)
+// Gera tolken de acesso 24 horas de validade
 exports.enviarProntuarioEmail = async (req, res) => {
   const { prontuarioId } = req.body;
   const clinicaId = req.usuario.clinica_id;
@@ -212,9 +216,9 @@ exports.enviarProntuarioEmail = async (req, res) => {
       SELECT 
         p.*, 
         u.nome as nome_profissional, 
+        pac.id as paciente_id,
         pac.nome as nome_paciente, 
-        pac.email as email_paciente,
-        pac.token_acesso
+        pac.email as email_paciente
       FROM prontuarios p
       JOIN usuarios u ON p.usuario_id = u.id
       JOIN pacientes pac ON p.paciente_id = pac.id
@@ -227,7 +231,15 @@ exports.enviarProntuarioEmail = async (req, res) => {
 
     const dados = rows[0];
 
-    // Auditoria
+    // 🔑 mesmo padrão do enviarTokenAcesso: gera token novo + 24h a cada envio
+    const novoToken = crypto.randomBytes(32).toString('hex');
+    const novaExpiracao = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await db.query(
+      'UPDATE pacientes SET token_acesso = ?, token_expiracao = ? WHERE id = ? AND clinica_id = ?',
+      [novoToken, novaExpiracao, dados.paciente_id, clinicaId]
+    );
+
     await auditService.registrarLog(req.usuario.id, prontuarioId, 'ENVIOU_EMAIL');
 
     const dadosEnvio = {
@@ -238,13 +250,12 @@ exports.enviarProntuarioEmail = async (req, res) => {
       codigo_cid: dados.diagnostico_cid ? dados.diagnostico_cid : 'Não informado!',
       texto_evolucao: dados.texto_evolucao,
       qr_code_url: "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://medlm.com.br/validar/" + dados.id,
-      token_acesso: dados.token_acesso
+      token_acesso: novoToken
     };
 
     await notificationService.sendProntuarioEmailNotification(dadosEnvio);
 
     res.json({ success: true, message: "Prontuário enviado com sucesso!" });
-
   } catch (error) {
     console.error("ERRO NO ENVIO:", error);
     res.status(500).json({ erro: "Falha ao enviar e-mail: " + error.message });

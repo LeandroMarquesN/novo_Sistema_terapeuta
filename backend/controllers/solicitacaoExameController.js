@@ -5,7 +5,7 @@
 const db = require('../config/db');
 const auditService = require('../services/auditService');
 const notificationService = require('../services/notificationService');
-
+const crypto = require('crypto');
 // =========================================================
 // 1. BUSCAR CATÁLOGO DE EXAMES (global + da clínica)
 // =========================================================
@@ -308,9 +308,9 @@ exports.enviarExamesEmail = async (req, res) => {
     try {
         const [rows] = await db.query(
             `SELECT s.*, 
+              p.id AS paciente_id_ref,
               p.nome AS nome_paciente, 
-              p.email AS email_paciente, 
-              p.token_acesso
+              p.email AS email_paciente
        FROM solicitacoes_exames s
        JOIN pacientes p ON s.paciente_id = p.id
        WHERE s.id = ? AND s.clinica_id = ? AND s.status_solicitacao = 'emitido'`,
@@ -332,6 +332,14 @@ exports.enviarExamesEmail = async (req, res) => {
             [solicitacaoId]
         );
 
+        // 🔑 gera token novo + 24h
+        const novoToken = crypto.randomBytes(32).toString('hex');
+        const novaExpiracao = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await db.query(
+            'UPDATE pacientes SET token_acesso = ?, token_expiracao = ? WHERE id = ? AND clinica_id = ?',
+            [novoToken, novaExpiracao, solicitacao.paciente_id_ref, clinicaId]
+        );
+
         await auditService.registrarLog(usuarioId, 'solicitacao_exame', solicitacaoId, 'ENVIOU_EMAIL', {
             crm: solicitacao.profissional_crm,
             uf_crm: solicitacao.profissional_uf_crm
@@ -340,7 +348,7 @@ exports.enviarExamesEmail = async (req, res) => {
         await notificationService.sendExamesEmailNotification({
             nome_paciente: solicitacao.nome_paciente,
             email_paciente: solicitacao.email_paciente,
-            token_acesso: solicitacao.token_acesso,
+            token_acesso: novoToken, // ✅
             nome_profissional: solicitacao.profissional_nome,
             profissional_crm: solicitacao.profissional_crm,
             profissional_uf_crm: solicitacao.profissional_uf_crm,
