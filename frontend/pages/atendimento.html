@@ -2011,67 +2011,69 @@
                     <i class="fas fa-plus-circle" style="color:var(--emerald)"></i>
                     Adicionar Medicamento
                   </p>
-
-                  <div class="sm:col-span-2">
-                    <label class="form-label block mb-1">Nome do Medicamento *</label>
-                    <div class="med-wrap">
-                      <input type="text" id="medNome" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: Dipirona, Amoxicilina, Losartana...">
-                      <div id="medNomeLista" class="med-lista"></div>
+                
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="sm:col-span-2">
+                      <label class="form-label block mb-1">Nome do Medicamento *</label>
+                      <div class="med-wrap">
+                        <input type="text" id="medNome" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: Dipirona, Amoxicilina, Losartana...">
+                        <div id="medNomeLista" class="med-lista"></div>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <label class="form-label block mb-1">Concentração</label>
-                    <div class="med-wrap">
-                      <input type="text" id="medConcentracao" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 500mg, 10mg/mL">
-                      <div id="medConcentracaoLista" class="med-lista"></div>
+                
+                    <div>
+                      <label class="form-label block mb-1">Concentração</label>
+                      <div class="med-wrap">
+                        <input type="text" id="medConcentracao" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 500mg, 10mg/mL">
+                        <div id="medConcentracaoLista" class="med-lista"></div>
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <label class="form-label block mb-1">Forma Farmacêutica</label>
-                    <select id="medForma" class="input-premium w-full px-3 py-2.5 text-sm">
-                      <option value="">Selecione...</option>
-                      <option value="Comprimido">Comprimido</option>
-                      <option value="Cápsula">Cápsula</option>
-                      <option value="Xarope">Xarope</option>
-                      <option value="Gotas">Gotas</option>
-                      <option value="Injetável">Injetável</option>
-                      <option value="Pomada">Pomada</option>
-                      <option value="Creme">Creme</option>
-                      <option value="Solução">Solução</option>
-                      <option value="Outro">Outro</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label class="form-label block mb-1">Quantidade *</label>
-                    <div class="med-wrap">
-                      <input type="text" id="medQuantidade" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 30 comprimidos">
-                      <div id="medQuantidadeLista" class="med-lista"></div>
+                
+                    <div>
+                      <label class="form-label block mb-1">Forma Farmacêutica</label>
+                      <select id="medForma" class="input-premium w-full px-3 py-2.5 text-sm">
+                        <option value="">Selecione...</option>
+                        <option value="Comprimido">Comprimido</option>
+                        <option value="Cápsula">Cápsula</option>
+                        <option value="Xarope">Xarope</option>
+                        <option value="Gotas">Gotas</option>
+                        <option value="Injetável">Injetável</option>
+                        <option value="Pomada">Pomada</option>
+                        <option value="Creme">Creme</option>
+                        <option value="Solução">Solução</option>
+                        <option value="Outro">Outro</option>
+                      </select>
                     </div>
-                  </div>
-                  
-                  <div>
-                    <label class="form-label block mb-1">Via de Administração</label>
-                    <select id="medVia" class="input-premium w-full px-3 py-2.5 text-sm">
-                      <option value="Oral">Oral</option>
-                      <option value="Tópica">Tópica</option>
-                      <option value="Intramuscular">Intramuscular</option>
-                      <option value="Subcutânea">Subcutânea</option>
-                      <option value="Intravenosa">Intravenosa</option>
-                      <option value="Inalatória">Inalatória</option>
-                      <option value="Outra">Outra</option>
-                    </select>
-                  </div>
-                  
-                  <div class="sm:col-span-2">
-                    <label class="form-label block mb-1">Posologia *</label>
-                    <div class="med-wrap">
-                      <textarea id="medPosologia" rows="2" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm resize-none" placeholder="Ex: Tomar 1 comprimido de 8/8 horas por 7 dias"></textarea>
-                      <div id="medPosologiaLista" class="med-lista"></div>
+                
+                    <div>
+                      <label class="form-label block mb-1">Quantidade *</label>
+                      <div class="med-wrap">
+                        <input type="text" id="medQuantidade" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm" placeholder="Ex: 30 comprimidos">
+                        <div id="medQuantidadeLista" class="med-lista"></div>
+                      </div>
                     </div>
-                  </div>
+                
+                    <div>
+                      <label class="form-label block mb-1">Via de Administração</label>
+                      <select id="medVia" class="input-premium w-full px-3 py-2.5 text-sm">
+                        <option value="Oral">Oral</option>
+                        <option value="Tópica">Tópica</option>
+                        <option value="Intramuscular">Intramuscular</option>
+                        <option value="Subcutânea">Subcutânea</option>
+                        <option value="Intravenosa">Intravenosa</option>
+                        <option value="Inalatória">Inalatória</option>
+                        <option value="Outra">Outra</option>
+                      </select>
+                    </div>
+                
+                    <div class="sm:col-span-2">
+                      <label class="form-label block mb-1">Posologia *</label>
+                      <div class="med-wrap">
+                        <textarea id="medPosologia" rows="2" autocomplete="off" class="input-premium w-full px-3 py-2.5 text-sm resize-none" placeholder="Ex: Tomar 1 comprimido de 8/8 horas por 7 dias"></textarea>
+                        <div id="medPosologiaLista" class="med-lista"></div>
+                      </div>
+                    </div>
+                
                     <div class="sm:col-span-2 flex items-center gap-3">
                       <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-300">
                         <input type="checkbox" id="medContinuo" class="rounded border-slate-600 text-emerald-500 focus:ring-emerald-500">
@@ -2079,7 +2081,7 @@
                       </label>
                     </div>
                   </div>
-
+                
                   <button type="button" onclick="adicionarMedicamento()"
                           class="btn-primary-gradient w-full sm:w-auto px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2">
                     <i class="fas fa-plus"></i>
