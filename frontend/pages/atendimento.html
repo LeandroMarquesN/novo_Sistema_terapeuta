@@ -989,6 +989,112 @@
         gap: 8px;
       }
 
+      /* Cards de modelos de anamnese */
+      .card-modelo-anamnese {
+        cursor: pointer;
+        padding: 14px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: all 0.2s;
+      }
+      .card-modelo-anamnese:hover {
+        border-color: rgba(96, 165, 250, 0.4);
+        box-shadow: 0 0 18px rgba(96, 165, 250, 0.12);
+      }
+      .card-modelo-anamnese .cm-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(96, 165, 250, 0.1);
+        border: 1px solid rgba(96, 165, 250, 0.25);
+        color: var(--blue);
+        font-size: 16px;
+      }
+      .card-modelo-anamnese .cm-titulo {
+        font-size: 13px;
+        font-weight: 800;
+        color: #e2e8f0;
+        font-family: "Space Grotesk", sans-serif;
+      }
+      .card-modelo-anamnese .cm-desc {
+        font-size: 11px;
+        color: rgba(148, 163, 184, 0.55);
+        line-height: 1.4;
+      }
+      .card-modelo-anamnese .cm-prof {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--blue);
+      }
+
+      .anamnese-form-wrap {
+        padding: 16px 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        height: 100%;
+        overflow: auto;
+      }
+      .anamnese-secao-titulo {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--cyan);
+        margin-top: 6px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--border);
+      }
+      .anamnese-campo {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .anamnese-campo label {
+        font-size: 11px;
+        font-weight: 700;
+        color: rgba(203, 213, 225, 0.85);
+      }
+      .anamnese-campo label .req {
+        color: var(--red);
+        margin-left: 2px;
+      }
+      .anamnese-check {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        cursor: pointer;
+        font-size: 12px;
+        color: #cbd5e1;
+      }
+      .anamnese-check input {
+        accent-color: var(--emerald);
+        width: 16px;
+        height: 16px;
+      }
+      .anamnese-acoes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 8px;
+        border-top: 1px solid var(--border);
+        margin-top: 4px;
+        position: sticky;
+        bottom: 0;
+        background: rgba(4, 16, 24, 0.96);
+        padding-bottom: 4px;
+      }
+
       /* Responsividade das abas */
       @media (max-width: 640px) {
         .tab-btn {
@@ -1267,6 +1373,13 @@
               class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-wider">
         <i class="fas fa-vial" style="color: var(--amber)"></i>
         <span>Exames</span>
+      </button>
+
+      <button type="button" onclick="trocarAba('anamnese')" id="tab-anamnese"
+              role="tab" aria-selected="false" aria-controls="painel-anamnese"
+              class="tab-btn flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-[11px] sm:text-xs font-black uppercase tracking-wider">
+        <i class="fas fa-clipboard-list" style="color: var(--blue)"></i>
+        <span>Anamnese</span>
       </button>
 
     </div>
@@ -2064,6 +2177,59 @@
               </div>
             </div>
           </section>
+
+          <!-- COLUNA 3: ANAMNESE (modelos por profissão) -->
+          <section
+            id="painel-anamnese"
+            role="tabpanel"
+            aria-labelledby="tab-anamnese"
+            class="aba-painel w-full flex-1 glass-panel flex flex-col overflow-hidden min-h-[560px] lg:min-h-0"
+          >
+            <div class="p-4 sm:p-5 glass-header flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="icon-wrap icon-blue">
+                  <i class="fas fa-clipboard-list"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-black text-white">Modelos de Anamnese</h3>
+                  <p class="text-[10px] text-slate-500 font-medium">Escolha o modelo da sua especialidade e preencha em janela flutuante</p>
+                </div>
+              </div>
+              <button type="button" class="btn-maximizar-painel" data-painel="painel-anamnese" title="Abrir em janela flutuante"
+                      onclick="maximizarPainel('painel-anamnese', 'Anamnese')"
+                      aria-label="Maximizar anamnese">
+                <i class="fas fa-expand"></i>
+              </button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
+              <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+                <div class="flex-1">
+                  <label class="form-label block mb-1.5" for="selectModeloAnamnese">Modelo disponível</label>
+                  <select id="selectModeloAnamnese" class="input-premium w-full px-3 py-2.5 text-sm">
+                    <option value="">Carregando modelos...</option>
+                  </select>
+                </div>
+                <button type="button" id="btnAbrirModeloAnamnese"
+                        onclick="abrirModeloAnamneseSelecionado()"
+                        class="btn-primary-gradient px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 whitespace-nowrap">
+                  <i class="fas fa-external-link-alt"></i>
+                  Abrir modelo
+                </button>
+              </div>
+
+              <div id="gridModelosAnamnese" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+                <!-- cards preenchidos via JS -->
+              </div>
+
+              <div class="glass-card p-4">
+                <p class="form-label mb-2">Histórico de anamneses deste paciente</p>
+                <div id="listaAnamnesesPaciente" class="space-y-2 text-xs text-slate-400">
+                  <p class="timeline-empty py-4">Nenhuma anamnese registrada ainda.</p>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
     </div>
@@ -2256,7 +2422,7 @@
       }
 
       // ─── Controle das abas do Ecossistema de Atendimento ───
-      const ABAS_ATENDIMENTO = ["prontuario", "receituario", "atestado", "exames"];
+      const ABAS_ATENDIMENTO = ["prontuario", "receituario", "atestado", "exames", "anamnese"];
 
       function trocarAba(nome) {
         if (!ABAS_ATENDIMENTO.includes(nome)) return;
@@ -2676,6 +2842,562 @@
             window.fecharTodasJanelasFlutuantes();
           }
         });
+
+        /**
+         * Abre janela flutuante com conteúdo HTML custom (ex.: formulário de anamnese)
+         * Não depende de um painel de aba — usa ID sintético.
+         */
+        window.abrirJanelaConteudo = function (janelaId, titulo, elementOrHtml) {
+          if (window.innerWidth < LIMITE_DESKTOP) {
+            // Em telas menores, ainda permite, mas com tamanho adaptado
+          }
+
+          if (janelas.has(janelaId)) {
+            trazerParaFrente(janelas.get(janelaId).shell);
+            return janelas.get(janelaId).shell;
+          }
+
+          const shell = criarShell(janelaId, titulo);
+          const body = shell.querySelector(".janela-body");
+
+          if (typeof elementOrHtml === "string") {
+            body.innerHTML = elementOrHtml;
+          } else if (elementOrHtml instanceof HTMLElement) {
+            body.appendChild(elementOrHtml);
+          }
+
+          // Fechar remove só a shell (sem painel de aba)
+          const btnFechar = shell.querySelector(".btn-fechar");
+          btnFechar.replaceWith(btnFechar.cloneNode(true));
+          shell.querySelector(".btn-fechar").addEventListener("click", function () {
+            if (shell.parentNode) shell.parentNode.removeChild(shell);
+            janelas.delete(janelaId);
+            atualizarBarra();
+          });
+
+          root.appendChild(shell);
+          janelas.set(janelaId, {
+            shell: shell,
+            placeholder: null,
+            parent: null,
+            next: null,
+            conteudoLivre: true
+          });
+          trazerParaFrente(shell);
+          atualizarBarra();
+          return shell;
+        };
+
+        // Ajuste fecharJanela para conteúdo livre
+        const _fecharOriginal = fecharJanela;
+        fecharJanela = function (painelId) {
+          const info = janelas.get(painelId);
+          if (info && info.conteudoLivre) {
+            if (info.shell && info.shell.parentNode) {
+              info.shell.parentNode.removeChild(info.shell);
+            }
+            janelas.delete(painelId);
+            atualizarBarra();
+            return;
+          }
+          _fecharOriginal(painelId);
+        };
+      })();
+
+      // ─── Modelos de Anamnese ───
+      (function () {
+        // Fallback local (caso API ainda não esteja no ar)
+        const MODELOS_FALLBACK = [
+          {
+            id: 1, profissao: "medico", nome: "Clínico Geral",
+            descricao: "Queixa, HDA, antecedentes, medicações e alergias",
+            icone: "fa-user-md",
+            campos: [
+              { secao: "Identificação da queixa", tipo: "textarea", rotulo: "Queixa principal", obrigatorio: 1, ordem: 1 },
+              { secao: "Identificação da queixa", tipo: "textarea", rotulo: "História da doença atual (HDA)", obrigatorio: 1, ordem: 2 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Hipertensão arterial", ordem: 10 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Diabetes mellitus", ordem: 11 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Cardiopatia", ordem: 12 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Asma / DPOC", ordem: 13 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Tireoidopatia", ordem: 14 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Cirurgias prévias", ordem: 15 },
+              { secao: "Antecedentes", tipo: "textarea", rotulo: "Outros antecedentes / observações", ordem: 16 },
+              { secao: "Medicações e alergias", tipo: "textarea", rotulo: "Medicações em uso", ordem: 20 },
+              { secao: "Medicações e alergias", tipo: "texto", rotulo: "Alergias medicamentosas", ordem: 21 },
+              { secao: "Hábitos", tipo: "select", rotulo: "Tabagismo", opcoes: ["Nunca", "Ex-fumante", "Atual"], ordem: 30 },
+              { secao: "Hábitos", tipo: "select", rotulo: "Etilismo", opcoes: ["Não", "Social", "Frequente"], ordem: 31 },
+              { secao: "Hábitos", tipo: "select", rotulo: "Atividade física", opcoes: ["Sedentário", "Leve", "Moderada", "Intensa"], ordem: 32 },
+              { secao: "Revisão de sistemas", tipo: "textarea", rotulo: "Sintomas associados", ordem: 40 }
+            ]
+          },
+          {
+            id: 2, profissao: "psicologo", nome: "Psicologia / Psicanálise",
+            descricao: "Queixa, humor, sono, suporte e histórico emocional",
+            icone: "fa-brain",
+            campos: [
+              { secao: "Queixa", tipo: "textarea", rotulo: "Queixa / motivo da consulta", obrigatorio: 1, ordem: 1 },
+              { secao: "Queixa", tipo: "textarea", rotulo: "História do problema atual", obrigatorio: 1, ordem: 2 },
+              { secao: "Estado emocional", tipo: "escala", rotulo: "Humor (0–10)", ordem: 10 },
+              { secao: "Estado emocional", tipo: "escala", rotulo: "Ansiedade (0–10)", ordem: 11 },
+              { secao: "Estado emocional", tipo: "select", rotulo: "Qualidade do sono", opcoes: ["Boa", "Regular", "Ruim", "Insônia"], ordem: 12 },
+              { secao: "Estado emocional", tipo: "checkbox", rotulo: "Ideação suicida / autolesão (avaliar risco)", ordem: 13 },
+              { secao: "Contexto", tipo: "textarea", rotulo: "Suporte social / rede de apoio", ordem: 20 },
+              { secao: "Contexto", tipo: "textarea", rotulo: "Histórico familiar relevante", ordem: 21 },
+              { secao: "Contexto", tipo: "textarea", rotulo: "Tratamentos anteriores", ordem: 22 },
+              { secao: "Observações", tipo: "textarea", rotulo: "Observações do profissional", ordem: 30 }
+            ]
+          },
+          {
+            id: 3, profissao: "fisioterapeuta", nome: "Fisioterapia",
+            descricao: "Dor (EVA), postura, amplitude e histórico ortopédico",
+            icone: "fa-walking",
+            campos: [
+              { secao: "Queixa", tipo: "textarea", rotulo: "Queixa principal / região afetada", obrigatorio: 1, ordem: 1 },
+              { secao: "Queixa", tipo: "escala", rotulo: "Intensidade da dor — EVA (0–10)", obrigatorio: 1, ordem: 2 },
+              { secao: "Queixa", tipo: "select", rotulo: "Caráter da dor", opcoes: ["Contínua", "Intermitente", "Em pontada", "Queimação", "Latejante"], ordem: 3 },
+              { secao: "Funcional", tipo: "checkbox", rotulo: "Limitação de amplitude de movimento", ordem: 10 },
+              { secao: "Funcional", tipo: "checkbox", rotulo: "Alteração postural", ordem: 11 },
+              { secao: "Funcional", tipo: "checkbox", rotulo: "Fraqueza muscular", ordem: 12 },
+              { secao: "Funcional", tipo: "checkbox", rotulo: "Edema / inflamação", ordem: 13 },
+              { secao: "Histórico", tipo: "textarea", rotulo: "Cirurgias / traumas ortopédicos", ordem: 20 },
+              { secao: "Histórico", tipo: "textarea", rotulo: "Tratamentos fisioterapêuticos prévios", ordem: 21 },
+              { secao: "Objetivos", tipo: "textarea", rotulo: "Objetivo do paciente com a reabilitação", ordem: 30 }
+            ]
+          },
+          {
+            id: 4, profissao: "nutricionista", nome: "Nutrição",
+            descricao: "Recordatório, alergias, objetivos e hábitos",
+            icone: "fa-apple-alt",
+            campos: [
+              { secao: "Objetivo", tipo: "select", rotulo: "Objetivo principal", opcoes: ["Emagrecimento", "Ganho de massa", "Reeducação alimentar", "Patologia específica", "Performance"], obrigatorio: 1, ordem: 1 },
+              { secao: "Hábitos", tipo: "textarea", rotulo: "Recordatório alimentar (24h)", obrigatorio: 1, ordem: 10 },
+              { secao: "Hábitos", tipo: "numero", rotulo: "Refeições por dia (aprox.)", ordem: 11 },
+              { secao: "Hábitos", tipo: "select", rotulo: "Consumo de água", opcoes: ["<1L", "1–2L", ">2L"], ordem: 12 },
+              { secao: "Restrições", tipo: "checkbox", rotulo: "Alergia alimentar", ordem: 20 },
+              { secao: "Restrições", tipo: "checkbox", rotulo: "Intolerância à lactose", ordem: 21 },
+              { secao: "Restrições", tipo: "checkbox", rotulo: "Doença celíaca / gluten", ordem: 22 },
+              { secao: "Restrições", tipo: "textarea", rotulo: "Restrições / aversões alimentares", ordem: 23 },
+              { secao: "Clínico", tipo: "texto", rotulo: "Peso atual (kg)", ordem: 30 },
+              { secao: "Clínico", tipo: "texto", rotulo: "Altura (cm)", ordem: 31 },
+              { secao: "Clínico", tipo: "textarea", rotulo: "Patologias / medicações relevantes", ordem: 32 }
+            ]
+          },
+          {
+            id: 5, profissao: "dentista", nome: "Odontologia",
+            descricao: "Queixa oral, higiene, alergias e antecedentes",
+            icone: "fa-tooth",
+            campos: [
+              { secao: "Queixa", tipo: "textarea", rotulo: "Queixa principal oral", obrigatorio: 1, ordem: 1 },
+              { secao: "Higiene", tipo: "select", rotulo: "Frequência de escovação", opcoes: ["1x/dia", "2x/dia", "3x ou mais"], ordem: 10 },
+              { secao: "Higiene", tipo: "checkbox", rotulo: "Uso de fio dental regularmente", ordem: 11 },
+              { secao: "Higiene", tipo: "checkbox", rotulo: "Sangramento gengival", ordem: 12 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Alergia a anestésico local", ordem: 20 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Uso de anticoagulante", ordem: 21 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Diabetes", ordem: 22 },
+              { secao: "Antecedentes", tipo: "checkbox", rotulo: "Hipertensão", ordem: 23 },
+              { secao: "Antecedentes", tipo: "textarea", rotulo: "Cirurgias / tratamentos odontológicos prévios", ordem: 24 },
+              { secao: "Observações", tipo: "textarea", rotulo: "Observações clínicas", ordem: 30 }
+            ]
+          }
+        ];
+
+        let modelosCache = [];
+
+        function getToken() {
+          return localStorage.getItem("token") || sessionStorage.getItem("token") || "";
+        }
+
+        function labelProfissao(p) {
+          const map = {
+            medico: "Médico",
+            psicologo: "Psicólogo",
+            fisioterapeuta: "Fisioterapeuta",
+            nutricionista: "Nutricionista",
+            dentista: "Dentista",
+            terapeuta: "Terapeuta",
+            esteticista: "Esteticista"
+          };
+          return map[p] || p;
+        }
+
+        async function carregarModelos() {
+          const select = document.getElementById("selectModeloAnamnese");
+          const grid = document.getElementById("gridModelosAnamnese");
+          try {
+            const res = await fetch("/api/anamnese/modelos", {
+              headers: { Authorization: "Bearer " + getToken() }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              modelosCache = data.modelos || [];
+            } else {
+              modelosCache = MODELOS_FALLBACK.map(function (m) {
+                return { id: m.id, profissao: m.profissao, nome: m.nome, descricao: m.descricao, icone: m.icone };
+              });
+            }
+          } catch (_) {
+            modelosCache = MODELOS_FALLBACK.map(function (m) {
+              return { id: m.id, profissao: m.profissao, nome: m.nome, descricao: m.descricao, icone: m.icone };
+            });
+          }
+
+          if (select) {
+            select.innerHTML =
+              '<option value="">Selecione um modelo...</option>' +
+              modelosCache
+                .map(function (m) {
+                  return (
+                    '<option value="' +
+                    m.id +
+                    '">' +
+                    labelProfissao(m.profissao) +
+                    " — " +
+                    m.nome +
+                    "</option>"
+                  );
+                })
+                .join("");
+          }
+
+          if (grid) {
+            grid.innerHTML = modelosCache
+              .map(function (m) {
+                return (
+                  '<div class="glass-card card-modelo-anamnese" data-modelo-id="' +
+                  m.id +
+                  '" onclick="abrirModeloAnamnesePorId(' +
+                  m.id +
+                  ')">' +
+                  '<div class="cm-icon"><i class="fas ' +
+                  (m.icone || "fa-clipboard-list") +
+                  '"></i></div>' +
+                  '<div class="cm-prof">' +
+                  labelProfissao(m.profissao) +
+                  "</div>" +
+                  '<div class="cm-titulo">' +
+                  m.nome +
+                  "</div>" +
+                  '<div class="cm-desc">' +
+                  (m.descricao || "") +
+                  "</div>" +
+                  "</div>"
+                );
+              })
+              .join("");
+          }
+        }
+
+        async function obterCamposModelo(modeloId) {
+          try {
+            const res = await fetch("/api/anamnese/modelos/" + modeloId, {
+              headers: { Authorization: "Bearer " + getToken() }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              return { modelo: data.modelo, campos: data.campos || [] };
+            }
+          } catch (_) {}
+
+          const fb = MODELOS_FALLBACK.find(function (m) {
+            return m.id === Number(modeloId);
+          });
+          if (fb) {
+            return {
+              modelo: { id: fb.id, nome: fb.nome, profissao: fb.profissao, icone: fb.icone },
+              campos: fb.campos
+            };
+          }
+          return null;
+        }
+
+        function renderCampo(campo, idx) {
+          const id = "anamnese_campo_" + idx;
+          const req = campo.obrigatorio ? '<span class="req">*</span>' : "";
+          const nome = "campo_" + (campo.id || idx);
+
+          if (campo.tipo === "checkbox") {
+            return (
+              '<label class="anamnese-check">' +
+              '<input type="checkbox" name="' +
+              nome +
+              '" data-rotulo="' +
+              escapeAttr(campo.rotulo) +
+              '" />' +
+              "<span>" +
+              escapeHtml(campo.rotulo) +
+              "</span></label>"
+            );
+          }
+
+          if (campo.tipo === "textarea") {
+            return (
+              '<div class="anamnese-campo"><label for="' +
+              id +
+              '">' +
+              escapeHtml(campo.rotulo) +
+              req +
+              '</label><textarea id="' +
+              id +
+              '" name="' +
+              nome +
+              '" rows="3" class="input-premium w-full px-3 py-2 text-sm" placeholder="' +
+              escapeAttr(campo.placeholder || "") +
+              '" data-rotulo="' +
+              escapeAttr(campo.rotulo) +
+              '"></textarea></div>'
+            );
+          }
+
+          if (campo.tipo === "select") {
+            let opts = campo.opcoes || [];
+            if (typeof opts === "string") {
+              try {
+                opts = JSON.parse(opts);
+              } catch (_) {
+                opts = [];
+              }
+            }
+            const optionsHtml = ['<option value="">—</option>']
+              .concat(
+                opts.map(function (o) {
+                  return '<option value="' + escapeAttr(o) + '">' + escapeHtml(o) + "</option>";
+                })
+              )
+              .join("");
+            return (
+              '<div class="anamnese-campo"><label for="' +
+              id +
+              '">' +
+              escapeHtml(campo.rotulo) +
+              req +
+              '</label><select id="' +
+              id +
+              '" name="' +
+              nome +
+              '" class="input-premium w-full px-3 py-2.5 text-sm" data-rotulo="' +
+              escapeAttr(campo.rotulo) +
+              '">' +
+              optionsHtml +
+              "</select></div>"
+            );
+          }
+
+          if (campo.tipo === "escala" || campo.tipo === "numero") {
+            return (
+              '<div class="anamnese-campo"><label for="' +
+              id +
+              '">' +
+              escapeHtml(campo.rotulo) +
+              req +
+              '</label><input type="number" id="' +
+              id +
+              '" name="' +
+              nome +
+              '" min="0" max="10" class="input-premium w-full px-3 py-2 text-sm" data-rotulo="' +
+              escapeAttr(campo.rotulo) +
+              '" /></div>'
+            );
+          }
+
+          // texto padrão
+          return (
+            '<div class="anamnese-campo"><label for="' +
+            id +
+            '">' +
+            escapeHtml(campo.rotulo) +
+            req +
+            '</label><input type="text" id="' +
+            id +
+            '" name="' +
+            nome +
+            '" class="input-premium w-full px-3 py-2 text-sm" placeholder="' +
+            escapeAttr(campo.placeholder || "") +
+            '" data-rotulo="' +
+            escapeAttr(campo.rotulo) +
+            '" /></div>'
+          );
+        }
+
+        function escapeHtml(s) {
+          return String(s || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+        function escapeAttr(s) {
+          return escapeHtml(s).replace(/'/g, "&#39;");
+        }
+
+        function montarFormulario(modelo, campos) {
+          const wrap = document.createElement("div");
+          wrap.className = "anamnese-form-wrap";
+          wrap.dataset.modeloId = modelo.id;
+
+          let html = "";
+          let secaoAtual = null;
+          campos.forEach(function (c, idx) {
+            if (c.secao && c.secao !== secaoAtual) {
+              secaoAtual = c.secao;
+              html += '<div class="anamnese-secao-titulo">' + escapeHtml(secaoAtual) + "</div>";
+            }
+            html += renderCampo(c, idx);
+          });
+
+          html +=
+            '<div class="anamnese-acoes">' +
+            '<button type="button" class="btn-secondary px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider" data-acao="rascunho">' +
+            '<i class="fas fa-save"></i> Salvar rascunho</button>' +
+            '<button type="button" class="btn-primary-gradient px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider" data-acao="finalizar">' +
+            '<i class="fas fa-check"></i> Finalizar</button>' +
+            "</div>";
+
+          wrap.innerHTML = html;
+
+          wrap.querySelector('[data-acao="rascunho"]').addEventListener("click", function () {
+            salvarAnamneseForm(wrap, modelo, "rascunho");
+          });
+          wrap.querySelector('[data-acao="finalizar"]').addEventListener("click", function () {
+            salvarAnamneseForm(wrap, modelo, "finalizado");
+          });
+
+          return wrap;
+        }
+
+        function coletarRespostas(wrap) {
+          const respostas = {};
+          wrap.querySelectorAll("input, textarea, select").forEach(function (el) {
+            const rotulo = el.getAttribute("data-rotulo") || el.name;
+            if (el.type === "checkbox") {
+              respostas[rotulo] = el.checked;
+            } else {
+              respostas[rotulo] = el.value;
+            }
+          });
+          return respostas;
+        }
+
+        async function salvarAnamneseForm(wrap, modelo, status) {
+          const pacienteId =
+            document.getElementById("atendimentoPacienteId")?.value ||
+            window.pacienteAtualId ||
+            null;
+          const agendamentoId =
+            document.getElementById("atendimentoAgendamentoId")?.value || null;
+
+          if (!pacienteId) {
+            alert("Selecione um paciente no atendimento antes de salvar a anamnese.");
+            return;
+          }
+
+          const respostas = coletarRespostas(wrap);
+          const payload = {
+            paciente_id: Number(pacienteId),
+            agendamento_id: agendamentoId ? Number(agendamentoId) : null,
+            modelo_id: modelo.id,
+            respostas: respostas,
+            status_anamnese: status
+          };
+
+          try {
+            const res = await fetch("/api/anamnese/salvar", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + getToken()
+              },
+              body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+              alert(status === "finalizado" ? "Anamnese finalizada." : "Rascunho salvo.");
+              if (typeof carregarHistoricoAnamneses === "function") {
+                carregarHistoricoAnamneses(pacienteId);
+              }
+            } else {
+              const err = await res.json().catch(function () {
+                return {};
+              });
+              alert(err.erro || "Não foi possível salvar. Verifique se a API está configurada.");
+            }
+          } catch (_) {
+            // Offline: salva localmente para não perder o preenchimento
+            try {
+              const key = "anamnese_local_" + modelo.id + "_" + pacienteId;
+              localStorage.setItem(key, JSON.stringify({ ...payload, em: new Date().toISOString() }));
+              alert("API indisponível. Respostas guardadas localmente neste dispositivo.");
+            } catch (e2) {
+              alert("Falha ao salvar anamnese.");
+            }
+          }
+        }
+
+        window.abrirModeloAnamnesePorId = async function (modeloId) {
+          const data = await obterCamposModelo(modeloId);
+          if (!data) {
+            alert("Modelo não encontrado.");
+            return;
+          }
+          const form = montarFormulario(data.modelo, data.campos);
+          const titulo = (data.modelo.nome || "Anamnese") + " — formulário";
+          if (typeof window.abrirJanelaConteudo === "function") {
+            window.abrirJanelaConteudo("anamnese-modelo-" + modeloId, titulo, form);
+          }
+        };
+
+        window.abrirModeloAnamneseSelecionado = function () {
+          const sel = document.getElementById("selectModeloAnamnese");
+          const id = sel && sel.value;
+          if (!id) {
+            alert("Selecione um modelo no dropdown.");
+            return;
+          }
+          window.abrirModeloAnamnesePorId(Number(id));
+        };
+
+        window.carregarHistoricoAnamneses = async function (pacienteId) {
+          const lista = document.getElementById("listaAnamnesesPaciente");
+          if (!lista || !pacienteId) return;
+          try {
+            const res = await fetch("/api/anamnese/paciente/" + pacienteId, {
+              headers: { Authorization: "Bearer " + getToken() }
+            });
+            if (!res.ok) throw new Error("fail");
+            const data = await res.json();
+            const rows = data.anamneses || [];
+            if (!rows.length) {
+              lista.innerHTML = '<p class="timeline-empty py-4">Nenhuma anamnese registrada ainda.</p>';
+              return;
+            }
+            lista.innerHTML = rows
+              .map(function (a) {
+                const dataFmt = a.data_preenchimento
+                  ? new Date(a.data_preenchimento).toLocaleString("pt-BR")
+                  : "—";
+                return (
+                  '<div class="glass-card p-3 flex items-center justify-between gap-2">' +
+                  "<div><div class=\"text-white font-bold text-xs\">" +
+                  escapeHtml(a.modelo_nome) +
+                  '</div><div class="text-[10px] text-slate-500">' +
+                  dataFmt +
+                  " · " +
+                  escapeHtml(a.profissional_nome || "") +
+                  " · " +
+                  escapeHtml(a.status_anamnese) +
+                  "</div></div></div>"
+                );
+              })
+              .join("");
+          } catch (_) {
+            /* silencioso se API não estiver pronta */
+          }
+        };
+
+        // Carrega modelos ao iniciar
+        if (document.readyState === "loading") {
+          document.addEventListener("DOMContentLoaded", carregarModelos);
+        } else {
+          carregarModelos();
+        }
       })();
     </script>
 

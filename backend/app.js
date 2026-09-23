@@ -40,6 +40,9 @@ const receitaRoutes = require('./routes/receitaRoutes');
 const atestadoRoutes = require('./routes/atestadoRoutes');
 const solicitacaoExameRoutes = require('./routes/solicitacaoExameRoutes');
 
+const anamneseRoutes = require('./routes/anamneseRoutes');
+
+
 // ...
 
 // importação Middleware
@@ -111,7 +114,7 @@ app.use('/api/agenda-avancada', agendaAvancadaApiRoutes);
 app.use('/api/receitas', receitaRoutes);
 app.use('/api/atestados', atestadoRoutes);
 app.use('/api/solicitacoes-exames', solicitacaoExameRoutes);
-
+app.use('/api/anamnese', anamneseRoutes);
 
 console.log("Rota /programa-fundadores montada com sucesso!");
 

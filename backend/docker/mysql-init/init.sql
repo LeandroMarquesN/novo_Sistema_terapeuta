@@ -551,3 +551,136 @@ INSERT IGNORE INTO catalogo_exames (clinica_id, categoria, nome_exame, instrucoe
 (NULL, 'Urina e Fezes', 'Cultura de urina', 'Coleta asséptica', NULL),
 (NULL, 'Urina e Fezes', 'Parasitológico de fezes', 'Amostra fresca', 'Check-up Básico'),
 (NULL, 'Urina e Fezes', 'Pesquisa de sangue oculto nas fezes', 'Dieta prévia se necessário', NULL);
+-- ============================================================
+-- 16. MODELOS DE ANAMNESE (por profissão)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS modelos_anamnese (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NULL COMMENT 'NULL = modelo do sistema; preenchido = custom da clínica',
+  profissao VARCHAR(60) NOT NULL,
+  nome VARCHAR(150) NOT NULL,
+  descricao VARCHAR(255) NULL,
+  icone VARCHAR(60) DEFAULT 'fa-clipboard-list',
+  ativo TINYINT(1) NOT NULL DEFAULT 1,
+  ordem INT UNSIGNED NOT NULL DEFAULT 0,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_modelo_profissao (profissao),
+  INDEX idx_modelo_clinica (clinica_id),
+  CONSTRAINT fk_modelo_anamnese_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS modelos_anamnese_campos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  modelo_id INT NOT NULL,
+  secao VARCHAR(120) NULL,
+  tipo ENUM('titulo','checkbox','texto','textarea','select','numero','escala') NOT NULL DEFAULT 'texto',
+  rotulo VARCHAR(255) NOT NULL,
+  placeholder VARCHAR(255) NULL,
+  opcoes JSON NULL COMMENT 'Para select/checkbox múltiplo: ["A","B"]',
+  obrigatorio TINYINT(1) NOT NULL DEFAULT 0,
+  ordem INT UNSIGNED NOT NULL DEFAULT 0,
+  CONSTRAINT fk_campo_modelo FOREIGN KEY (modelo_id) REFERENCES modelos_anamnese(id) ON DELETE CASCADE,
+  INDEX idx_campo_modelo_ordem (modelo_id, ordem)
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS anamneses_preenchidas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  clinica_id INT NOT NULL,
+  paciente_id INT NOT NULL,
+  usuario_id INT NOT NULL,
+  agendamento_id INT NULL,
+  modelo_id INT NOT NULL,
+  respostas JSON NOT NULL,
+  status_anamnese ENUM('rascunho','finalizado') NOT NULL DEFAULT 'rascunho',
+  data_preenchimento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_anamnese_paciente (paciente_id),
+  INDEX idx_anamnese_clinica (clinica_id),
+  INDEX idx_anamnese_modelo (modelo_id),
+  CONSTRAINT fk_anamnese_clinica FOREIGN KEY (clinica_id) REFERENCES clinicas(id) ON DELETE CASCADE,
+  CONSTRAINT fk_anamnese_paciente FOREIGN KEY (paciente_id) REFERENCES pacientes(id) ON DELETE CASCADE,
+  CONSTRAINT fk_anamnese_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+  CONSTRAINT fk_anamnese_agendamento FOREIGN KEY (agendamento_id) REFERENCES agendamentos(id) ON DELETE SET NULL,
+  CONSTRAINT fk_anamnese_modelo FOREIGN KEY (modelo_id) REFERENCES modelos_anamnese(id) ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+-- Seeds dos 5 modelos de sistema
+INSERT IGNORE INTO modelos_anamnese (id, clinica_id, profissao, nome, descricao, icone, ordem) VALUES
+(1, NULL, 'medico', 'Clínico Geral', 'Queixa, HDA, antecedentes, medicações e alergias', 'fa-user-md', 1),
+(2, NULL, 'psicologo', 'Psicologia / Psicanálise', 'Queixa, humor, sono, suporte e histórico emocional', 'fa-brain', 2),
+(3, NULL, 'fisioterapeuta', 'Fisioterapia', 'Dor (EVA), postura, amplitude e histórico ortopédico', 'fa-walking', 3),
+(4, NULL, 'nutricionista', 'Nutrição', 'Recordatório, alergias, objetivos e hábitos', 'fa-apple-alt', 4),
+(5, NULL, 'dentista', 'Odontologia', 'Queixa oral, higiene, alergias e antecedentes', 'fa-tooth', 5);
+
+-- Campos: Clínico Geral (modelo 1)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(1, 'Identificação da queixa', 'textarea', 'Queixa principal', 'Descreva a queixa principal do paciente...', NULL, 1, 1),
+(1, 'Identificação da queixa', 'textarea', 'História da doença atual (HDA)', 'Início, evolução, fatores de melhora/piora...', NULL, 1, 2),
+(1, 'Antecedentes', 'checkbox', 'Hipertensão arterial', NULL, NULL, 0, 10),
+(1, 'Antecedentes', 'checkbox', 'Diabetes mellitus', NULL, NULL, 0, 11),
+(1, 'Antecedentes', 'checkbox', 'Cardiopatia', NULL, NULL, 0, 12),
+(1, 'Antecedentes', 'checkbox', 'Asma / DPOC', NULL, NULL, 0, 13),
+(1, 'Antecedentes', 'checkbox', 'Tireoidopatia', NULL, NULL, 0, 14),
+(1, 'Antecedentes', 'checkbox', 'Cirurgias prévias', NULL, NULL, 0, 15),
+(1, 'Antecedentes', 'textarea', 'Outros antecedentes / observações', NULL, NULL, 0, 16),
+(1, 'Medicações e alergias', 'textarea', 'Medicações em uso', 'Nome, dose e posologia...', NULL, 0, 20),
+(1, 'Medicações e alergias', 'texto', 'Alergias medicamentosas', 'Ex: dipirona, penicilina...', NULL, 0, 21),
+(1, 'Hábitos', 'select', 'Tabagismo', NULL, '["Nunca","Ex-fumante","Atual"]', 0, 30),
+(1, 'Hábitos', 'select', 'Etilismo', NULL, '["Não","Social","Frequente"]', 0, 31),
+(1, 'Hábitos', 'select', 'Atividade física', NULL, '["Sedentário","Leve","Moderada","Intensa"]', 0, 32),
+(1, 'Revisão de sistemas', 'textarea', 'Sintomas associados', 'Febre, emagrecimento, dor, dispneia...', NULL, 0, 40);
+
+-- Campos: Psicologia (modelo 2)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(2, 'Queixa', 'textarea', 'Queixa / motivo da consulta', NULL, NULL, 1, 1),
+(2, 'Queixa', 'textarea', 'História do problema atual', 'Quando começou, gatilhos, evolução...', NULL, 1, 2),
+(2, 'Estado emocional', 'escala', 'Humor (0–10)', '0 = muito baixo · 10 = muito elevado', NULL, 0, 10),
+(2, 'Estado emocional', 'escala', 'Ansiedade (0–10)', NULL, NULL, 0, 11),
+(2, 'Estado emocional', 'select', 'Qualidade do sono', NULL, '["Boa","Regular","Ruim","Insônia"]', 0, 12),
+(2, 'Estado emocional', 'checkbox', 'Ideação suicida / autolesão (avaliar risco)', NULL, NULL, 0, 13),
+(2, 'Contexto', 'textarea', 'Suporte social / rede de apoio', NULL, NULL, 0, 20),
+(2, 'Contexto', 'textarea', 'Histórico familiar relevante', NULL, NULL, 0, 21),
+(2, 'Contexto', 'textarea', 'Tratamentos anteriores', 'Terapias, medicações psiquiátricas...', NULL, 0, 22),
+(2, 'Observações', 'textarea', 'Observações do profissional', NULL, NULL, 0, 30);
+
+-- Campos: Fisioterapia (modelo 3)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(3, 'Queixa', 'textarea', 'Queixa principal / região afetada', NULL, NULL, 1, 1),
+(3, 'Queixa', 'escala', 'Intensidade da dor — EVA (0–10)', '0 = sem dor · 10 = pior dor imaginável', NULL, 1, 2),
+(3, 'Queixa', 'select', 'Caráter da dor', NULL, '["Contínua","Intermitente","Em pontada","Queimação","Latejante"]', 0, 3),
+(3, 'Funcional', 'checkbox', 'Limitação de amplitude de movimento', NULL, NULL, 0, 10),
+(3, 'Funcional', 'checkbox', 'Alteração postural', NULL, NULL, 0, 11),
+(3, 'Funcional', 'checkbox', 'Fraqueza muscular', NULL, NULL, 0, 12),
+(3, 'Funcional', 'checkbox', 'Edema / inflamação', NULL, NULL, 0, 13),
+(3, 'Histórico', 'textarea', 'Cirurgias / traumas ortopédicos', NULL, NULL, 0, 20),
+(3, 'Histórico', 'textarea', 'Tratamentos fisioterapêuticos prévios', NULL, NULL, 0, 21),
+(3, 'Objetivos', 'textarea', 'Objetivo do paciente com a reabilitação', NULL, NULL, 0, 30);
+
+-- Campos: Nutrição (modelo 4)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(4, 'Objetivo', 'select', 'Objetivo principal', NULL, '["Emagrecimento","Ganho de massa","Reeducação alimentar","Patologia específica","Performance"]', 1, 1),
+(4, 'Hábitos', 'textarea', 'Recordatório alimentar (24h)', 'Descreva as refeições do último dia típico...', NULL, 1, 10),
+(4, 'Hábitos', 'numero', 'Refeições por dia (aprox.)', NULL, NULL, 0, 11),
+(4, 'Hábitos', 'select', 'Consumo de água', NULL, '["<1L","1–2L",">2L"]', 0, 12),
+(4, 'Restrições', 'checkbox', 'Alergia alimentar', NULL, NULL, 0, 20),
+(4, 'Restrições', 'checkbox', 'Intolerância à lactose', NULL, NULL, 0, 21),
+(4, 'Restrições', 'checkbox', 'Doença celíaca / gluten', NULL, NULL, 0, 22),
+(4, 'Restrições', 'textarea', 'Restrições / aversões alimentares', NULL, NULL, 0, 23),
+(4, 'Clínico', 'texto', 'Peso atual (kg)', NULL, NULL, 0, 30),
+(4, 'Clínico', 'texto', 'Altura (cm)', NULL, NULL, 0, 31),
+(4, 'Clínico', 'textarea', 'Patologias / medicações relevantes', NULL, NULL, 0, 32);
+
+-- Campos: Odontologia (modelo 5)
+INSERT IGNORE INTO modelos_anamnese_campos (modelo_id, secao, tipo, rotulo, placeholder, opcoes, obrigatorio, ordem) VALUES
+(5, 'Queixa', 'textarea', 'Queixa principal oral', 'Dor, sangramento, estética, prótese...', NULL, 1, 1),
+(5, 'Higiene', 'select', 'Frequência de escovação', NULL, '["1x/dia","2x/dia","3x ou mais"]', 0, 10),
+(5, 'Higiene', 'checkbox', 'Uso de fio dental regularmente', NULL, NULL, 0, 11),
+(5, 'Higiene', 'checkbox', 'Sangramento gengival', NULL, NULL, 0, 12),
+(5, 'Antecedentes', 'checkbox', 'Alergia a anestésico local', NULL, NULL, 0, 20),
+(5, 'Antecedentes', 'checkbox', 'Uso de anticoagulante', NULL, NULL, 0, 21),
+(5, 'Antecedentes', 'checkbox', 'Diabetes', NULL, NULL, 0, 22),
+(5, 'Antecedentes', 'checkbox', 'Hipertensão', NULL, NULL, 0, 23),
+(5, 'Antecedentes', 'textarea', 'Cirurgias / tratamentos odontológicos prévios', NULL, NULL, 0, 24),
+(5, 'Observações', 'textarea', 'Observações clínicas', NULL, NULL, 0, 30);
