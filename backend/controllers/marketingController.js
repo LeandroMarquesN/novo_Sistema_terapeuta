@@ -1,3 +1,4 @@
+const db = require('../config/db');
 // controllers/marketingController.js
 const marketingService = require('../services/marketingService');
 

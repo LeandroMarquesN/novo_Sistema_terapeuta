@@ -151,7 +151,7 @@ exports.simularPagamentoTeste = async (req, res) => {
 
         // 2. Registra a compra simulada no histórico para aparecer nas métricas
         await db.query(
-            `INSERT INTO whatsapp_compras_creditos (clinica_id, quantidade_creditos, valor_pago, status_pagamento, criado_em) 
+            `INSERT INTO whatsapp_compras_creditos (clinica_id, quantidade_creditos, valor_total, status_pagamento, criado_em) 
        VALUES (?, ?, ?, 'aprovado', NOW())`,
             [clinicaId, quantidadeCreditos, 0.00]
         );
