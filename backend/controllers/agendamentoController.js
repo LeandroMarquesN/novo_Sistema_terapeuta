@@ -144,15 +144,11 @@ exports.criarAgendamento = async (req, res) => {
     const agendamentoId = agendamentoResult.insertId;
 
     // --- LOGICA FINANCEIRA BRASIL ---
-    // --- LOGICA FINANCEIRA BRASIL ---
-    // Mesmo que valor_sinal venha vazio, forçamos o registro com valor 0.00
     let valorLimpo = 0.00;
     if (valor_sinal) {
       valorLimpo = parseFloat(valor_sinal.replace(/\./g, '').replace(',', '.'));
     }
 
-    // Agora, SEMPRE inserimos no financeiro, independentemente do valor.
-    // Isso garante que o agendamento apareça no seu Dashboard Financeiro.
     const dataLocal = new Date();
     const ano = dataLocal.getFullYear();
     const mes = String(dataLocal.getMonth() + 1).padStart(2, '0');
@@ -187,7 +183,6 @@ exports.criarAgendamento = async (req, res) => {
 
     // --- BLOCO DE NOTIFICAÇÕES COM TRATAMENTO DE ERRO ROBUSTO ---
     try {
-      // 1. Busca os dados completos da clínica
       const [clinicaResult] = await connection.query(
         'SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?',
         [clinicaId]
@@ -198,13 +193,12 @@ exports.criarAgendamento = async (req, res) => {
         console.warn(`[MED-LM] ⚠️ Aviso: Clínica ID ${clinicaId} não encontrada para envio de notificações.`);
       }
 
-      // 2. Busca o telefone e nome do paciente
       const [[pacienteDados]] = await connection.query(
         'SELECT nome, telefone FROM pacientes WHERE id = ?',
         [paciente_id]
       );
 
-      // 3. Processamento do E-mail
+      // Processamento do E-mail
       if (email && dadosDaClinica) {
         console.log(`[AGENDAMENTO] Preparando envio de e-mail para: ${email}`);
         const dadosDoAgendamento = {
@@ -222,7 +216,7 @@ exports.criarAgendamento = async (req, res) => {
           .catch(emailErr => console.error("[MED-LM] ❌ Erro crítico no envio de e-mail:", emailErr.message));
       }
 
-      // 4. Processamento do WhatsApp com Tratamento de Exceção Dedicado
+      // Processamento do WhatsApp com Tratamento Dedicado
       if (pacienteDados && pacienteDados.telefone && dadosDaClinica) {
         console.log(`[AGENDAMENTO] Iniciando disparo de WhatsApp para ${pacienteDados.nome} (${pacienteDados.telefone})...`);
 
@@ -230,16 +224,13 @@ exports.criarAgendamento = async (req, res) => {
           await whatsappAgendaService.notificarAgendamentoWhatsApp(dadosDaClinica, pacienteDados, { data_agendamento }, 'criado');
           console.log(`[AGENDAMENTO] ✅ WhatsApp disparado e crédito abatido com sucesso!`);
         } catch (whatsErr) {
-          // Aqui tratamos especificamente erros do WhatsApp (ex: créditos esgotados, número inválido)
           console.error(`[MED-LM] ❌ Falha controlada no envio de WhatsApp:`, whatsErr.message);
-          // Opcional: Você pode salvar esse erro numa tabela de logs de falhas se desejar futuramente
         }
       } else {
         console.log("[AGENDAMENTO] ℹ️ WhatsApp ignorado: Paciente sem telefone ou dados da clínica incompletos.");
       }
 
     } catch (notifError) {
-      // Tratamento genérico para qualquer falha inesperada no bloco de notificações
       console.error("[MED-LM] ❌ Erro geral ao processar as notificações em background:", notifError.message);
     }
 
@@ -248,14 +239,31 @@ exports.criarAgendamento = async (req, res) => {
       agendamentoId
     });
 
-    // =============================================================================
-    // 2. LISTAR AGENDAMENTOS
-    // =============================================================================
-    exports.listarAgendamentos = async (req, res) => {
-      const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+  } catch (err) {
+    if (connection) await connection.rollback();
 
-      try {
-        const sqlAgendamentos = `
+    console.error("❌ ERRO DETALHADO AO CRIAR AGENDAMENTO:", err);
+
+    if (err.code === 'ER_DUP_ENTRY') {
+      return res.status(409).json({
+        erro: 'Este horário já está ocupado por outro agendamento. Escolha outro horário.'
+      });
+    }
+
+    res.status(500).json({ erro: 'Erro ao criar agendamento', detalhes: err.message });
+  } finally {
+    if (connection) connection.release();
+  }
+};
+
+// =============================================================================
+// 2. LISTAR AGENDAMENTOS
+// =============================================================================
+exports.listarAgendamentos = async (req, res) => {
+  const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+
+  try {
+    const sqlAgendamentos = `
       SELECT
         a.*,
         f.status_pagamento AS financeiro_status,
@@ -267,63 +275,63 @@ exports.criarAgendamento = async (req, res) => {
       ORDER BY a.data_agendamento ASC
     `;
 
-        const [agendamentos] = await db.query(sqlAgendamentos, [clinicaId]);
+    const [agendamentos] = await db.query(sqlAgendamentos, [clinicaId]);
 
-        if (agendamentos.length === 0) return res.json({ total: 0, dados: [] });
+    if (agendamentos.length === 0) return res.json({ total: 0, dados: [] });
 
-        const agendamentoIds = agendamentos.map(a => a.id);
-        const [anexos] = await db.query(
-          'SELECT agendamento_id, nome_original, caminho_servidor, mime_type FROM anexos WHERE agendamento_id IN (?)',
-          [agendamentoIds]
-        );
+    const agendamentoIds = agendamentos.map(a => a.id);
+    const [anexos] = await db.query(
+      'SELECT agendamento_id, nome_original, caminho_servidor, mime_type FROM anexos WHERE agendamento_id IN (?)',
+      [agendamentoIds]
+    );
 
-        let totalMasculino = 0;
-        let totalFeminino = 0;
+    let totalMasculino = 0;
+    let totalFeminino = 0;
 
-        const dadosFormatados = agendamentos.map(ag => {
-          if (ag.genero === 'Masculino') totalMasculino++;
-          if (ag.genero === 'Feminino') totalFeminino++;
+    const dadosFormatados = agendamentos.map(ag => {
+      if (ag.genero === 'Masculino') totalMasculino++;
+      if (ag.genero === 'Feminino') totalFeminino++;
 
-          return {
-            ...ag,
-            status_formatado: ag.status_agendamento.replace('_', ' ').toUpperCase(),
-            data_ptbr: new Date(ag.data_agendamento).toLocaleString('pt-BR'),
-            anexos: anexos.filter(an => an.agendamento_id === ag.id)
-          };
-        });
+      return {
+        ...ag,
+        status_formatado: ag.status_agendamento.replace('_', ' ').toUpperCase(),
+        data_ptbr: new Date(ag.data_agendamento).toLocaleString('pt-BR'),
+        anexos: anexos.filter(an => an.agendamento_id === ag.id)
+      };
+    });
 
-        res.json({
-          meta: {
-            total_geral: agendamentos.length,
-            distribuicao_genero: {
-              masculino: totalMasculino,
-              feminino: totalFeminino,
-              outros: agendamentos.length - (totalMasculino + totalFeminino)
-            }
-          },
-          dados: dadosFormatados
-        });
+    res.json({
+      meta: {
+        total_geral: agendamentos.length,
+        distribuicao_genero: {
+          masculino: totalMasculino,
+          feminino: totalFeminino,
+          outros: agendamentos.length - (totalMasculino + totalFeminino)
+        }
+      },
+      dados: dadosFormatados
+    });
 
-      } catch (err) {
-        console.error("Erro ao listar:", err);
-        res.status(500).json({ erro: 'Erro ao listar agendamentos', detalhes: err.message });
-      }
-    };
+  } catch (err) {
+    console.error("Erro ao listar:", err);
+    res.status(500).json({ erro: 'Erro ao listar agendamentos', detalhes: err.message });
+  }
+};
 
-    // ============================================================================
-    // 2.1 LISTA AGENDAMENTO DE HOJE (Para a Voz e Dashboard do dia)
-    // ============================================================================
-    exports.listarAgendamentosHoje = async (req, res) => {
-      const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+// ============================================================================
+// 2.1 LISTA AGENDAMENTO DE HOJE (Para a Voz e Dashboard do dia)
+// ============================================================================
+exports.listarAgendamentosHoje = async (req, res) => {
+  const clinicaId = req.usuario ? req.usuario.clinica_id : null;
 
-      const agoraLocal = new Date();
-      const ano = agoraLocal.getFullYear();
-      const mes = String(agoraLocal.getMonth() + 1).padStart(2, '0');
-      const dia = String(agoraLocal.getDate()).padStart(2, '0');
-      const hoje = `${ano}-${mes}-${dia}`;
+  const agoraLocal = new Date();
+  const ano = agoraLocal.getFullYear();
+  const mes = String(agoraLocal.getMonth() + 1).padStart(2, '0');
+  const dia = String(agoraLocal.getDate()).padStart(2, '0');
+  const hoje = `${ano}-${mes}-${dia}`;
 
-      try {
-        const sqlAgendamentosHoje = `
+  try {
+    const sqlAgendamentosHoje = `
       SELECT
         a.*,
         f.status_pagamento AS financeiro_status
@@ -335,212 +343,203 @@ exports.criarAgendamento = async (req, res) => {
       ORDER BY a.data_agendamento ASC
     `;
 
-        const [agendamentos] = await db.query(sqlAgendamentosHoje, [clinicaId, hoje]);
-        res.json(agendamentos);
+    const [agendamentos] = await db.query(sqlAgendamentosHoje, [clinicaId, hoje]);
+    res.json(agendamentos);
 
-      } catch (err) {
-        console.error("Erro ao listar agenda de hoje:", err);
-        res.status(500).json({ erro: 'Erro ao buscar agenda do dia' });
-      }
-    };
+  } catch (err) {
+    console.error("Erro ao listar agenda de hoje:", err);
+    res.status(500).json({ erro: 'Erro ao buscar agenda do dia' });
+  }
+};
 
-    // =============================================================================
-    // 3. DELETAR AGENDAMENTO
-    // =============================================================================
-    exports.deletarAgendamento = async (req, res) => {
-      const connection = await db.getConnection();
-      const clinicaId = req.usuario ? req.usuario.clinica_id : null;
-      try {
-        const { id } = req.params;
-        const [agendamento] = await connection.query(
-          'SELECT nome, email, tipo_terapia, data_agendamento FROM agendamentos WHERE id = ? AND clinica_id = ?',
-          [id, clinicaId]
-        );
+// =============================================================================
+// 3. DELETAR AGENDAMENTO
+// =============================================================================
+exports.deletarAgendamento = async (req, res) => {
+  const connection = await db.getConnection();
+  const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+  try {
+    const { id } = req.params;
+    const [agendamento] = await connection.query(
+      'SELECT nome, email, tipo_terapia, data_agendamento FROM agendamentos WHERE id = ? AND clinica_id = ?',
+      [id, clinicaId]
+    );
 
-        if (agendamento.length === 0) return res.status(404).json({ mensagem: 'Não encontrado.' });
+    if (agendamento.length === 0) return res.status(404).json({ mensagem: 'Não encontrado.' });
 
-        await connection.query('DELETE FROM agendamentos WHERE id = ? AND clinica_id = ?', [id, clinicaId]);
+    await connection.query('DELETE FROM agendamentos WHERE id = ? AND clinica_id = ?', [id, clinicaId]);
 
-        res.status(200).json({ mensagem: 'Excluído com sucesso.' });
+    res.status(200).json({ mensagem: 'Excluído com sucesso.' });
 
-        if (agendamento[0].email) {
-          notificationService.sendEmailNotification(agendamento[0], false, true);
-        }
-      } catch (err) {
-        res.status(500).json({ erro: 'Erro ao deletar', detalhes: err.message });
-      } finally {
-        connection.release();
-      }
-    };
+    if (agendamento[0].email) {
+      notificationService.sendEmailNotification(agendamento[0], false, true);
+    }
+  } catch (err) {
+    res.status(500).json({ erro: 'Erro ao deletar', detalhes: err.message });
+  } finally {
+    connection.release();
+  }
+};
 
-    // =============================================================================
-    // 4. ATUALIZAR COMPLETO (E REATIVAR STATUS SE NECESSÁRIO)
-    // =============================================================================
-    exports.atualizarAgendamentoCompleto = async (req, res) => {
-      const agendamentoId = req.params.id;
-      const clinicaId = req.usuario ? req.usuario.clinica_id : null;
-      let { nome, cpf, email, telefone, genero, data_agendamento } = req.body;
-      const anexos = req.files['anexos'] || [];
+// =============================================================================
+// 4. ATUALIZAR COMPLETO (E REATIVAR STATUS SE NECESSÁRIO)
+// =============================================================================
+exports.atualizarAgendamentoCompleto = async (req, res) => {
+  const agendamentoId = req.params.id;
+  const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+  let { nome, cpf, email, telefone, genero, data_agendamento } = req.body;
+  const anexos = req.files['anexos'] || [];
 
-      // 🌟 CORREÇÃO DE FUSO: Limpa a data vinda da edição também
-      if (data_agendamento) {
-        data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
-      }
+  if (data_agendamento) {
+    data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
+  }
 
-      const connection = await db.getConnection();
-      try {
-        await connection.beginTransaction();
-        const [agendamentoAtual] = await connection.query('SELECT paciente_id FROM agendamentos WHERE id = ? AND clinica_id = ?', [agendamentoId, clinicaId]);
-        if (agendamentoAtual.length === 0) throw new Error('Acesso negado');
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [agendamentoAtual] = await connection.query('SELECT paciente_id FROM agendamentos WHERE id = ? AND clinica_id = ?', [agendamentoId, clinicaId]);
+    if (agendamentoAtual.length === 0) throw new Error('Acesso negado');
 
-        const pacienteId = agendamentoAtual[0].paciente_id;
+    const pacienteId = agendamentoAtual[0].paciente_id;
 
-        await connection.query(
-          `UPDATE agendamentos 
+    await connection.query(
+      `UPDATE agendamentos 
        SET nome=?, email=?, telefone=?, genero=?, data_agendamento=?, cpf=?, status_agendamento='aguardando_sinal' 
        WHERE id=? AND clinica_id=?`,
-          [nome, email, telefone, genero, data_agendamento, cpf, agendamentoId, clinicaId]
-        );
+      [nome, email, telefone, genero, data_agendamento, cpf, agendamentoId, clinicaId]
+    );
 
-        if (anexos.length > 0) {
-          for (const file of anexos) {
-            await connection.query('INSERT INTO anexos (clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes) VALUES (?,?,?,?,?,?,?)', [clinicaId, pacienteId, agendamentoId, file.originalname, file.filename, file.mimetype, file.size]);
-          }
-        }
-
-        await connection.commit();
-        res.status(200).json({ mensagem: 'Atualizado com sucesso!' });
-      } catch (err) {
-        if (connection) await connection.rollback();
-        res.status(500).json({ erro: err.message });
-      } finally {
-        connection.release();
+    if (anexos.length > 0) {
+      for (const file of anexos) {
+        await connection.query('INSERT INTO anexos (clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes) VALUES (?,?,?,?,?,?,?)', [clinicaId, pacienteId, agendamentoId, file.originalname, file.filename, file.mimetype, file.size]);
       }
-    };
+    }
 
-    // =============================================================================
-    // 5. REAGENDAR (SÓ DATA)
-    // =============================================================================
-    exports.reagendarAgendamento = async (req, res) => {
-      const agendamentoId = req.params.id;
-      let { data_agendamento } = req.body;
+    await connection.commit();
+    res.status(200).json({ mensagem: 'Atualizado com sucesso!' });
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ erro: err.message });
+  } finally {
+    connection.release();
+  }
+};
 
-      const clinicaId = req.clinicaId || (req.usuario ? req.usuario.clinica_id : null);
+// =============================================================================
+// 5. REAGENDAR (SÓ DATA)
+// =============================================================================
+exports.reagendarAgendamento = async (req, res) => {
+  const agendamentoId = req.params.id;
+  let { data_agendamento } = req.body;
 
-      if (!clinicaId) {
-        return res.status(403).json({ erro: 'Acesso negado: Clínica não identificada.' });
-      }
+  const clinicaId = req.clinicaId || (req.usuario ? req.usuario.clinica_id : null);
 
-      if (data_agendamento && data_agendamento.includes('T')) {
-        data_agendamento = data_agendamento.replace('T', ' ').substring(0, 19);
-        if (data_agendamento.length === 16) data_agendamento += ':00';
-      }
+  if (!clinicaId) {
+    return res.status(403).json({ erro: 'Acesso negado: Clínica não identificada.' });
+  }
 
-      const connection = await db.getConnection();
-      try {
-        await connection.beginTransaction();
+  if (data_agendamento && data_agendamento.includes('T')) {
+    data_agendamento = data_agendamento.replace('T', ' ').substring(0, 19);
+    if (data_agendamento.length === 16) data_agendamento += ':00';
+  }
 
-        // 1. SELECT FOR UPDATE: Bloqueia a linha para garantir que ninguém mais mexa nela
-        const [rows] = await connection.query(
-          'SELECT id FROM agendamentos WHERE id = ? AND clinica_id = ? FOR UPDATE',
-          [agendamentoId, clinicaId]
-        );
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
 
-        if (rows.length === 0) {
-          throw new Error('Agendamento não encontrado ou não pertence a esta clínica.');
-        }
-        const [updateResult] = await connection.query(
-          `UPDATE agendamentos 
+    const [rows] = await connection.query(
+      'SELECT id FROM agendamentos WHERE id = ? AND clinica_id = ? FOR UPDATE',
+      [agendamentoId, clinicaId]
+    );
+
+    if (rows.length === 0) {
+      throw new Error('Agendamento não encontrado ou não pertence a esta clínica.');
+    }
+    const [updateResult] = await connection.query(
+      `UPDATE agendamentos 
        SET data_agendamento = ?, 
            status_agendamento = 'aguardando_sinal' 
        WHERE id = ? AND clinica_id = ?`,
-          [data_agendamento, agendamentoId, clinicaId]
-        );
+      [data_agendamento, agendamentoId, clinicaId]
+    );
 
-        if (updateResult.affectedRows === 0) {
-          throw new Error('Agendamento não encontrado ou não pertence a esta clínica.');
-        }
+    if (updateResult.affectedRows === 0) {
+      throw new Error('Agendamento não encontrado ou não pertence a esta clínica.');
+    }
 
-        // 2. Lógica Financeira Robusta
-        // Cancela qualquer financeiro aberto antigo para este agendamento
-        await connection.query(
-          "UPDATE financeiro SET status_pagamento = 'cancelado' WHERE agendamento_id = ? AND status_pagamento = 'aberto'",
-          [agendamentoId]
-        );
+    await connection.query(
+      "UPDATE financeiro SET status_pagamento = 'cancelado' WHERE agendamento_id = ? AND status_pagamento = 'aberto'",
+      [agendamentoId]
+    );
 
-        // Verifica se existia financeiro para copiar os dados
-        const [financeiroExistente] = await connection.query(
-          "SELECT id FROM financeiro WHERE agendamento_id = ? LIMIT 1",
-          [agendamentoId]
-        );
+    const [financeiroExistente] = await connection.query(
+      "SELECT id FROM financeiro WHERE agendamento_id = ? LIMIT 1",
+      [agendamentoId]
+    );
 
-        const novaData = data_agendamento.split(' ')[0];
+    const novaData = data_agendamento.split(' ')[0];
 
-        if (financeiroExistente.length > 0) {
-          // Se existia, criamos o novo registro espelhando o anterior
-          await connection.query(
-            `INSERT INTO financeiro (clinica_id, paciente_id, agendamento_id, tipo, descricao, valor, data_vencimento, status_pagamento) 
-             SELECT clinica_id, paciente_id, agendamento_id, tipo, descricao, valor, ?, 'aberto' 
-             FROM financeiro WHERE agendamento_id = ? LIMIT 1`,
-            [novaData, agendamentoId]
-          );
-        } else {
-          // Se NÃO existia, criamos um do zero para garantir que o financeiro não fique vazio
-          await connection.query(
-            `INSERT INTO financeiro (clinica_id, paciente_id, agendamento_id, tipo, descricao, valor, data_vencimento, status_pagamento) 
-             SELECT clinica_id, paciente_id, ?, 'receita', 'Consulta Reagendada', 0.00, ?, 'aberto' 
-             FROM agendamentos WHERE id = ?`,
-            [agendamentoId, novaData, agendamentoId]
-          );
-        }
+    if (financeiroExistente.length > 0) {
+      await connection.query(
+        `INSERT INTO financeiro (clinica_id, paciente_id, agendamento_id, tipo, descricao, valor, data_vencimento, status_pagamento) 
+         SELECT clinica_id, paciente_id, agendamento_id, tipo, descricao, valor, ?, 'aberto' 
+         FROM financeiro WHERE agendamento_id = ? LIMIT 1`,
+        [novaData, agendamentoId]
+      );
+    } else {
+      await connection.query(
+        `INSERT INTO financeiro (clinica_id, paciente_id, agendamento_id, tipo, descricao, valor, data_vencimento, status_pagamento) 
+         SELECT clinica_id, paciente_id, ?, 'receita', 'Consulta Reagendada', 0.00, ?, 'aberto' 
+         FROM agendamentos WHERE id = ?`,
+        [agendamentoId, novaData, agendamentoId]
+      );
+    }
 
-        // 3. Seleção para notificação
-        const [dados] = await connection.query(
-          'SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ? AND clinica_id = ?',
-          [agendamentoId, clinicaId]
-        );
+    const [dados] = await connection.query(
+      'SELECT nome, email, telefone, tipo_terapia FROM agendamentos WHERE id = ? AND clinica_id = ?',
+      [agendamentoId, clinicaId]
+    );
 
-        await connection.commit();
+    await connection.commit();
 
-        res.status(200).json({ mensagem: 'Reagendado com sucesso!' });
+    res.status(200).json({ mensagem: 'Reagendado com sucesso!' });
 
-        // 4. Notificações (E-mail e WhatsApp)
-        if (dados.length > 0) {
-          const pacienteInfo = dados[0];
+    if (dados.length > 0) {
+      const pacienteInfo = dados[0];
 
-          if (pacienteInfo.email) {
-            notificationService.sendEmailNotification({ ...pacienteInfo, data_agendamento }, true);
-          }
-
-          // Busca os dados da clínica para o WhatsApp
-          const [[clinicaDados]] = await db.query('SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?', [clinicaId]);
-
-          if (clinicaDados && pacienteInfo.telefone) {
-            whatsappAgendaService.notificarAgendamentoWhatsApp(clinicaDados, pacienteInfo, { data_agendamento }, 'reagendado')
-              .catch(err => console.error("[MED-LM] Erro no reagendamento via WhatsApp:", err));
-          }
-        }
-
-      } catch (err) {
-        if (connection) await connection.rollback();
-        res.status(500).json({ erro: err.message });
-      } finally {
-        connection.release();
-      }
-    };
-    // =============================================================================
-    // 6. BUSCAR UM AGENDAMENTO ESPECÍFICO (Para a Gaveta de Prontuário)
-    // =============================================================================
-    exports.obterDetalhesAgendamento = async (req, res) => {
-      if (!req.usuario) {
-        return res.status(401).json({ error: "Sessão inválida." });
+      if (pacienteInfo.email) {
+        notificationService.sendEmailNotification({ ...pacienteInfo, data_agendamento }, true);
       }
 
-      const { id } = req.params;
-      const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+      const [[clinicaDados]] = await db.query('SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?', [clinicaId]);
 
-      try {
-        const sql = `
+      if (clinicaDados && pacienteInfo.telefone) {
+        whatsappAgendaService.notificarAgendamentoWhatsApp(clinicaDados, pacienteInfo, { data_agendamento }, 'reagendado')
+          .catch(err => console.error("[MED-LM] Erro no reagendamento via WhatsApp:", err));
+      }
+    }
+
+  } catch (err) {
+    if (connection) await connection.rollback();
+    res.status(500).json({ erro: err.message });
+  } finally {
+    connection.release();
+  }
+};
+
+// =============================================================================
+// 6. BUSCAR UM AGENDAMENTO ESPECÍFICO (Para a Gaveta de Prontuário)
+// =============================================================================
+exports.obterDetalhesAgendamento = async (req, res) => {
+  if (!req.usuario) {
+    return res.status(401).json({ error: "Sessão inválida." });
+  }
+
+  const { id } = req.params;
+  const clinicaId = req.usuario ? req.usuario.clinica_id : null;
+
+  try {
+    const sql = `
       SELECT
         a.id, a.nome, a.cpf, a.email, a.telefone, a.tipo_terapia,
         a.motivo_consulta, '' AS observacoes, a.status_agendamento, a.data_agendamento,
@@ -549,22 +548,22 @@ exports.criarAgendamento = async (req, res) => {
       INNER JOIN pacientes p ON a.paciente_id = p.id
       WHERE a.id = ? AND a.clinica_id = ?
     `;
-        const [resultado] = await db.query(sql, [id, clinicaId]);
+    const [resultado] = await db.query(sql, [id, clinicaId]);
 
-        if (resultado.length === 0) {
-          return res.status(404).json({ erro: 'Agendamento/Prontuário não encontrado.' });
-        }
+    if (resultado.length === 0) {
+      return res.status(404).json({ erro: 'Agendamento/Prontuário não encontrado.' });
+    }
 
-        const ag = resultado[0];
+    const ag = resultado[0];
 
-        res.json({
-          ...ag,
-          data_formatada: new Date(ag.data_agendamento).toLocaleDateString('pt-BR'),
-          hora_formatada: new Date(ag.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
-        });
+    res.json({
+      ...ag,
+      data_formatada: new Date(ag.data_agendamento).toLocaleDateString('pt-BR'),
+      hora_formatada: new Date(ag.data_agendamento).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+    });
 
-      } catch (err) {
-        console.error("Erro interno no controller ao obter prontuário:", err);
-        res.status(500).json({ erro: 'Erro interno ao buscar dados do banco.' });
-      }
-    };
+  } catch (err) {
+    console.error("Erro interno no controller ao obter prontuário:", err);
+    res.status(500).json({ erro: 'Erro interno ao buscar dados do banco.' });
+  }
+};
