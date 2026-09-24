@@ -213,7 +213,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       })
     }).catch(() => { });
 
-    // 2. Força o arranque da instância (Garante que sai do estado 'close')
+    // 2. Força o start da instância para sair do estado 'close'
     await fetch(`${evolutionApiUrl}/instance/start/${instanceName}`, {
       method: 'GET',
       headers: { 'apikey': evolutionApiKey }
@@ -222,24 +222,37 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     let qrcodeBase64 = null;
     let estadoInstancia = 'close';
 
-    // 3. Tenta obter o QR Code com tentativas controladas
-    for (let tentativa = 1; tentativa <= 4; tentativa++) {
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Aguarda 2 segundos para o Baileys gerar
+    // 3. Loop de tentativas para capturar o QR Code assim que o Baileys gerar
+    for (let tentativa = 1; tentativa <= 5; tentativa++) {
+      await new Promise(resolve => setTimeout(resolve, 2500)); // Aguarda 2.5s entre as tentativas
 
-      const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
+      // Tenta buscar diretamente na rota de qrcode da Evolution API v2
+      const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
         method: 'GET',
         headers: { 'apikey': evolutionApiKey }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-
-        qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
-        estadoInstancia = data.instance?.state || data.state || estadoInstancia;
-
+      if (qrRes.ok) {
+        const qrData = await qrRes.json();
+        // Diferentes versões retornam o base64 em locais distintos
+        qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || qrData.pairingCode || null;
         if (qrcodeBase64) {
+          estadoInstancia = 'connecting';
           break;
         }
+      }
+
+      // Se não veio no qrCode, tenta pelo connect tradicional
+      const connRes = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
+        method: 'GET',
+        headers: { 'apikey': evolutionApiKey }
+      });
+
+      if (connRes.ok) {
+        const connData = await connRes.json();
+        qrcodeBase64 = connData.base64 || connData.qrcode?.base64 || connData.code || null;
+        estadoInstancia = connData.instance?.state || connData.state || estadoInstancia;
+        if (qrcodeBase64) break;
       }
     }
 
