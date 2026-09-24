@@ -130,6 +130,6 @@ exports.webhookMercadoPago = async (req, res) => {
         return res.status(200).json({ received: true });
     } catch (err) {
         console.error('[PAGAMENTO] Erro no webhook:', err);
-        return.status(500).json({ erro: 'Erro ao processar webhook.' });
+        return res.status(500).json({ erro: 'Erro ao processar webhook.' });
     }
 };
