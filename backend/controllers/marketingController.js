@@ -181,7 +181,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     res.json({
       instanceName,
       qrcode: qrcodeBase64,
-      status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'open')
+      status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'desconhecido')
     });
   } catch (err) {
     console.error('[MARKETING] Erro ao conectar instância:', err);
