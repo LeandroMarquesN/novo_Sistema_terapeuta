@@ -1089,6 +1089,71 @@
             window.addEventListener('scroll', aoRolar, { passive: true });
         })();
     </script>
+    <script>
+        // ─── LÓGICA DO PAINEL DE CRÉDITOS DE WHATSAPP ───
+
+async function carregarDadosCreditosWhatsApp() {
+    try {
+        const res = await fetch('/api/marketing/creditos-whatsapp', { headers });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const saldo = data.whatsapp_creditos || 0;
+        const totalComprado = data.total_comprado_mes || 0;
+
+        // Atualiza os elementos na tela
+        document.getElementById('saldoCreditosDisplay').textContent = saldo;
+        document.getElementById('totalCompradoDisplay').textContent = `${totalComprado} créditos`;
+        document.getElementById('mensagensGarantidasDisplay').textContent = `${saldo} envios`;
+
+        // Lógica do Banner de Alerta Inteligente (Avisa se saldo for menor que 50)
+        const banner = document.getElementById('bannerAlertaCreditos');
+        const textoAlerta = document.getElementById('textoAlertaCreditos');
+
+        if (saldo === 0) {
+            banner.classList.remove('hidden');
+            banner.className = "mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-semibold flex items-center justify-between gap-3 shadow-[0_0_15px_rgba(248,113,113,0.15)]";
+            textoAlerta.innerHTML = `<i class="fas fa-ban text-red-400 text-base"></i> Seus créditos de WhatsApp esgotaram! Faça uma recarga para continuar disparando campanhas.`;
+        } else if (saldo < 50) {
+            banner.classList.remove('hidden');
+            banner.className = "mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between gap-3 shadow-[0_0_15px_rgba(251,191,36,0.15)]";
+            textoAlerta.innerHTML = `<i class="fas fa-triangle-exclamation text-amber-400 text-base"></i> Atenção: restam apenas <strong>${saldo} créditos</strong> de WhatsApp em sua conta.`;
+        } else {
+            banner.classList.add('hidden');
+        }
+    } catch (err) {
+        console.error('Erro ao carregar créditos de WhatsApp:', err);
+    }
+}
+
+async function comprarCreditosWhatsApp(pacote) {
+    if (!confirm(`Deseja prosseguir para a compra do pacote de ${pacote} disparos de WhatsApp?`)) return;
+
+    try {
+        const res = await fetch('/api/pagamentos/criar-preferencia', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ pacote })
+        });
+        const data = await res.json();
+
+        if (data.init_point) {
+            // Redireciona o usuário para o Checkout Pro seguro do Mercado Pago
+            window.location.href = data.init_point;
+        } else {
+            alert(data.erro || 'Erro ao gerar link de pagamento.');
+        }
+    } catch (err) {
+        console.error('Erro na requisição de pagamento:', err);
+        alert('Falha ao conectar com o gateway de pagamento.');
+    }
+}
+
+// Executa ao carregar a página
+document.addEventListener('DOMContentLoaded', () => {
+    carregarDadosCreditosWhatsApp();
+});
+    </script>
 
     <script src="../ScriptGlobal/FuncDataHora.js"></script>
     <script src="../ScriptGlobal/DarkMode.js"></script>

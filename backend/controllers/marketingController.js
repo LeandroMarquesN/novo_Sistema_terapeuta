@@ -79,3 +79,25 @@ exports.listarCampanhas = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao listar campanhas.' });
   }
 };
+
+exports.obterCreditosWhatsApp = async (req, res) => {
+  try {
+    const clinicaId = req.usuario.clinica_id;
+    const [[clinica]] = await db.query('SELECT whatsapp_creditos FROM clinicas WHERE id = ?', [clinicaId]);
+
+    const [[estatisticas]] = await db.query(
+      `SELECT SUM(quantidade_creditos) as total_comprado_mes 
+       FROM whatsapp_compras_creditos 
+       WHERE clinica_id = ? AND status_pagamento = 'aprovado' AND MONTH(criado_em) = MONTH(CURDATE())`,
+      [clinicaId]
+    );
+
+    res.json({
+      whatsapp_creditos: clinica?.whatsapp_creditos || 0,
+      total_comprado_mes: estatisticas?.total_comprado_mes || 0
+    });
+  } catch (err) {
+    console.error('[MARKETING] Erro ao buscar créditos:', err);
+    res.status(500).json({ erro: 'Erro ao buscar créditos.' });
+  }
+};

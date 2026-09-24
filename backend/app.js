@@ -41,6 +41,7 @@ const atestadoRoutes = require('./routes/atestadoRoutes');
 const solicitacaoExameRoutes = require('./routes/solicitacaoExameRoutes');
 
 const anamneseRoutes = require('./routes/anamneseRoutes');
+const pagamentoRoutes = require('./routes/pagamentoRoutes'); // <--- ADICIONE ESTA LINHA
 
 
 // ...
@@ -115,6 +116,7 @@ app.use('/api/receitas', receitaRoutes);
 app.use('/api/atestados', atestadoRoutes);
 app.use('/api/solicitacoes-exames', solicitacaoExameRoutes);
 app.use('/api/anamnese', anamneseRoutes);
+app.use('/api/pagamentos', pagamentoRoutes); // <--- ADICIONE ESTA LINHA
 
 console.log("Rota /programa-fundadores montada com sucesso!");
 
