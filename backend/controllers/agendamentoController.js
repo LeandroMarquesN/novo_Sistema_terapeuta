@@ -7,7 +7,7 @@ const financeiroController = require('./financeiroController'); // Importe o con
 
 // Importa o serviço de notificações
 const notificationService = require('../services/notificationService');
-
+const whatsappAgendaService = require('../services/whatsappAgendaService');
 
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
@@ -188,6 +188,9 @@ exports.criarAgendamento = async (req, res) => {
     const [clinicaResult] = await connection.query('SELECT nome_clinica, telefone_clinica FROM clinicas WHERE id = ?', [clinicaId]);
     const dadosDaClinica = clinicaResult[0];
 
+    // Busca o telefone do paciente recém-criado/atualizado para o WhatsApp
+    const [[pacienteDados]] = await connection.query('SELECT nome, telefone FROM pacientes WHERE id = ?', [paciente_id]);
+
     if (email && dadosDaClinica) {
       const dadosDoAgendamento = {
         nome: nome,
@@ -201,6 +204,12 @@ exports.criarAgendamento = async (req, res) => {
 
       notificationService.sendEmailNotification(dadosDaClinica, dadosDoAgendamento)
         .catch(err => console.error("[MED-LM] Erro no envio de e-mail:", err));
+    }
+
+    // 🚀 DISPARO AUTOMÁTICO DE WHATSAPP (Em background)
+    if (pacienteDados && pacienteDados.telefone && dadosDaClinica) {
+      whatsappAgendaService.notificarAgendamentoWhatsApp(dadosDaClinica, pacienteDados, { data_agendamento }, 'criado')
+        .catch(err => console.error("[MED-LM] Erro no envio automático de WhatsApp:", err));
     }
 
     return res.status(201).json({
@@ -482,10 +491,23 @@ exports.reagendarAgendamento = async (req, res) => {
 
     res.status(200).json({ mensagem: 'Reagendado com sucesso!' });
 
-    // 4. Notificação
-    if (dados.length > 0 && dados[0].email) {
-      notificationService.sendEmailNotification({ ...dados[0], data_agendamento }, true);
+    // 4. Notificações (E-mail e WhatsApp)
+    if (dados.length > 0) {
+      const pacienteInfo = dados[0];
+
+      if (pacienteInfo.email) {
+        notificationService.sendEmailNotification({ ...pacienteInfo, data_agendamento }, true);
+      }
+
+      // Busca os dados da clínica para o WhatsApp
+      const [[clinicaDados]] = await db.query('SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?', [clinicaId]);
+
+      if (clinicaDados && pacienteInfo.telefone) {
+        whatsappAgendaService.notificarAgendamentoWhatsApp(clinicaDados, pacienteInfo, { data_agendamento }, 'reagendado')
+          .catch(err => console.error("[MED-LM] Erro no reagendamento via WhatsApp:", err));
+      }
     }
+
   } catch (err) {
     if (connection) await connection.rollback();
     res.status(500).json({ erro: err.message });
