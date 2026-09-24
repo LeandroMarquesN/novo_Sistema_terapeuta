@@ -11,6 +11,6 @@ router.post('/criar-preferencia', authMiddleware, pagamentoController.criarPrefe
 router.post('/webhook', pagamentoController.webhookMercadoPago);
 
 // Rota de teste temporária (remova depois que testar)
-router.post('/simular-teste', authMiddleware, pagamentoController.simularPagamentoTeste);
+// router.post('/simular-teste', authMiddleware, pagamentoController.simularPagamentoTeste);
 
 module.exports = router;
