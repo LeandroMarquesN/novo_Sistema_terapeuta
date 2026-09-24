@@ -102,3 +102,46 @@ exports.obterCreditosWhatsApp = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao buscar créditos.' });
   }
 };
+// Adicionar em controllers/marketingController.js
+exports.conectarInstanciaWhatsApp = async (req, res) => {
+  try {
+    const clinicaId = req.usuario.clinica_id;
+    const [[clinica]] = await db.query('SELECT id, telefone_clinica, nome_clinica FROM clinicas WHERE id = ?', [clinicaId]);
+
+    if (!clinica || !clinica.telefone_clinica) {
+      return res.status(400).json({ erro: 'Cadastre o telefone oficial da clínica antes de conectar o WhatsApp.' });
+    }
+
+    const instanceName = `clinica_${clinicaId}`;
+    const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
+    const evolutionApiKey = process.env.EVOLUTION_API_KEY;
+
+    // 1. Tenta criar a instância na Evolution API
+    await fetch(`${evolutionApiUrl}/instance/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
+      body: JSON.stringify({
+        instanceName,
+        token: evolutionApiKey,
+        qrcode: true,
+        integration: 'WHATSAPP-BAILEYS'
+      })
+    }).catch(() => { }); // Ignora se já existir
+
+    // 2. Solicita o QR Code / Conexão
+    const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
+      method: 'GET',
+      headers: { 'apikey': evolutionApiKey }
+    });
+
+    const data = await response.json();
+    res.json({
+      instanceName,
+      qrcode: data.base64 || data.qrcode?.base64 || null,
+      status: data.instance?.state || 'connecting'
+    });
+  } catch (err) {
+    console.error('[MARKETING] Erro ao conectar instância:', err);
+    res.status(500).json({ erro: 'Erro ao gerar QR Code do WhatsApp.' });
+  }
+};

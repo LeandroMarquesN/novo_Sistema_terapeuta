@@ -240,6 +240,29 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', atualizarProgresso);
     atualizarProgresso();
 })();
+async function conectarWhatsAppInstance() {
+    const modal = document.getElementById('modalQrCode');
+    const container = document.getElementById('qrCodeContainer');
+    modal.classList.remove('hidden');
+    container.innerHTML = '<span class="text-slate-800 text-xs font-semibold animate-pulse">Solicitando QR Code...</span>';
+
+    try {
+        const res = await fetch('/api/marketing/whatsapp/conectar');
+        const data = await res.json();
+
+        if (data.qrcode) {
+            container.innerHTML = `<img src="${data.qrcode}" alt="QR Code WhatsApp" class="w-48 h-48 object-contain mx-auto">`;
+        } else {
+            container.innerHTML = '<p class="text-xs text-emerald-600 font-bold">Instância já conectada ou ativa com sucesso!</p>';
+        }
+    } catch (e) {
+        container.innerHTML = '<p class="text-xs text-red-500 font-semibold">Erro ao comunicar com a Evolution API.</p>';
+    }
+}
+
+function fecharModalQrCode() {
+    document.getElementById('modalQrCode').classList.add('hidden');
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     carregarDadosCreditosWhatsApp();

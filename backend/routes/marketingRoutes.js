@@ -6,6 +6,7 @@ const marketingController = require('../controllers/marketingController');
 
 router.use(auth);
 
+router.get('/whatsapp/conectar', marketingController.conectarInstanciaWhatsApp);
 router.get('/creditos-whatsapp', marketingController.obterCreditosWhatsApp);
 router.get('/pacientes/buscar', marketingController.buscarPacientes);
 router.get('/publico-alvo', marketingController.previaPublicoAlvo);
