@@ -1,3 +1,16 @@
+
+tailwind.config = {
+    darkMode: 'class',
+    theme: {
+        extend: {
+            fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+                space: ['Space Grotesk', 'sans-serif']
+            }
+        }
+    }
+}
+
 const token = localStorage.getItem('token');
 const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
