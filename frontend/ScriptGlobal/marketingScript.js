@@ -162,6 +162,85 @@ document.addEventListener('DOMContentLoaded', () => {
     atualizarPreview();
 });
 
+// ─── Barra de progresso, menu de navegação (drawer) mobile e comportamento de scroll das barras fixas ───
+(function () {
+    'use strict';
+
+    /* 1. Barra de progresso de leitura */
+    var progressBar = document.getElementById('scroll-progress');
+    function atualizarProgresso() {
+        if (!progressBar) return;
+        var alturaTotal = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        var percentual = alturaTotal > 0 ? (window.scrollY / alturaTotal) * 100 : 0;
+        progressBar.style.width = percentual + '%';
+    }
+
+    /* 2. Drawer de navegação mobile (menu lateral em telas pequenas/médias) */
+    var btnAbrir = document.getElementById('btnOpenDrawer');
+    var btnFechar = document.getElementById('btnCloseDrawer');
+    var overlay = document.getElementById('drawerOverlay');
+    var drawer = document.getElementById('mobileDrawer');
+
+    function abrirDrawer() {
+        if (!drawer || !overlay) return;
+        drawer.classList.add('open');
+        overlay.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        if (btnAbrir) btnAbrir.setAttribute('aria-expanded', 'true');
+    }
+    function fecharDrawer() {
+        if (!drawer || !overlay) return;
+        drawer.classList.remove('open');
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+        if (btnAbrir) btnAbrir.setAttribute('aria-expanded', 'false');
+    }
+
+    if (btnAbrir) btnAbrir.addEventListener('click', abrirDrawer);
+    if (btnFechar) btnFechar.addEventListener('click', fecharDrawer);
+    if (overlay) overlay.addEventListener('click', fecharDrawer);
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') fecharDrawer();
+    });
+    // Fecha o drawer automaticamente ao navegar para um item do menu
+    if (drawer) {
+        drawer.querySelectorAll('a.nav-item').forEach(function (link) {
+            link.addEventListener('click', fecharDrawer);
+        });
+    }
+
+    /* 3. Comportamento padrão de scroll para topbar/tabbar em telas pequenas e médias:
+          somem durante o scroll e voltam a aparecer assim que o scroll para. */
+    var topbar = document.querySelector('.mobile-topbar');
+    var tabbar = document.querySelector('.mobile-bottom-tabbar');
+    var scrollStopTimer = null;
+    var SCROLL_STOP_DELAY = 600;
+    var ultimoScrollY = window.scrollY;
+
+    function aoRolar() {
+        atualizarProgresso();
+
+        var deltaY = window.scrollY - ultimoScrollY;
+        ultimoScrollY = window.scrollY;
+
+        // Só reage à rolagem em telas pequenas/médias (nav mobile ativo)
+        if (window.innerWidth < 1024 && Math.abs(deltaY) > 2) {
+            if (tabbar) tabbar.classList.add('tabbar-hidden');
+            if (topbar) topbar.classList.add('topbar-hidden');
+        }
+
+        clearTimeout(scrollStopTimer);
+        scrollStopTimer = setTimeout(function () {
+            if (tabbar) tabbar.classList.remove('tabbar-hidden');
+            if (topbar) topbar.classList.remove('topbar-hidden');
+        }, SCROLL_STOP_DELAY);
+    }
+
+    window.addEventListener('scroll', aoRolar, { passive: true });
+    window.addEventListener('resize', atualizarProgresso);
+    atualizarProgresso();
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
     carregarDadosCreditosWhatsApp();
     atualizarContadorPublico?.();

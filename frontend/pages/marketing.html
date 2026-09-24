@@ -39,9 +39,10 @@
 
         /* ─── Sidebar (Desktop) — Elegante, moderna e sem sombra pesada ─── */
         aside.sidebar-desktop {
-            background: rgba(2,12,18,0.92) !important;
+            background: rgba(2,12,18,0.78) !important;
             border-right: 1px solid var(--border) !important;
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(22px) saturate(150%);
+            -webkit-backdrop-filter: blur(22px) saturate(150%);
         }
         .logo-block { border-bottom: 1px solid var(--border); }
         .logo-icon {
@@ -94,19 +95,25 @@
         }
 
         .cyber-panel {
-            background: #06131c !important;
+            background: rgba(6, 19, 28, 0.55) !important;
             border: 1px solid rgba(34, 211, 238, 0.18) !important;
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03);
             position: relative;
             overflow: hidden;
         }
 
         .cyber-card-premium {
-            background: #081924 !important;
+            background: rgba(8, 25, 36, 0.45) !important;
             border: 1px solid rgba(52, 211, 153, 0.15) !important;
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .cyber-card-premium:hover {
             border-color: rgba(34, 211, 238, 0.4) !important;
+            transform: translateY(-1px);
         }
 
         .glow-line::before {
@@ -240,11 +247,13 @@
             .mobile-topbar, .mobile-bottom-tabbar { display: flex !important; }
             .mobile-topbar {
                 position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 64px;
-                background: rgba(2, 12, 18, 0.95);
+                background: rgba(2, 12, 18, 0.75);
                 border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-                backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+                backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%);
                 align-items: center; justify-content: space-between; padding: 0 16px;
+                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
             }
+            .mobile-topbar.topbar-hidden { transform: translateY(-100%); }
             .mobile-topbar .logo-wrap { display: flex; align-items: center; gap: 10px; }
             .mobile-topbar .logo-icon {
                 width: 38px; height: 38px; border-radius: 12px;
@@ -271,8 +280,10 @@
             .mobile-drawer {
                 display: flex; flex-direction: column; position: fixed;
                 top: 0; left: 0; bottom: 0; width: min(300px, 85vw);
-                background: rgba(4, 16, 24, 0.98);
+                background: rgba(4, 16, 24, 0.88);
+                backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
                 border-right: 1px solid rgba(52,211,153,0.18);
+                box-shadow: 8px 0 40px rgba(0,0,0,0.4);
                 z-index: 80; transform: translateX(-105%);
                 transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); padding: 0;
             }
@@ -311,8 +322,9 @@
             .mobile-bottom-tabbar {
                 position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0));
                 left: 14px; right: 14px; z-index: 60; height: 70px;
-                background: rgba(4, 16, 24, 0.92); border: 1px solid rgba(52, 211, 153, 0.15);
-                border-radius: 26px; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+                background: rgba(4, 16, 24, 0.75); border: 1px solid rgba(52, 211, 153, 0.15);
+                border-radius: 26px; backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.35);
                 align-items: center; justify-content: space-around; padding: 0 6px;
                 transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
                 transform: translateY(0); opacity: 1;
@@ -328,7 +340,6 @@
         }
 
         @media (min-width: 1024px) {
-            #sidebarMenu:hover { width: 16rem; }
             .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer, .mobile-drawer-overlay { display: none !important; }
         }
     </style>
@@ -383,10 +394,10 @@
         <a href="/dashboard/configuracoes" class="tab-item"><i class="fas fa-user-cog"></i><span>Perfil</span></a>
     </nav>
 
-    <div class="flex w-full min-h-screen relative group">
+    <div class="flex w-full min-h-screen relative">
 
         <!-- Sidebar Desktop — Padrão unificado do sistema -->
-        <aside id="sidebarMenu" class="sidebar-desktop fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group flex flex-col justify-between">
+        <aside id="sidebarMenu" class="sidebar-desktop peer fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 ease-out h-screen overflow-hidden group flex flex-col justify-between">
             <div class="flex flex-col">
                 <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
                     <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">M</div>
@@ -440,7 +451,7 @@
         </aside>
 
         <!-- Conteúdo Principal -->
-        <main class="flex-1 min-h-screen pl-20 lg:group-hover:pl-64 flex flex-col transition-all duration-300 w-full">
+        <main class="flex-1 min-h-screen pl-20 lg:peer-hover:pl-64 flex flex-col transition-all duration-300 ease-out w-full">
             <div class="container-fluid p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-[1600px] mx-auto w-full">
 
                 <!-- Cabeçalho -->
@@ -571,7 +582,7 @@
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Título interno</label>
                                     <input id="campoTitulo" type="text" placeholder="Ex: Aviso de feriado prolongado"
-                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs font-semibold">
+                                        class="w-full p-3 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-semibold">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -579,7 +590,7 @@
                                     </label>
                                     <input id="campoAssunto" type="text" maxlength="60" placeholder="Ex: Estaremos fechados nesta sexta"
                                         oninput="document.getElementById('contadorAssunto').textContent = this.value.length + '/60'"
-                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs font-semibold">
+                                        class="w-full p-3 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-semibold">
                                 </div>
                             </div>
 
@@ -595,7 +606,7 @@
                                     <button type="button" class="toolbar-btn" onclick="inserirVariavel('{{nome_paciente}}')" title="Inserir nome do paciente"><i class="fas fa-user-tag"></i></button>
                                 </div>
                                 <div id="campoCorpo" contenteditable="true"
-                                    class="w-full min-h-[180px] p-4 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs font-medium leading-relaxed"
+                                    class="w-full min-h-[180px] p-4 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-medium leading-relaxed"
                                     oninput="atualizarPreview()"
                                     data-placeholder="Olá {{nome_paciente}}, ..."></div>
                             </div>
@@ -626,7 +637,7 @@
                                     <div class="autocomplete-wrap">
                                         <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs" style="z-index:1"></i>
                                         <input id="campoBuscaPaciente" type="text" placeholder="Digite o nome ou CPF do paciente..." autocomplete="off"
-                                            class="w-full pl-9 pr-3 py-2.5 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs">
+                                            class="w-full pl-9 pr-3 py-2.5 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs">
                                         <div id="autocompleteLista" class="autocomplete-lista"></div>
                                     </div>
                                     <div id="listaPacientesSelecionados" class="flex flex-wrap gap-2"></div>
@@ -683,7 +694,7 @@
                     <div class="overflow-x-auto w-full">
                         <table class="min-w-full divide-y divide-white/5">
                             <thead>
-                                <tr class="bg-[#030e17] text-cyan-400 uppercase text-[10px] font-black tracking-widest border-b border-white/5">
+                                <tr class="bg-[#030e17]/70 backdrop-blur-sm text-cyan-400 uppercase text-[10px] font-black tracking-widest border-b border-white/5">
                                     <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Campanha</th>
                                     <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Público</th>
                                     <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Status</th>
