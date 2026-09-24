@@ -201,7 +201,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'http://167.233.99.211:8080';
     const evolutionApiKey = process.env.EVOLUTION_API_KEY || '9deee09f44ae8f7e0e65d7811d1c08a5';
 
-    // 1. Tenta criar a instância caso ela não exista
+    // 1. Assegura que a instância existe
     await fetch(`${evolutionApiUrl}/instance/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
@@ -213,11 +213,19 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       })
     }).catch(() => { });
 
+    // 2. Força o arranque da instância (Garante que sai do estado 'close')
+    await fetch(`${evolutionApiUrl}/instance/start/${instanceName}`, {
+      method: 'GET',
+      headers: { 'apikey': evolutionApiKey }
+    }).catch(() => { });
+
     let qrcodeBase64 = null;
     let estadoInstancia = 'close';
 
-    // 2. Na v2 da Evolution API, o endpoint correto para forçar e obter o QR code é o /instance/connect
-    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    // 3. Tenta obter o QR Code com tentativas controladas
+    for (let tentativa = 1; tentativa <= 4; tentativa++) {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Aguarda 2 segundos para o Baileys gerar
+
       const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
         method: 'GET',
         headers: { 'apikey': evolutionApiKey }
@@ -226,18 +234,12 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       if (response.ok) {
         const data = await response.json();
 
-        // Verifica as estruturas mais comuns de retorno da v2
         qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
         estadoInstancia = data.instance?.state || data.state || estadoInstancia;
 
         if (qrcodeBase64) {
           break;
         }
-      }
-
-      // Se falhar ou vier vazio, aguarda 2 segundos antes de tentar de novo
-      if (tentativa < 3) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
       }
     }
 
