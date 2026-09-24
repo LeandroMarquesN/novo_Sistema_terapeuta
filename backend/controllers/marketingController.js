@@ -81,113 +81,7 @@ exports.listarCampanhas = async (req, res) => {
   }
 };
 
-exports.obterCreditosWhatsApp = async (req, res) => {
-  try {
-    const clinicaId = req.usuario.clinica_id;
-    const [[clinica]] = await db.query('SELECT whatsapp_creditos FROM clinicas WHERE id = ?', [clinicaId]);
-
-    const [[estatisticas]] = await db.query(
-      `SELECT SUM(quantidade_creditos) as total_comprado_mes 
-       FROM whatsapp_compras_creditos 
-       WHERE clinica_id = ? AND status_pagamento = 'aprovado' AND MONTH(criado_em) = MONTH(CURDATE())`,
-      [clinicaId]
-    );
-
-    res.json({
-      whatsapp_creditos: clinica?.whatsapp_creditos || 0,
-      total_comprado_mes: estatisticas?.total_comprado_mes || 0
-    });
-  } catch (err) {
-    console.error('[MARKETING] Erro ao buscar créditos:', err);
-    res.status(500).json({ erro: 'Erro ao buscar créditos.' });
-  }
-};
-// Adicionar em controllers/marketingController.js
-// Substituir em controllers/marketingController.js
-// exports.conectarInstanciaWhatsApp = async (req, res) => {
-//   try {
-//     const clinicaId = req.usuario.clinica_id;
-//     const [[clinica]] = await db.query('SELECT id, telefone_clinica, nome_clinica FROM clinicas WHERE id = ?', [clinicaId]);
-
-//     if (!clinica || !clinica.telefone_clinica) {
-//       return res.status(400).json({ erro: 'Cadastre o telefone oficial da clínica antes de conectar o WhatsApp.' });
-//     }
-
-//     const instanceName = `clinica_${clinicaId}`;
-//     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
-//     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
-
-//     if (!evolutionApiKey) {
-//       console.error('[MARKETING] EVOLUTION_API_KEY não está definida nas variáveis de ambiente.');
-//       return res.status(500).json({ erro: 'Configuração ausente: EVOLUTION_API_KEY não definida no servidor.' });
-//     }
-//     console.log(`[MARKETING] Conectando instância "${instanceName}" via ${evolutionApiUrl}`);
-
-//     // 1. Assegura que a instância existe na Evolution API
-//     try {
-//       const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
-//         body: JSON.stringify({
-//           instanceName,
-//           token: evolutionApiKey,
-//           qrcode: true,
-//           integration: 'WHATSAPP-BAILEYS'
-//         })
-//       });
-//       if (!createRes.ok && createRes.status !== 403) {
-//         // 403 costuma significar "instância já existe" em algumas versões da Evolution API — não é um erro fatal aqui.
-//         const corpoErro = await createRes.text().catch(() => '');
-//         console.warn(`[MARKETING] instance/create retornou ${createRes.status}: ${corpoErro}`);
-//       }
-//     } catch (errCreate) {
-//       console.error('[MARKETING] Falha de rede ao chamar instance/create na Evolution API:', errCreate.message);
-//       return res.status(502).json({ erro: `Não foi possível conectar à Evolution API em ${evolutionApiUrl}. Verifique a URL/host e se o serviço está no ar.` });
-//     }
-
-//     // 2. Tenta buscar o QR Code na rota de conexão
-//     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
-//       method: 'GET',
-//       headers: { 'apikey': evolutionApiKey }
-//     });
-
-//     if (!response.ok) {
-//       const corpoErro = await response.text().catch(() => '');
-//       console.error(`[MARKETING] instance/connect retornou ${response.status}: ${corpoErro}`);
-//       return res.status(502).json({ erro: `Evolution API respondeu com erro ${response.status} ao tentar conectar.` });
-//     }
-
-//     const data = await response.json();
-
-//     // Varredura abrangente para capturar o base64 do QR code em qualquer variação da Evolution API
-//     let qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
-
-//     // Se o connect não retornou o base64 diretamente, tentamos forçar o fetch do QR code separadamente
-//     if (!qrcodeBase64 && (!data.instance || data.instance.state !== 'open')) {
-//       const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
-//         method: 'GET',
-//         headers: { 'apikey': evolutionApiKey }
-//       }).catch((errQr) => {
-//         console.error('[MARKETING] Falha ao buscar /instance/qrCode:', errQr.message);
-//         return null;
-//       });
-
-//       if (qrRes && qrRes.ok) {
-//         const qrData = await qrRes.json();
-//         qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
-//       }
-//     }
-
-//     res.json({
-//       instanceName,
-//       qrcode: qrcodeBase64,
-//       status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'desconhecido')
-//     });
-//   } catch (err) {
-//     console.error('[MARKETING] Erro ao conectar instância:', err);
-//     res.status(500).json({ erro: 'Erro ao gerar QR Code do WhatsApp.' });
-//   }
-// };
+// Substituir a função conectarInstanciaWhatsApp em controllers/marketingController.js
 exports.conectarInstanciaWhatsApp = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
@@ -201,8 +95,21 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'http://167.233.99.211:8080';
     const evolutionApiKey = process.env.EVOLUTION_API_KEY || '9deee09f44ae8f7e0e65d7811d1c08a5';
 
-    // 1. Assegura que a instância existe
-    await fetch(`${evolutionApiUrl}/instance/create`, {
+    console.log(`[MARKETING] Limpando e reiniciando instância "${instanceName}" para nova conexão...`);
+
+    // 1. Limpeza rigorosa: Tenta dar logout e deletar a instância anterior para não acumular lixo no Redis/VPS
+    await fetch(`${evolutionApiUrl}/instance/logout/${instanceName}`, {
+      method: 'DELETE',
+      headers: { 'apikey': evolutionApiKey }
+    }).catch(() => { });
+
+    await fetch(`${evolutionApiUrl}/instance/delete/${instanceName}`, {
+      method: 'DELETE',
+      headers: { 'apikey': evolutionApiKey }
+    }).catch(() => { });
+
+    // 2. Cria uma instância totalmente nova e limpa
+    const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
       body: JSON.stringify({
@@ -211,48 +118,33 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
         qrcode: true,
         integration: 'WHATSAPP-BAILEYS'
       })
-    }).catch(() => { });
+    });
 
-    // 2. Força o start da instância para sair do estado 'close'
-    await fetch(`${evolutionApiUrl}/instance/start/${instanceName}`, {
-      method: 'GET',
-      headers: { 'apikey': evolutionApiKey }
-    }).catch(() => { });
+    if (!createRes.ok) {
+      const errTxt = await createRes.text().catch(() => '');
+      console.warn(`[MARKETING] Aviso ao criar instância: ${errTxt}`);
+    }
 
     let qrcodeBase64 = null;
     let estadoInstancia = 'close';
 
-    // 3. Loop de tentativas para capturar o QR Code assim que o Baileys gerar
-    for (let tentativa = 1; tentativa <= 5; tentativa++) {
-      await new Promise(resolve => setTimeout(resolve, 2500)); // Aguarda 2.5s entre as tentativas
+    // 3. Loop rápido para capturar o QR Code recém-gerado pela Evolution API
+    for (let tentativa = 1; tentativa <= 4; tentativa++) {
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Aguarda 2 segundos entre as tentativas
 
-      // Tenta buscar diretamente na rota de qrcode da Evolution API v2
-      const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
+      const qrRes = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
         method: 'GET',
         headers: { 'apikey': evolutionApiKey }
       });
 
       if (qrRes.ok) {
         const qrData = await qrRes.json();
-        // Diferentes versões retornam o base64 em locais distintos
-        qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || qrData.pairingCode || null;
+        qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
+        estadoInstancia = qrData.instance?.state || qrData.state || estadoInstancia;
+
         if (qrcodeBase64) {
-          estadoInstancia = 'connecting';
           break;
         }
-      }
-
-      // Se não veio no qrCode, tenta pelo connect tradicional
-      const connRes = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
-        method: 'GET',
-        headers: { 'apikey': evolutionApiKey }
-      });
-
-      if (connRes.ok) {
-        const connData = await connRes.json();
-        qrcodeBase64 = connData.base64 || connData.qrcode?.base64 || connData.code || null;
-        estadoInstancia = connData.instance?.state || connData.state || estadoInstancia;
-        if (qrcodeBase64) break;
       }
     }
 
