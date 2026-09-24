@@ -116,20 +116,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
 
-    // 1. Verifica o estado atual da instância na Evolution API
-    const stateRes = await fetch(`${evolutionApiUrl}/instance/connectionState/${instanceName}`, {
-      method: 'GET',
-      headers: { 'apikey': evolutionApiKey }
-    }).catch(() => null);
-
-    const stateData = stateRes ? await stateRes.json() : null;
-    const isConnected = stateData?.instance?.state === 'open';
-
-    if (isConnected) {
-      return res.json({ instanceName, qrcode: null, status: 'open' });
-    }
-
-    // 2. Se não estiver conectada, tenta criar a instância caso não exista
+    // 1. Cria a instância na Evolution API (caso não exista)
     await fetch(`${evolutionApiUrl}/instance/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
@@ -141,16 +128,20 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       })
     }).catch(() => { });
 
-    // 3. Força a obtenção/geração do QR Code
+    // 2. Busca o QR Code diretamente na rota de conexão
     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
       headers: { 'apikey': evolutionApiKey }
     });
 
     const data = await response.json();
+
+    // A Evolution API pode retornar o base64 em diferentes estruturas dependendo da versão exata
+    const qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
+
     res.json({
       instanceName,
-      qrcode: data.base64 || data.qrcode?.base64 || null,
+      qrcode: qrcodeBase64,
       status: data.instance?.state || 'connecting'
     });
   } catch (err) {
