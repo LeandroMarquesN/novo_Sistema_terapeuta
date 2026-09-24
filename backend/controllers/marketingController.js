@@ -116,7 +116,20 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
 
-    // 1. Tenta criar a instância na Evolution API
+    // 1. Verifica o estado atual da instância na Evolution API
+    const stateRes = await fetch(`${evolutionApiUrl}/instance/connectionState/${instanceName}`, {
+      method: 'GET',
+      headers: { 'apikey': evolutionApiKey }
+    }).catch(() => null);
+
+    const stateData = stateRes ? await stateRes.json() : null;
+    const isConnected = stateData?.instance?.state === 'open';
+
+    if (isConnected) {
+      return res.json({ instanceName, qrcode: null, status: 'open' });
+    }
+
+    // 2. Se não estiver conectada, tenta criar a instância caso não exista
     await fetch(`${evolutionApiUrl}/instance/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
@@ -126,9 +139,9 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
         qrcode: true,
         integration: 'WHATSAPP-BAILEYS'
       })
-    }).catch(() => { }); // Ignora se já existir
+    }).catch(() => { });
 
-    // 2. Solicita o QR Code / Conexão
+    // 3. Força a obtenção/geração do QR Code
     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
       headers: { 'apikey': evolutionApiKey }
