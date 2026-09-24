@@ -247,25 +247,15 @@ async function conectarWhatsAppInstance() {
     container.innerHTML = '<span class="text-slate-800 text-xs font-semibold animate-pulse">Solicitando QR Code...</span>';
 
     try {
-        const res = await fetch('/api/marketing/whatsapp/conectar', { headers });
+        const res = await fetch('/api/marketing/whatsapp/conectar');
         const data = await res.json();
 
-        if (!res.ok) {
-            container.innerHTML = `<p class="text-xs text-red-500 font-semibold px-2">${data.erro || 'Erro ao gerar QR Code do WhatsApp.'}</p>`;
-            return;
-        }
-
         if (data.qrcode) {
-            // A Evolution API pode retornar o base64 puro ou já com o prefixo data:image/...
-            const src = data.qrcode.startsWith('data:') ? data.qrcode : `data:image/png;base64,${data.qrcode}`;
-            container.innerHTML = `<img src="${src}" alt="QR Code WhatsApp" class="w-48 h-48 object-contain mx-auto">`;
-        } else if (data.status === 'open') {
-            container.innerHTML = '<p class="text-xs text-emerald-600 font-bold">Instância já conectada ou ativa com sucesso!</p>';
+            container.innerHTML = `<img src="${data.qrcode}" alt="QR Code WhatsApp" class="w-48 h-48 object-contain mx-auto">`;
         } else {
-            container.innerHTML = '<p class="text-xs text-amber-600 font-semibold px-2">Nenhum QR Code retornado pela Evolution API. Tente novamente em alguns segundos.</p>';
+            container.innerHTML = '<p class="text-xs text-emerald-600 font-bold">Instância já conectada ou ativa com sucesso!</p>';
         }
     } catch (e) {
-        console.error('[WHATSAPP] Erro ao conectar instância:', e);
         container.innerHTML = '<p class="text-xs text-red-500 font-semibold">Erro ao comunicar com a Evolution API.</p>';
     }
 }

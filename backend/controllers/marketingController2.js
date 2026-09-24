@@ -117,45 +117,23 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
 
-    if (!evolutionApiKey) {
-      console.error('[MARKETING] EVOLUTION_API_KEY não está definida nas variáveis de ambiente.');
-      return res.status(500).json({ erro: 'Configuração ausente: EVOLUTION_API_KEY não definida no servidor.' });
-    }
-    console.log(`[MARKETING] Conectando instância "${instanceName}" via ${evolutionApiUrl}`);
-
     // 1. Assegura que a instância existe na Evolution API
-    try {
-      const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
-        body: JSON.stringify({
-          instanceName,
-          token: evolutionApiKey,
-          qrcode: true,
-          integration: 'WHATSAPP-BAILEYS'
-        })
-      });
-      if (!createRes.ok && createRes.status !== 403) {
-        // 403 costuma significar "instância já existe" em algumas versões da Evolution API — não é um erro fatal aqui.
-        const corpoErro = await createRes.text().catch(() => '');
-        console.warn(`[MARKETING] instance/create retornou ${createRes.status}: ${corpoErro}`);
-      }
-    } catch (errCreate) {
-      console.error('[MARKETING] Falha de rede ao chamar instance/create na Evolution API:', errCreate.message);
-      return res.status(502).json({ erro: `Não foi possível conectar à Evolution API em ${evolutionApiUrl}. Verifique a URL/host e se o serviço está no ar.` });
-    }
+    await fetch(`${evolutionApiUrl}/instance/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
+      body: JSON.stringify({
+        instanceName,
+        token: evolutionApiKey,
+        qrcode: true,
+        integration: 'WHATSAPP-BAILEYS'
+      })
+    }).catch(() => { });
 
     // 2. Tenta buscar o QR Code na rota de conexão
     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
       headers: { 'apikey': evolutionApiKey }
     });
-
-    if (!response.ok) {
-      const corpoErro = await response.text().catch(() => '');
-      console.error(`[MARKETING] instance/connect retornou ${response.status}: ${corpoErro}`);
-      return res.status(502).json({ erro: `Evolution API respondeu com erro ${response.status} ao tentar conectar.` });
-    }
 
     const data = await response.json();
 
@@ -167,10 +145,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
         method: 'GET',
         headers: { 'apikey': evolutionApiKey }
-      }).catch((errQr) => {
-        console.error('[MARKETING] Falha ao buscar /instance/qrCode:', errQr.message);
-        return null;
-      });
+      }).catch(() => null);
 
       if (qrRes && qrRes.ok) {
         const qrData = await qrRes.json();
