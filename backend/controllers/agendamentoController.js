@@ -194,9 +194,10 @@ exports.criarAgendamento = async (req, res) => {
         console.warn(`[MED-LM] ⚠️ Aviso: Clínica ID ${clinicaId} não encontrada para envio de notificações.`);
       }
 
+      // Busca os dados diretamente do agendamento recém-criado para garantir o telefone
       const [[pacienteDados]] = await connection.query(
-        'SELECT nome, telefone FROM pacientes WHERE id = ?',
-        [paciente_id]
+        'SELECT nome, telefone FROM agendamentos WHERE id = ?',
+        [agendamentoId]
       );
 
       // Processamento do E-mail
@@ -217,12 +218,12 @@ exports.criarAgendamento = async (req, res) => {
           .catch(emailErr => console.error("[MED-LM] ❌ Erro crítico no envio de e-mail:", emailErr.message));
       }
 
-      // Processamento do WhatsApp corrigido
+      // Processamento do WhatsApp corrigido buscando da tabela agendamentos
       if (pacienteDados && pacienteDados.telefone && dadosDaClinica) {
         console.log(`[AGENDAMENTO] Iniciando disparo de WhatsApp para ${pacienteDados.nome} (${pacienteDados.telefone})...`);
         try {
           const mensagemTexto = `Olá ${pacienteDados.nome}, seu agendamento na ${dadosDaClinica.nome_clinica} foi realizado com sucesso para a data: ${new Date(data_agendamento).toLocaleString('pt-BR')}.`;
-          
+
           await whatsappService.enviarWhatsApp(clinicaId, pacienteDados.telefone, mensagemTexto);
           console.log(`[AGENDAMENTO] ✅ WhatsApp disparado e crédito abatido com sucesso!`);
         } catch (whatsErr) {
