@@ -7,22 +7,22 @@ const notificationService = require('../services/notificationService'); // Ajust
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
 // 1. Criar Preferência de Checkout Pro (Chamado pelo frontend ao clicar em comprar)
+// controllers/pagamentoController.js (Trecho atualizado da criação de preferência)
 exports.criarPreferenciaWhatsApp = async (req, res) => {
     try {
         const clinicaId = req.usuario.clinica_id;
-        const { pacote } = req.body; // Ex: 500 ou 1000 mensagens
+        const { pacote } = req.body; // Recebe 50, 100, 300, 500 ou 1000
 
-        let quantidadeCreditos = 500;
-        let precoUnitarioVenda = 0.45; // Custo de 0.35 + 0.10 da sua margem
+        const quantidadeCreditos = Number(pacote);
+        const pacotesPermitidos = [50, 100, 300, 500, 1000];
 
-        if (pacote === 1000) {
-            quantidadeCreditos = 1000;
-            precoUnitarioVenda = 0.45;
+        if (!pacotesPermitidos.includes(quantidadeCreditos)) {
+            return res.status(400).json({ erro: 'Pacote de créditos inválido.' });
         }
 
+        const precoUnitarioVenda = 0.45; // Custo base 0.35 + 0.10 da sua margem
         const valorTotal = Number((quantidadeCreditos * precoUnitarioVenda).toFixed(2));
 
-        // Busca dados da clínica para referência
         const [[clinica]] = await db.query('SELECT nome_clinica, email_master FROM clinicas WHERE id = ?', [clinicaId]);
         if (!clinica) return res.status(404).json({ erro: 'Clínica não encontrada.' });
 
@@ -48,11 +48,11 @@ exports.criarPreferenciaWhatsApp = async (req, res) => {
                 },
                 auto_return: 'approved',
                 notification_url: `${process.env.APP_BASE_URL_ENV || 'http://localhost:3000'}/api/pagamentos/webhook`,
-                external_reference: String(clinicaId), // Guarda o ID da clínica para usarmos no webhook
+                external_reference: String(clinicaId),
             },
         });
 
-        return res.json({ init_point: resultado.init_point }); // Link de redirecionamento seguro do Mercado Pago
+        return res.json({ init_point: resultado.init_point });
     } catch (err) {
         console.error('[PAGAMENTO] Erro ao criar preferência:', err);
         res.status(500).json({ erro: 'Erro ao gerar pagamento.' });

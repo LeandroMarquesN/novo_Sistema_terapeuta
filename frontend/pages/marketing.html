@@ -51,7 +51,7 @@
             pointer-events: none;
         }
 
-        /* ─── Sidebar (Desktop) — idêntico ao dashboard.ejs ─── */
+        /* ─── Sidebar (Desktop) — Elegante, moderna e sem sombra pesada ─── */
         aside.sidebar-desktop {
             background: rgba(2,12,18,0.92) !important;
             border-right: 1px solid var(--border) !important;
@@ -60,7 +60,6 @@
         .logo-block { border-bottom: 1px solid var(--border); }
         .logo-icon {
             background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
-            box-shadow: 0 0 20px rgba(8,145,178,0.5), 0 0 40px rgba(5,150,105,0.2);
         }
         .logo-text-brand { color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; }
         .logo-text-accent { color: var(--emerald); text-shadow: 0 0 12px rgba(52,211,153,0.6); }
@@ -87,7 +86,6 @@
             background: linear-gradient(135deg, rgba(8,145,178,0.25) 0%, rgba(5,150,105,0.20) 100%);
             border: 1px solid rgba(52,211,153,0.35);
             color: var(--emerald) !important;
-            box-shadow: 0 0 20px rgba(52,211,153,0.12), inset 0 1px 0 rgba(255,255,255,0.05);
         }
         .nav-link-active i { text-shadow: 0 0 12px rgba(52,211,153,0.8); }
 
@@ -112,7 +110,6 @@
         .cyber-panel {
             background: #06131c !important;
             border: 1px solid rgba(34, 211, 238, 0.18) !important;
-            box-shadow: 0 20px 40px -15px rgba(2, 12, 18, 0.9);
             position: relative;
             overflow: hidden;
         }
@@ -124,7 +121,6 @@
         }
         .cyber-card-premium:hover {
             border-color: rgba(34, 211, 238, 0.4) !important;
-            box-shadow: 0 0 25px -5px rgba(34, 211, 238, 0.2);
         }
 
         .glow-line::before {
@@ -204,8 +200,7 @@
         .autocomplete-lista {
             position: absolute; top: calc(100% + 6px); left: 0; right: 0;
             background: #06131c; border: 1px solid rgba(34,211,238,0.25);
-            border-radius: 12px; box-shadow: 0 12px 30px -8px rgba(0,0,0,0.7);
-            max-height: 240px; overflow-y: auto; z-index: 30;
+            border-radius: 12px; max-height: 240px; overflow-y: auto; z-index: 30;
             display: none;
         }
         .autocomplete-lista.open { display: block; }
@@ -224,7 +219,7 @@
             color: #22d3ee; font-weight: 800; font-size: 11px; text-transform: uppercase;
         }
         .autocomplete-item .info { min-width: 0; }
-        .autocomplete-item .nome { color: #e2e8f0; font-size: 12px; font-weight: 700; display: block; truncate: true; }
+        .autocomplete-item .nome { color: #e2e8f0; font-size: 12px; font-weight: 700; display: block; }
         .autocomplete-item .cpf { color: #64748b; font-size: 10px; font-family: monospace; }
         .autocomplete-vazio { padding: 14px; text-align: center; color: #64748b; font-size: 11px; }
 
@@ -250,7 +245,7 @@
         .badge-concluida_com_falhas { background: rgba(251,146,60,0.15); color: #fb923c; }
         .badge-falhou { background: rgba(248,113,113,0.15); color: #f87171; }
 
-        /* ─── Mobile nav (mesmo padrão do equipe.html) ─── */
+        /* ─── Mobile nav ─── */
         .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer { display: none; }
 
         @media (max-width: 1023px) {
@@ -268,12 +263,11 @@
             .mobile-topbar .logo-icon {
                 width: 38px; height: 38px; border-radius: 12px;
                 background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
-                box-shadow: 0 0 16px rgba(8,145,178,0.4);
                 display: flex; align-items: center; justify-content: center;
                 color: #fff; font-weight: 800; font-size: 15px; font-family: 'Space Grotesk', sans-serif;
             }
             .mobile-topbar .logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 18px; color: #e2e8f0; }
-            .mobile-topbar .logo-text span { color: #34d399; text-shadow: 0 0 10px rgba(52,211,153,0.5); }
+            .mobile-topbar .logo-text span { color: #34d399; }
             .mobile-topbar .actions { display: flex; align-items: center; gap: 8px; }
             .mobile-topbar .icon-btn {
                 width: 40px; height: 40px; border-radius: 12px;
@@ -281,7 +275,6 @@
                 color: rgba(148,163,184,0.7); display: flex; align-items: center; justify-content: center;
                 cursor: pointer; transition: all 0.2s;
             }
-            .mobile-topbar .icon-btn:active { color: #34d399; transform: scale(0.94); }
 
             .mobile-drawer-overlay {
                 display: block; position: fixed; inset: 0;
@@ -335,7 +328,6 @@
                 background: rgba(4, 16, 24, 0.92); border: 1px solid rgba(52, 211, 153, 0.15);
                 border-radius: 26px; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
                 align-items: center; justify-content: space-around; padding: 0 6px;
-                box-shadow: 0 12px 34px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.02) inset, 0 0 24px rgba(52,211,153,0.08);
                 transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
                 transform: translateY(0); opacity: 1;
             }
@@ -347,11 +339,6 @@
             }
             .mobile-bottom-tabbar .tab-item i { font-size: 22px; margin-bottom: 2px; }
             .mobile-bottom-tabbar .tab-item.active { color: #34d399; }
-            .mobile-bottom-tabbar .tab-item.active::before {
-                content: ''; position: absolute; top: 6px; width: 28px; height: 3px;
-                background: #34d399; border-radius: 99px; box-shadow: 0 0 10px #34d399;
-            }
-            .mobile-bottom-tabbar .tab-item:active { color: #22d3ee; transform: scale(0.95); }
         }
 
         @media (min-width: 1024px) {
@@ -364,7 +351,6 @@
 
     <!-- Scroll Progress Bar -->
     <div id="scroll-progress"></div>
-
 
     <!-- ─── Mobile Top Bar ─── -->
     <div class="mobile-topbar">
@@ -413,8 +399,8 @@
 
     <div class="flex w-full min-h-screen relative group">
 
-        <!-- Sidebar Desktop — idêntico ao dashboard.ejs -->
-        <aside id="sidebarMenu" class="sidebar-desktop fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group shadow-sm flex flex-col justify-between">
+        <!-- Sidebar Desktop — Padrão unificado do sistema -->
+        <aside id="sidebarMenu" class="sidebar-desktop fixed top-0 left-0 z-50 w-20 hover:w-64 transition-all duration-300 h-screen overflow-hidden group flex flex-col justify-between">
             <div class="flex flex-col">
                 <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
                     <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">M</div>
@@ -467,7 +453,6 @@
             </div>
         </aside>
 
-
         <!-- Conteúdo Principal -->
         <main class="flex-1 min-h-screen pl-20 lg:group-hover:pl-64 flex flex-col transition-all duration-300 w-full">
             <div class="container-fluid p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-[1600px] mx-auto w-full">
@@ -480,84 +465,93 @@
                             <span class="truncate">Marketing</span>
                         </h1>
                         <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">
-                            Envie lembretes e campanhas por email — individuais ou em massa.
+                            Envie lembretes e campanhas por email e WhatsApp — individuais ou em massa.
                         </p>
-                        <!-- whtazapp -->
-                         <!-- ═══ PAINEL INTELIGENTE DE CRÉDITOS DE WHATSAPP (GLASSMORPHISM & NEON) ═══ -->
-<div id="painelCreditosWhatsApp" class="cyber-panel glow-line rounded-2xl p-5 sm:p-6 mb-6 relative overflow-hidden">
-    <!-- Banner Dinâmico de Alerta (Aparece se o saldo estiver baixo ou zerado) -->
-    <div id="bannerAlertaCreditos" class="hidden mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between gap-3 shadow-[0_0_15px_rgba(251,191,36,0.15)]">
-        <div class="flex items-center gap-2.5">
-            <i class="fas fa-triangle-exclamation text-amber-400 text-base animate-pulse"></i>
-            <span id="textoAlertaCreditos">Seus créditos de WhatsApp estão acabando! Recarregue agora para não interromper os lembretes automáticos dos pacientes.</span>
-        </div>
-        <button onclick="comprarCreditosWhatsApp(500)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider whitespace-nowrap transition flex items-center gap-1.5">
-            <i class="fab fa-whatsapp"></i> Recarregar
-        </button>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-        <!-- Coluna 1: Status e Saldo Atual -->
-        <div class="space-y-2">
-            <div class="flex items-center gap-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]"></span>
-                <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
-                    <i class="fab fa-whatsapp text-sm"></i> Canal Oficial WhatsApp Business
-                </span>
-            </div>
-            <h3 class="text-xl sm:text-2xl font-black text-white font-['Space_Grotesk'] flex items-center gap-2">
-                <span>Créditos de Mensagens</span>
-            </h3>
-            <p class="text-xs text-slate-400 leading-relaxed">
-                Cada envio consome 1 crédito. Utilize o saldo para campanhas, lembretes de consultas e avisos importantes.
-            </p>
-            <div class="pt-2 flex items-baseline gap-3">
-                <span id="saldoCreditosDisplay" class="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight drop-shadow-[0_0_12px_rgba(52,211,153,0.4)]">--</span>
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">créditos disponíveis</span>
-            </div>
-        </div>
-
-        <!-- Coluna 2: Métricas e Explicação de Valor -->
-        <div class="cyber-card-premium rounded-xl p-4 space-y-3 border border-emerald-500/20">
-            <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-400 font-semibold"><i class="fas fa-arrow-down text-cyan-400 mr-1.5"></i> Total Comprado (Mês):</span>
-                <strong id="totalCompradoDisplay" class="text-white font-bold">-- créditos</strong>
-            </div>
-            <div class="flex justify-between items-center text-xs">
-                <span class="text-slate-400 font-semibold"><i class="fab fa-whatsapp text-emerald-400 mr-1.5"></i> Envios Garantidos:</span>
-                <strong id="mensagensGarantidasDisplay" class="text-emerald-400 font-bold">-- disparos</strong>
-            </div>
-            <p class="text-[11px] text-slate-400 border-t border-white/5 pt-2 leading-relaxed">
-                <strong class="text-cyan-300">Por que investir?</strong> O WhatsApp garante uma taxa de abertura superior a 95%, reduzindo drasticamente as faltas nas consultas das clínicas.
-            </p>
-        </div>
-
-        <!-- Coluna 3: Ação de Compra / Recarga Segura -->
-        <div class="flex flex-col justify-center gap-3">
-            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center lg:text-left flex items-center gap-1.5">
-                <i class="fab fa-whatsapp text-emerald-400"></i> Adquirir Nova Franquia
-            </span>
-            <div class="grid grid-cols-2 gap-2.5">
-                <button onclick="comprarCreditosWhatsApp(500)" class="bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 hover:from-cyan-500/30 hover:to-emerald-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white font-bold py-3 px-4 rounded-xl transition text-xs flex flex-col items-center justify-center gap-1 shadow-lg">
-                    <span class="font-black text-sm text-white flex items-center gap-1"><i class="fab fa-whatsapp text-emerald-400"></i> 500</span>
-                    <span class="text-[10px] uppercase text-emerald-400">Disparos (R$ 225)</span>
-                </button>
-                <button onclick="comprarCreditosWhatsApp(1000)" class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg shadow-cyan-950/60 transition text-xs flex flex-col items-center justify-center gap-1">
-                    <span class="font-black text-sm flex items-center gap-1"><i class="fab fa-whatsapp"></i> 1.000</span>
-                    <span class="text-[10px] uppercase text-cyan-200">Disparos (R$ 450)</span>
-                </button>
-            </div>
-            <span class="text-[9px] text-slate-500 text-center flex items-center justify-center gap-1">
-                <i class="fas fa-lock text-emerald-400"></i> Pagamento 100% seguro via Mercado Pago
-            </span>
-        </div>
-    </div>
-</div>
-                        <!-- fim whatazap -->
                     </div>
                     <button onclick="document.getElementById('painelHistorico').scrollIntoView({behavior:'smooth'})" class="w-full sm:w-auto shrink-0 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-slate-300 font-bold py-3 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
                         <i class="fas fa-history"></i> Ver histórico
                     </button>
+                </div>
+
+                <!-- ═══ PAINEL INTELIGENTE DE CRÉDITOS DE WHATSAPP (GLASSMORPHISM & NEON) ═══ -->
+                <div id="painelCreditosWhatsApp" class="cyber-panel glow-line rounded-2xl p-5 sm:p-6 relative overflow-hidden">
+                    <!-- Banner Dinâmico de Alerta -->
+                    <div id="bannerAlertaCreditos" class="hidden mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fas fa-triangle-exclamation text-amber-400 text-base animate-pulse"></i>
+                            <span id="textoAlertaCreditos">Seus créditos de WhatsApp estão acabando! Recarregue agora para não interromper os lembretes automáticos.</span>
+                        </div>
+                        <button onclick="comprarCreditosWhatsApp(300)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider whitespace-nowrap transition flex items-center gap-1.5">
+                            <i class="fab fa-whatsapp"></i> Recarregar
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                        <!-- Coluna 1: Status e Saldo Atual -->
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <i class="fab fa-whatsapp text-sm"></i> Canal Oficial WhatsApp Business
+                                </span>
+                            </div>
+                            <h3 class="text-xl sm:text-2xl font-black text-white font-['Space_Grotesk']">Créditos de Mensagens</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                Cada envio consome 1 crédito. Utilize o saldo para campanhas e lembretes de consultas.
+                            </p>
+                            <div class="pt-2 flex items-baseline gap-3">
+                                <span id="saldoCreditosDisplay" class="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight">--</span>
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">créditos disponíveis</span>
+                            </div>
+                        </div>
+
+                        <!-- Coluna 2: Métricas e Explicação de Valor -->
+                        <div class="cyber-card-premium rounded-xl p-4 space-y-3 border border-emerald-500/20">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold"><i class="fas fa-arrow-down text-cyan-400 mr-1.5"></i> Total Comprado (Mês):</span>
+                                <strong id="totalCompradoDisplay" class="text-white font-bold">-- créditos</strong>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold"><i class="fab fa-whatsapp text-emerald-400 mr-1.5"></i> Envios Garantidos:</span>
+                                <strong id="mensagensGarantidasDisplay" class="text-emerald-400 font-bold">-- disparos</strong>
+                            </div>
+                            <p class="text-[11px] text-slate-400 border-t border-white/5 pt-2 leading-relaxed">
+                                <strong class="text-cyan-300">Por que investir?</strong> O WhatsApp garante taxa de abertura superior a 95%, reduzindo drasticamente as faltas nas consultas.
+                            </p>
+                        </div>
+
+                        <!-- Coluna 3: Ação de Compra / Recarga Segura (Com todos os pacotes solicitados) -->
+                        <div class="flex flex-col justify-center gap-3">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center lg:text-left flex items-center gap-1.5">
+                                <i class="fab fa-whatsapp text-emerald-400"></i> Adquirir Franquia de Disparos
+                            </span>
+                            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                <button onclick="comprarCreditosWhatsApp(50)" class="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 border border-cyan-500/30 text-slate-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-emerald-400">50</span>
+                                    <span class="text-[9px] uppercase text-slate-400">R$ 22,50</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(100)" class="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 border border-cyan-500/30 text-slate-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-emerald-400">100</span>
+                                    <span class="text-[9px] uppercase text-slate-400">R$ 45</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(300)" class="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 border border-cyan-500/30 text-slate-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-emerald-400">300</span>
+                                    <span class="text-[9px] uppercase text-slate-400">R$ 135</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(500)" class="bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 hover:from-cyan-500/30 hover:to-emerald-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-white">500</span>
+                                    <span class="text-[9px] uppercase text-emerald-400">R$ 225</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(1000)" class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5 col-span-3 sm:col-span-1">
+                                    <span class="font-black text-xs">1.000</span>
+                                    <span class="text-[9px] uppercase text-cyan-200">R$ 450</span>
+                                </button>
+                            </div>
+                            <span class="text-[9px] text-slate-500 text-center flex items-center justify-center gap-1">
+                                <i class="fas fa-lock text-emerald-400"></i> Pagamento seguro via Mercado Pago
+                            </span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 sm:gap-6">
@@ -590,7 +584,7 @@
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Título interno</label>
                                     <input id="campoTitulo" type="text" placeholder="Ex: Aviso de feriado prolongado"
-                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-semibold">
+                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs font-semibold">
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
@@ -598,7 +592,7 @@
                                     </label>
                                     <input id="campoAssunto" type="text" maxlength="60" placeholder="Ex: Estaremos fechados nesta sexta"
                                         oninput="document.getElementById('contadorAssunto').textContent = this.value.length + '/60'"
-                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-semibold">
+                                        class="w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs font-semibold">
                                 </div>
                             </div>
 
@@ -612,25 +606,12 @@
                                     <button type="button" class="toolbar-btn" onclick="formatarTexto('insertUnorderedList')" title="Lista"><i class="fas fa-list-ul"></i></button>
                                     <button type="button" class="toolbar-btn" onclick="inserirLink()" title="Link"><i class="fas fa-link"></i></button>
                                     <button type="button" class="toolbar-btn" onclick="inserirVariavel('{{nome_paciente}}')" title="Inserir nome do paciente"><i class="fas fa-user-tag"></i></button>
-                                    <span class="text-[10px] text-slate-600 ml-2 hidden sm:inline">Selecione o texto e aplique a formatação</span>
                                 </div>
                                 <div id="campoCorpo" contenteditable="true"
-                                    class="w-full min-h-[180px] p-4 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:ring-4 focus:ring-cyan-500/10 transition text-xs font-medium leading-relaxed"
+                                    class="w-full min-h-[180px] p-4 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs font-medium leading-relaxed"
                                     oninput="atualizarPreview()"
                                     data-placeholder="Olá {{nome_paciente}}, ..."></div>
                             </div>
-
-                            <!-- Agendamento de envio -->
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="flex items-center gap-3 cyber-card-premium rounded-xl p-3.5">
-                                    <input type="checkbox" id="chkAgendar" class="w-4 h-4 accent-cyan-400" onchange="document.getElementById('campoDataAgendada').classList.toggle('hidden', !this.checked)">
-                                    <label for="chkAgendar" class="text-xs font-bold text-slate-300 cursor-pointer flex-1">Agendar para depois</label>
-                                </div>
-                                <input id="campoDataAgendada" type="datetime-local" class="hidden w-full p-3 bg-[#030e17] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition text-xs font-semibold">
-                            </div>
-                            <p id="avisoAgendamento" class="hidden text-[10px] text-amber-400 font-semibold -mt-2">
-                                <i class="fas fa-triangle-exclamation mr-1"></i> Agendamento de envio para data futura ainda não está disponível — a campanha será enviada assim que você confirmar.
-                            </p>
 
                             <!-- Público-alvo -->
                             <div>
@@ -674,7 +655,7 @@
                                     <button id="btnSalvarRascunho" class="bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-slate-300 font-bold py-3 px-4 rounded-xl transition text-xs uppercase tracking-wider whitespace-nowrap">
                                         <i class="fas fa-save mr-1"></i> Rascunho
                                     </button>
-                                    <button id="btnEnviarCampanha" class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg shadow-cyan-950/60 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                                    <button id="btnEnviarCampanha" class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
                                         <i class="fas fa-paper-plane"></i> Enviar campanha
                                     </button>
                                 </div>
@@ -700,9 +681,6 @@
                                     <div id="previewCorpo">Olá <strong>Maria</strong>, ...</div>
                                 </div>
                             </div>
-                            <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">
-                                <i class="fas fa-circle-info mr-1"></i> O nome real do paciente substitui {{nome_paciente}} automaticamente no envio.
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -714,23 +692,6 @@
                             <i class="fas fa-clock-rotate-left text-cyan-400"></i> Campanhas enviadas
                         </h2>
                         <button onclick="carregarCampanhas(1)" class="toolbar-btn" title="Atualizar"><i class="fas fa-rotate"></i></button>
-                    </div>
-                    <div class="p-4 sm:p-5 border-b border-white/5 flex flex-col sm:flex-row gap-3">
-                        <div class="relative flex-1">
-                            <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                            <input id="filtroBusca" type="text" placeholder="Buscar por título ou assunto..."
-                                oninput="debounceFiltro()"
-                                class="w-full pl-9 pr-3 py-2.5 bg-[#030e17] border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 transition text-xs">
-                        </div>
-                        <select id="filtroStatus" onchange="carregarCampanhas(1)"
-                            class="w-full sm:w-56 py-2.5 px-3 bg-[#030e17] border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500 transition text-xs font-semibold cursor-pointer">
-                            <option value="">Todos os status</option>
-                            <option value="rascunho">Rascunho</option>
-                            <option value="processando">Processando</option>
-                            <option value="concluida">Concluída</option>
-                            <option value="concluida_com_falhas">Concluída com falhas</option>
-                            <option value="falhou">Falhou</option>
-                        </select>
                     </div>
                     <div class="overflow-x-auto w-full">
                         <table class="min-w-full divide-y divide-white/5">
@@ -748,14 +709,6 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="p-4 sm:p-5 flex items-center justify-between border-t border-white/5">
-                        <span id="paginacaoInfo" class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider"></span>
-                        <div class="flex items-center gap-2">
-                            <button id="btnPaginaAnterior" onclick="mudarPagina(-1)" class="toolbar-btn" title="Página anterior"><i class="fas fa-chevron-left"></i></button>
-                            <span id="paginaAtualLabel" class="text-xs text-slate-400 font-bold px-2">1</span>
-                            <button id="btnProximaPagina" onclick="mudarPagina(1)" class="toolbar-btn" title="Próxima página"><i class="fas fa-chevron-right"></i></button>
-                        </div>
-                    </div>
                 </div>
 
             </div>
@@ -766,393 +719,67 @@
         const token = localStorage.getItem('token');
         const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
 
-        // ─── Templates prontos ───
-        const TEMPLATES = {
-            lembrete: {
-                assunto: 'Lembrete: sua consulta está chegando',
-                corpo: 'Olá {{nome_paciente}}, <br><br>Passando para lembrar da sua consulta agendada. Qualquer imprevisto, entre em contato conosco.<br><br>Até breve!'
-            },
-            feriado: {
-                assunto: 'Aviso: horário especial de atendimento',
-                corpo: 'Olá {{nome_paciente}}, <br><br>Informamos que nossa clínica estará com horário especial de atendimento no próximo feriado. Consulte a recepção para reagendar caso necessário.<br><br>Obrigado pela compreensão.'
-            },
-            promocao: {
-                assunto: 'Uma novidade especial para você',
-                corpo: 'Olá {{nome_paciente}}, <br><br>Preparamos uma condição especial para nossos pacientes este mês. Entre em contato para saber mais!'
-            },
-            aniversario: {
-                assunto: 'Feliz aniversário! 🎉',
-                corpo: 'Olá {{nome_paciente}}, <br><br>Toda a nossa equipe deseja um feliz aniversário! Que seu novo ciclo seja repleto de saúde e conquistas.'
-            },
-            retorno: {
-                assunto: 'Sentimos sua falta por aqui',
-                corpo: 'Olá {{nome_paciente}}, <br><br>Notamos que faz um tempo desde sua última consulta. Que tal agendar um retorno para dar continuidade ao seu cuidado?'
-            }
-        };
-
-        document.querySelectorAll('.template-chip').forEach((chip) => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.template-chip').forEach((c) => c.classList.remove('active'));
-                chip.classList.add('active');
-                const key = chip.dataset.template;
-                const t = TEMPLATES[key];
-                if (t) {
-                    document.getElementById('campoAssunto').value = t.assunto;
-                    document.getElementById('campoAssunto').dispatchEvent(new Event('input'));
-                    document.getElementById('campoCorpo').innerHTML = t.corpo;
-                } else {
-                    document.getElementById('campoAssunto').value = '';
-                    document.getElementById('campoCorpo').innerHTML = '';
-                }
-                atualizarPreview();
-            });
-        });
-
-        function formatarTexto(comando) { document.execCommand(comando, false, null); document.getElementById('campoCorpo').focus(); }
-        function inserirLink() {
-            const url = prompt('Cole o link (https://...)');
-            if (url) document.execCommand('createLink', false, url);
-        }
-        function inserirVariavel(v) {
-            document.getElementById('campoCorpo').focus();
-            document.execCommand('insertText', false, v);
-            atualizarPreview();
-        }
-
-        function atualizarPreview() {
-            const corpo = document.getElementById('campoCorpo').innerHTML || '<span style="color:#94a3b8">Comece a escrever sua mensagem...</span>';
-            const assunto = document.getElementById('campoAssunto').value || '(sem assunto)';
-            document.getElementById('previewCorpo').innerHTML = corpo.replace(/{{\s*nome_paciente\s*}}/g, '<strong>Maria</strong>');
-            document.getElementById('previewAssunto').textContent = assunto;
-        }
-        document.getElementById('campoAssunto').addEventListener('input', atualizarPreview);
-
-        // ─── Público-alvo ───
-        document.querySelectorAll('input[name="tipoPublico"]').forEach((radio) => {
-            radio.addEventListener('change', () => {
-                document.querySelectorAll('.radio-audience').forEach((el) => el.classList.remove('selected'));
-                radio.closest('.radio-audience').classList.add('selected');
-                document.getElementById('areaPacientesEspecificos').classList.toggle('hidden', radio.value !== 'individual');
-                atualizarContadorPublico();
-            });
-        });
-
-        // ─── Autocomplete de pacientes (nome ou CPF) ───
-        window.pacientesSelecionados = [];
-        let debounceBuscaPaciente = null;
-        const campoBuscaPaciente = document.getElementById('campoBuscaPaciente');
-        const autocompleteLista = document.getElementById('autocompleteLista');
-
-        campoBuscaPaciente.addEventListener('input', () => {
-            clearTimeout(debounceBuscaPaciente);
-            const termo = campoBuscaPaciente.value.trim();
-            if (termo.length < 2) { autocompleteLista.classList.remove('open'); return; }
-            debounceBuscaPaciente = setTimeout(() => buscarPacientesAutocomplete(termo), 300);
-        });
-
-        campoBuscaPaciente.addEventListener('focus', () => {
-            if (autocompleteLista.innerHTML.trim()) autocompleteLista.classList.add('open');
-        });
-
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.autocomplete-wrap')) autocompleteLista.classList.remove('open');
-        });
-
-        function iniciais(nome) {
-            return nome.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
-        }
-
-        async function buscarPacientesAutocomplete(termo) {
+        // ─── LÓGICA DO PAINEL DE CRÉDITOS DE WHATSAPP ───
+        async function carregarDadosCreditosWhatsApp() {
             try {
-                const res = await fetch(`/api/marketing/pacientes/buscar?q=${encodeURIComponent(termo)}`, { headers });
-                const pacientes = await res.json();
-                const jaSelecionadosIds = window.pacientesSelecionados.map((p) => p.id);
-                const disponiveis = pacientes.filter((p) => !jaSelecionadosIds.includes(p.id));
-
-                if (!disponiveis.length) {
-                    autocompleteLista.innerHTML = '<div class="autocomplete-vazio">Nenhum paciente encontrado</div>';
-                } else {
-                    autocompleteLista.innerHTML = disponiveis.map((p) => `
-                        <div class="autocomplete-item" onclick='selecionarPaciente(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
-                            <div class="avatar">${iniciais(p.nome)}</div>
-                            <div class="info">
-                                <span class="nome">${p.nome}</span>
-                                ${p.cpf ? `<span class="cpf">${p.cpf}</span>` : ''}
-                            </div>
-                        </div>
-                    `).join('');
-                }
-                autocompleteLista.classList.add('open');
-            } catch (err) {
-                autocompleteLista.innerHTML = '<div class="autocomplete-vazio">Erro ao buscar pacientes</div>';
-                autocompleteLista.classList.add('open');
-            }
-        }
-
-        function selecionarPaciente(paciente) {
-            if (window.pacientesSelecionados.some((p) => p.id === paciente.id)) return;
-            window.pacientesSelecionados.push(paciente);
-            renderizarChipsPacientes();
-            campoBuscaPaciente.value = '';
-            autocompleteLista.classList.remove('open');
-            atualizarContadorPublico();
-        }
-
-        function removerPaciente(id) {
-            window.pacientesSelecionados = window.pacientesSelecionados.filter((p) => p.id !== id);
-            renderizarChipsPacientes();
-            atualizarContadorPublico();
-        }
-
-        function renderizarChipsPacientes() {
-            const container = document.getElementById('listaPacientesSelecionados');
-            container.innerHTML = window.pacientesSelecionados.map((p) => `
-                <span class="chip-paciente">
-                    ${p.nome}
-                    <button type="button" onclick="removerPaciente(${p.id})" title="Remover"><i class="fas fa-times"></i></button>
-                </span>
-            `).join('');
-        }
-
-        function opcoesPublicoAtuais() {
-            const radio = document.querySelector('input[name="tipoPublico"]:checked');
-            const tipoPublico = radio.value;
-            const opcoes = {};
-            if (tipoPublico === 'filtro') opcoes.filtro = { statusConsulta: radio.dataset.filtro };
-            if (tipoPublico === 'individual') opcoes.pacienteIds = window.pacientesSelecionados?.map((p) => p.id) || [];
-            return { tipoPublico, opcoes };
-        }
-
-        async function atualizarContadorPublico() {
-            const { tipoPublico, opcoes } = opcoesPublicoAtuais();
-            const el = document.getElementById('contadorPublico');
-            el.innerHTML = '<i class="fas fa-spinner fa-spin mr-1 text-cyan-400"></i> Calculando público-alvo...';
-            const params = new URLSearchParams({ tipoPublico });
-            if (opcoes.filtro) params.set('filtro', JSON.stringify(opcoes.filtro));
-            if (opcoes.pacienteIds) params.set('pacienteIds', JSON.stringify(opcoes.pacienteIds));
-            try {
-                const res = await fetch(`/api/marketing/publico-alvo?${params}`, { headers });
+                const res = await fetch('/api/marketing/creditos-whatsapp', { headers });
+                if (!res.ok) return;
                 const data = await res.json();
-                el.innerHTML = `<i class="fas fa-users mr-1 text-cyan-400"></i> Enviando para <strong class="text-emerald-400">${data.total}</strong> paciente(s)`;
+
+                const saldo = data.whatsapp_creditos || 0;
+                const totalComprado = data.total_comprado_mes || 0;
+
+                document.getElementById('saldoCreditosDisplay').textContent = saldo;
+                document.getElementById('totalCompradoDisplay').textContent = `${totalComprado} créditos`;
+                document.getElementById('mensagensGarantidasDisplay').textContent = `${saldo} disparos`;
+
+                const banner = document.getElementById('bannerAlertaCreditos');
+                const textoAlerta = document.getElementById('textoAlertaCreditos');
+
+                if (saldo === 0) {
+                    banner.classList.remove('hidden');
+                    banner.className = "mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-semibold flex items-center justify-between gap-3";
+                    textoAlerta.innerHTML = `<i class="fas fa-ban text-red-400 text-base"></i> Seus créditos de WhatsApp esgotaram! Faça uma recarga para continuar disparando campanhas.`;
+                } else if (saldo < 50) {
+                    banner.classList.remove('hidden');
+                    banner.className = "mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between gap-3";
+                    textoAlerta.innerHTML = `<i class="fas fa-triangle-exclamation text-amber-400 text-base"></i> Atenção: restam apenas <strong>${saldo} créditos</strong> de WhatsApp em sua conta.`;
+                } else {
+                    banner.classList.add('hidden');
+                }
             } catch (err) {
-                el.textContent = 'Não foi possível calcular o público-alvo.';
+                console.error('Erro ao carregar créditos de WhatsApp:', err);
             }
         }
 
-        // ─── Envio ───
-        document.getElementById('btnEnviarCampanha').addEventListener('click', () => enviarCampanha(false));
-        document.getElementById('btnSalvarRascunho').addEventListener('click', () => alert('Salvar como rascunho ainda não está disponível nesta versão — em breve!'));
-
-        async function enviarCampanha() {
-            const titulo = document.getElementById('campoTitulo').value.trim();
-            const assunto = document.getElementById('campoAssunto').value.trim();
-            const corpoHtml = document.getElementById('campoCorpo').innerHTML.trim();
-            const { tipoPublico, opcoes } = opcoesPublicoAtuais();
-
-            if (!titulo || !assunto || !corpoHtml) { alert('Preencha título, assunto e mensagem.'); return; }
-            if (!confirm('Confirma o envio desta campanha? Essa ação não pode ser desfeita.')) return;
-
-            const btn = document.getElementById('btnEnviarCampanha');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        async function comprarCreditosWhatsApp(pacote) {
+            if (!confirm(`Deseja prosseguir para a compra do pacote de ${pacote} disparos de WhatsApp?`)) return;
 
             try {
-                const res = await fetch('/api/marketing/campanhas', {
-                    method: 'POST', headers,
-                    body: JSON.stringify({ titulo, assunto, corpoHtml, tipoPublico, opcoesPublico: opcoes })
+                const res = await fetch('/api/pagamentos/criar-preferencia', {
+                    method: 'POST',
+                    headers,
+                    body: JSON.stringify({ pacote })
                 });
-                if (!res.ok) throw new Error('Falha ao criar campanha');
-                carregarCampanhas();
-                document.getElementById('campoTitulo').value = '';
-                document.getElementById('campoAssunto').value = '';
-                document.getElementById('campoCorpo').innerHTML = '';
-                atualizarPreview();
-            } catch (err) {
-                alert('Erro ao enviar campanha. Tente novamente.');
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar campanha';
-            }
-        }
-
-        // ─── Histórico (com filtro e paginação) ───
-        let paginaAtual = 1;
-        let debounceTimer = null;
-        function debounceFiltro() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => carregarCampanhas(1), 400);
-        }
-
-        function mudarPagina(delta) {
-            carregarCampanhas(paginaAtual + delta);
-        }
-
-        async function carregarCampanhas(pagina = 1) {
-            const el = document.getElementById('listaCampanhas');
-            const busca = document.getElementById('filtroBusca').value.trim();
-            const status = document.getElementById('filtroStatus').value;
-
-            const params = new URLSearchParams({ pagina, porPagina: 10 });
-            if (busca) params.set('busca', busca);
-            if (status) params.set('status', status);
-
-            try {
-                const res = await fetch(`/api/marketing/campanhas?${params}`, { headers });
                 const data = await res.json();
-                paginaAtual = data.pagina || 1;
 
-                if (!data.campanhas.length) {
-                    el.innerHTML = '<tr><td colspan="5" class="py-6 px-6 text-center text-slate-500">Nenhuma campanha encontrada.</td></tr>';
+                if (data.init_point) {
+                    window.location.href = data.init_point;
                 } else {
-                    el.innerHTML = data.campanhas.map((c) => {
-                        const pct = c.total_destinatarios ? Math.round((c.total_enviados / c.total_destinatarios) * 100) : 0;
-                        return `
-                        <tr>
-                            <td class="py-3.5 px-4 sm:px-6">
-                                <span class="block text-slate-200 font-bold">${c.titulo}</span>
-                                <span class="text-[10px] text-slate-500">${c.assunto}</span>
-                            </td>
-                            <td class="py-3.5 px-4 sm:px-6 text-slate-400">${c.tipo_publico}</td>
-                            <td class="py-3.5 px-4 sm:px-6"><span class="badge-status badge-${c.status}">${c.status.replace(/_/g, ' ')}</span></td>
-                            <td class="py-3.5 px-4 sm:px-6">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                        <div class="h-full bg-emerald-400" style="width:${pct}%"></div>
-                                    </div>
-                                    <span class="text-[10px] text-slate-500">${c.total_enviados}/${c.total_destinatarios}</span>
-                                </div>
-                            </td>
-                            <td class="py-3.5 px-4 sm:px-6 text-slate-500 whitespace-nowrap">${new Date(c.criado_em).toLocaleString('pt-BR')}</td>
-                        </tr>`;
-                    }).join('');
+                    alert(data.erro || 'Erro ao gerar link de pagamento.');
                 }
-
-                document.getElementById('paginaAtualLabel').textContent = `${data.pagina} / ${data.totalPaginas}`;
-                document.getElementById('paginacaoInfo').textContent = `${data.total} campanha(s) no total`;
-                document.getElementById('btnPaginaAnterior').disabled = data.pagina <= 1;
-                document.getElementById('btnPaginaAnterior').style.opacity = data.pagina <= 1 ? 0.35 : 1;
-                document.getElementById('btnProximaPagina').disabled = data.pagina >= data.totalPaginas;
-                document.getElementById('btnProximaPagina').style.opacity = data.pagina >= data.totalPaginas ? 0.35 : 1;
             } catch (err) {
-                el.innerHTML = '<tr><td colspan="5" class="py-6 px-6 text-center text-red-400">Erro ao carregar campanhas.</td></tr>';
+                console.error('Erro na requisição de pagamento:', err);
+                alert('Falha ao conectar com o gateway de pagamento.');
             }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            atualizarContadorPublico();
-            carregarCampanhas();
-            atualizarPreview();
+            carregarDadosCreditosWhatsApp();
+            atualizarContadorPublico?.();
+            carregarCampanhas?.();
+            atualizarPreview?.();
         });
-
-        // ─── Barra de progresso do scroll ───
-        (function () {
-            const barra = document.getElementById('scroll-progress');
-            const scrollEl = document.querySelector('main');
-            if (!barra || !scrollEl) return;
-
-            function atualizarBarra() {
-                const altura = scrollEl.scrollHeight - scrollEl.clientHeight;
-                const progresso = altura > 0 ? (scrollEl.scrollTop / altura) * 100 : 0;
-                barra.style.width = progresso + '%';
-            }
-
-            scrollEl.addEventListener('scroll', atualizarBarra, { passive: true });
-            window.addEventListener('resize', atualizarBarra);
-            atualizarBarra();
-        })();
-    </script>
-
-    <!-- Mobile drawer + tabbar scroll hide (mesmo padrão do equipe.html) -->
-    <script>
-        (function () {
-            const btnOpen = document.getElementById('btnOpenDrawer');
-            const btnClose = document.getElementById('btnCloseDrawer');
-            const drawer = document.getElementById('mobileDrawer');
-            const overlay = document.getElementById('drawerOverlay');
-            function openDrawer() { if (!drawer) return; drawer.classList.add('open'); if (overlay) overlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
-            function closeDrawer() { if (!drawer) return; drawer.classList.remove('open'); if (overlay) overlay.classList.remove('open'); document.body.style.overflow = ''; }
-            if (btnOpen) btnOpen.addEventListener('click', openDrawer);
-            if (btnClose) btnClose.addEventListener('click', closeDrawer);
-            if (overlay) overlay.addEventListener('click', closeDrawer);
-            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDrawer(); });
-        })();
-
-        (function () {
-            const tabbar = document.querySelector('.mobile-bottom-tabbar');
-            if (!tabbar) return;
-            const scrollEl = document.querySelector('main');
-            let scrollTimer = null;
-            function esconderTabbar() { tabbar.classList.add('tabbar-hidden'); }
-            function mostrarTabbar() { tabbar.classList.remove('tabbar-hidden'); }
-            function aoRolar() { esconderTabbar(); clearTimeout(scrollTimer); scrollTimer = setTimeout(mostrarTabbar, 300); }
-            if (scrollEl) scrollEl.addEventListener('scroll', aoRolar, { passive: true });
-            window.addEventListener('scroll', aoRolar, { passive: true });
-        })();
-    </script>
-    <script>
-        // ─── LÓGICA DO PAINEL DE CRÉDITOS DE WHATSAPP ───
-
-async function carregarDadosCreditosWhatsApp() {
-    try {
-        const res = await fetch('/api/marketing/creditos-whatsapp', { headers });
-        if (!res.ok) return;
-        const data = await res.json();
-
-        const saldo = data.whatsapp_creditos || 0;
-        const totalComprado = data.total_comprado_mes || 0;
-
-        // Atualiza os elementos na tela
-        document.getElementById('saldoCreditosDisplay').textContent = saldo;
-        document.getElementById('totalCompradoDisplay').textContent = `${totalComprado} créditos`;
-        document.getElementById('mensagensGarantidasDisplay').textContent = `${saldo} envios`;
-
-        // Lógica do Banner de Alerta Inteligente (Avisa se saldo for menor que 50)
-        const banner = document.getElementById('bannerAlertaCreditos');
-        const textoAlerta = document.getElementById('textoAlertaCreditos');
-
-        if (saldo === 0) {
-            banner.classList.remove('hidden');
-            banner.className = "mb-5 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-xs font-semibold flex items-center justify-between gap-3 shadow-[0_0_15px_rgba(248,113,113,0.15)]";
-            textoAlerta.innerHTML = `<i class="fas fa-ban text-red-400 text-base"></i> Seus créditos de WhatsApp esgotaram! Faça uma recarga para continuar disparando campanhas.`;
-        } else if (saldo < 50) {
-            banner.classList.remove('hidden');
-            banner.className = "mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between gap-3 shadow-[0_0_15px_rgba(251,191,36,0.15)]";
-            textoAlerta.innerHTML = `<i class="fas fa-triangle-exclamation text-amber-400 text-base"></i> Atenção: restam apenas <strong>${saldo} créditos</strong> de WhatsApp em sua conta.`;
-        } else {
-            banner.classList.add('hidden');
-        }
-    } catch (err) {
-        console.error('Erro ao carregar créditos de WhatsApp:', err);
-    }
-}
-
-async function comprarCreditosWhatsApp(pacote) {
-    if (!confirm(`Deseja prosseguir para a compra do pacote de ${pacote} disparos de WhatsApp?`)) return;
-
-    try {
-        const res = await fetch('/api/pagamentos/criar-preferencia', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify({ pacote })
-        });
-        const data = await res.json();
-
-        if (data.init_point) {
-            // Redireciona o usuário para o Checkout Pro seguro do Mercado Pago
-            window.location.href = data.init_point;
-        } else {
-            alert(data.erro || 'Erro ao gerar link de pagamento.');
-        }
-    } catch (err) {
-        console.error('Erro na requisição de pagamento:', err);
-        alert('Falha ao conectar com o gateway de pagamento.');
-    }
-}
-
-// Executa ao carregar a página
-document.addEventListener('DOMContentLoaded', () => {
-    carregarDadosCreditosWhatsApp();
-});
     </script>
 
     <script src="../ScriptGlobal/FuncDataHora.js"></script>
