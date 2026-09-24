@@ -269,14 +269,34 @@ async function conectarWhatsAppInstance() {
         container.innerHTML = '<p class="text-xs text-red-500 font-semibold">Erro ao comunicar com a Evolution API.</p>';
     }
 }
+// Carregar dados da instância e telefone da clínica ao iniciar a página
+async function carregarDadosInstanciaWhatsApp() {
+    try {
+        const res = await fetch('/api/marketing/whatsapp/conectar', { headers });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        if (data.instanceName) {
+            document.getElementById('instanciaNomeDisplay').textContent = data.instanceName;
+        }
+        if (data.telefone) {
+            document.getElementById('telefoneClinicaDisplay').textContent = data.telefone;
+        }
+    } catch (err) {
+        console.error('Erro ao carregar dados da instância:', err);
+    }
+}
+
 
 function fecharModalQrCode() {
     document.getElementById('modalQrCode').classList.add('hidden');
 }
-
+// Atualize o DOMContentLoaded para incluir esta função
 document.addEventListener('DOMContentLoaded', () => {
     carregarDadosCreditosWhatsApp();
+    carregarDadosInstanciaWhatsApp();
     atualizarContadorPublico?.();
     carregarCampanhas?.();
     atualizarPreview?.();
 });
+

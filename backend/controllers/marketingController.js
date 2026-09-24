@@ -104,6 +104,90 @@ exports.obterCreditosWhatsApp = async (req, res) => {
 };
 // Adicionar em controllers/marketingController.js
 // Substituir em controllers/marketingController.js
+// exports.conectarInstanciaWhatsApp = async (req, res) => {
+//   try {
+//     const clinicaId = req.usuario.clinica_id;
+//     const [[clinica]] = await db.query('SELECT id, telefone_clinica, nome_clinica FROM clinicas WHERE id = ?', [clinicaId]);
+
+//     if (!clinica || !clinica.telefone_clinica) {
+//       return res.status(400).json({ erro: 'Cadastre o telefone oficial da clínica antes de conectar o WhatsApp.' });
+//     }
+
+//     const instanceName = `clinica_${clinicaId}`;
+//     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
+//     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
+
+//     if (!evolutionApiKey) {
+//       console.error('[MARKETING] EVOLUTION_API_KEY não está definida nas variáveis de ambiente.');
+//       return res.status(500).json({ erro: 'Configuração ausente: EVOLUTION_API_KEY não definida no servidor.' });
+//     }
+//     console.log(`[MARKETING] Conectando instância "${instanceName}" via ${evolutionApiUrl}`);
+
+//     // 1. Assegura que a instância existe na Evolution API
+//     try {
+//       const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
+//         body: JSON.stringify({
+//           instanceName,
+//           token: evolutionApiKey,
+//           qrcode: true,
+//           integration: 'WHATSAPP-BAILEYS'
+//         })
+//       });
+//       if (!createRes.ok && createRes.status !== 403) {
+//         // 403 costuma significar "instância já existe" em algumas versões da Evolution API — não é um erro fatal aqui.
+//         const corpoErro = await createRes.text().catch(() => '');
+//         console.warn(`[MARKETING] instance/create retornou ${createRes.status}: ${corpoErro}`);
+//       }
+//     } catch (errCreate) {
+//       console.error('[MARKETING] Falha de rede ao chamar instance/create na Evolution API:', errCreate.message);
+//       return res.status(502).json({ erro: `Não foi possível conectar à Evolution API em ${evolutionApiUrl}. Verifique a URL/host e se o serviço está no ar.` });
+//     }
+
+//     // 2. Tenta buscar o QR Code na rota de conexão
+//     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
+//       method: 'GET',
+//       headers: { 'apikey': evolutionApiKey }
+//     });
+
+//     if (!response.ok) {
+//       const corpoErro = await response.text().catch(() => '');
+//       console.error(`[MARKETING] instance/connect retornou ${response.status}: ${corpoErro}`);
+//       return res.status(502).json({ erro: `Evolution API respondeu com erro ${response.status} ao tentar conectar.` });
+//     }
+
+//     const data = await response.json();
+
+//     // Varredura abrangente para capturar o base64 do QR code em qualquer variação da Evolution API
+//     let qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
+
+//     // Se o connect não retornou o base64 diretamente, tentamos forçar o fetch do QR code separadamente
+//     if (!qrcodeBase64 && (!data.instance || data.instance.state !== 'open')) {
+//       const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
+//         method: 'GET',
+//         headers: { 'apikey': evolutionApiKey }
+//       }).catch((errQr) => {
+//         console.error('[MARKETING] Falha ao buscar /instance/qrCode:', errQr.message);
+//         return null;
+//       });
+
+//       if (qrRes && qrRes.ok) {
+//         const qrData = await qrRes.json();
+//         qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
+//       }
+//     }
+
+//     res.json({
+//       instanceName,
+//       qrcode: qrcodeBase64,
+//       status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'desconhecido')
+//     });
+//   } catch (err) {
+//     console.error('[MARKETING] Erro ao conectar instância:', err);
+//     res.status(500).json({ erro: 'Erro ao gerar QR Code do WhatsApp.' });
+//   }
+// };
 exports.conectarInstanciaWhatsApp = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
@@ -114,18 +198,14 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     }
 
     const instanceName = `clinica_${clinicaId}`;
-    const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
-    const evolutionApiKey = process.env.EVOLUTION_API_KEY;
+    const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'http://167.233.99.211:8080';
+    const evolutionApiKey = process.env.EVOLUTION_API_KEY || '9deee09f44ae8f7e0e65d7811d1c08a5';
 
-    if (!evolutionApiKey) {
-      console.error('[MARKETING] EVOLUTION_API_KEY não está definida nas variáveis de ambiente.');
-      return res.status(500).json({ erro: 'Configuração ausente: EVOLUTION_API_KEY não definida no servidor.' });
-    }
     console.log(`[MARKETING] Conectando instância "${instanceName}" via ${evolutionApiUrl}`);
 
     // 1. Assegura que a instância existe na Evolution API
     try {
-      const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
+      await fetch(`${evolutionApiUrl}/instance/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
         body: JSON.stringify({
@@ -135,17 +215,11 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
           integration: 'WHATSAPP-BAILEYS'
         })
       });
-      if (!createRes.ok && createRes.status !== 403) {
-        // 403 costuma significar "instância já existe" em algumas versões da Evolution API — não é um erro fatal aqui.
-        const corpoErro = await createRes.text().catch(() => '');
-        console.warn(`[MARKETING] instance/create retornou ${createRes.status}: ${corpoErro}`);
-      }
     } catch (errCreate) {
-      console.error('[MARKETING] Falha de rede ao chamar instance/create na Evolution API:', errCreate.message);
-      return res.status(502).json({ erro: `Não foi possível conectar à Evolution API em ${evolutionApiUrl}. Verifique a URL/host e se o serviço está no ar.` });
+      console.warn('[MARKETING] Aviso ao criar instância (pode já existir):', errCreate.message);
     }
 
-    // 2. Tenta buscar o QR Code na rota de conexão
+    // 2. Busca o QR Code na rota de conexão da v2
     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
       headers: { 'apikey': evolutionApiKey }
@@ -154,32 +228,17 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     if (!response.ok) {
       const corpoErro = await response.text().catch(() => '');
       console.error(`[MARKETING] instance/connect retornou ${response.status}: ${corpoErro}`);
-      return res.status(502).json({ erro: `Evolution API respondeu com erro ${response.status} ao tentar conectar.` });
+      return res.status(502).json({ erro: `Evolution API respondeu com erro ${response.status}.` });
     }
 
     const data = await response.json();
 
-    // Varredura abrangente para capturar o base64 do QR code em qualquer variação da Evolution API
-    let qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
-
-    // Se o connect não retornou o base64 diretamente, tentamos forçar o fetch do QR code separadamente
-    if (!qrcodeBase64 && (!data.instance || data.instance.state !== 'open')) {
-      const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
-        method: 'GET',
-        headers: { 'apikey': evolutionApiKey }
-      }).catch((errQr) => {
-        console.error('[MARKETING] Falha ao buscar /instance/qrCode:', errQr.message);
-        return null;
-      });
-
-      if (qrRes && qrRes.ok) {
-        const qrData = await qrRes.json();
-        qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
-      }
-    }
+    // Captura o base64 do QR code nas diferentes estruturas possíveis da API v2
+    let qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || data.pairingCode || null;
 
     res.json({
       instanceName,
+      telefone: clinica.telefone_clinica,
       qrcode: qrcodeBase64,
       status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'desconhecido')
     });
