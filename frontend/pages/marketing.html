@@ -803,6 +803,18 @@
                 alert('Falha ao conectar com o gateway de pagamento.');
             }
         }
+        async function atualizarContadorPublico() {
+            const el = document.getElementById('contadorPublico');
+            if (!el) return;
+            el.innerHTML = '<i class="fas fa-spinner fa-spin mr-1 text-cyan-400"></i> Calculando público-alvo...';
+            try {
+                const res = await fetch('/api/marketing/publico-alvo?tipoPublico=todos', { headers });
+                const data = await res.json();
+                el.innerHTML = `<i class="fas fa-users mr-1 text-cyan-400"></i> Enviando para <strong class="text-emerald-400">${data.total || 0}</strong> paciente(s)`;
+            } catch (err) {
+                if (el) el.textContent = 'Não foi possível calcular o público-alvo.';
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarDadosCreditosWhatsApp();
