@@ -816,6 +816,61 @@
             }
         }
 
+        // ─── Histórico e Listagem de Campanhas ───
+let paginaAtual = 1;
+let debounceTimer = null;
+
+function debounceFiltro() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => carregarCampanhas(1), 400);
+}
+
+function mudarPagina(delta) {
+    carregarCampanhas(paginaAtual + delta);
+}
+
+async function carregarCampanhas(pagina = 1) {
+    const el = document.getElementById('listaCampanhas');
+    if (!el) return;
+
+    const params = new URLSearchParams({ pagina, porPagina: 10 });
+
+    try {
+        const res = await fetch(`/api/marketing/campanhas?${params}`, { headers });
+        const data = await res.json();
+        paginaAtual = data.pagina || 1;
+
+        if (!data.campanhas || !data.campanhas.length) {
+            el.innerHTML = '<tr><td colspan="5" class="py-6 px-6 text-center text-slate-500">Nenhuma campanha encontrada.</td></tr>';
+            return;
+        }
+
+        el.innerHTML = data.campanhas.map((c) => {
+            const pct = c.total_destinatarios ? Math.round((c.total_enviados / c.total_destinatarios) * 100) : 0;
+            return `
+            <tr>
+                <td class="py-3.5 px-4 sm:px-6">
+                    <span class="block text-slate-200 font-bold">${c.titulo}</span>
+                    <span class="text-[10px] text-slate-500">${c.assunto}</span>
+                </td>
+                <td class="py-3.5 px-4 sm:px-6 text-slate-400">${c.tipo_publico}</td>
+                <td class="py-3.5 px-4 sm:px-6"><span class="badge-status badge-${c.status}">${c.status.replace(/_/g, ' ')}</span></td>
+                <td class="py-3.5 px-4 sm:px-6">
+                    <div class="flex items-center gap-2">
+                        <div class="w-20 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div class="h-full bg-emerald-400" style="width:${pct}%"></div>
+                        </div>
+                        <span class="text-[10px] text-slate-500">${c.total_enviados}/${c.total_destinatarios}</span>
+                    </div>
+                </td>
+                <td class="py-3.5 px-4 sm:px-6 text-slate-500 whitespace-nowrap">${new Date(c.criado_em).toLocaleString('pt-BR')}</td>
+            </tr>`;
+        }).join('');
+    } catch (err) {
+        el.innerHTML = '<tr><td colspan="5" class="py-6 px-6 text-center text-red-400">Erro ao carregar campanhas.</td></tr>';
+    }
+}
+
         document.addEventListener('DOMContentLoaded', () => {
             carregarDadosCreditosWhatsApp();
             atualizarContadorPublico?.();
