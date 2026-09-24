@@ -870,6 +870,32 @@ async function carregarCampanhas(pagina = 1) {
         el.innerHTML = '<tr><td colspan="5" class="py-6 px-6 text-center text-red-400">Erro ao carregar campanhas.</td></tr>';
     }
 }
+        // ─── Atualiza o mockup de visualização do email ───
+function atualizarPreview() {
+    const corpoEl = document.getElementById('campoCorpo');
+    const assuntoEl = document.getElementById('campoAssunto');
+    const previewCorpoEl = document.getElementById('previewCorpo');
+    const previewAssuntoEl = document.getElementById('previewAssunto');
+
+    if (!corpoEl || !previewCorpoEl) return;
+
+    const corpo = corpoEl.innerHTML.trim() || '<span style="color:#94a3b8">Comece a escrever sua mensagem...</span>';
+    const assunto = assuntoEl ? (assuntoEl.value.trim() || '(sem assunto)') : '(sem assunto)';
+
+    previewCorpoEl.innerHTML = corpo.replace(/{{\s*nome_paciente\s*}}/g, '<strong>Maria</strong>');
+    if (previewAssuntoEl) {
+        previewAssuntoEl.textContent = assunto;
+    }
+}
+
+// Vincula o evento de input no campo de assunto se ele existir
+document.addEventListener('DOMContentLoaded', () => {
+    const campoAssunto = document.getElementById('campoAssunto');
+    if (campoAssunto) {
+        campoAssunto.addEventListener('input', atualizarPreview);
+    }
+    atualizarPreview();
+});
 
         document.addEventListener('DOMContentLoaded', () => {
             carregarDadosCreditosWhatsApp();
