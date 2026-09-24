@@ -103,6 +103,7 @@ exports.obterCreditosWhatsApp = async (req, res) => {
   }
 };
 // Adicionar em controllers/marketingController.js
+// Substituir em controllers/marketingController.js
 exports.conectarInstanciaWhatsApp = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
@@ -116,7 +117,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
 
-    // 1. Cria a instância na Evolution API (caso não exista)
+    // 1. Assegura que a instância existe na Evolution API
     await fetch(`${evolutionApiUrl}/instance/create`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
@@ -128,7 +129,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       })
     }).catch(() => { });
 
-    // 2. Busca o QR Code diretamente na rota de conexão
+    // 2. Tenta buscar o QR Code na rota de conexão
     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
       headers: { 'apikey': evolutionApiKey }
@@ -136,13 +137,26 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
 
     const data = await response.json();
 
-    // A Evolution API pode retornar o base64 em diferentes estruturas dependendo da versão exata
-    const qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
+    // Varredura abrangente para capturar o base64 do QR code em qualquer variação da Evolution API
+    let qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
+
+    // Se o connect não retornou o base64 diretamente, tentamos forçar o fetch do QR code separadamente
+    if (!qrcodeBase64 && (!data.instance || data.instance.state !== 'open')) {
+      const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
+        method: 'GET',
+        headers: { 'apikey': evolutionApiKey }
+      }).catch(() => null);
+
+      if (qrRes && qrRes.ok) {
+        const qrData = await qrRes.json();
+        qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
+      }
+    }
 
     res.json({
       instanceName,
       qrcode: qrcodeBase64,
-      status: data.instance?.state || 'connecting'
+      status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'open')
     });
   } catch (err) {
     console.error('[MARKETING] Erro ao conectar instância:', err);
