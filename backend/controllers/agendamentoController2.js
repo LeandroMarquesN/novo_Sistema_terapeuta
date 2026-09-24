@@ -8,7 +8,6 @@ const financeiroController = require('./financeiroController'); // Importe o con
 // Importa o serviço de notificações
 const notificationService = require('../services/notificationService');
 const whatsappAgendaService = require('../services/whatsappAgendaService');
-const whatsappService = require('../services/whatsappService');
 
 
 const uploadDir = path.join(__dirname, '..', 'uploads');
@@ -217,16 +216,15 @@ exports.criarAgendamento = async (req, res) => {
           .catch(emailErr => console.error("[MED-LM] ❌ Erro crítico no envio de e-mail:", emailErr.message));
       }
 
-      // Processamento do WhatsApp corrigido
+      // Processamento do WhatsApp com Tratamento Dedicado
       if (pacienteDados && pacienteDados.telefone && dadosDaClinica) {
         console.log(`[AGENDAMENTO] Iniciando disparo de WhatsApp para ${pacienteDados.nome} (${pacienteDados.telefone})...`);
+
         try {
-          const mensagemTexto = `Olá ${pacienteDados.nome}, seu agendamento na ${dadosDaClinica.nome_clinica} foi realizado com sucesso para a data: ${new Date(data_agendamento).toLocaleString('pt-BR')}.`;
-          
-          await whatsappService.enviarWhatsApp(clinicaId, pacienteDados.telefone, mensagemTexto);
+          await whatsappAgendaService.notificarAgendamentoWhatsApp(dadosDaClinica, pacienteDados, { data_agendamento }, 'criado');
           console.log(`[AGENDAMENTO] ✅ WhatsApp disparado e crédito abatido com sucesso!`);
         } catch (whatsErr) {
-          console.error(`[MED-LM] ❌ Falha no envio de WhatsApp:`, whatsErr.message);
+          console.error(`[MED-LM] ❌ Falha controlada no envio de WhatsApp:`, whatsErr.message);
         }
       } else {
         console.log("[AGENDAMENTO] ℹ️ WhatsApp ignorado: Paciente sem telefone ou dados da clínica incompletos.");
