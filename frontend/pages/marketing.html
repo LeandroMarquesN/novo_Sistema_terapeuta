@@ -547,6 +547,36 @@
                                     <span class="text-[9px] uppercase text-cyan-200">R$ 450</span>
                                 </button>
                             </div>
+                            <!-- BOTÃO DE TESTE / SIMULAÇÃO SEM GASTAR NADA -->
+                            <button onclick="simularCompraTeste(50)" class="w-full bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 font-bold py-2 px-3 rounded-xl transition text-[10px] uppercase tracking-wider flex items-center justify-center gap-1.5">
+                                <i class="fas fa-flask"><span>Testar 50 Créditos Grátis (Modo Simulação)</span></i>
+                            </button>
+                            <script>
+                                async function simularCompraTeste(pacote) {
+                                    if (!confirm(`[MODO TESTE] Deseja adicionar ${pacote} créditos de forma simulada e gratuita para testar o sistema?`)) return;
+
+                                    try {
+                                        const res = await fetch('/api/pagamentos/simular-teste', {
+                                            method: 'POST',
+                                            headers,
+                                            body: JSON.stringify({ pacote })
+                                        });
+                                        const data = await res.json();
+
+                                        if (data.sucesso) {
+                                            alert(data.mensagem);
+                                            carregarDadosCreditosWhatsApp(); // Atualiza os créditos na tela na hora!
+                                        } else {
+                                            alert(data.erro || 'Erro ao simular.');
+                                        }
+                                    } catch (err) {
+                                        console.error('Erro na requisição de teste:', err);
+                                        alert('Falha ao conectar com a rota de teste.');
+                                    }
+                                }
+                            </script>
+                            <!-- fim da logica de teste -->
+    
                             <span class="text-[9px] text-slate-500 text-center flex items-center justify-center gap-1">
                                 <i class="fas fa-lock text-emerald-400"></i> Pagamento seguro via Mercado Pago
                             </span>

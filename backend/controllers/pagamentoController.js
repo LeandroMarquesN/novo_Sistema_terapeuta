@@ -133,3 +133,37 @@ exports.webhookMercadoPago = async (req, res) => {
         return res.status(500).json({ erro: 'Erro ao processar webhook.' });
     }
 };
+
+// --funcao para testar owhatassaap sem gastar e nem colocar creditos
+
+exports.simularPagamentoTeste = async (req, res) => {
+    try {
+        const clinicaId = req.usuario.clinica_id;
+        const { pacote } = req.body; // Ex: 50, 100, 300, 500, 1000
+
+        const quantidadeCreditos = Number(pacote) || 50;
+
+        // 1. Adiciona os créditos diretamente na tabela da clínica
+        await db.query(
+            'UPDATE clinicas SET whatsapp_creditos = whatsapp_creditos + ? WHERE id = ?',
+            [quantidadeCreditos, clinicaId]
+        );
+
+        // 2. Registra a compra simulada no histórico para aparecer nas métricas
+        await db.query(
+            `INSERT INTO whatsapp_compras_creditos (clinica_id, quantidade_creditos, valor_pago, status_pagamento, criado_em) 
+       VALUES (?, ?, ?, 'aprovado', NOW())`,
+            [clinicaId, quantidadeCreditos, 0.00]
+        );
+
+        console.log(`[TESTE] Adicionados ${quantidadeCreditos} créditos de WhatsApp para a clínica ID ${clinicaId} (Simulação)`);
+
+        return res.json({
+            sucesso: true,
+            mensagem: `Simulação concluída! ${quantidadeCreditos} créditos adicionados com sucesso.`
+        });
+    } catch (err) {
+        console.error('[TESTE] Erro ao simular pagamento:', err);
+        return res.status(500).json({ erro: 'Erro ao processar simulação de teste.' });
+    }
+};

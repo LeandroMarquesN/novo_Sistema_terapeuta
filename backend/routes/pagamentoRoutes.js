@@ -10,4 +10,7 @@ router.post('/criar-preferencia', auth, pagamentoController.criarPreferenciaWhat
 // Rota pública para receber o webhook do Mercado Pago (sem auth)
 router.post('/webhook', pagamentoController.webhookMercadoPago);
 
+// Rota exclusiva para testes sem gastar dinheiro
+router.post('/simular-teste', authMiddleware, pagamentoController.simularPagamentoTeste);
+
 module.exports = router;
