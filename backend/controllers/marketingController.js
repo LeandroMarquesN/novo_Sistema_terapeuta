@@ -201,46 +201,50 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'http://167.233.99.211:8080';
     const evolutionApiKey = process.env.EVOLUTION_API_KEY || '9deee09f44ae8f7e0e65d7811d1c08a5';
 
-    console.log(`[MARKETING] Conectando instância "${instanceName}" via ${evolutionApiUrl}`);
+    // 1. Assegura que a instância existe (cria se não existir)
+    await fetch(`${evolutionApiUrl}/instance/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
+      body: JSON.stringify({
+        instanceName,
+        token: evolutionApiKey,
+        qrcode: true,
+        integration: 'WHATSAPP-BAILEYS'
+      })
+    }).catch(() => { }); // Ignora erro se já existir
 
-    // 1. Assegura que a instância existe na Evolution API
-    try {
-      await fetch(`${evolutionApiUrl}/instance/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
-        body: JSON.stringify({
-          instanceName,
-          token: evolutionApiKey,
-          qrcode: true,
-          integration: 'WHATSAPP-BAILEYS'
-        })
+    let qrcodeBase64 = null;
+    let estadoInstancia = 'close';
+
+    // 2. Tenta buscar o QR Code até 3 vezes (aguardando o Baileys inicializar)
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
+        method: 'GET',
+        headers: { 'apikey': evolutionApiKey }
       });
-    } catch (errCreate) {
-      console.warn('[MARKETING] Aviso ao criar instância (pode já existir):', errCreate.message);
+
+      if (response.ok) {
+        const data = await response.json();
+
+        // Mapeia as diferentes estruturas possíveis da v2
+        qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || data.pairingCode || null;
+        estadoInstancia = data.instance?.state || data.state || estadoInstancia;
+
+        if (qrcodeBase64 || estadoInstancia === 'open') {
+          break;
+        }
+      }
+
+      if (tentativa < 3) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Aguarda 2 segundos antes de tentar novamente
+      }
     }
-
-    // 2. Busca o QR Code na rota de conexão da v2
-    const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
-      method: 'GET',
-      headers: { 'apikey': evolutionApiKey }
-    });
-
-    if (!response.ok) {
-      const corpoErro = await response.text().catch(() => '');
-      console.error(`[MARKETING] instance/connect retornou ${response.status}: ${corpoErro}`);
-      return res.status(502).json({ erro: `Evolution API respondeu com erro ${response.status}.` });
-    }
-
-    const data = await response.json();
-
-    // Captura o base64 do QR code nas diferentes estruturas possíveis da API v2
-    let qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || data.pairingCode || null;
 
     res.json({
       instanceName,
       telefone: clinica.telefone_clinica,
       qrcode: qrcodeBase64,
-      status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'desconhecido')
+      status: estadoInstancia
     });
   } catch (err) {
     console.error('[MARKETING] Erro ao conectar instância:', err);
