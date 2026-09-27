@@ -36,35 +36,58 @@ exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem) => {
   }
 
   const instanceName = `clinica_${clinicaId}`;
-  const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
+  const evolutionApiUrl = (process.env.EVOLUTION_API_URL || '').replace(/\/$/, '');
   const evolutionApiKey = process.env.EVOLUTION_API_KEY;
 
+  if (!evolutionApiUrl) {
+    throw new Error('EVOLUTION_API_URL não configurada no servidor (.env).');
+  }
   if (!evolutionApiKey) {
-    throw new Error('EVOLUTION_API_KEY não configurada no servidor.');
+    throw new Error('EVOLUTION_API_KEY não configurada no servidor (.env).');
   }
 
-  console.log(`[WHATSAPP] Clínica ${clinica.nome_clinica} → ${numero} (instância: ${instanceName})`);
+  const urlEnvio = `${evolutionApiUrl}/message/sendText/${instanceName}`;
 
-  // 3. Envio
-  const response = await fetch(`${evolutionApiUrl}/message/sendText/${instanceName}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: evolutionApiKey
-    },
-    body: JSON.stringify({
-      number: numero,
-      text: mensagem,
-      delay: 1200
-    })
-  });
+  console.log(`[WHATSAPP] Clínica ${clinica.nome_clinica} → ${numero}`);
+  console.log(`[WHATSAPP] Instância: ${instanceName}`);
+  console.log(`[WHATSAPP] URL: ${urlEnvio}`);
+
+  // 3. Envio com captura detalhada de erro de rede
+  let response;
+  try {
+    response = await fetch(urlEnvio, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: evolutionApiKey
+      },
+      body: JSON.stringify({
+        number: numero,
+        text: mensagem,
+        delay: 1200
+      })
+    });
+  } catch (errFetch) {
+    // Aqui cai o "fetch failed" (DNS, timeout, SSL, firewall, host offline, etc.)
+    console.error('[WHATSAPP] Falha de rede ao chamar Evolution API:', errFetch.message);
+    console.error('[WHATSAPP] Stack:', errFetch.cause || errFetch.stack);
+    throw new Error(
+      `Falha de rede ao conectar na Evolution API (${evolutionApiUrl}). ` +
+      `Detalhe: ${errFetch.message}. ` +
+      `Verifique se o VPS/Hetzner está acessível, se a URL está correta (com https) e se a porta não está bloqueada.`
+    );
+  }
 
   if (!response.ok) {
-    let erroMsg = `Erro na Evolution API (${response.status})`;
+    let erroMsg = `Erro na Evolution API (HTTP ${response.status})`;
     try {
       const erroData = await response.json();
-      erroMsg = erroData.message || erroData.error || erroMsg;
-    } catch (_) {}
+      erroMsg = erroData.message || erroData.error || erroData.response?.message || erroMsg;
+      console.error('[WHATSAPP] Resposta de erro da Evolution:', JSON.stringify(erroData));
+    } catch (_) {
+      const texto = await response.text().catch(() => '');
+      if (texto) erroMsg += ` — ${texto.slice(0, 200)}`;
+    }
     throw new Error(erroMsg);
   }
 
