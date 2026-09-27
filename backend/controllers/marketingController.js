@@ -1,14 +1,31 @@
-const db = require('../config/db');
 // controllers/marketingController.js
+const db = require('../config/db');
 const marketingService = require('../services/marketingService');
+const whatsappService = require('../services/whatsappService');
 
-// GET /api/marketing/pacientes/buscar?q=maria
+// GET /api/marketing/pacientes/buscar?q=
 exports.buscarPacientes = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
     const termo = (req.query.q || '').trim();
-    if (termo.length < 2) return res.json([]);
-    const pacientes = await marketingService.buscarPacientesPorTermo(clinicaId, termo);
+
+    let pacientes;
+    if (termo.length === 0) {
+      // Lista inicial (primeiros 20) para abrir o autocomplete
+      const [rows] = await db.query(
+        `SELECT id, nome, cpf, email, telefone 
+         FROM pacientes 
+         WHERE clinica_id = ? AND ativo = 1 
+         ORDER BY nome ASC 
+         LIMIT 20`,
+        [clinicaId]
+      );
+      pacientes = rows;
+    } else if (termo.length < 2) {
+      return res.json([]);
+    } else {
+      pacientes = await marketingService.buscarPacientesPorTermo(clinicaId, termo);
+    }
     res.json(pacientes);
   } catch (err) {
     console.error('[MARKETING] Erro ao buscar pacientes:', err);
@@ -16,19 +33,23 @@ exports.buscarPacientes = async (req, res) => {
   }
 };
 
-// GET /api/marketing/publico-alvo?tipoPublico=todos
-// Usado pela tela pra mostrar "Esta campanha será enviada para X pacientes" ANTES de confirmar.
+// GET /api/marketing/publico-alvo
 exports.previaPublicoAlvo = async (req, res) => {
   try {
-    const clinicaId = req.usuario.clinica_id; // nunca confiar no body — vem do token
-    const { tipoPublico = 'todos', pacienteIds, filtro } = req.query;
+    const clinicaId = req.usuario.clinica_id;
+    const { tipoPublico = 'todos', pacienteIds, filtro, canal = 'email' } = req.query;
 
     const opcoesPublico = {
       pacienteIds: pacienteIds ? JSON.parse(pacienteIds) : undefined,
       filtro: filtro ? JSON.parse(filtro) : undefined,
     };
 
-    const destinatarios = await marketingService.listarPublicoAlvo(clinicaId, tipoPublico, opcoesPublico);
+    const destinatarios = await marketingService.listarPublicoAlvo(
+      clinicaId,
+      tipoPublico,
+      opcoesPublico,
+      canal
+    );
     res.json({ total: destinatarios.length });
   } catch (err) {
     console.error('[MARKETING] Erro na prévia de público:', err);
@@ -37,43 +58,80 @@ exports.previaPublicoAlvo = async (req, res) => {
 };
 
 // POST /api/marketing/campanhas
-// Cria a campanha e dispara o processamento em background (não bloqueia a resposta).
 exports.criarCampanha = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
     const usuarioId = req.usuario.id;
-    const { titulo, assunto, corpoHtml, tipoPublico, opcoesPublico } = req.body;
-
-    if (!titulo || !assunto || !corpoHtml) {
-      return res.status(400).json({ erro: 'Título, assunto e corpo do email são obrigatórios.' });
-    }
-
-    const { campanhaId, totalDestinatarios } = await marketingService.criarCampanha(clinicaId, usuarioId, {
+    const {
       titulo,
       assunto,
       corpoHtml,
       tipoPublico,
       opcoesPublico,
-    });
+      canal = 'email',
+      rascunho = false
+    } = req.body;
 
-    // Dispara o processamento SEM bloquear a resposta HTTP.
-    marketingService.processarCampanha(campanhaId).catch((err) =>
-      console.error(`[MARKETING] Erro ao processar campanha ${campanhaId}:`, err)
+    if (!titulo || !corpoHtml) {
+      return res.status(400).json({ erro: 'Título e corpo da mensagem são obrigatórios.' });
+    }
+    if (canal === 'email' && !assunto) {
+      return res.status(400).json({ erro: 'Assunto do e-mail é obrigatório.' });
+    }
+
+    // Validação rápida de créditos se for WhatsApp
+    if (canal === 'whatsapp' && !rascunho) {
+      const [[clinica]] = await db.query(
+        'SELECT whatsapp_creditos FROM clinicas WHERE id = ?',
+        [clinicaId]
+      );
+      if (!clinica || (clinica.whatsapp_creditos || 0) <= 0) {
+        return res.status(402).json({
+          erro: 'Créditos de WhatsApp insuficientes. Faça uma recarga para continuar.',
+          codigo: 'CREDITOS_INSUFICIENTES'
+        });
+      }
+    }
+
+    const { campanhaId, totalDestinatarios } = await marketingService.criarCampanha(
+      clinicaId,
+      usuarioId,
+      {
+        titulo,
+        assunto: assunto || '',
+        corpoHtml,
+        tipoPublico,
+        opcoesPublico,
+        canal,
+        rascunho
+      }
     );
 
-    res.status(201).json({ campanhaId, totalDestinatarios });
+    // Processamento em background (não bloqueia a resposta HTTP)
+    if (!rascunho) {
+      marketingService.processarCampanha(campanhaId).catch((err) =>
+        console.error(`[MARKETING] Erro ao processar campanha ${campanhaId}:`, err)
+      );
+    }
+
+    res.status(201).json({ campanhaId, totalDestinatarios, canal });
   } catch (err) {
     console.error('[MARKETING] Erro ao criar campanha:', err);
-    res.status(500).json({ erro: 'Erro ao criar campanha.' });
+    res.status(500).json({ erro: err.message || 'Erro ao criar campanha.' });
   }
 };
 
-// GET /api/marketing/campanhas?pagina=1&porPagina=10&status=&busca=
+// GET /api/marketing/campanhas
 exports.listarCampanhas = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
     const { pagina, porPagina, status, busca } = req.query;
-    const resultado = await marketingService.listarCampanhas(clinicaId, { pagina, porPagina, status, busca });
+    const resultado = await marketingService.listarCampanhas(clinicaId, {
+      pagina,
+      porPagina,
+      status,
+      busca
+    });
     res.json(resultado);
   } catch (err) {
     console.error('[MARKETING] Erro ao listar campanhas:', err);
@@ -81,10 +139,14 @@ exports.listarCampanhas = async (req, res) => {
   }
 };
 
+// GET /api/marketing/creditos-whatsapp
 exports.obterCreditosWhatsApp = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
-    const [[clinica]] = await db.query('SELECT whatsapp_creditos FROM clinicas WHERE id = ?', [clinicaId]);
+    const [[clinica]] = await db.query(
+      'SELECT whatsapp_creditos FROM clinicas WHERE id = ?',
+      [clinicaId]
+    );
 
     const [[estatisticas]] = await db.query(
       `SELECT SUM(quantidade_creditos) as total_comprado_mes 
@@ -102,15 +164,20 @@ exports.obterCreditosWhatsApp = async (req, res) => {
     res.status(500).json({ erro: 'Erro ao buscar créditos.' });
   }
 };
-// Adicionar em controllers/marketingController.js
-// Substituir em controllers/marketingController.js
+
+// GET /api/marketing/whatsapp/conectar
 exports.conectarInstanciaWhatsApp = async (req, res) => {
   try {
     const clinicaId = req.usuario.clinica_id;
-    const [[clinica]] = await db.query('SELECT id, telefone_clinica, nome_clinica FROM clinicas WHERE id = ?', [clinicaId]);
+    const [[clinica]] = await db.query(
+      'SELECT id, telefone_clinica, nome_clinica FROM clinicas WHERE id = ?',
+      [clinicaId]
+    );
 
     if (!clinica || !clinica.telefone_clinica) {
-      return res.status(400).json({ erro: 'Cadastre o telefone oficial da clínica antes de conectar o WhatsApp.' });
+      return res.status(400).json({
+        erro: 'Cadastre o telefone oficial da clínica antes de conectar o WhatsApp.'
+      });
     }
 
     const instanceName = `clinica_${clinicaId}`;
@@ -118,73 +185,101 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
 
     if (!evolutionApiKey) {
-      console.error('[MARKETING] EVOLUTION_API_KEY não está definida nas variáveis de ambiente.');
-      return res.status(500).json({ erro: 'Configuração ausente: EVOLUTION_API_KEY não definida no servidor.' });
+      console.error('[MARKETING] EVOLUTION_API_KEY não definida.');
+      return res.status(500).json({
+        erro: 'Configuração ausente: EVOLUTION_API_KEY não definida no servidor.'
+      });
     }
-    console.log(`[MARKETING] Conectando instância "${instanceName}" via ${evolutionApiUrl}`);
 
-    // 1. Assegura que a instância existe na Evolution API
+    // 1. Garante existência da instância
     try {
       const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': evolutionApiKey },
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: evolutionApiKey
+        },
         body: JSON.stringify({
           instanceName,
-          token: evolutionApiKey,
           qrcode: true,
           integration: 'WHATSAPP-BAILEYS'
         })
       });
-      if (!createRes.ok && createRes.status !== 403) {
-        // 403 costuma significar "instância já existe" em algumas versões da Evolution API — não é um erro fatal aqui.
+
+      // 403 / 409 costumam significar "já existe" — ignoramos
+      if (!createRes.ok && ![403, 409].includes(createRes.status)) {
         const corpoErro = await createRes.text().catch(() => '');
-        console.warn(`[MARKETING] instance/create retornou ${createRes.status}: ${corpoErro}`);
+        console.warn(`[MARKETING] instance/create → ${createRes.status}: ${corpoErro}`);
       }
     } catch (errCreate) {
-      console.error('[MARKETING] Falha de rede ao chamar instance/create na Evolution API:', errCreate.message);
-      return res.status(502).json({ erro: `Não foi possível conectar à Evolution API em ${evolutionApiUrl}. Verifique a URL/host e se o serviço está no ar.` });
+      console.error('[MARKETING] Falha de rede no create:', errCreate.message);
+      return res.status(502).json({
+        erro: `Não foi possível conectar à Evolution API (${evolutionApiUrl}).`
+      });
     }
 
-    // 2. Tenta buscar o QR Code na rota de conexão
+    // 2. Solicita conexão / QR
     const response = await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
-      headers: { 'apikey': evolutionApiKey }
+      headers: { apikey: evolutionApiKey }
     });
 
     if (!response.ok) {
       const corpoErro = await response.text().catch(() => '');
-      console.error(`[MARKETING] instance/connect retornou ${response.status}: ${corpoErro}`);
-      return res.status(502).json({ erro: `Evolution API respondeu com erro ${response.status} ao tentar conectar.` });
+      console.error(`[MARKETING] instance/connect → ${response.status}: ${corpoErro}`);
+      return res.status(502).json({
+        erro: `Evolution API respondeu com erro ${response.status}.`
+      });
     }
 
     const data = await response.json();
 
-    // Varredura abrangente para capturar o base64 do QR code em qualquer variação da Evolution API
+    // Extrai base64 de várias formas possíveis da Evolution API
     let qrcodeBase64 = data.base64 || data.qrcode?.base64 || data.code || null;
 
-    // Se o connect não retornou o base64 diretamente, tentamos forçar o fetch do QR code separadamente
-    if (!qrcodeBase64 && (!data.instance || data.instance.state !== 'open')) {
-      const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
-        method: 'GET',
-        headers: { 'apikey': evolutionApiKey }
-      }).catch((errQr) => {
-        console.error('[MARKETING] Falha ao buscar /instance/qrCode:', errQr.message);
-        return null;
-      });
-
-      if (qrRes && qrRes.ok) {
-        const qrData = await qrRes.json();
-        qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
-      }
+    // Fallback extra se necessário
+    if (!qrcodeBase64 && data.instance?.state !== 'open') {
+      try {
+        const qrRes = await fetch(`${evolutionApiUrl}/instance/qrCode/${instanceName}`, {
+          method: 'GET',
+          headers: { apikey: evolutionApiKey }
+        });
+        if (qrRes.ok) {
+          const qrData = await qrRes.json();
+          qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
+        }
+      } catch (_) {}
     }
 
     res.json({
       instanceName,
+      telefone: clinica.telefone_clinica,
       qrcode: qrcodeBase64,
       status: data.instance?.state || (qrcodeBase64 ? 'connecting' : 'open')
     });
   } catch (err) {
     console.error('[MARKETING] Erro ao conectar instância:', err);
     res.status(500).json({ erro: 'Erro ao gerar QR Code do WhatsApp.' });
+  }
+};
+
+// POST /api/marketing/whatsapp/enviar (envio unitário / teste)
+exports.enviarWhatsAppMarketing = async (req, res) => {
+  try {
+    const clinicaId = req.usuario.clinica_id;
+    const { telefone, mensagem } = req.body;
+
+    if (!telefone || !mensagem) {
+      return res.status(400).json({ erro: 'Telefone e mensagem são obrigatórios.' });
+    }
+
+    await whatsappService.enviarWhatsApp(clinicaId, telefone, mensagem);
+    res.json({ sucesso: true, mensagem: 'Mensagem enviada com sucesso!' });
+  } catch (err) {
+    console.error('[MARKETING] Erro ao enviar WhatsApp:', err.message);
+    const status = err.message.includes('créditos') ? 402 : 500;
+    res.status(status).json({
+      erro: err.message || 'Erro ao enviar mensagem via WhatsApp.'
+    });
   }
 };

@@ -3,71 +3,77 @@ require('dotenv').config();
 const db = require('../config/db');
 
 /**
- * Dispara uma mensagem de WhatsApp vinculada à clínica, validando créditos, 
- * garantindo a instância na Evolution API e utilizando o telefone_clinica cadastrado.
+ * Envia mensagem de WhatsApp via Evolution API.
+ * Valida créditos, formata números e abate 1 crédito apenas após sucesso.
  */
 exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem) => {
+  // 1. Dados da clínica
+  const [[clinica]] = await db.query(
+    `SELECT whatsapp_creditos, nome_clinica, telefone_clinica 
+     FROM clinicas WHERE id = ?`,
+    [clinicaId]
+  );
+
+  if (!clinica) {
+    throw new Error('Clínica não encontrada.');
+  }
+
+  if ((clinica.whatsapp_creditos || 0) <= 0) {
+    throw new Error('Créditos de WhatsApp esgotados. Faça uma recarga para continuar.');
+  }
+
+  if (!clinica.telefone_clinica) {
+    throw new Error('A clínica não possui telefone oficial cadastrado (telefone_clinica).');
+  }
+
+  // 2. Formatação do destinatário (Brasil)
+  let numero = String(telefoneDestino).replace(/\D/g, '');
+  if (numero.length < 10) {
+    throw new Error('Número de telefone inválido.');
+  }
+  if (!numero.startsWith('55')) {
+    numero = `55${numero}`;
+  }
+
+  const instanceName = `clinica_${clinicaId}`;
+  const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
+  const evolutionApiKey = process.env.EVOLUTION_API_KEY;
+
+  if (!evolutionApiKey) {
+    throw new Error('EVOLUTION_API_KEY não configurada no servidor.');
+  }
+
+  console.log(`[WHATSAPP] Clínica ${clinica.nome_clinica} → ${numero} (instância: ${instanceName})`);
+
+  // 3. Envio
+  const response = await fetch(`${evolutionApiUrl}/message/sendText/${instanceName}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: evolutionApiKey
+    },
+    body: JSON.stringify({
+      number: numero,
+      text: mensagem,
+      delay: 1200
+    })
+  });
+
+  if (!response.ok) {
+    let erroMsg = `Erro na Evolution API (${response.status})`;
     try {
-        // 1. Busca os dados da clínica (créditos disponíveis, nome e o telefone oficial)
-        const [[clinica]] = await db.query(
-            'SELECT whatsapp_creditos, nome_clinica, telefone_clinica FROM clinicas WHERE id = ?',
-            [clinicaId]
-        );
+      const erroData = await response.json();
+      erroMsg = erroData.message || erroData.error || erroMsg;
+    } catch (_) {}
+    throw new Error(erroMsg);
+  }
 
-        if (!clinica) {
-            throw new Error('Clínica não encontrada.');
-        }
+  // 4. Abate crédito somente após sucesso confirmado
+  await db.query(
+    'UPDATE clinicas SET whatsapp_creditos = GREATEST(whatsapp_creditos - 1, 0) WHERE id = ?',
+    [clinicaId]
+  );
 
-        if (clinica.whatsapp_creditos <= 0) {
-            console.warn(`[WHATSAPP] Clínica ID ${clinicaId} (${clinica.nome_clinica}) tentou enviar mensagem, mas está sem créditos.`);
-            throw new Error('Créditos de WhatsApp esgotados. Faça uma recarga para continuar.');
-        }
-
-        // 2. Formata o telefone do destinatário (paciente)
-        const numeroDestinoLimpo = telefoneDestino.replace(/\D/g, '');
-        const destinoFormatado = numeroDestinoLimpo.startsWith('55') ? numeroDestinoLimpo : `55${numeroDestinoLimpo}`;
-
-        // 3. Obtém e valida o número remetente da clínica cadastrado no banco (telefone_clinica)
-        const remetenteClinica = clinica.telefone_clinica ? clinica.telefone_clinica.replace(/\D/g, '') : '';
-
-        if (!remetenteClinica) {
-            throw new Error('A clínica não possui um telefone oficial cadastrado (telefone_clinica) para realizar o disparo.');
-        }
-
-        // Nome da instância exclusiva da clínica na Evolution API (ex: clinica_5)
-        const instanceName = `clinica_${clinicaId}`;
-        const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
-        const evolutionApiKey = process.env.EVOLUTION_API_KEY; // A chave mestra configurada no Render
-
-        console.log(`[WHATSAPP] Disparando pela clínica: ${clinica.nome_clinica} (Instância: ${instanceName})`);
-        console.log(`[WHATSAPP] Destinatário: ${destinoFormatado}`);
-
-        // 4. Envio real via Evolution API
-        const response = await fetch(`${evolutionApiUrl}/message/sendText/${instanceName}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'apikey': evolutionApiKey
-            },
-            body: JSON.stringify({
-                number: destinoFormatado,
-                text: mensagem,
-                delay: 1200
-            })
-        });
-
-        if (!response.ok) {
-            const erroData = await response.json().catch(() => ({}));
-            throw new Error(erroData.message || `Erro na Evolution API: ${response.statusText}`);
-        }
-
-        // 5. Abate 1 crédito do saldo da clínica no banco de dados após o sucesso
-        await db.query('UPDATE clinicas SET whatsapp_creditos = whatsapp_creditos - 1 WHERE id = ?', [clinicaId]);
-
-        console.log(`[WHATSAPP] Mensagem enviada com sucesso e crédito descontado para a clínica ID ${clinicaId}.`);
-        return true;
-    } catch (err) {
-        console.error('[WHATSAPP] Erro no envio:', err.message);
-        throw err;
-    }
+  console.log(`[WHATSAPP] Enviado com sucesso. Crédito abatido (clínica ${clinicaId}).`);
+  return true;
 };
