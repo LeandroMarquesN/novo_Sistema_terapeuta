@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const agendaService = require('../services/agendaService');
 const notificationService = require('../services/notificationService');
+const whatsappService = require('../services/whatsappService');
 const crypto = require('crypto');
 
 // =============================================================================
@@ -72,7 +73,7 @@ exports.getHorariosLivres = async (req, res) => {
 };
 
 // =============================================================================
-// 3. CRIAR AGENDAMENTO (COM VÍNCULO DO PROFISSIONAL)
+// 3. CRIAR AGENDAMENTO (COM VÍNCULO DO PROFISSIONAL + WHATSAPP)
 // =============================================================================
 const PAGAMENTO_PLATAFORMA_ATIVO = false;
 
@@ -85,7 +86,7 @@ exports.criarAgendamento = async (req, res) => {
   const {
     nome, email, telefone, cpf, data, horario,
     genero, data_nascimento, tipo_terapia, motivo_consulta, aceite_lgpd,
-    usuario_id, // 🌟 Captura o ID do profissional escolhido no select do portal
+    usuario_id,
     forma_pagamento
   } = req.body;
 
@@ -176,10 +177,13 @@ exports.criarAgendamento = async (req, res) => {
       pacienteId = resPaciente.insertId;
     }
 
-    // 🌟 DEFINIR O PROFISSIONAL RESPONSÁVEL (Usa o escolhido ou pega o primeiro como fallback)
+    // DEFINIR O PROFISSIONAL RESPONSÁVEL
     let profissionalIdFinal = usuario_id;
     if (!profissionalIdFinal) {
-      const [usuariosAdmin] = await connection.execute('SELECT id FROM usuarios WHERE clinica_id = ? LIMIT 1', [clinica_id]);
+      const [usuariosAdmin] = await connection.execute(
+        'SELECT id FROM usuarios WHERE clinica_id = ? LIMIT 1',
+        [clinica_id]
+      );
       profissionalIdFinal = usuariosAdmin.length > 0 ? usuariosAdmin[0].id : null;
     }
 
@@ -190,11 +194,23 @@ exports.criarAgendamento = async (req, res) => {
     const statusInicial = 'aguardando_sinal';
     const dataAgendamentoCompleta = `${data} ${horario}`;
 
-    // CRIAR O AGENDAMENTO COM O ID DO PROFISSIONAL
+    // CRIAR O AGENDAMENTO
     const [resAgendamento] = await connection.execute(
       `INSERT INTO agendamentos (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, motivo_consulta, nome, email, telefone, cpf, tipo_terapia) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [clinica_id, pacienteId, profissionalIdFinal, dataAgendamentoCompleta, statusInicial, motivo_consulta, nome, email, telefone, cpf, tipo_terapia]
+      [
+        clinica_id,
+        pacienteId,
+        profissionalIdFinal,
+        dataAgendamentoCompleta,
+        statusInicial,
+        motivo_consulta,
+        nome,
+        email,
+        telefone,
+        cpf,
+        tipo_terapia
+      ]
     );
     const agendamentoId = resAgendamento.insertId;
 
@@ -221,7 +237,7 @@ exports.criarAgendamento = async (req, res) => {
     req.session.pacienteId = pacienteId;
     await connection.commit();
 
-    // Notificação interna
+    // ─── Notificação interna (não bloqueia) ───
     try {
       const { criarNotificacao } = require('../services/notificationServiceClientExterno');
       await criarNotificacao({
@@ -233,22 +249,63 @@ exports.criarAgendamento = async (req, res) => {
         pacienteId: pacienteId
       });
     } catch (notifErr) {
-      console.error('Erro ao criar notificação interna:', notifErr);
+      console.error('[PORTAL] Erro ao criar notificação interna:', notifErr.message);
     }
 
-    // Disparo de e-mail
-    const [clinicaResult] = await db.execute('SELECT * FROM clinicas WHERE id = ?', [clinica_id]);
-    const dadosParaEmail = {
-      nome: nome,
-      email: email,
-      tipo_terapia: tipo_terapia || 'Terapia Integrativa',
-      data_agendamento: dataAgendamentoCompleta,
-      motivo_consulta: motivo_consulta || 'Consulta inicial',
-      token_acesso: novoToken
-    };
+    // ─── Dados da clínica para e-mail / WhatsApp ───
+    let dadosClinica = null;
+    try {
+      const [clinicaResult] = await db.execute(
+        'SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?',
+        [clinica_id]
+      );
+      dadosClinica = clinicaResult[0] || null;
+    } catch (errClinica) {
+      console.error('[PORTAL] Erro ao buscar dados da clínica:', errClinica.message);
+    }
 
-    notificationService.sendEmailNotification(clinicaResult[0], dadosParaEmail)
-      .catch(err => console.error("Erro ao enviar email:", err));
+    // ─── Disparo de e-mail (background) ───
+    if (email && dadosClinica) {
+      const dadosParaEmail = {
+        nome: nome,
+        email: email,
+        tipo_terapia: tipo_terapia || 'Terapia Integrativa',
+        data_agendamento: dataAgendamentoCompleta,
+        motivo_consulta: motivo_consulta || 'Consulta inicial',
+        token_acesso: novoToken
+      };
+
+      notificationService.sendEmailNotification(dadosClinica, dadosParaEmail)
+        .then(() => console.log(`[PORTAL] ✅ E-mail enviado para ${email}`))
+        .catch(err => console.error('[PORTAL] ❌ Erro ao enviar e-mail:', err.message));
+    }
+
+    // ─── Disparo de WhatsApp (background) ───
+    // Mesmo padrão do agendamentoController.js (painel interno)
+    if (telefone && dadosClinica) {
+      const dataFormatada = new Date(dataAgendamentoCompleta).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const mensagemWhatsApp =
+        `Olá {{nome_paciente}}, seu agendamento na ${dadosClinica.nome_clinica} ` +
+        `foi realizado com sucesso para ${dataFormatada}. ` +
+        `Tipo: ${tipo_terapia || 'Consulta'}. ` +
+        `Em caso de dúvidas, entre em contato com a clínica.`;
+
+      console.log(`[PORTAL] Iniciando disparo de WhatsApp para ${nome} (${telefone})...`);
+
+      whatsappService
+        .enviarWhatsApp(clinica_id, telefone, mensagemWhatsApp, nome)
+        .then(() => console.log(`[PORTAL] ✅ WhatsApp enviado e crédito abatido para ${nome}`))
+        .catch(err => console.error(`[PORTAL] ❌ Falha no WhatsApp:`, err.message));
+    } else {
+      console.log('[PORTAL] ℹ️ WhatsApp ignorado: paciente sem telefone ou clínica sem dados.');
+    }
 
     return res.json({
       success: true,
@@ -275,7 +332,7 @@ exports.criarAgendamento = async (req, res) => {
 // 4. LISTAR PROFISSIONAIS DA CLÍNICA PARA O PORTAL PÚBLICO
 // =============================================================================
 exports.getUsuariosClinica = async (req, res) => {
-  const clinica_id = req.clinicaId; // Injetado pelo portalMiddleware via slug
+  const clinica_id = req.clinicaId;
   if (!clinica_id) return res.status(400).json({ success: false, message: "Clínica não encontrada." });
 
   try {
