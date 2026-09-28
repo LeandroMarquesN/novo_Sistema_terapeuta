@@ -21,6 +21,7 @@ const headers = {
 let pacientesSelecionados = [];
 let paginaAtual = 1;
 let debounceTimer = null;
+let filtroStatusAtual = '';
 
 // ─── Modais de feedback (UX moderna) ───
 function mostrarModal({ tipo = 'info', titulo, mensagem, botaoTexto = 'Entendi', onConfirm }) {
@@ -157,7 +158,16 @@ async function atualizarContadorPublico() {
 }
 
 // ─── Histórico de campanhas ───
-async function carregarCampanhas(pagina = 1) {
+function filtrarCampanhas(status) {
+  filtroStatusAtual = status || '';
+  document.querySelectorAll('.filtro-status-btn').forEach((btn) => {
+    const ativo = (btn.getAttribute('data-filtro-status') || '') === filtroStatusAtual;
+    btn.classList.toggle('active', ativo);
+  });
+  carregarCampanhas(1, filtroStatusAtual);
+}
+
+async function carregarCampanhas(pagina = 1, status = filtroStatusAtual) {
   const el = document.getElementById('listaCampanhas');
   if (!el) return;
 
@@ -165,6 +175,8 @@ async function carregarCampanhas(pagina = 1) {
 
   try {
     const params = new URLSearchParams({ pagina, porPagina: 10 });
+    if (status) params.set('status', status);
+
     const res = await fetch(`/api/marketing/campanhas?${params}`, { headers });
     const data = await res.json();
     paginaAtual = data.pagina || 1;

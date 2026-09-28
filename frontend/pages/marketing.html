@@ -238,6 +238,13 @@
         .badge-concluida_com_falhas { background: rgba(251,146,60,0.15); color: #fb923c; }
         .badge-falhou { background: rgba(248,113,113,0.15); color: #f87171; }
 
+        .filtro-status-btn.active {
+            border-color: rgba(34,211,238,0.45) !important;
+            color: #22d3ee !important;
+            background: rgba(34,211,238,0.08);
+        }
+
+
         /* ─── Mobile nav ─── */
         .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer { display: none; }
 
@@ -750,11 +757,17 @@
 
                 <!-- ═══ HISTÓRICO ═══ -->
                 <div id="painelHistorico" class="cyber-panel glow-line rounded-2xl overflow-hidden">
-                    <div class="p-4 sm:p-5 border-b border-white/5 flex items-center justify-between">
+                    <div class="p-4 sm:p-5 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <h2 class="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
                             <i class="fas fa-clock-rotate-left text-cyan-400"></i> Campanhas enviadas
                         </h2>
-                        <button onclick="carregarCampanhas(1)" class="toolbar-btn" title="Atualizar"><i class="fas fa-rotate"></i></button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="filtrarCampanhas('')" data-filtro-status="" class="filtro-status-btn active px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300 transition">Todas</button>
+                            <button type="button" onclick="filtrarCampanhas('processando')" data-filtro-status="processando" class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-amber-500/40 hover:text-amber-300 transition">Processando</button>
+                            <button type="button" onclick="filtrarCampanhas('concluida')" data-filtro-status="concluida" class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-300 transition">Sucesso</button>
+                            <button type="button" onclick="filtrarCampanhas('concluida_com_falhas')" data-filtro-status="concluida_com_falhas" class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-orange-500/40 hover:text-orange-300 transition">Com Falhas</button>
+                            <button onclick="carregarCampanhas(1)" class="toolbar-btn" title="Atualizar"><i class="fas fa-rotate"></i></button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto w-full">
                         <table class="min-w-full divide-y divide-white/5">
