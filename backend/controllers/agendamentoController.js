@@ -3,18 +3,14 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
-const financeiroController = require('./financeiroController'); // Importe o controller
+const financeiroController = require('./financeiroController');
 
-// Importa o serviço de notificações
 const notificationService = require('../services/notificationService');
 const whatsappAgendaService = require('../services/whatsappAgendaService');
 const whatsappService = require('../services/whatsappService');
 
-
 const uploadDir = path.join(__dirname, '..', 'uploads');
 
-
-// Assegura que o diretório de uploads existe
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -31,26 +27,22 @@ exports.criarAgendamento = async (req, res) => {
     nome, cpf, email, telefone, data_nascimento, idade,
     peso, genero, altura, tipo_sanguineo, tipo_terapia,
     data_agendamento, motivo_consulta, origem_indicacao, observacoes, aceite_lgpd,
-    valor_sinal, usuario_id // 🌟 Captura o ID do profissional escolhido no select
+    valor_sinal, usuario_id
   } = req.body;
 
-  // Validação de segurança para o profissional
   const profissionalIdFinal = usuario_id || (req.usuario ? req.usuario.id : null);
   if (!profissionalIdFinal) {
     return res.status(400).json({ mensagem: 'O profissional responsável deve ser selecionado.' });
   }
 
-  // Trava de segurança LGPD
   if (!aceite_lgpd || aceite_lgpd === 'false' || aceite_lgpd === false || aceite_lgpd === '0') {
     return res.status(400).json({ mensagem: 'O consentimento da LGPD é obrigatório para realizar o agendamento.' });
   }
 
-  // 🌟 CORREÇÃO DE FUSO NO INPUT: Limpa caracteres ISO para salvar a hora local real
   if (data_agendamento) {
     data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
   }
-  // calcula aidade do paciente
-  // Calcula idade a partir da data de nascimento, caso não venha preenchida (ou para garantir consistência)
+
   if (data_nascimento) {
     const nascimento = new Date(data_nascimento);
     const hoje = new Date();
@@ -61,7 +53,6 @@ exports.criarAgendamento = async (req, res) => {
     }
     idade = idadeCalculada;
   }
-  // fim da funcao calcular idade
 
   const clinicaId = req.usuario ? req.usuario.clinica_id : null;
   const usuarioId = req.usuario.id;
@@ -84,11 +75,9 @@ exports.criarAgendamento = async (req, res) => {
 
   const connection = await db.getConnection();
   try {
-    // Garante que a sessão do banco use o fuso de Brasília/São Paulo
     await connection.query("SET time_zone = '-03:00'");
     await connection.beginTransaction();
 
-    // --- LÓGICA DE TOKEN DE ACESSO ---
     const novoToken = crypto.randomBytes(32).toString('hex');
     const dataExpiracao = new Date();
     dataExpiracao.setMonth(dataExpiracao.getMonth() + 3);
@@ -108,7 +97,7 @@ exports.criarAgendamento = async (req, res) => {
           idade = ?, tipo_sanguineo = ?, genero = ?,
           condicoes_preexistentes = ?, status_pagamento = 'pendente',
           token_acesso = ?, token_expiracao = ?,
-          aceite_lgpd = 1, data_aceite_lgpd = NOW() -- Padronizado
+          aceite_lgpd = 1, data_aceite_lgpd = NOW()
          WHERE id = ?`,
         [telefone, email, peso, altura, idade, tipo_sanguineo, genero, condicoesString, novoToken, dataExpiracao, paciente_id]
       );
@@ -125,7 +114,6 @@ exports.criarAgendamento = async (req, res) => {
       paciente_id = novoPacResult.insertId;
     }
 
-    // --- LOGICA DE AGENDAMENTO ---
     const sqlAgendamento = `
       INSERT INTO agendamentos (
         clinica_id, paciente_id, usuario_id, nome, data_agendamento,
@@ -144,10 +132,9 @@ exports.criarAgendamento = async (req, res) => {
     const [agendamentoResult] = await connection.query(sqlAgendamento, valoresAgendamento);
     const agendamentoId = agendamentoResult.insertId;
 
-    // --- LOGICA FINANCEIRA BRASIL ---
     let valorLimpo = 0.00;
     if (valor_sinal) {
-      valorLimpo = parseFloat(valor_sinal.replace(/\./g, '').replace(',', '.'));
+      valorLimpo = parseFloat(String(valor_sinal).replace(/\./g, '').replace(',', '.'));
     }
 
     const dataLocal = new Date();
@@ -169,7 +156,6 @@ exports.criarAgendamento = async (req, res) => {
       ]
     );
 
-    // --- ANEXOS ---
     if (anexos.length > 0) {
       for (const file of anexos) {
         await connection.query(
@@ -182,7 +168,7 @@ exports.criarAgendamento = async (req, res) => {
     await connection.commit();
     console.log(`[AGENDAMENTO] Transação confirmada com sucesso para o ID: ${agendamentoId}`);
 
-    // --- BLOCO DE NOTIFICAÇÕES COM TRATAMENTO DE ERRO ROBUSTO ---
+    // ─── NOTIFICAÇÕES (não bloqueiam a resposta) ───
     try {
       const [clinicaResult] = await connection.query(
         'SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?',
@@ -191,16 +177,15 @@ exports.criarAgendamento = async (req, res) => {
       const dadosDaClinica = clinicaResult[0];
 
       if (!dadosDaClinica) {
-        console.warn(`[MED-LM] ⚠️ Aviso: Clínica ID ${clinicaId} não encontrada para envio de notificações.`);
+        console.warn(`[MED-LM] ⚠️ Clínica ID ${clinicaId} não encontrada para notificações.`);
       }
 
-      // Busca os dados diretamente do agendamento recém-criado para garantir o telefone
       const [[pacienteDados]] = await connection.query(
         'SELECT nome, telefone FROM agendamentos WHERE id = ?',
         [agendamentoId]
       );
 
-      // Processamento do E-mail
+      // E-mail
       if (email && dadosDaClinica) {
         console.log(`[AGENDAMENTO] Preparando envio de e-mail para: ${email}`);
         const dadosDoAgendamento = {
@@ -215,26 +200,35 @@ exports.criarAgendamento = async (req, res) => {
 
         notificationService.sendEmailNotification(dadosDaClinica, dadosDoAgendamento)
           .then(() => console.log(`[AGENDAMENTO] ✅ E-mail enviado com sucesso para ${email}`))
-          .catch(emailErr => console.error("[MED-LM] ❌ Erro crítico no envio de e-mail:", emailErr.message));
+          .catch(emailErr => console.error("[MED-LM] ❌ Erro no envio de e-mail:", emailErr.message));
       }
 
-      // Processamento do WhatsApp corrigido buscando da tabela agendamentos
+      // WhatsApp — usa tag {{nome_paciente}} + 4º parâmetro nomePaciente
       if (pacienteDados && pacienteDados.telefone && dadosDaClinica) {
         console.log(`[AGENDAMENTO] Iniciando disparo de WhatsApp para ${pacienteDados.nome} (${pacienteDados.telefone})...`);
-        try {
-          const mensagemTexto = `Olá ${pacienteDados.nome}, seu agendamento na ${dadosDaClinica.nome_clinica} foi realizado com sucesso para a data: ${new Date(data_agendamento).toLocaleString('pt-BR')}.`;
 
-          await whatsappService.enviarWhatsApp(clinicaId, pacienteDados.telefone, mensagemTexto);
-          console.log(`[AGENDAMENTO] ✅ WhatsApp disparado e crédito abatido com sucesso!`);
-        } catch (whatsErr) {
-          console.error(`[MED-LM] ❌ Falha no envio de WhatsApp:`, whatsErr.message);
-        }
+        const dataFormatada = new Date(data_agendamento).toLocaleString('pt-BR', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+
+        const mensagemTexto =
+          `Olá {{nome_paciente}}, seu agendamento na ${dadosDaClinica.nome_clinica} ` +
+          `foi realizado com sucesso para a data: ${dataFormatada}.`;
+
+        whatsappService
+          .enviarWhatsApp(clinicaId, pacienteDados.telefone, mensagemTexto, pacienteDados.nome)
+          .then(() => console.log(`[AGENDAMENTO] ✅ WhatsApp disparado e crédito abatido com sucesso!`))
+          .catch(whatsErr => console.error(`[MED-LM] ❌ Falha no envio de WhatsApp:`, whatsErr.message));
       } else {
-        console.log("[AGENDAMENTO] ℹ️ WhatsApp ignorado: Paciente sem telefone ou dados da clínica incompletos.");
+        console.log("[AGENDAMENTO] ℹ️ WhatsApp ignorado: paciente sem telefone ou dados da clínica incompletos.");
       }
 
     } catch (notifError) {
-      console.error("[MED-LM] ❌ Erro geral ao processar as notificações em background:", notifError.message);
+      console.error("[MED-LM] ❌ Erro geral ao processar notificações:", notifError.message);
     }
 
     return res.status(201).json({
@@ -321,9 +315,9 @@ exports.listarAgendamentos = async (req, res) => {
   }
 };
 
-// ============================================================================
-// 2.1 LISTA AGENDAMENTO DE HOJE (Para a Voz e Dashboard do dia)
-// ============================================================================
+// =============================================================================
+// 2.1 LISTA AGENDAMENTO DE HOJE
+// =============================================================================
 exports.listarAgendamentosHoje = async (req, res) => {
   const clinicaId = req.usuario ? req.usuario.clinica_id : null;
 
@@ -385,13 +379,13 @@ exports.deletarAgendamento = async (req, res) => {
 };
 
 // =============================================================================
-// 4. ATUALIZAR COMPLETO (E REATIVAR STATUS SE NECESSÁRIO)
+// 4. ATUALIZAR COMPLETO
 // =============================================================================
 exports.atualizarAgendamentoCompleto = async (req, res) => {
   const agendamentoId = req.params.id;
   const clinicaId = req.usuario ? req.usuario.clinica_id : null;
   let { nome, cpf, email, telefone, genero, data_agendamento } = req.body;
-  const anexos = req.files['anexos'] || [];
+  const anexos = (req.files && req.files['anexos']) || [];
 
   if (data_agendamento) {
     data_agendamento = data_agendamento.replace('T', ' ').replace('Z', '').split('.')[0];
@@ -400,7 +394,10 @@ exports.atualizarAgendamentoCompleto = async (req, res) => {
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();
-    const [agendamentoAtual] = await connection.query('SELECT paciente_id FROM agendamentos WHERE id = ? AND clinica_id = ?', [agendamentoId, clinicaId]);
+    const [agendamentoAtual] = await connection.query(
+      'SELECT paciente_id FROM agendamentos WHERE id = ? AND clinica_id = ?',
+      [agendamentoId, clinicaId]
+    );
     if (agendamentoAtual.length === 0) throw new Error('Acesso negado');
 
     const pacienteId = agendamentoAtual[0].paciente_id;
@@ -414,7 +411,10 @@ exports.atualizarAgendamentoCompleto = async (req, res) => {
 
     if (anexos.length > 0) {
       for (const file of anexos) {
-        await connection.query('INSERT INTO anexos (clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes) VALUES (?,?,?,?,?,?,?)', [clinicaId, pacienteId, agendamentoId, file.originalname, file.filename, file.mimetype, file.size]);
+        await connection.query(
+          'INSERT INTO anexos (clinica_id, paciente_id, agendamento_id, nome_original, caminho_servidor, mime_type, tamanho_bytes) VALUES (?,?,?,?,?,?,?)',
+          [clinicaId, pacienteId, agendamentoId, file.originalname, file.filename, file.mimetype, file.size]
+        );
       }
     }
 
@@ -458,6 +458,7 @@ exports.reagendarAgendamento = async (req, res) => {
     if (rows.length === 0) {
       throw new Error('Agendamento não encontrado ou não pertence a esta clínica.');
     }
+
     const [updateResult] = await connection.query(
       `UPDATE agendamentos 
        SET data_agendamento = ?, 
@@ -511,14 +512,20 @@ exports.reagendarAgendamento = async (req, res) => {
       const pacienteInfo = dados[0];
 
       if (pacienteInfo.email) {
-        notificationService.sendEmailNotification({ ...pacienteInfo, data_agendamento }, true);
+        notificationService.sendEmailNotification({ ...pacienteInfo, data_agendamento }, true)
+          .catch(err => console.error('[MED-LM] Erro e-mail reagendamento:', err.message));
       }
 
-      const [[clinicaDados]] = await db.query('SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?', [clinicaId]);
+      const [[clinicaDados]] = await db.query(
+        'SELECT id, nome_clinica, telefone_clinica, whatsapp_creditos FROM clinicas WHERE id = ?',
+        [clinicaId]
+      );
 
       if (clinicaDados && pacienteInfo.telefone) {
-        whatsappAgendaService.notificarAgendamentoWhatsApp(clinicaDados, pacienteInfo, { data_agendamento }, 'reagendado')
-          .catch(err => console.error("[MED-LM] Erro no reagendamento via WhatsApp:", err));
+        // Mantém whatsappAgendaService no reagendamento (já existente no projeto)
+        whatsappAgendaService
+          .notificarAgendamentoWhatsApp(clinicaDados, pacienteInfo, { data_agendamento }, 'reagendado')
+          .catch(err => console.error('[MED-LM] Erro no reagendamento via WhatsApp:', err.message));
       }
     }
 
@@ -531,7 +538,7 @@ exports.reagendarAgendamento = async (req, res) => {
 };
 
 // =============================================================================
-// 6. BUSCAR UM AGENDAMENTO ESPECÍFICO (Para a Gaveta de Prontuário)
+// 6. BUSCAR UM AGENDAMENTO ESPECÍFICO
 // =============================================================================
 exports.obterDetalhesAgendamento = async (req, res) => {
   if (!req.usuario) {
