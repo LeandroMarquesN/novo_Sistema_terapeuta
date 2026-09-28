@@ -15,6 +15,66 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+/**
+ * Monta mensagem de confirmação de agendamento elegante para WhatsApp.
+ */
+function montarMensagemConfirmacaoAgendamento({
+  nomeClinica,
+  dataAgendamento,
+  tipoTerapia,
+  motivoConsulta
+}) {
+  const dataObj = new Date(dataAgendamento);
+
+  const dataExtenso = dataObj.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const hora = dataObj.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  // Capitaliza a primeira letra do dia da semana (ex: "segunda-feira" → "Segunda-feira")
+  const dataCapitalizada = dataExtenso.charAt(0).toUpperCase() + dataExtenso.slice(1);
+
+  const tipo = (tipoTerapia || 'Consulta').trim();
+  const motivo = (motivoConsulta || '').trim();
+
+  let blocoMotivo = '';
+  if (motivo) {
+    blocoMotivo = `\n📝 *Motivo:* ${motivo}\n`;
+  }
+
+  return (
+`✨ *Agendamento confirmado!*
+
+Olá, *{{nome_paciente}}*! 👋
+
+É um prazer tê-lo(a) conosco. Seu horário na *${nomeClinica}* foi reservado com sucesso.
+
+━━━━━━━━━━━━━━━━
+📅 *Data:* ${dataCapitalizada}
+🕐 *Horário:* ${hora}
+🩺 *Atendimento:* ${tipo}${blocoMotivo}━━━━━━━━━━━━━━━━
+
+✅ *O que fazer agora?*
+• Anote a data e o horário
+• Chegue com alguns minutos de antecedência
+• Em caso de imprevisto, avise com antecedência
+
+Se precisar *remarcar* ou *cancelar*, é só responder esta mensagem ou entrar em contato com a clínica.
+
+Estamos à disposição e ansiosos para recebê-lo(a)! 💚
+
+Com carinho,
+*Equipe ${nomeClinica}*`
+  );
+}
+
 // =============================================================================
 // 1. CRIAR AGENDAMENTO
 // =============================================================================
@@ -55,7 +115,6 @@ exports.criarAgendamento = async (req, res) => {
   }
 
   const clinicaId = req.usuario ? req.usuario.clinica_id : null;
-  const usuarioId = req.usuario.id;
 
   const patientPhoto = req.files && req.files['patient_photo'] ? req.files['patient_photo'][0] : null;
   const anexos = (req.files && req.files['anexos']) || [];
@@ -203,21 +262,16 @@ exports.criarAgendamento = async (req, res) => {
           .catch(emailErr => console.error("[MED-LM] ❌ Erro no envio de e-mail:", emailErr.message));
       }
 
-      // WhatsApp — usa tag {{nome_paciente}} + 4º parâmetro nomePaciente
+      // WhatsApp — template elegante
       if (pacienteDados && pacienteDados.telefone && dadosDaClinica) {
         console.log(`[AGENDAMENTO] Iniciando disparo de WhatsApp para ${pacienteDados.nome} (${pacienteDados.telefone})...`);
 
-        const dataFormatada = new Date(data_agendamento).toLocaleString('pt-BR', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
+        const mensagemTexto = montarMensagemConfirmacaoAgendamento({
+          nomeClinica: dadosDaClinica.nome_clinica,
+          dataAgendamento: data_agendamento,
+          tipoTerapia: tipo_terapia,
+          motivoConsulta: motivo_consulta
         });
-
-        const mensagemTexto =
-          `Olá {{nome_paciente}}, seu agendamento na ${dadosDaClinica.nome_clinica} ` +
-          `foi realizado com sucesso para a data: ${dataFormatada}.`;
 
         whatsappService
           .enviarWhatsApp(clinicaId, pacienteDados.telefone, mensagemTexto, pacienteDados.nome)
@@ -522,7 +576,6 @@ exports.reagendarAgendamento = async (req, res) => {
       );
 
       if (clinicaDados && pacienteInfo.telefone) {
-        // Mantém whatsappAgendaService no reagendamento (já existente no projeto)
         whatsappAgendaService
           .notificarAgendamentoWhatsApp(clinicaDados, pacienteInfo, { data_agendamento }, 'reagendado')
           .catch(err => console.error('[MED-LM] Erro no reagendamento via WhatsApp:', err.message));

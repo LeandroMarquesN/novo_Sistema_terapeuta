@@ -4,6 +4,64 @@ const notificationService = require('../services/notificationService');
 const whatsappService = require('../services/whatsappService');
 const crypto = require('crypto');
 
+/**
+ * Monta mensagem de confirmação de agendamento elegante para WhatsApp.
+ */
+function montarMensagemConfirmacaoAgendamento({
+  nomeClinica,
+  dataAgendamento,
+  tipoTerapia,
+  motivoConsulta
+}) {
+  const dataObj = new Date(dataAgendamento);
+
+  const dataExtenso = dataObj.toLocaleDateString('pt-BR', {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const hora = dataObj.toLocaleTimeString('pt-BR', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  const dataCapitalizada = dataExtenso.charAt(0).toUpperCase() + dataExtenso.slice(1);
+  const tipo = (tipoTerapia || 'Consulta').trim();
+  const motivo = (motivoConsulta || '').trim();
+
+  let blocoMotivo = '';
+  if (motivo) {
+    blocoMotivo = `\n📝 *Motivo:* ${motivo}\n`;
+  }
+
+  return (
+`✨ *Agendamento confirmado!*
+
+Olá, *{{nome_paciente}}*! 👋
+
+É um prazer tê-lo(a) conosco. Seu horário na *${nomeClinica}* foi reservado com sucesso.
+
+━━━━━━━━━━━━━━━━
+📅 *Data:* ${dataCapitalizada}
+🕐 *Horário:* ${hora}
+🩺 *Atendimento:* ${tipo}${blocoMotivo}━━━━━━━━━━━━━━━━
+
+✅ *O que fazer agora?*
+• Anote a data e o horário
+• Chegue com alguns minutos de antecedência
+• Em caso de imprevisto, avise com antecedência
+
+Se precisar *remarcar* ou *cancelar*, é só responder esta mensagem ou entrar em contato com a clínica.
+
+Estamos à disposição e ansiosos para recebê-lo(a)! 💚
+
+Com carinho,
+*Equipe ${nomeClinica}*`
+  );
+}
+
 // =============================================================================
 // 1. RENDERIZAR PORTAL PRINCIPAL
 // =============================================================================
@@ -73,7 +131,7 @@ exports.getHorariosLivres = async (req, res) => {
 };
 
 // =============================================================================
-// 3. CRIAR AGENDAMENTO (COM VÍNCULO DO PROFISSIONAL + WHATSAPP)
+// 3. CRIAR AGENDAMENTO (COM VÍNCULO DO PROFISSIONAL + WHATSAPP ELEGANTE)
 // =============================================================================
 const PAGAMENTO_PLATAFORMA_ATIVO = false;
 
@@ -103,8 +161,6 @@ exports.criarAgendamento = async (req, res) => {
   const novoToken = crypto.randomBytes(32).toString('hex');
   const novaExpiracao = new Date();
   novaExpiracao.setDate(novaExpiracao.getDate() + 30);
-
-  const pagamentoViaPlataforma = PAGAMENTO_PLATAFORMA_ATIVO && forma_pagamento === 'plataforma';
 
   try {
     await connection.query("SET time_zone = '-03:00'");
@@ -152,7 +208,6 @@ exports.criarAgendamento = async (req, res) => {
 
     const valorSinalDinamico = parseFloat(config.valor_sinal ? config.valor_sinal : 0.00);
 
-    // BUSCAR OU CRIAR O PACIENTE
     let pacienteId;
     const [pacientesExistentes] = await connection.execute(
       'SELECT id FROM pacientes WHERE cpf = ? AND clinica_id = ? LIMIT 1',
@@ -177,7 +232,6 @@ exports.criarAgendamento = async (req, res) => {
       pacienteId = resPaciente.insertId;
     }
 
-    // DEFINIR O PROFISSIONAL RESPONSÁVEL
     let profissionalIdFinal = usuario_id;
     if (!profissionalIdFinal) {
       const [usuariosAdmin] = await connection.execute(
@@ -194,7 +248,6 @@ exports.criarAgendamento = async (req, res) => {
     const statusInicial = 'aguardando_sinal';
     const dataAgendamentoCompleta = `${data} ${horario}`;
 
-    // CRIAR O AGENDAMENTO
     const [resAgendamento] = await connection.execute(
       `INSERT INTO agendamentos (clinica_id, paciente_id, usuario_id, data_agendamento, status_agendamento, motivo_consulta, nome, email, telefone, cpf, tipo_terapia) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -214,7 +267,6 @@ exports.criarAgendamento = async (req, res) => {
     );
     const agendamentoId = resAgendamento.insertId;
 
-    // REGISTRO NO FINANCEIRO
     const descricaoFinanceira = `Sinal - ${nome}`;
     await connection.execute(
       `INSERT INTO financeiro 
@@ -237,7 +289,7 @@ exports.criarAgendamento = async (req, res) => {
     req.session.pacienteId = pacienteId;
     await connection.commit();
 
-    // ─── Notificação interna (não bloqueia) ───
+    // Notificação interna
     try {
       const { criarNotificacao } = require('../services/notificationServiceClientExterno');
       await criarNotificacao({
@@ -252,7 +304,7 @@ exports.criarAgendamento = async (req, res) => {
       console.error('[PORTAL] Erro ao criar notificação interna:', notifErr.message);
     }
 
-    // ─── Dados da clínica para e-mail / WhatsApp ───
+    // Dados da clínica
     let dadosClinica = null;
     try {
       const [clinicaResult] = await db.execute(
@@ -264,7 +316,7 @@ exports.criarAgendamento = async (req, res) => {
       console.error('[PORTAL] Erro ao buscar dados da clínica:', errClinica.message);
     }
 
-    // ─── Disparo de e-mail (background) ───
+    // E-mail
     if (email && dadosClinica) {
       const dadosParaEmail = {
         nome: nome,
@@ -280,22 +332,14 @@ exports.criarAgendamento = async (req, res) => {
         .catch(err => console.error('[PORTAL] ❌ Erro ao enviar e-mail:', err.message));
     }
 
-    // ─── Disparo de WhatsApp (background) ───
-    // Mesmo padrão do agendamentoController.js (painel interno)
+    // WhatsApp — template elegante
     if (telefone && dadosClinica) {
-      const dataFormatada = new Date(dataAgendamentoCompleta).toLocaleString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+      const mensagemWhatsApp = montarMensagemConfirmacaoAgendamento({
+        nomeClinica: dadosClinica.nome_clinica,
+        dataAgendamento: dataAgendamentoCompleta,
+        tipoTerapia: tipo_terapia,
+        motivoConsulta: motivo_consulta
       });
-
-      const mensagemWhatsApp =
-        `Olá {{nome_paciente}}, seu agendamento na ${dadosClinica.nome_clinica} ` +
-        `foi realizado com sucesso para ${dataFormatada}. ` +
-        `Tipo: ${tipo_terapia || 'Consulta'}. ` +
-        `Em caso de dúvidas, entre em contato com a clínica.`;
 
       console.log(`[PORTAL] Iniciando disparo de WhatsApp para ${nome} (${telefone})...`);
 
