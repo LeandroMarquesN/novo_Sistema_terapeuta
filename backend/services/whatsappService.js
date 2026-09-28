@@ -4,7 +4,7 @@ const db = require('../config/db');
 
 /**
  * Envia mensagem de WhatsApp via Evolution API.
- * Valida créditos, formata números e abate 1 crédito apenas após sucesso.
+ * Valida créditos, formata números, garante que a instância existe/está ativa e abate 1 crédito apenas após sucesso.
  */
 exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem) => {
   // 1. Dados da clínica
@@ -46,6 +46,36 @@ exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem) => {
     throw new Error('EVOLUTION_API_KEY não configurada no servidor (.env).');
   }
 
+  // ─── PASSO ADICIONAL: GARANTIR QUE A INSTÂNCIA EXISTE E ESTÁ ATIVA ───
+  try {
+    const checkStateUrl = `${evolutionApiUrl}/instance/connectionState/${instanceName}`;
+    const checkResponse = await fetch(checkStateUrl, {
+      method: 'GET',
+      headers: { apikey: evolutionApiKey }
+    });
+
+    // Se a instância não existe (404) ou o estado não está aberto/conectado, tentamos criá-la/inicializá-la
+    if (!checkResponse.ok) {
+      console.log(`[WHATSAPP] Instância ${instanceName} não encontrada ou inativa. A criar automaticamente...`);
+
+      const createUrl = `${evolutionApiUrl}/instance/create`;
+      await fetch(createUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: evolutionApiKey
+        },
+        body: JSON.stringify({
+          instanceName: instanceName,
+          integration: 'WHATSAPP-BAILEYS'
+        })
+      });
+    }
+  } catch (errAutoCreate) {
+    console.error('[WHATSAPP] Aviso ao verificar/criar instância automaticamente:', errAutoCreate.message);
+  }
+  // ────────────────────────────────────────────────────────────────────
+
   const urlEnvio = `${evolutionApiUrl}/message/sendText/${instanceName}`;
 
   console.log(`[WHATSAPP] Clínica ${clinica.nome_clinica} → ${numero}`);
@@ -68,13 +98,10 @@ exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem) => {
       })
     });
   } catch (errFetch) {
-    // Aqui cai o "fetch failed" (DNS, timeout, SSL, firewall, host offline, etc.)
     console.error('[WHATSAPP] Falha de rede ao chamar Evolution API:', errFetch.message);
-    console.error('[WHATSAPP] Stack:', errFetch.cause || errFetch.stack);
     throw new Error(
       `Falha de rede ao conectar na Evolution API (${evolutionApiUrl}). ` +
-      `Detalhe: ${errFetch.message}. ` +
-      `Verifique se o VPS/Hetzner está acessível, se a URL está correta (com https) e se a porta não está bloqueada.`
+      `Detalhe: ${errFetch.message}.`
     );
   }
 
