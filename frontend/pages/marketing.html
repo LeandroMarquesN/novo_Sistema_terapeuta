@@ -1,1754 +1,1036 @@
 <!DOCTYPE html>
 <html lang="pt-br" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Marketing | MedLM</title>
 
     <script src="../ScriptGlobal/BloqBotVoltar.js"></script>
 
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="icon" href="../logo/faviicon.png" type="image/x-icon" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="icon"
-      sizes="16x18"
-      href="../logo/faviicon.png"
-      type="image/x-icon"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" href="../logo/faviicon.png" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" sizes="16x18" href="../logo/faviicon.png" type="image/x-icon">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-      :root {
-        --emerald: #34d399;
-        --emerald-d: #059669;
-        --cyan: #22d3ee;
-        --amber: #fbbf24;
-        --slate-bg: #020c12;
-        --border: rgba(52, 211, 153, 0.15);
-        --border-cyan: rgba(34, 211, 238, 0.18);
-      }
-
-      /* ─── Scroll Progress Bar (funcional) ─── */
-      #scroll-progress {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 3px;
-        width: 0%;
-        background: linear-gradient(90deg, var(--cyan), var(--emerald));
-        z-index: 9999;
-        box-shadow: 0 0 12px rgba(34, 211, 238, 0.5),
-          0 0 4px rgba(52, 211, 153, 0.4);
-        transition: width 0.1s linear;
-        pointer-events: none;
-      }
-
-      /* ─── Sidebar (Desktop) — Elegante, moderna e sem sombra pesada ─── */
-      aside.sidebar-desktop {
-        background: rgba(2, 12, 18, 0.78) !important;
-        border-right: 1px solid var(--border) !important;
-        backdrop-filter: blur(22px) saturate(150%);
-        -webkit-backdrop-filter: blur(22px) saturate(150%);
-      }
-      .logo-block {
-        border-bottom: 1px solid var(--border);
-      }
-      .logo-icon {
-        background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
-      }
-      .logo-text-brand {
-        color: #e2e8f0;
-        font-family: "Space Grotesk", sans-serif;
-      }
-      .logo-text-accent {
-        color: var(--emerald);
-        text-shadow: 0 0 12px rgba(52, 211, 153, 0.6);
-      }
-
-      .nav-link {
-        color: rgba(148, 163, 184, 0.7);
-        border-radius: 14px;
-        transition: all 0.25s ease;
-        border: 1px solid transparent;
-        position: relative;
-        overflow: hidden;
-      }
-      .nav-link::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        background: linear-gradient(
-          90deg,
-          rgba(52, 211, 153, 0.08),
-          transparent
-        );
-        transition: opacity 0.3s;
-      }
-      .nav-link:hover {
-        color: var(--emerald);
-        border-color: var(--border);
-      }
-      .nav-link:hover::before {
-        opacity: 1;
-      }
-      .nav-link:hover i {
-        text-shadow: 0 0 10px rgba(52, 211, 153, 0.7);
-      }
-
-      .nav-link-active {
-        background: linear-gradient(
-          135deg,
-          rgba(8, 145, 178, 0.25) 0%,
-          rgba(5, 150, 105, 0.2) 100%
-        );
-        border: 1px solid rgba(52, 211, 153, 0.35);
-        color: var(--emerald) !important;
-      }
-      .nav-link-active i {
-        text-shadow: 0 0 12px rgba(52, 211, 153, 0.8);
-      }
-
-      #theme-toggle-btn {
-        color: rgba(148, 163, 184, 0.6);
-        border-radius: 14px;
-        border: 1px solid transparent;
-        transition: all 0.25s;
-      }
-      #theme-toggle-btn:hover {
-        color: var(--cyan);
-        border-color: var(--border-cyan);
-      }
-
-      body {
-        background-color: #020c12 !important;
-        background-image: radial-gradient(
-            circle at -10% -10%,
-            rgba(34, 211, 238, 0.22) 0%,
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 110% 110%,
-            rgba(52, 211, 153, 0.18) 0%,
-            transparent 45%
-          ) !important;
-        background-attachment: fixed !important;
-        color: #f1f5f9;
-        min-height: 100vh;
-      }
-
-      .cyber-panel {
-        background: rgba(6, 19, 28, 0.55) !important;
-        border: 1px solid rgba(34, 211, 238, 0.18) !important;
-        backdrop-filter: blur(20px) saturate(140%);
-        -webkit-backdrop-filter: blur(20px) saturate(140%);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25),
-          inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .cyber-card-premium {
-        background: rgba(8, 25, 36, 0.45) !important;
-        border: 1px solid rgba(52, 211, 153, 0.15) !important;
-        backdrop-filter: blur(14px) saturate(140%);
-        -webkit-backdrop-filter: blur(14px) saturate(140%);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-      .cyber-card-premium:hover {
-        border-color: rgba(34, 211, 238, 0.4) !important;
-        transform: translateY(-1px);
-      }
-
-      .glow-line::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 2px;
-        background: linear-gradient(
-          90deg,
-          transparent,
-          #34d399,
-          #22d3ee,
-          transparent
-        );
-        z-index: 10;
-      }
-
-      ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #020c12;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: rgba(34, 211, 238, 0.4);
-        border-radius: 99px;
-      }
-
-      /* ─── Template chip ─── */
-      .template-chip {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 14px;
-        border-radius: 12px;
-        background: rgba(255, 255, 255, 0.02);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: #94a3b8;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        cursor: pointer;
-        transition: all 0.2s;
-        white-space: nowrap;
-      }
-      .template-chip:hover,
-      .template-chip.active {
-        border-color: rgba(34, 211, 238, 0.45);
-        color: #22d3ee;
-        background: rgba(34, 211, 238, 0.06);
-      }
-
-      /* ─── Toolbar de formatação ─── */
-      .toolbar-btn {
-        width: 32px;
-        height: 32px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: #94a3b8;
-        cursor: pointer;
-        transition: all 0.15s;
-        font-size: 12px;
-      }
-      .toolbar-btn:hover {
-        color: #34d399;
-        border-color: rgba(52, 211, 153, 0.35);
-      }
-
-      /* ─── Preview do email (mockup) ─── */
-      .email-preview-frame {
-        background: #f4f4f5;
-        border-radius: 14px;
-        overflow: hidden;
-        border: 6px solid #0b0b0d;
-      }
-      .email-preview-body {
-        background: #ffffff;
-        color: #1e293b;
-        padding: 22px;
-        font-family: "Inter", sans-serif;
-        font-size: 13px;
-        line-height: 1.6;
-        min-height: 220px;
-        max-height: 320px;
-        overflow-y: auto;
-      }
-
-      .radio-audience {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 12px 14px;
-        border-radius: 12px;
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        background: rgba(255, 255, 255, 0.02);
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .radio-audience:hover {
-        border-color: rgba(52, 211, 153, 0.3);
-      }
-      .radio-audience.selected {
-        border-color: rgba(52, 211, 153, 0.5);
-        background: rgba(52, 211, 153, 0.06);
-      }
-
-      /* ─── Autocomplete de pacientes ─── */
-      .autocomplete-wrap {
-        position: relative;
-      }
-      .autocomplete-lista {
-        position: absolute;
-        top: calc(100% + 6px);
-        left: 0;
-        right: 0;
-        background: #06131c;
-        border: 1px solid rgba(34, 211, 238, 0.25);
-        border-radius: 12px;
-        max-height: 240px;
-        overflow-y: auto;
-        z-index: 30;
-        display: none;
-      }
-      .autocomplete-lista.open {
-        display: block;
-      }
-      .autocomplete-item {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 10px 14px;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        transition: background 0.15s;
-      }
-      .autocomplete-item:last-child {
-        border-bottom: none;
-      }
-      .autocomplete-item:hover,
-      .autocomplete-item.highlight {
-        background: rgba(34, 211, 238, 0.08);
-      }
-      .autocomplete-item .avatar {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-        flex-shrink: 0;
-        background: linear-gradient(
-          135deg,
-          rgba(34, 211, 238, 0.25),
-          rgba(52, 211, 153, 0.15)
-        );
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #22d3ee;
-        font-weight: 800;
-        font-size: 11px;
-        text-transform: uppercase;
-      }
-      .autocomplete-item .info {
-        min-width: 0;
-      }
-      .autocomplete-item .nome {
-        color: #e2e8f0;
-        font-size: 12px;
-        font-weight: 700;
-        display: block;
-      }
-      .autocomplete-item .cpf {
-        color: #64748b;
-        font-size: 10px;
-        font-family: monospace;
-      }
-      .autocomplete-vazio {
-        padding: 14px;
-        text-align: center;
-        color: #64748b;
-        font-size: 11px;
-      }
-
-      .chip-paciente {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        padding: 5px 10px 5px 6px;
-        border-radius: 999px;
-        background: rgba(52, 211, 153, 0.1);
-        border: 1px solid rgba(52, 211, 153, 0.3);
-        color: #34d399;
-        font-size: 11px;
-        font-weight: 700;
-      }
-      .chip-paciente button {
-        background: none;
-        border: none;
-        color: rgba(52, 211, 153, 0.6);
-        cursor: pointer;
-        font-size: 10px;
-        padding: 2px;
-      }
-      .chip-paciente button:hover {
-        color: #f87171;
-      }
-
-      .badge-status {
-        padding: 3px 10px;
-        border-radius: 999px;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        white-space: nowrap;
-      }
-      .badge-rascunho {
-        background: rgba(148, 163, 184, 0.15);
-        color: #94a3b8;
-      }
-      .badge-processando {
-        background: rgba(251, 191, 36, 0.15);
-        color: #fbbf24;
-      }
-      .badge-concluida {
-        background: rgba(52, 211, 153, 0.15);
-        color: #34d399;
-      }
-      .badge-concluida_com_falhas {
-        background: rgba(251, 146, 60, 0.15);
-        color: #fb923c;
-      }
-      .badge-falhou {
-        background: rgba(248, 113, 113, 0.15);
-        color: #f87171;
-      }
-
-      .filtro-status-btn.active {
-        border-color: rgba(34, 211, 238, 0.45) !important;
-        color: #22d3ee !important;
-        background: rgba(34, 211, 238, 0.08);
-      }
-
-      /* ─── Card de recomendações WhatsApp ─── */
-      .wa-alert-card {
-        background: linear-gradient(
-          135deg,
-          rgba(251, 191, 36, 0.08) 0%,
-          rgba(34, 211, 238, 0.06) 50%,
-          rgba(52, 211, 153, 0.06) 100%
-        );
-        border: 1px solid rgba(251, 191, 36, 0.35);
-        box-shadow: 0 0 24px rgba(251, 191, 36, 0.08),
-          inset 0 1px 0 rgba(255, 255, 255, 0.04);
-        backdrop-filter: blur(16px) saturate(140%);
-        -webkit-backdrop-filter: blur(16px) saturate(140%);
-      }
-      .wa-alert-card .wa-icon-wrap {
-        background: linear-gradient(
-          135deg,
-          rgba(251, 191, 36, 0.25),
-          rgba(34, 211, 238, 0.15)
-        );
-        box-shadow: 0 0 16px rgba(251, 191, 36, 0.2);
-      }
-
-      /* ─── Banner mobile QR ─── */
-      .wa-mobile-banner {
-        background: linear-gradient(
-          90deg,
-          rgba(248, 113, 113, 0.12),
-          rgba(251, 191, 36, 0.1)
-        );
-        border: 1px solid rgba(248, 113, 113, 0.35);
-        animation: pulse-border 2.5s ease-in-out infinite;
-      }
-      @keyframes pulse-border {
-        0%,
-        100% {
-          border-color: rgba(248, 113, 113, 0.35);
-        }
-        50% {
-          border-color: rgba(251, 191, 36, 0.5);
-        }
-      }
-
-      /* ─── Modal de confirmação QR ─── */
-      #modalConfirmQr {
-        transition: opacity 0.25s ease;
-      }
-      #modalConfirmQr .confirm-panel {
-        animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      }
-      @keyframes scaleIn {
-        from {
-          opacity: 0;
-          transform: scale(0.92) translateY(12px);
-        }
-        to {
-          opacity: 1;
-          transform: scale(1) translateY(0);
-        }
-      }
-      .confirm-check {
-        accent-color: #34d399;
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-        flex-shrink: 0;
-      }
-
-      /* ─── Mobile nav ─── */
-      .mobile-topbar,
-      .mobile-bottom-tabbar,
-      .mobile-drawer-overlay,
-      .mobile-drawer {
-        display: none;
-      }
-
-      @media (max-width: 1023px) {
-        #sidebarMenu {
-          display: none !important;
-        }
-        main {
-          padding-left: 0 !important;
-          padding-top: 80px !important;
-          padding-bottom: 110px !important;
-        }
-        .mobile-topbar,
-        .mobile-bottom-tabbar {
-          display: flex !important;
-        }
-        .mobile-topbar {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 60;
-          height: 64px;
-          background: rgba(2, 12, 18, 0.75);
-          border-bottom: 1px solid rgba(52, 211, 153, 0.15);
-          backdrop-filter: blur(22px) saturate(150%);
-          -webkit-backdrop-filter: blur(22px) saturate(150%);
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 16px;
-          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .mobile-topbar.topbar-hidden {
-          transform: translateY(-100%);
-        }
-        .mobile-topbar .logo-wrap {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-        .mobile-topbar .logo-icon {
-          width: 38px;
-          height: 38px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #fff;
-          font-weight: 800;
-          font-size: 15px;
-          font-family: "Space Grotesk", sans-serif;
-        }
-        .mobile-topbar .logo-text {
-          font-family: "Space Grotesk", sans-serif;
-          font-weight: 800;
-          font-size: 18px;
-          color: #e2e8f0;
-        }
-        .mobile-topbar .logo-text span {
-          color: #34d399;
-        }
-        .mobile-topbar .actions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .mobile-topbar .icon-btn {
-          width: 40px;
-          height: 40px;
-          border-radius: 12px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(52, 211, 153, 0.15);
-          color: rgba(148, 163, 184, 0.7);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s;
+        :root {
+            --emerald:   #34d399;
+            --emerald-d: #059669;
+            --cyan:      #22d3ee;
+            --amber:     #fbbf24;
+            --slate-bg:  #020c12;
+            --border:    rgba(52,211,153,0.15);
+            --border-cyan: rgba(34,211,238,0.18);
         }
 
-        .mobile-drawer-overlay {
-          display: block;
-          position: fixed;
-          inset: 0;
-          background: rgba(2, 12, 18, 0.7);
-          backdrop-filter: blur(6px);
-          z-index: 70;
-          opacity: 0;
-          pointer-events: none;
-          transition: opacity 0.3s;
-        }
-        .mobile-drawer-overlay.open {
-          opacity: 1;
-          pointer-events: auto;
-        }
-        .mobile-drawer {
-          display: flex;
-          flex-direction: column;
-          position: fixed;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          width: min(300px, 85vw);
-          background: rgba(4, 16, 24, 0.88);
-          backdrop-filter: blur(24px) saturate(150%);
-          -webkit-backdrop-filter: blur(24px) saturate(150%);
-          border-right: 1px solid rgba(52, 211, 153, 0.18);
-          box-shadow: 8px 0 40px rgba(0, 0, 0, 0.4);
-          z-index: 80;
-          transform: translateX(-105%);
-          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          padding: 0;
-        }
-        .mobile-drawer.open {
-          transform: translateX(0);
-        }
-        .mobile-drawer .drawer-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px 18px;
-          border-bottom: 1px solid rgba(52, 211, 153, 0.12);
-        }
-        .mobile-drawer .drawer-logo {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .mobile-drawer .drawer-logo .logo-icon {
-          width: 42px;
-          height: 42px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #0891b2, #059669);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #fff;
-          font-weight: 800;
-          font-size: 16px;
-        }
-        .mobile-drawer .drawer-logo span {
-          font-family: "Space Grotesk", sans-serif;
-          font-weight: 700;
-          font-size: 18px;
-          color: #e2e8f0;
-        }
-        .mobile-drawer .drawer-logo span b {
-          color: #34d399;
-        }
-        .mobile-drawer .close-drawer {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: rgba(148, 163, 184, 0.7);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-        }
-        .mobile-drawer nav {
-          flex: 1;
-          padding: 16px 12px;
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-          overflow-y: auto;
-        }
-        .mobile-drawer .nav-item {
-          display: flex;
-          align-items: center;
-          gap: 14px;
-          padding: 14px 16px;
-          border-radius: 14px;
-          color: rgba(148, 163, 184, 0.7);
-          font-weight: 600;
-          font-size: 14px;
-          text-decoration: none;
-          transition: all 0.2s;
-          border: 1px solid transparent;
-        }
-        .mobile-drawer .nav-item i {
-          width: 22px;
-          text-align: center;
-          font-size: 16px;
-        }
-        .mobile-drawer .nav-item.active {
-          background: linear-gradient(
-            135deg,
-            rgba(8, 145, 178, 0.25),
-            rgba(5, 150, 105, 0.2)
-          );
-          border-color: rgba(52, 211, 153, 0.35);
-          color: #34d399;
-        }
-        .mobile-drawer .drawer-footer {
-          padding: 12px;
-          border-top: 1px solid rgba(52, 211, 153, 0.1);
+        /* ─── Scroll Progress Bar (funcional) ─── */
+        #scroll-progress {
+            position: fixed; top: 0; left: 0; height: 3px; width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            z-index: 9999;
+            box-shadow: 0 0 12px rgba(34,211,238,0.5), 0 0 4px rgba(52,211,153,0.4);
+            transition: width 0.1s linear;
+            pointer-events: none;
         }
 
-        .mobile-bottom-tabbar {
-          position: fixed;
-          bottom: calc(14px + env(safe-area-inset-bottom, 0));
-          left: 14px;
-          right: 14px;
-          z-index: 60;
-          height: 70px;
-          background: rgba(4, 16, 24, 0.75);
-          border: 1px solid rgba(52, 211, 153, 0.15);
-          border-radius: 26px;
-          backdrop-filter: blur(24px) saturate(150%);
-          -webkit-backdrop-filter: blur(24px) saturate(150%);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-          align-items: center;
-          justify-content: space-around;
-          padding: 0 6px;
-          transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-            opacity 0.35s ease;
-          transform: translateY(0);
-          opacity: 1;
+        /* ─── Sidebar (Desktop) — Fixa, expandida e fluida ─── */
+        aside.sidebar-desktop {
+            background: rgba(2,12,18,0.92) !important;
+            border-right: 1px solid var(--border) !important;
+            backdrop-filter: blur(22px) saturate(150%);
+            -webkit-backdrop-filter: blur(22px) saturate(150%);
+            width: 16rem !important; /* w-64 */
+            min-width: 16rem !important;
+            max-width: 16rem !important;
+            transition: none !important; /* sem expand/collapse no hover */
         }
-        .mobile-bottom-tabbar.tabbar-hidden {
-          transform: translateY(140%);
-          opacity: 0;
+        aside.sidebar-desktop .nav-link span,
+        aside.sidebar-desktop .logo-text-brand,
+        aside.sidebar-desktop #theme-toggle-btn span {
+            opacity: 1 !important;
+            visibility: visible !important;
         }
-        .mobile-bottom-tabbar .tab-item {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 4px;
-          flex: 1;
-          height: 100%;
-          color: rgba(148, 163, 184, 0.55);
-          font-size: 11px;
-          font-weight: 700;
-          text-decoration: none;
-          transition: all 0.2s;
-          position: relative;
+        aside.sidebar-desktop .nav-link {
+            padding-left: 0.875rem;
+            padding-right: 0.875rem;
         }
-        .mobile-bottom-tabbar .tab-item i {
-          font-size: 22px;
-          margin-bottom: 2px;
+        .logo-block { border-bottom: 1px solid var(--border); }
+        .logo-icon {
+            background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
         }
-        .mobile-bottom-tabbar .tab-item.active {
-          color: #34d399;
-        }
-      }
+        .logo-text-brand { color: #e2e8f0; font-family: 'Space Grotesk', sans-serif; }
+        .logo-text-accent { color: var(--emerald); text-shadow: 0 0 12px rgba(52,211,153,0.6); }
 
-      @media (min-width: 1024px) {
-        .mobile-topbar,
-        .mobile-bottom-tabbar,
-        .mobile-drawer,
-        .mobile-drawer-overlay {
-          display: none !important;
+        .nav-link {
+            color: rgba(148,163,184,0.7);
+            border-radius: 14px;
+            transition: all 0.25s ease;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
-      }
+        .nav-link::before {
+            content: '';
+            position: absolute; inset: 0; opacity: 0;
+            background: linear-gradient(90deg, rgba(52,211,153,0.08), transparent);
+            transition: opacity 0.3s;
+        }
+        .nav-link:hover { color: var(--emerald); border-color: var(--border); }
+        .nav-link:hover::before { opacity: 1; }
+        .nav-link:hover i { text-shadow: 0 0 10px rgba(52,211,153,0.7); }
 
-      /* Responsividade extra para cards WhatsApp */
-      @media (max-width: 640px) {
-        .wa-alert-card .wa-grid {
-          grid-template-columns: 1fr !important;
+        .nav-link-active {
+            background: linear-gradient(135deg, rgba(8,145,178,0.25) 0%, rgba(5,150,105,0.20) 100%);
+            border: 1px solid rgba(52,211,153,0.35);
+            color: var(--emerald) !important;
         }
-        #modalConfirmQr .confirm-panel {
-          margin: 12px;
-          max-width: calc(100% - 24px);
+        .nav-link-active i { text-shadow: 0 0 12px rgba(52,211,153,0.8); }
+
+        #theme-toggle-btn {
+            color: rgba(148,163,184,0.6);
+            border-radius: 14px;
+            border: 1px solid transparent;
+            transition: all 0.25s;
         }
-      }
+        #theme-toggle-btn:hover { color: var(--cyan); border-color: var(--border-cyan); }
+
+        body {
+            background-color: #020c12 !important;
+            background-image:
+                radial-gradient(circle at -10% -10%, rgba(34, 211, 238, 0.22) 0%, transparent 40%),
+                radial-gradient(circle at 110% 110%, rgba(52, 211, 153, 0.18) 0%, transparent 45%) !important;
+            background-attachment: fixed !important;
+            color: #f1f5f9;
+            min-height: 100vh;
+        }
+
+        .cyber-panel {
+            background: rgba(6, 19, 28, 0.55) !important;
+            border: 1px solid rgba(34, 211, 238, 0.18) !important;
+            backdrop-filter: blur(20px) saturate(140%);
+            -webkit-backdrop-filter: blur(20px) saturate(140%);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-card-premium {
+            background: rgba(8, 25, 36, 0.45) !important;
+            border: 1px solid rgba(52, 211, 153, 0.15) !important;
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .cyber-card-premium:hover {
+            border-color: rgba(34, 211, 238, 0.4) !important;
+            transform: translateY(-1px);
+        }
+
+        .glow-line::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, #34d399, #22d3ee, transparent);
+            z-index: 10;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #020c12; }
+        ::-webkit-scrollbar-thumb { background: rgba(34, 211, 238, 0.4); border-radius: 99px; }
+
+        /* ─── Template chip ─── */
+        .template-chip {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 14px; border-radius: 12px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8; font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.04em;
+            cursor: pointer; transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .template-chip:hover, .template-chip.active {
+            border-color: rgba(34,211,238,0.45);
+            color: #22d3ee;
+            background: rgba(34,211,238,0.06);
+        }
+
+        /* ─── Toolbar de formatação ─── */
+        .toolbar-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8; cursor: pointer; transition: all 0.15s;
+            font-size: 12px;
+        }
+        .toolbar-btn:hover { color: #34d399; border-color: rgba(52,211,153,0.35); }
+
+        /* ─── Preview do email (mockup) ─── */
+        .email-preview-frame {
+            background: #f4f4f5;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 6px solid #0b0b0d;
+        }
+        .email-preview-body {
+            background: #ffffff;
+            color: #1e293b;
+            padding: 22px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            line-height: 1.6;
+            min-height: 220px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .radio-audience {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 12px 14px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.02);
+            cursor: pointer; transition: all 0.2s;
+        }
+        .radio-audience:hover { border-color: rgba(52,211,153,0.3); }
+        .radio-audience.selected {
+            border-color: rgba(52,211,153,0.5);
+            background: rgba(52,211,153,0.06);
+        }
+
+        /* ─── Autocomplete de pacientes ─── */
+        .autocomplete-wrap { position: relative; }
+        .autocomplete-lista {
+            position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+            background: #06131c; border: 1px solid rgba(34,211,238,0.25);
+            border-radius: 12px; max-height: 240px; overflow-y: auto; z-index: 30;
+            display: none;
+        }
+        .autocomplete-lista.open { display: block; }
+        .autocomplete-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 14px; cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            transition: background 0.15s;
+        }
+        .autocomplete-item:last-child { border-bottom: none; }
+        .autocomplete-item:hover, .autocomplete-item.highlight { background: rgba(34,211,238,0.08); }
+        .autocomplete-item .avatar {
+            width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+            background: linear-gradient(135deg, rgba(34,211,238,0.25), rgba(52,211,153,0.15));
+            display: flex; align-items: center; justify-content: center;
+            color: #22d3ee; font-weight: 800; font-size: 11px; text-transform: uppercase;
+        }
+        .autocomplete-item .info { min-width: 0; }
+        .autocomplete-item .nome { color: #e2e8f0; font-size: 12px; font-weight: 700; display: block; }
+        .autocomplete-item .cpf { color: #64748b; font-size: 10px; font-family: monospace; }
+        .autocomplete-vazio { padding: 14px; text-align: center; color: #64748b; font-size: 11px; }
+
+        .chip-paciente {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 10px 5px 6px; border-radius: 999px;
+            background: rgba(52,211,153,0.1); border: 1px solid rgba(52,211,153,0.3);
+            color: #34d399; font-size: 11px; font-weight: 700;
+        }
+        .chip-paciente button {
+            background: none; border: none; color: rgba(52,211,153,0.6);
+            cursor: pointer; font-size: 10px; padding: 2px;
+        }
+        .chip-paciente button:hover { color: #f87171; }
+
+        .badge-status {
+            padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap;
+        }
+        .badge-rascunho { background: rgba(148,163,184,0.15); color: #94a3b8; }
+        .badge-processando { background: rgba(251,191,36,0.15); color: #fbbf24; }
+        .badge-concluida { background: rgba(52,211,153,0.15); color: #34d399; }
+        .badge-concluida_com_falhas { background: rgba(251,146,60,0.15); color: #fb923c; }
+        .badge-falhou { background: rgba(248,113,113,0.15); color: #f87171; }
+
+        .filtro-status-btn.active {
+            border-color: rgba(34,211,238,0.45) !important;
+            color: #22d3ee !important;
+            background: rgba(34,211,238,0.08);
+        }
+
+
+
+        /* ─── WhatsApp status neon ─── */
+        .wa-status-badge {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 10px 16px; border-radius: 14px;
+            font-size: 12px; font-weight: 800; letter-spacing: 0.03em;
+            transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+            position: relative; overflow: hidden; max-width: 100%;
+        }
+        .wa-status-badge .wa-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .wa-status-connected {
+            background: linear-gradient(135deg, rgba(52,211,153,0.15), rgba(16,185,129,0.08));
+            border: 1px solid rgba(52,211,153,0.55); color: #34d399;
+            box-shadow: 0 0 20px rgba(52,211,153,0.25), inset 0 0 12px rgba(52,211,153,0.08);
+            animation: neonPulseGreen 2.2s ease-in-out infinite;
+        }
+        .wa-status-connected .wa-dot {
+            background: #34d399;
+            box-shadow: 0 0 8px #34d399, 0 0 16px rgba(52,211,153,0.6);
+            animation: dotPulse 1.4s ease-in-out infinite;
+        }
+        .wa-status-disconnected {
+            background: linear-gradient(135deg, rgba(251,191,36,0.12), rgba(248,113,113,0.08));
+            border: 1px solid rgba(251,191,36,0.5); color: #fbbf24;
+            box-shadow: 0 0 18px rgba(251,191,36,0.2), inset 0 0 10px rgba(251,191,36,0.06);
+            animation: neonPulseAmber 2.4s ease-in-out infinite;
+        }
+        .wa-status-disconnected .wa-dot {
+            background: #fbbf24;
+            box-shadow: 0 0 8px #fbbf24, 0 0 14px rgba(251,191,36,0.5);
+            animation: dotPulse 1.6s ease-in-out infinite;
+        }
+        .wa-status-connecting {
+            background: linear-gradient(135deg, rgba(34,211,238,0.12), rgba(6,182,212,0.08));
+            border: 1px solid rgba(34,211,238,0.5); color: #22d3ee;
+            box-shadow: 0 0 18px rgba(34,211,238,0.22), inset 0 0 10px rgba(34,211,238,0.06);
+        }
+        .wa-status-connecting .wa-dot {
+            background: #22d3ee; box-shadow: 0 0 8px #22d3ee;
+            animation: dotSpin 0.9s linear infinite;
+        }
+        @keyframes neonPulseGreen {
+            0%,100% { box-shadow: 0 0 16px rgba(52,211,153,0.22), inset 0 0 10px rgba(52,211,153,0.06); }
+            50% { box-shadow: 0 0 28px rgba(52,211,153,0.4), inset 0 0 14px rgba(52,211,153,0.12); }
+        }
+        @keyframes neonPulseAmber {
+            0%,100% { box-shadow: 0 0 14px rgba(251,191,36,0.18), inset 0 0 8px rgba(251,191,36,0.05); }
+            50% { box-shadow: 0 0 24px rgba(251,191,36,0.35), inset 0 0 12px rgba(251,191,36,0.1); }
+        }
+        @keyframes dotPulse {
+            0%,100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.25); opacity: 0.75; }
+        }
+        @keyframes dotSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .wa-status-subtitle { font-size: 10px; font-weight: 600; margin-top: 6px; line-height: 1.45; opacity: 0.9; }
+        .wa-status-phone { font-family: ui-monospace, monospace; font-weight: 700; letter-spacing: 0.04em; }
+        .wa-alert-card {
+            background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(34,211,238,0.06) 50%, rgba(52,211,153,0.06) 100%);
+            border: 1px solid rgba(251,191,36,0.35);
+            box-shadow: 0 0 24px rgba(251,191,36,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+            backdrop-filter: blur(16px) saturate(140%);
+        }
+        .wa-alert-card .wa-icon-wrap {
+            background: linear-gradient(135deg, rgba(251,191,36,0.25), rgba(34,211,238,0.15));
+            box-shadow: 0 0 16px rgba(251,191,36,0.2);
+        }
+        #modalConfirmQr .confirm-panel { animation: scaleIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.92) translateY(12px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .confirm-check { accent-color: #34d399; width: 18px; height: 18px; cursor: pointer; flex-shrink: 0; }
+
+        /* ─── Mobile nav ─── */
+        .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer-overlay, .mobile-drawer { display: none; }
+
+        @media (max-width: 1023px) {
+            #sidebarMenu { display: none !important; }
+            main { padding-left: 0 !important; padding-top: 80px !important; padding-bottom: 110px !important; }
+            .mobile-topbar, .mobile-bottom-tabbar { display: flex !important; }
+            .mobile-topbar {
+                position: fixed; top: 0; left: 0; right: 0; z-index: 60; height: 64px;
+                background: rgba(2, 12, 18, 0.75);
+                border-bottom: 1px solid rgba(52, 211, 153, 0.15);
+                backdrop-filter: blur(22px) saturate(150%); -webkit-backdrop-filter: blur(22px) saturate(150%);
+                align-items: center; justify-content: space-between; padding: 0 16px;
+                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+            }
+            .mobile-topbar.topbar-hidden { transform: translateY(-100%); }
+            .mobile-topbar .logo-wrap { display: flex; align-items: center; gap: 10px; }
+            .mobile-topbar .logo-icon {
+                width: 38px; height: 38px; border-radius: 12px;
+                background: linear-gradient(135deg, #0891b2 0%, #059669 100%);
+                display: flex; align-items: center; justify-content: center;
+                color: #fff; font-weight: 800; font-size: 15px; font-family: 'Space Grotesk', sans-serif;
+            }
+            .mobile-topbar .logo-text { font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 18px; color: #e2e8f0; }
+            .mobile-topbar .logo-text span { color: #34d399; }
+            .mobile-topbar .actions { display: flex; align-items: center; gap: 8px; }
+            .mobile-topbar .icon-btn {
+                width: 40px; height: 40px; border-radius: 12px;
+                background: rgba(255,255,255,0.04); border: 1px solid rgba(52,211,153,0.15);
+                color: rgba(148,163,184,0.7); display: flex; align-items: center; justify-content: center;
+                cursor: pointer; transition: all 0.2s;
+            }
+
+            .mobile-drawer-overlay {
+                display: block; position: fixed; inset: 0;
+                background: rgba(2,12,18,0.7); backdrop-filter: blur(6px);
+                z-index: 70; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            }
+            .mobile-drawer-overlay.open { opacity: 1; pointer-events: auto; }
+            .mobile-drawer {
+                display: flex; flex-direction: column; position: fixed;
+                top: 0; left: 0; bottom: 0; width: min(300px, 85vw);
+                background: rgba(4, 16, 24, 0.88);
+                backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+                border-right: 1px solid rgba(52,211,153,0.18);
+                box-shadow: 8px 0 40px rgba(0,0,0,0.4);
+                z-index: 80; transform: translateX(-105%);
+                transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); padding: 0;
+            }
+            .mobile-drawer.open { transform: translateX(0); }
+            .mobile-drawer .drawer-header {
+                display: flex; align-items: center; justify-content: space-between;
+                padding: 20px 18px; border-bottom: 1px solid rgba(52,211,153,0.12);
+            }
+            .mobile-drawer .drawer-logo { display: flex; align-items: center; gap: 12px; }
+            .mobile-drawer .drawer-logo .logo-icon {
+                width: 42px; height: 42px; border-radius: 12px;
+                background: linear-gradient(135deg, #0891b2, #059669);
+                display: flex; align-items: center; justify-content: center;
+                color: #fff; font-weight: 800; font-size: 16px;
+            }
+            .mobile-drawer .drawer-logo span { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; color: #e2e8f0; }
+            .mobile-drawer .drawer-logo span b { color: #34d399; }
+            .mobile-drawer .close-drawer {
+                width: 36px; height: 36px; border-radius: 10px;
+                background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+                color: rgba(148,163,184,0.7); display: flex; align-items: center; justify-content: center; cursor: pointer;
+            }
+            .mobile-drawer nav { flex: 1; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+            .mobile-drawer .nav-item {
+                display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 14px;
+                color: rgba(148,163,184,0.7); font-weight: 600; font-size: 14px;
+                text-decoration: none; transition: all 0.2s; border: 1px solid transparent;
+            }
+            .mobile-drawer .nav-item i { width: 22px; text-align: center; font-size: 16px; }
+            .mobile-drawer .nav-item.active {
+                background: linear-gradient(135deg, rgba(8,145,178,0.25), rgba(5,150,105,0.2));
+                border-color: rgba(52,211,153,0.35); color: #34d399;
+            }
+            .mobile-drawer .drawer-footer { padding: 12px; border-top: 1px solid rgba(52,211,153,0.1); }
+
+            .mobile-bottom-tabbar {
+                position: fixed; bottom: calc(14px + env(safe-area-inset-bottom, 0));
+                left: 14px; right: 14px; z-index: 60; height: 70px;
+                background: rgba(4, 16, 24, 0.75); border: 1px solid rgba(52, 211, 153, 0.15);
+                border-radius: 26px; backdrop-filter: blur(24px) saturate(150%); -webkit-backdrop-filter: blur(24px) saturate(150%);
+                box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+                align-items: center; justify-content: space-around; padding: 0 6px;
+                transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.35s ease;
+                transform: translateY(0); opacity: 1;
+            }
+            .mobile-bottom-tabbar.tabbar-hidden { transform: translateY(140%); opacity: 0; }
+            .mobile-bottom-tabbar .tab-item {
+                display: flex; flex-direction: column; align-items: center; justify-content: center;
+                gap: 4px; flex: 1; height: 100%; color: rgba(148,163,184,0.55);
+                font-size: 11px; font-weight: 700; text-decoration: none; transition: all 0.2s; position: relative;
+            }
+            .mobile-bottom-tabbar .tab-item i { font-size: 22px; margin-bottom: 2px; }
+            .mobile-bottom-tabbar .tab-item.active { color: #34d399; }
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-topbar, .mobile-bottom-tabbar, .mobile-drawer, .mobile-drawer-overlay { display: none !important; }
+        }
     </style>
-  </head>
-  <body class="font-sans antialiased flex overflow-x-hidden">
+</head>
+<body class="font-sans antialiased flex overflow-x-hidden">
+
     <!-- Scroll Progress Bar -->
     <div id="scroll-progress"></div>
 
     <!-- ─── Mobile Top Bar ─── -->
     <div class="mobile-topbar">
-      <div class="logo-wrap">
-        <button
-          class="icon-btn"
-          id="btnOpenDrawer"
-          aria-label="Abrir menu"
-          type="button"
-        >
-          <i class="fas fa-bars"></i>
-        </button>
-        <div class="logo-icon">M</div>
-        <span class="logo-text">Med<span>LM</span></span>
-      </div>
-      <div class="actions">
-        <a
-          href="/dashboard"
-          class="icon-btn"
-          title="Dashboard"
-          style="text-decoration: none"
-          ><i class="fas fa-home"></i
-        ></a>
-      </div>
+        <div class="logo-wrap">
+            <button class="icon-btn" id="btnOpenDrawer" aria-label="Abrir menu" type="button"><i class="fas fa-bars"></i></button>
+            <div class="logo-icon">M</div>
+            <span class="logo-text">Med<span>LM</span></span>
+        </div>
+        <div class="actions">
+            <a href="/dashboard" class="icon-btn" title="Dashboard" style="text-decoration:none"><i class="fas fa-home"></i></a>
+        </div>
     </div>
 
     <!-- ─── Mobile Drawer ─── -->
     <div class="mobile-drawer-overlay" id="drawerOverlay"></div>
     <div class="mobile-drawer" id="mobileDrawer">
-      <div class="drawer-header">
-        <div class="drawer-logo">
-          <div class="logo-icon">M</div>
-          <span>Med<b>LM</b></span>
+        <div class="drawer-header">
+            <div class="drawer-logo"><div class="logo-icon">M</div><span>Med<b>LM</b></span></div>
+            <button class="close-drawer" id="btnCloseDrawer" aria-label="Fechar menu" type="button"><i class="fas fa-times"></i></button>
         </div>
-        <button
-          class="close-drawer"
-          id="btnCloseDrawer"
-          aria-label="Fechar menu"
-          type="button"
-        >
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      <nav>
-        <a href="/dashboard" class="nav-item"
-          ><i class="fas fa-chart-line"></i> Dashboard</a
-        >
-        <a href="/pacientes" class="nav-item"
-          ><i class="fas fa-user-injured"></i> Pacientes</a
-        >
-        <a href="/financeiro" class="nav-item"
-          ><i class="fas fa-hand-holding-usd"></i> Financeiro</a
-        >
-        <a href="/agendamento" class="nav-item"
-          ><i class="fas fa-calendar-check"></i> Agendamento</a
-        >
-        <a href="/equipe" class="nav-item"
-          ><i class="fas fa-users-cog"></i> Minha Equipe</a
-        >
-        <a href="/marketing" class="nav-item active"
-          ><i class="fas fa-bullhorn"></i> Marketing</a
-        >
-        <a href="/dashboard/configuracoes" class="nav-item"
-          ><i class="fas fa-cogs"></i> Configurações</a
-        >
-        <a
-          href="javascript:void(0)"
-          onclick="handleLogout(event)"
-          class="nav-item"
-          style="color: rgba(248, 113, 113, 0.75)"
-          ><i class="fas fa-sign-out-alt"></i> Sair</a
-        >
-      </nav>
-      <div class="drawer-footer">
-        <button
-          type="button"
-          id="theme-toggle-btn-mobile"
-          class="nav-item"
-          style="
-            width: 100%;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            text-align: left;
-          "
-        >
-          <i class="fas fa-moon"></i> Tema
-        </button>
-      </div>
+        <nav>
+            <a href="/dashboard" class="nav-item"><i class="fas fa-chart-line"></i> Dashboard</a>
+            <a href="/pacientes" class="nav-item"><i class="fas fa-user-injured"></i> Pacientes</a>
+            <a href="/financeiro" class="nav-item"><i class="fas fa-hand-holding-usd"></i> Financeiro</a>
+            <a href="/agendamento" class="nav-item"><i class="fas fa-calendar-check"></i> Agendamento</a>
+            <a href="/equipe" class="nav-item"><i class="fas fa-users-cog"></i> Minha Equipe</a>
+            <a href="/marketing" class="nav-item active"><i class="fas fa-bullhorn"></i> Marketing</a>
+            <a href="/dashboard/configuracoes" class="nav-item"><i class="fas fa-cogs"></i> Configurações</a>
+            <a href="javascript:void(0)" onclick="handleLogout(event)" class="nav-item" style="color:rgba(248,113,113,0.75)"><i class="fas fa-sign-out-alt"></i> Sair</a>
+        </nav>
+        <div class="drawer-footer">
+            <button type="button" id="theme-toggle-btn-mobile" class="nav-item" style="width:100%;background:transparent;border:none;cursor:pointer;text-align:left">
+                <i class="fas fa-moon"></i> Tema
+            </button>
+        </div>
     </div>
 
     <!-- ─── Mobile Bottom Tab Bar ─── -->
     <nav class="mobile-bottom-tabbar">
-      <a href="/dashboard" class="tab-item"
-        ><i class="fas fa-home"></i><span>Início</span></a
-      >
-      <a href="/pacientes" class="tab-item"
-        ><i class="fas fa-user-injured"></i><span>Pacientes</span></a
-      >
-      <a href="/agendamento" class="tab-item"
-        ><i class="fas fa-calendar-check"></i><span>Agenda</span></a
-      >
-      <a href="/marketing" class="tab-item active"
-        ><i class="fas fa-bullhorn"></i><span>Marketing</span></a
-      >
-      <a href="/dashboard/configuracoes" class="tab-item"
-        ><i class="fas fa-cogs"></i><span>Config</span></a
-      >
+        <a href="/dashboard" class="tab-item"><i class="fas fa-home"></i><span>Início</span></a>
+        <a href="/pacientes" class="tab-item"><i class="fas fa-user-injured"></i><span>Pacientes</span></a>
+        <a href="/agendamento" class="tab-item"><i class="fas fa-calendar-check"></i><span>Agenda</span></a>
+        <a href="/marketing" class="tab-item active"><i class="fas fa-bullhorn"></i><span>Marketing</span></a>
+        <a href="/dashboard/configuracoes" class="tab-item"><i class="fas fa-user-cog"></i><span>Perfil</span></a>
     </nav>
 
-    <!-- Sidebar Desktop + Main content (mantido da estrutura original) -->
-    <div class="flex w-full min-h-screen">
-      <!-- Sidebar desktop (estrutura padrão do sistema — ajuste se necessário no seu layout) -->
-      <aside
-        id="sidebarMenu"
-        class="sidebar-desktop hidden lg:flex flex-col w-64 fixed inset-y-0 left-0 z-40"
-      >
-        <!-- Conteúdo da sidebar original do seu sistema pode ser mantido aqui -->
-      </aside>
+    <div class="flex w-full min-h-screen relative">
 
-      <main
-        class="flex-1 lg:pl-64 p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto"
-      >
-        <div class="space-y-5 sm:space-y-6">
-          <!-- ═══ BANNER MOBILE: aviso QR no computador ═══ -->
-          <div
-            id="bannerMobileQr"
-            class="wa-mobile-banner hidden rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4"
-          >
-            <div
-              class="w-11 h-11 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0"
-            >
-              <i class="fas fa-mobile-alt text-red-400 text-lg"></i>
+        <!-- Sidebar Desktop — Padrão unificado do sistema -->
+        <aside id="sidebarMenu" class="sidebar-desktop fixed top-0 left-0 z-50 w-64 h-screen overflow-y-auto overflow-x-hidden flex flex-col justify-between">
+            <div class="flex flex-col">
+                <div class="h-24 flex items-center px-6 logo-block overflow-hidden">
+                    <div class="logo-icon w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-white font-bold text-lg">M</div>
+                    <span class="logo-text-brand ml-4 font-bold text-xl whitespace-nowrap tracking-tight">
+                        Med<span class="logo-text-accent font-extrabold">LM</span>
+                    </span>
+                </div>
+
+                <nav class="px-3 pt-6 space-y-1.5">
+                    <a href="/dashboard" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-chart-line w-6 text-lg"></i>
+                        <span class="ml-4 font-semibold whitespace-nowrap">Dashboard</span>
+                    </a>
+                    <a href="/pacientes" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-user-injured w-6"></i>
+                        <span class="ml-4 font-medium whitespace-nowrap">Pacientes</span>
+                    </a>
+                    <a href="/financeiro" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-hand-holding-usd w-6"></i>
+                        <span class="ml-4 font-medium whitespace-nowrap">Financeiro</span>
+                    </a>
+                    <a href="/agendamento" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-calendar-check w-6"></i>
+                        <span class="ml-4 font-medium whitespace-nowrap">Agendamento</span>
+                    </a>
+                    <a href="/equipe" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-users-cog w-6"></i>
+                        <span class="ml-4 font-medium whitespace-nowrap">Minha Equipe</span>
+                    </a>
+                    <a href="/marketing" class="nav-link nav-link-active flex items-center p-3.5">
+                        <i class="fas fa-bullhorn w-6"></i>
+                        <span class="ml-4 font-medium whitespace-nowrap">Marketing</span>
+                    </a>
+                    <a href="/dashboard/configuracoes" class="nav-link flex items-center p-3.5">
+                        <i class="fas fa-cogs w-6"></i>
+                        <span class="ml-4 font-medium whitespace-nowrap">Configurações</span>
+                    </a>
+                    <a href="#" onclick="handleLogout()" class="nav-link flex items-center p-3.5" style="color:rgba(248,113,113,0.6)!important">
+                        <i class="fas fa-sign-out-alt w-6"></i>
+                        <span class="ml-4 font-medium whitespace-nowrap">Sair</span>
+                    </a>
+                </nav>
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-black text-red-300 mb-1">
-                Você está em um dispositivo móvel
-              </p>
-              <p class="text-xs text-slate-300 leading-relaxed">
-                O ideal é
-                <strong class="text-amber-300"
-                  >gerar o QR Code pelo computador</strong
-                >. Se você tentar escanear o código com a mesma câmera do
-                celular em que esta tela está aberta, não conseguirá ler o QR
-                adequadamente. Abra o MedLM em um PC/notebook e use o celular da
-                clínica para escanear.
-              </p>
-            </div>
-            <button
-              type="button"
-              onclick="document.getElementById('bannerMobileQr').classList.add('hidden')"
-              class="text-slate-400 hover:text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition flex-shrink-0"
-            >
-              Entendi
-            </button>
-          </div>
 
-          <!-- ═══ PAINEL DE CONEXÃO DO WHATSAPP ═══ -->
-          <div
-            id="painelConexaoWhatsApp"
-            class="cyber-panel glow-line rounded-2xl p-5 sm:p-6 relative overflow-hidden"
-          >
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
-              <div class="space-y-2">
-                <div class="flex items-center gap-2">
-                  <span
-                    id="statusIndicatorInstance"
-                    class="w-2.5 h-2.5 rounded-full bg-amber-400"
-                  ></span>
-                  <span
-                    class="text-[10px] font-black text-amber-400 uppercase tracking-widest flex items-center gap-1.5"
-                  >
-                    <i class="fab fa-whatsapp text-sm"></i> Status da Conexão do
-                    WhatsApp
-                  </span>
-                </div>
-                <h3
-                  class="text-xl sm:text-2xl font-black text-white font-['Space_Grotesk']"
-                >
-                  Sessão da Clínica
-                </h3>
-                <p
-                  id="statusInstanceText"
-                  class="text-xs text-slate-400 leading-relaxed"
-                >
-                  Conecte o número oficial da clínica para habilitar os disparos
-                  automatizados de agendamentos.
-                </p>
-              </div>
-
-              <div
-                class="cyber-card-premium rounded-xl p-4 space-y-2 border border-cyan-500/20"
-              >
-                <div class="flex justify-between items-center text-xs">
-                  <span class="text-slate-400 font-semibold"
-                    >Número Oficial:</span
-                  >
-                  <strong
-                    id="telefoneClinicaDisplay"
-                    class="text-cyan-300 font-mono"
-                    >--</strong
-                  >
-                </div>
-                <div class="flex justify-between items-center text-xs">
-                  <span class="text-slate-400 font-semibold"
-                    >Instância Evolution:</span
-                  >
-                  <strong id="instanciaNomeDisplay" class="text-white font-mono"
-                    >--</strong
-                  >
-                </div>
-              </div>
-
-              <div class="flex flex-col justify-center gap-3">
-                <button
-                  type="button"
-                  onclick="solicitarConfirmacaoQr()"
-                  class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider"
-                >
-                  <i class="fas fa-qrcode"></i> Gerar QR Code / Conectar
+            <div class="p-4" style="border-top:1px solid var(--border)">
+                <button id="theme-toggle-btn" class="flex items-center w-full p-3 transition">
+                    <i class="fas fa-moon w-6"></i>
+                    <span class="ml-4 font-medium text-sm">Tema</span>
                 </button>
-                <span
-                  class="text-[9px] text-slate-500 text-center flex items-center justify-center gap-1"
-                >
-                  <i class="fas fa-shield-alt text-cyan-400"></i> Conexão segura
-                  via Evolution API
-                </span>
-              </div>
             </div>
+        </aside>
 
-            <!-- ═══ CARD DE ALERTA E RECOMENDAÇÕES ═══ -->
-            <div class="wa-alert-card rounded-2xl p-4 sm:p-5 mt-6">
-              <div class="flex flex-col sm:flex-row gap-4">
-                <div
-                  class="wa-icon-wrap w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
-                >
-                  <i
-                    class="fas fa-exclamation-triangle text-amber-400 text-xl"
-                  ></i>
-                </div>
-                <div class="flex-1 space-y-3 min-w-0">
-                  <h4
-                    class="text-sm font-black text-amber-300 uppercase tracking-wide flex items-center gap-2"
-                  >
-                    <i class="fas fa-shield-alt text-cyan-400"></i>
-                    Recomendações importantes — uso do WhatsApp da clínica
-                  </h4>
-                  <ul
-                    class="space-y-2.5 text-xs text-slate-300 leading-relaxed"
-                  >
-                    <li class="flex gap-2.5">
-                      <i
-                        class="fas fa-plug text-emerald-400 mt-0.5 flex-shrink-0"
-                      ></i>
-                      <span>
-                        <strong class="text-white"
-                          >Mantenha o telefone conectado.</strong
-                        >
-                        A sessão precisa permanecer ativa para que lembretes
-                        automáticos de consulta e campanhas de marketing
-                        funcionem corretamente.
-                      </span>
-                    </li>
-                    <li class="flex gap-2.5">
-                      <i
-                        class="fas fa-clinic-medical text-cyan-400 mt-0.5 flex-shrink-0"
-                      ></i>
-                      <span>
-                        <strong class="text-white"
-                          >Uso exclusivo para o consultório/clínica.</strong
-                        >
-                        Este número deve ser usado apenas para comunicação
-                        oficial com pacientes (lembretes, campanhas e avisos da
-                        clínica).
-                      </span>
-                    </li>
-                    <li class="flex gap-2.5">
-                      <i
-                        class="fas fa-ban text-red-400 mt-0.5 flex-shrink-0"
-                      ></i>
-                      <span>
-                        <strong class="text-red-300"
-                          >Não utilize em grupos abertos, de spam ou de
-                          terceiros.</strong
-                        >
-                        Participar de grupos externos aumenta o risco de
-                        banimento e bloqueio da infraestrutura WhatsApp da
-                        clínica.
-                      </span>
-                    </li>
-                  </ul>
-                  <p
-                    class="text-[10px] text-slate-500 pt-1 border-t border-white/5"
-                  >
-                    A instância está configurada para ignorar mensagens de
-                    grupos e rejeitar chamadas automaticamente (boas práticas
-                    Evolution API).
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+        <!-- Conteúdo Principal -->
+        <main class="flex-1 min-h-screen pl-0 lg:pl-64 flex flex-col w-full">
+            <div class="container-fluid p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6 max-w-[1600px] mx-auto w-full">
 
-          <!-- Modal QR Code (existente) -->
-          <div
-            id="modalQrCode"
-            class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4"
-          >
-            <div
-              class="cyber-panel rounded-2xl p-6 max-w-sm w-full text-center space-y-4 border border-cyan-500/30 relative"
-            >
-              <button
-                type="button"
-                onclick="fecharModalQrCode()"
-                class="absolute top-4 right-4 text-slate-400 hover:text-white"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-              <h3 class="text-lg font-black text-white font-['Space_Grotesk']">
-                Escaneie o QR Code
-              </h3>
-              <p class="text-xs text-slate-400">
-                Abra o WhatsApp no celular da clínica, vá em Aparelhos
-                Conectados e leia o código abaixo:
-              </p>
-              <div
-                id="qrCodeContainer"
-                class="bg-white p-4 rounded-xl flex items-center justify-center min-h-[220px]"
-              >
-                <span class="text-slate-800 text-xs font-semibold animate-pulse"
-                  >Gerando QR Code...</span
-                >
-              </div>
-              <button
-                type="button"
-                onclick="fecharModalQrCode()"
-                class="w-full bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 font-bold py-2.5 rounded-xl text-xs uppercase"
-              >
-                Fechar
-              </button>
-            </div>
-          </div>
-
-          <!-- ═══ MODAL DE CONFIRMAÇÃO OBRIGATÓRIA ANTES DO QR ═══ -->
-          <div
-            id="modalConfirmQr"
-            class="fixed inset-0 z-[60] bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4"
-          >
-            <div
-              class="confirm-panel cyber-panel rounded-2xl p-5 sm:p-6 max-w-md w-full border border-amber-500/40 relative"
-            >
-              <button
-                type="button"
-                onclick="fecharModalConfirmQr()"
-                class="absolute top-4 right-4 text-slate-400 hover:text-white transition"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-
-              <div class="flex items-start gap-3 mb-4">
-                <div
-                  class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0"
-                >
-                  <i
-                    class="fas fa-exclamation-triangle text-amber-400 text-xl"
-                  ></i>
-                </div>
-                <div>
-                  <h3
-                    class="text-lg font-black text-white font-['Space_Grotesk'] mb-1"
-                  >
-                    Atenção antes de conectar
-                  </h3>
-                  <p class="text-xs text-slate-400 leading-relaxed">
-                    Confirme que você está ciente das regras de uso do WhatsApp
-                    da clínica.
-                  </p>
-                </div>
-              </div>
-
-              <div
-                class="space-y-3 mb-5 text-xs text-slate-300 leading-relaxed"
-              >
-                <div
-                  class="flex gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5"
-                >
-                  <i
-                    class="fas fa-check-circle text-emerald-400 mt-0.5 flex-shrink-0"
-                  ></i>
-                  <span
-                    >O número será usado
-                    <strong class="text-white">exclusivamente</strong> para o
-                    consultório/clínica (lembretes e campanhas).</span
-                  >
-                </div>
-                <div
-                  class="flex gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5"
-                >
-                  <i class="fas fa-ban text-red-400 mt-0.5 flex-shrink-0"></i>
-                  <span
-                    >Não irei utilizar este número em
-                    <strong class="text-red-300"
-                      >grupos abertos, de spam ou de terceiros</strong
-                    >.</span
-                  >
-                </div>
-                <div
-                  class="flex gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5"
-                >
-                  <i
-                    class="fas fa-mobile-alt text-cyan-400 mt-0.5 flex-shrink-0"
-                  ></i>
-                  <span
-                    >Se estiver no celular, o ideal é gerar o QR no
-                    <strong class="text-cyan-300">computador</strong> e escanear
-                    com o aparelho da clínica.</span
-                  >
-                </div>
-              </div>
-
-              <label
-                class="flex items-start gap-3 mb-5 cursor-pointer select-none p-3 rounded-xl border border-white/10 hover:border-emerald-500/30 transition"
-              >
-                <input
-                  type="checkbox"
-                  id="checkCienciaQr"
-                  class="confirm-check mt-0.5"
-                />
-                <span class="text-xs text-slate-300 leading-relaxed">
-                  Li e estou ciente das recomendações acima. Concordo em usar
-                  este WhatsApp apenas para fins oficiais da clínica.
-                </span>
-              </label>
-
-              <div class="flex flex-col sm:flex-row gap-2.5">
-                <button
-                  type="button"
-                  onclick="fecharModalConfirmQr()"
-                  class="flex-1 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="button"
-                  id="btnConfirmarQr"
-                  onclick="confirmarEGerarQr()"
-                  class="flex-1 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition opacity-40 cursor-not-allowed"
-                  disabled
-                >
-                  <i class="fas fa-qrcode mr-1"></i> Continuar e gerar QR
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 sm:gap-6">
-            <!-- ═══ COLUNA ESQUERDA: CONSTRUTOR ═══ -->
-            <div class="xl:col-span-3 space-y-5 sm:space-y-6">
-              <!-- Templates rápidos -->
-              <div class="cyber-panel rounded-2xl p-4 sm:p-5">
-                <p
-                  class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3"
-                >
-                  <i class="fas fa-bolt text-amber-400 mr-1"></i> Começar com um
-                  modelo
-                </p>
-                <div class="flex gap-2.5 overflow-x-auto pb-1">
-                  <div class="template-chip" data-template="lembrete">
-                    <i class="fas fa-calendar-check"></i> Lembrete de consulta
-                  </div>
-                  <div class="template-chip" data-template="feriado">
-                    <i class="fas fa-store-slash"></i> Feriado / Recesso
-                  </div>
-                  <div class="template-chip" data-template="promocao">
-                    <i class="fas fa-percent"></i> Promoção
-                  </div>
-                  <div class="template-chip" data-template="aniversario">
-                    <i class="fas fa-birthday-cake"></i> Aniversário
-                  </div>
-                  <div class="template-chip" data-template="retorno">
-                    <i class="fas fa-user-clock"></i> Convite de retorno
-                  </div>
-                  <div class="template-chip" data-template="">
-                    <i class="fas fa-file"></i> Em branco
-                  </div>
-                </div>
-              </div>
-
-              <!-- Construtor -->
-              <div
-                class="cyber-panel glow-line rounded-2xl p-4 sm:p-6 space-y-5"
-              >
-                <h2
-                  class="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2"
-                >
-                  <i class="fas fa-pen-nib text-emerald-400"></i> Nova campanha
-                </h2>
-
-                <!-- Canal de Envio -->
-                <div>
-                  <label
-                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                    >Canal de Envio</label
-                  >
-                  <div class="flex flex-wrap gap-4">
-                    <label
-                      class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="canalEnvio"
-                        value="email"
-                        checked
-                        class="accent-cyan-400"
-                        onchange="alternarCanalEnvio()"
-                      />
-                      <i class="fas fa-envelope text-cyan-400"></i> E-mail
-                      (Brevo)
-                    </label>
-                    <label
-                      class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer"
-                    >
-                      <input
-                        type="radio"
-                        name="canalEnvio"
-                        value="whatsapp"
-                        class="accent-emerald-400"
-                        onchange="alternarCanalEnvio()"
-                      />
-                      <i class="fab fa-whatsapp text-emerald-400"></i> WhatsApp
-                      (Evolution API)
-                    </label>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label
-                      class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                      >Título interno</label
-                    >
-                    <input
-                      id="campoTitulo"
-                      type="text"
-                      placeholder="Ex: Aviso de feriado prolongado"
-                      class="w-full p-3 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-semibold"
-                    />
-                  </div>
-                  <div>
-                    <label
-                      class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                    >
-                      Assunto do email
-                      <span
-                        id="contadorAssunto"
-                        class="text-slate-600 normal-case font-medium"
-                        >0/60</span
-                      >
-                    </label>
-                    <input
-                      id="campoAssunto"
-                      type="text"
-                      maxlength="60"
-                      placeholder="Ex: Estaremos fechados nesta sexta"
-                      oninput="document.getElementById('contadorAssunto').textContent = this.value.length + '/60'"
-                      class="w-full p-3 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-semibold"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label
-                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5"
-                  >
-                    Mensagem
-                    <span class="text-slate-600 normal-case font-medium"
-                      >— use {{nome_paciente}} para personalizar</span
-                    >
-                  </label>
-                  <div class="flex items-center gap-1.5 mb-2">
-                    <button
-                      type="button"
-                      class="toolbar-btn"
-                      onclick="formatarTexto('bold')"
-                      title="Negrito"
-                    >
-                      <i class="fas fa-bold"></i>
-                    </button>
-                    <button
-                      type="button"
-                      class="toolbar-btn"
-                      onclick="formatarTexto('italic')"
-                      title="Itálico"
-                    >
-                      <i class="fas fa-italic"></i>
-                    </button>
-                    <button
-                      type="button"
-                      class="toolbar-btn"
-                      onclick="formatarTexto('insertUnorderedList')"
-                      title="Lista"
-                    >
-                      <i class="fas fa-list-ul"></i>
-                    </button>
-                    <button
-                      type="button"
-                      class="toolbar-btn"
-                      onclick="inserirLink()"
-                      title="Link"
-                    >
-                      <i class="fas fa-link"></i>
-                    </button>
-                    <button
-                      type="button"
-                      class="toolbar-btn"
-                      onclick="inserirVariavel('{{nome_paciente}}')"
-                      title="Inserir nome do paciente"
-                    >
-                      <i class="fas fa-user-tag"></i>
-                    </button>
-                  </div>
-                  <div
-                    id="campoCorpo"
-                    contenteditable="true"
-                    class="w-full min-h-[180px] p-4 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-medium leading-relaxed"
-                    oninput="atualizarPreview()"
-                    data-placeholder="Olá {{nome_paciente}}, ..."
-                  ></div>
-                </div>
-
-                <!-- Público-alvo -->
-                <div>
-                  <label
-                    class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"
-                    >Público-alvo</label
-                  >
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <label class="radio-audience selected">
-                      <input
-                        type="radio"
-                        name="tipoPublico"
-                        value="todos"
-                        checked
-                        class="mt-0.5 accent-emerald-400"
-                      />
-                      <span class="text-xs"
-                        ><strong class="text-white block"
-                          >Todos os pacientes</strong
-                        ><span class="text-slate-500 text-[10px]"
-                          >Toda a base ativa</span
-                        ></span
-                      >
-                    </label>
-                    <label class="radio-audience">
-                      <input
-                        type="radio"
-                        name="tipoPublico"
-                        value="filtro"
-                        data-filtro="sem_retorno_90d"
-                        class="mt-0.5 accent-emerald-400"
-                      />
-                      <span class="text-xs"
-                        ><strong class="text-white block"
-                          >Sem retorno há 90+ dias</strong
-                        ><span class="text-slate-500 text-[10px]"
-                          >Reengajamento</span
-                        ></span
-                      >
-                    </label>
-                    <label class="radio-audience">
-                      <input
-                        type="radio"
-                        name="tipoPublico"
-                        value="filtro"
-                        data-filtro="aniversariantes_mes"
-                        class="mt-0.5 accent-emerald-400"
-                      />
-                      <span class="text-xs"
-                        ><strong class="text-white block"
-                          >Aniversariantes do mês</strong
-                        ><span class="text-slate-500 text-[10px]"
-                          >Data de nascimento</span
-                        ></span
-                      >
-                    </label>
-                    <label class="radio-audience">
-                      <input
-                        type="radio"
-                        name="tipoPublico"
-                        value="individual"
-                        class="mt-0.5 accent-emerald-400"
-                      />
-                      <span class="text-xs"
-                        ><strong class="text-white block"
-                          >Pacientes específicos</strong
-                        ><span class="text-slate-500 text-[10px]"
-                          >Escolha manual</span
-                        ></span
-                      >
-                    </label>
-                  </div>
-
-                  <div
-                    id="areaPacientesEspecificos"
-                    class="hidden mt-3 space-y-2"
-                  >
-                    <div class="autocomplete-wrap">
-                      <i
-                        class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs"
-                        style="z-index: 1"
-                      ></i>
-                      <input
-                        id="campoBuscaPaciente"
-                        type="text"
-                        placeholder="Digite o nome ou CPF do paciente..."
-                        autocomplete="off"
-                        class="w-full pl-9 pr-3 py-2.5 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs"
-                      />
-                      <div
-                        id="autocompleteLista"
-                        class="autocomplete-lista"
-                      ></div>
+                <!-- Cabeçalho -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div class="min-w-0">
+                        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight flex items-center gap-2 sm:gap-3 font-['Space_Grotesk']">
+                            <i class="fas fa-bullhorn text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.4)] shrink-0"></i>
+                            <span class="truncate">Marketing</span>
+                        </h1>
+                        <p class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest mt-1.5">
+                            Envie lembretes e campanhas por email e WhatsApp — individuais ou em massa.
+                        </p>
                     </div>
-                    <div
-                      id="listaPacientesSelecionados"
-                      class="flex flex-wrap gap-2"
-                    ></div>
-                  </div>
-                </div>
-
-                <!-- Ação -->
-                <div
-                  class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-white/5 pt-5"
-                >
-                  <span
-                    id="contadorPublico"
-                    class="text-xs text-slate-400 font-semibold"
-                  >
-                    <i class="fas fa-users mr-1 text-cyan-400"></i> Calculando
-                    público-alvo...
-                  </span>
-                  <div class="flex gap-2.5">
-                    <button
-                      id="btnSalvarRascunho"
-                      class="bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-slate-300 font-bold py-3 px-4 rounded-xl transition text-xs uppercase tracking-wider whitespace-nowrap"
-                    >
-                      <i class="fas fa-save mr-1"></i> Rascunho
+                    <button onclick="document.getElementById('painelHistorico').scrollIntoView({behavior:'smooth'})" class="w-full sm:w-auto shrink-0 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-slate-300 font-bold py-3 px-5 rounded-xl transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                        <i class="fas fa-history"></i> Ver histórico
                     </button>
-                    <button
-                      id="btnEnviarCampanha"
-                      class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <i class="fas fa-paper-plane"></i> Enviar campanha
+                </div>
+
+                <!-- ═══ PAINEL INTELIGENTE DE CRÉDITOS DE WHATSAPP (GLASSMORPHISM & NEON) ═══ -->
+                <div id="painelCreditosWhatsApp" class="cyber-panel glow-line rounded-2xl p-5 sm:p-6 relative overflow-hidden">
+                    <!-- Banner Dinâmico de Alerta -->
+                    <div id="bannerAlertaCreditos" class="hidden mb-5 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-semibold flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <i class="fas fa-triangle-exclamation text-amber-400 text-base animate-pulse"></i>
+                            <span id="textoAlertaCreditos">Seus créditos de WhatsApp estão acabando! Recarregue agora para não interromper os lembretes automáticos.</span>
+                        </div>
+                        <button onclick="comprarCreditosWhatsApp(300)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider whitespace-nowrap transition flex items-center gap-1.5">
+                            <i class="fab fa-whatsapp"></i> Recarregar
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                        <!-- Coluna 1: Status e Saldo Atual -->
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                                <span class="text-[10px] font-black text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <i class="fab fa-whatsapp text-sm"></i> Canal Oficial WhatsApp Business
+                                </span>
+                            </div>
+                            <h3 class="text-xl sm:text-2xl font-black text-white font-['Space_Grotesk']">Créditos de Mensagens</h3>
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                Cada envio consome 1 crédito. Utilize o saldo para campanhas e lembretes de consultas.
+                            </p>
+                            <div class="pt-2 flex items-baseline gap-3">
+                                <span id="saldoCreditosDisplay" class="text-3xl sm:text-4xl font-extrabold text-emerald-400 tracking-tight">--</span>
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">créditos disponíveis</span>
+                            </div>
+                        </div>
+
+                        <!-- Coluna 2: Métricas e Explicação de Valor -->
+                        <div class="cyber-card-premium rounded-xl p-4 space-y-3 border border-emerald-500/20">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold"><i class="fas fa-arrow-down text-cyan-400 mr-1.5"></i> Total Comprado (Mês):</span>
+                                <strong id="totalCompradoDisplay" class="text-white font-bold">-- créditos</strong>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold"><i class="fab fa-whatsapp text-emerald-400 mr-1.5"></i> Envios Garantidos:</span>
+                                <strong id="mensagensGarantidasDisplay" class="text-emerald-400 font-bold">-- disparos</strong>
+                            </div>
+                            <p class="text-[11px] text-slate-400 border-t border-white/5 pt-2 leading-relaxed">
+                                <strong class="text-cyan-300">Por que investir?</strong> O WhatsApp garante taxa de abertura superior a 95%, reduzindo drasticamente as faltas nas consultas.
+                            </p>
+                        </div>
+
+                        <!-- Coluna 3: Ação de Compra / Recarga Segura (Com todos os pacotes solicitados) -->
+                        <div class="flex flex-col justify-center gap-3">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center lg:text-left flex items-center gap-1.5">
+                                <i class="fab fa-whatsapp text-emerald-400"></i> Adquirir Franquia de Disparos
+                            </span>
+                            <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                                <button onclick="comprarCreditosWhatsApp(50)" class="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 border border-cyan-500/30 text-slate-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-emerald-400">50</span>
+                                    <span class="text-[9px] uppercase text-slate-400">R$ 22,50</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(100)" class="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 border border-cyan-500/30 text-slate-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-emerald-400">100</span>
+                                    <span class="text-[9px] uppercase text-slate-400">R$ 45</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(300)" class="bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 hover:from-cyan-500/20 hover:to-emerald-500/20 border border-cyan-500/30 text-slate-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-emerald-400">300</span>
+                                    <span class="text-[9px] uppercase text-slate-400">R$ 135</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(500)" class="bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 hover:from-cyan-500/30 hover:to-emerald-500/30 border border-cyan-500/40 text-cyan-300 hover:text-white font-bold py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5">
+                                    <span class="font-black text-xs text-white">500</span>
+                                    <span class="text-[9px] uppercase text-emerald-400">R$ 225</span>
+                                </button>
+                                <button onclick="comprarCreditosWhatsApp(1000)" class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-2 px-1 rounded-xl transition text-[11px] flex flex-col items-center justify-center gap-0.5 col-span-3 sm:col-span-1">
+                                    <span class="font-black text-xs">1.000</span>
+                                    <span class="text-[9px] uppercase text-cyan-200">R$ 450</span>
+                                </button>
+                            </div>
+                            
+                            <span class="text-[9px] text-slate-500 text-center flex items-center justify-center gap-1">
+                                <i class="fas fa-lock text-emerald-400"></i> Pagamento seguro via Mercado Pago
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- Banner mobile QR -->
+                <div id="bannerMobileQr" class="hidden rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mb-5"
+                     style="background:linear-gradient(90deg,rgba(248,113,113,0.12),rgba(251,191,36,0.1));border:1px solid rgba(248,113,113,0.35);">
+                    <div class="w-11 h-11 rounded-xl bg-red-500/20 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-mobile-alt text-red-400 text-lg"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-black text-red-300 mb-1">Você está em um dispositivo móvel</p>
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            O ideal é <strong class="text-amber-300">gerar o QR Code pelo computador</strong>.
+                            Se tentar escanear com a mesma câmera do celular em que esta tela está aberta, não conseguirá ler o código.
+                        </p>
+                    </div>
+                    <button type="button" onclick="document.getElementById('bannerMobileQr').classList.add('hidden')"
+                        class="text-slate-400 hover:text-white text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg border border-white/10 hover:border-white/20 transition flex-shrink-0">
+                        Entendi
                     </button>
-                  </div>
                 </div>
-              </div>
-            </div>
 
-            <!-- ═══ COLUNA DIREITA: PREVIEW ═══ -->
-            <div class="xl:col-span-2 space-y-5 sm:space-y-6">
-              <div
-                class="cyber-panel rounded-2xl p-4 sm:p-5 xl:sticky xl:top-6"
-              >
-                <p
-                  class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3"
-                >
-                  <i class="fas fa-eye text-cyan-400 mr-1"></i> Preview da
-                  mensagem
-                </p>
-                <div class="email-preview-frame">
-                  <div class="bg-[#e2e2e5] px-4 py-2 flex items-center gap-1.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
-                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
-                    <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
-                  </div>
-                  <div class="email-preview-body">
-                    <p class="text-[11px] text-slate-400 mb-1">
-                      De:
-                      <strong id="previewRemetente" class="text-slate-600"
-                        >Sua Clínica</strong
-                      >
-                    </p>
-                    <p
-                      class="text-[11px] text-slate-400 mb-3 pb-3 border-b border-slate-200"
-                    >
-                      Assunto:
-                      <strong id="previewAssunto" class="text-slate-800"
-                        >(sem assunto)</strong
-                      >
-                    </p>
-                    <div id="previewCorpo">Olá <strong>Maria</strong>, ...</div>
-                  </div>
+                <!-- ═══ PAINEL DE CONEXÃO DO WHATSAPP ═══ -->
+                <div id="painelConexaoWhatsApp" class="cyber-panel glow-line rounded-2xl p-5 sm:p-6 relative overflow-hidden mt-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+                                    <i class="fab fa-whatsapp text-sm"></i> Status da Conexão do WhatsApp
+                                </span>
+                            </div>
+                            <div id="waStatusBadge" class="wa-status-badge wa-status-disconnected">
+                                <span class="wa-dot"></span>
+                                <span id="waStatusLabel">WhatsApp Desconectado — Necessário Conectar</span>
+                            </div>
+                            <p id="waStatusSubtitle" class="wa-status-subtitle text-amber-200/90">
+                                Disparos automáticos e lembretes de consultas estão <strong>pausados</strong> até que o QR Code seja lido.
+                            </p>
+                            <p id="statusInstanceText" class="text-xs text-slate-400 leading-relaxed hidden"></p>
+                            <span id="statusIndicatorInstance" class="hidden"></span>
+                        </div>
+
+                        <div class="cyber-card-premium rounded-xl p-4 space-y-2 border border-cyan-500/20">
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold">Número Oficial:</span>
+                                <strong id="telefoneClinicaDisplay" class="text-cyan-300 font-mono wa-status-phone">--</strong>
+                            </div>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="text-slate-400 font-semibold">Instância Evolution:</span>
+                                <strong id="instanciaNomeDisplay" class="text-white font-mono">--</strong>
+                            </div>
+                            <div class="flex justify-between items-center text-xs pt-1 border-t border-white/5">
+                                <span class="text-slate-400 font-semibold">Estado:</span>
+                                <strong id="waEstadoDisplay" class="text-slate-300 font-mono text-[11px]">--</strong>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col justify-center gap-3">
+                            <button type="button" onclick="solicitarConfirmacaoQr()"
+                                class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider">
+                                <i class="fas fa-qrcode"></i> Gerar QR Code / Conectar
+                            </button>
+                            <span class="text-[9px] text-slate-500 text-center flex items-center justify-center gap-1">
+                                <i class="fas fa-shield-alt text-cyan-400"></i> Conexão segura via Evolution API
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Card recomendações -->
+                    <div class="wa-alert-card rounded-2xl p-4 sm:p-5 mt-6">
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="wa-icon-wrap w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-exclamation-triangle text-amber-400 text-xl"></i>
+                            </div>
+                            <div class="flex-1 space-y-3 min-w-0">
+                                <h4 class="text-sm font-black text-amber-300 uppercase tracking-wide flex items-center gap-2">
+                                    <i class="fas fa-shield-alt text-cyan-400"></i>
+                                    Recomendações importantes — uso do WhatsApp da clínica
+                                </h4>
+                                <ul class="space-y-2.5 text-xs text-slate-300 leading-relaxed">
+                                    <li class="flex gap-2.5">
+                                        <i class="fas fa-plug text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong class="text-white">Mantenha o telefone conectado.</strong> A sessão precisa permanecer ativa para lembretes e campanhas funcionarem.</span>
+                                    </li>
+                                    <li class="flex gap-2.5">
+                                        <i class="fas fa-clinic-medical text-cyan-400 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong class="text-white">Uso exclusivo para o consultório/clínica.</strong> Comunicação oficial com pacientes apenas.</span>
+                                    </li>
+                                    <li class="flex gap-2.5">
+                                        <i class="fas fa-ban text-red-400 mt-0.5 flex-shrink-0"></i>
+                                        <span><strong class="text-red-300">Não utilize em grupos abertos, de spam ou de terceiros.</strong> Evita banimentos e bloqueios.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          <!-- ═══ HISTÓRICO ═══ -->
-          <div
-            id="painelHistorico"
-            class="cyber-panel glow-line rounded-2xl overflow-hidden"
-          >
-            <div
-              class="p-4 sm:p-5 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-            >
-              <h2
-                class="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2"
-              >
-                <i class="fas fa-clock-rotate-left text-cyan-400"></i> Campanhas
-                enviadas
-              </h2>
-              <div class="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onclick="filtrarCampanhas('')"
-                  data-filtro-status=""
-                  class="filtro-status-btn active px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300 transition"
-                >
-                  Todas
-                </button>
-                <button
-                  type="button"
-                  onclick="filtrarCampanhas('processando')"
-                  data-filtro-status="processando"
-                  class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-amber-500/40 hover:text-amber-300 transition"
-                >
-                  Processando
-                </button>
-                <button
-                  type="button"
-                  onclick="filtrarCampanhas('concluida')"
-                  data-filtro-status="concluida"
-                  class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-300 transition"
-                >
-                  Sucesso
-                </button>
-                <button
-                  type="button"
-                  onclick="filtrarCampanhas('concluida_com_falhas')"
-                  data-filtro-status="concluida_com_falhas"
-                  class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-orange-500/40 hover:text-orange-300 transition"
-                >
-                  Com Falhas
-                </button>
-                <button
-                  type="button"
-                  onclick="carregarCampanhas(1)"
-                  class="toolbar-btn"
-                  title="Atualizar"
-                >
-                  <i class="fas fa-rotate"></i>
-                </button>
-              </div>
-            </div>
-            <div class="overflow-x-auto w-full">
-              <table class="min-w-full divide-y divide-white/5">
-                <thead>
-                  <tr
-                    class="bg-[#030e17]/70 backdrop-blur-sm text-cyan-400 uppercase text-[10px] font-black tracking-widest border-b border-white/5"
-                  >
-                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">
-                      Campanha
-                    </th>
-                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">
-                      Público
-                    </th>
-                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">
-                      Status
-                    </th>
-                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">
-                      Progresso
-                    </th>
-                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">
-                      Data
-                    </th>
-                  </tr>
-                </thead>
-                <tbody
-                  id="listaCampanhas"
-                  class="divide-y divide-white/5 text-xs text-slate-300 font-medium"
-                >
-                  <tr>
-                    <td
-                      colspan="5"
-                      class="py-6 px-6 text-center text-slate-500"
-                    >
-                      Carregando...
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+<!-- Modal para exibir o QR Code -->
+<div id="modalQrCode" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="cyber-panel rounded-2xl p-6 max-w-sm w-full text-center space-y-4 border border-cyan-500/30 relative">
+        <button onclick="fecharModalQrCode()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
+        <h3 class="text-lg font-black text-white font-['Space_Grotesk']">Escaneie o QR Code</h3>
+        <p class="text-xs text-slate-400">Abra o WhatsApp no celular da clínica, vá em Aparelhos Conectados e leia o código abaixo:</p>
+        <div id="qrCodeContainer" class="bg-white p-4 rounded-xl flex items-center justify-center min-h-[220px]">
+            <span class="text-slate-800 text-xs font-semibold animate-pulse">Gerando QR Code...</span>
         </div>
-      </main>
+        <button onclick="fecharModalQrCode()" class="w-full bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 font-bold py-2.5 rounded-xl text-xs uppercase">Fechar</button>
+    </div>
+</div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-5 gap-5 sm:gap-6">
+
+                    <!-- ═══ COLUNA ESQUERDA: CONSTRUTOR ═══ -->
+                    <div class="xl:col-span-3 space-y-5 sm:space-y-6">
+
+                        <!-- Templates rápidos -->
+                        <div class="cyber-panel rounded-2xl p-4 sm:p-5">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                <i class="fas fa-bolt text-amber-400 mr-1"></i> Começar com um modelo
+                            </p>
+                            <div class="flex gap-2.5 overflow-x-auto pb-1">
+                                <div class="template-chip" data-template="lembrete"><i class="fas fa-calendar-check"></i> Lembrete de consulta</div>
+                                <div class="template-chip" data-template="feriado"><i class="fas fa-store-slash"></i> Feriado / Recesso</div>
+                                <div class="template-chip" data-template="promocao"><i class="fas fa-percent"></i> Promoção</div>
+                                <div class="template-chip" data-template="aniversario"><i class="fas fa-birthday-cake"></i> Aniversário</div>
+                                <div class="template-chip" data-template="retorno"><i class="fas fa-user-clock"></i> Convite de retorno</div>
+                                <div class="template-chip" data-template=""><i class="fas fa-file"></i> Em branco</div>
+                            </div>
+                        </div>
+
+                        <!-- Construtor -->
+                        <div class="cyber-panel glow-line rounded-2xl p-4 sm:p-6 space-y-5">
+                            <h2 class="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+                                <i class="fas fa-pen-nib text-emerald-400"></i> Nova campanha
+                            </h2>
+
+                            <!-- Canal de Envio -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Canal de Envio</label>
+                                <div class="flex flex-wrap gap-4">
+                                    <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer">
+                                        <input type="radio" name="canalEnvio" value="email" checked class="accent-cyan-400" onchange="alternarCanalEnvio()">
+                                        <i class="fas fa-envelope text-cyan-400"></i> E-mail (Brevo)
+                                    </label>
+                                    <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer">
+                                        <input type="radio" name="canalEnvio" value="whatsapp" class="accent-emerald-400" onchange="alternarCanalEnvio()">
+                                        <i class="fab fa-whatsapp text-emerald-400"></i> WhatsApp (Evolution API)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Título interno</label>
+                                    <input id="campoTitulo" type="text" placeholder="Ex: Aviso de feriado prolongado"
+                                        class="w-full p-3 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-semibold">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                                        Assunto do email <span id="contadorAssunto" class="text-slate-600 normal-case font-medium">0/60</span>
+                                    </label>
+                                    <input id="campoAssunto" type="text" maxlength="60" placeholder="Ex: Estaremos fechados nesta sexta"
+                                        oninput="document.getElementById('contadorAssunto').textContent = this.value.length + '/60'"
+                                        class="w-full p-3 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-semibold">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                                    Mensagem <span class="text-slate-600 normal-case font-medium">— use {{nome_paciente}} para personalizar</span>
+                                </label>
+                                <div class="flex items-center gap-1.5 mb-2">
+                                    <button type="button" class="toolbar-btn" onclick="formatarTexto('bold')" title="Negrito"><i class="fas fa-bold"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="formatarTexto('italic')" title="Itálico"><i class="fas fa-italic"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="formatarTexto('insertUnorderedList')" title="Lista"><i class="fas fa-list-ul"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="inserirLink()" title="Link"><i class="fas fa-link"></i></button>
+                                    <button type="button" class="toolbar-btn" onclick="inserirVariavel('{{nome_paciente}}')" title="Inserir nome do paciente"><i class="fas fa-user-tag"></i></button>
+                                </div>
+                                <div id="campoCorpo" contenteditable="true"
+                                    class="w-full min-h-[180px] p-4 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs font-medium leading-relaxed"
+                                    oninput="atualizarPreview()"
+                                    data-placeholder="Olá {{nome_paciente}}, ..."></div>
+                            </div>
+
+                            <!-- Público-alvo -->
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Público-alvo</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <label class="radio-audience selected">
+                                        <input type="radio" name="tipoPublico" value="todos" checked class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Todos os pacientes</strong><span class="text-slate-500 text-[10px]">Toda a base ativa</span></span>
+                                    </label>
+                                    <label class="radio-audience">
+                                        <input type="radio" name="tipoPublico" value="filtro" data-filtro="sem_retorno_90d" class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Sem retorno há 90+ dias</strong><span class="text-slate-500 text-[10px]">Reengajamento</span></span>
+                                    </label>
+                                    <label class="radio-audience">
+                                        <input type="radio" name="tipoPublico" value="filtro" data-filtro="aniversariantes_mes" class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Aniversariantes do mês</strong><span class="text-slate-500 text-[10px]">Data de nascimento</span></span>
+                                    </label>
+                                    <label class="radio-audience">
+                                        <input type="radio" name="tipoPublico" value="individual" class="mt-0.5 accent-emerald-400">
+                                        <span class="text-xs"><strong class="text-white block">Pacientes específicos</strong><span class="text-slate-500 text-[10px]">Escolha manual</span></span>
+                                    </label>
+                                </div>
+
+                                <div id="areaPacientesEspecificos" class="hidden mt-3 space-y-2">
+                                    <div class="autocomplete-wrap">
+                                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-xs" style="z-index:1"></i>
+                                        <input id="campoBuscaPaciente" type="text" placeholder="Digite o nome ou CPF do paciente..." autocomplete="off"
+                                            class="w-full pl-9 pr-3 py-2.5 bg-[#030e17]/60 backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder-slate-600 focus:outline-none focus:border-cyan-500 focus:bg-[#030e17]/80 transition text-xs">
+                                        <div id="autocompleteLista" class="autocomplete-lista"></div>
+                                    </div>
+                                    <div id="listaPacientesSelecionados" class="flex flex-wrap gap-2"></div>
+                                </div>
+                            </div>
+
+                            <!-- Ação -->
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-white/5 pt-5">
+                                <span id="contadorPublico" class="text-xs text-slate-400 font-semibold">
+                                    <i class="fas fa-users mr-1 text-cyan-400"></i> Calculando público-alvo...
+                                </span>
+                                <div class="flex gap-2.5">
+                                    <button id="btnSalvarRascunho" class="bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 text-slate-300 font-bold py-3 px-4 rounded-xl transition text-xs uppercase tracking-wider whitespace-nowrap">
+                                        <i class="fas fa-save mr-1"></i> Rascunho
+                                    </button>
+                                    <button id="btnEnviarCampanha" class="bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 px-6 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wider whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed">
+                                        <i class="fas fa-paper-plane"></i> Enviar campanha
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ═══ COLUNA DIREITA: PREVIEW ═══ -->
+                    <div class="xl:col-span-2 space-y-5 sm:space-y-6">
+                        <div class="cyber-panel rounded-2xl p-4 sm:p-5 xl:sticky xl:top-6">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
+                                <i class="fas fa-eye text-cyan-400 mr-1"></i> Preview da mensagem
+                            </p>
+                            <div class="email-preview-frame">
+                                <div class="bg-[#e2e2e5] px-4 py-2 flex items-center gap-1.5">
+                                    <span class="w-2.5 h-2.5 rounded-full bg-red-400"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-yellow-400"></span>
+                                    <span class="w-2.5 h-2.5 rounded-full bg-green-400"></span>
+                                </div>
+                                <div class="email-preview-body">
+                                    <p class="text-[11px] text-slate-400 mb-1">De: <strong id="previewRemetente" class="text-slate-600">Sua Clínica</strong></p>
+                                    <p class="text-[11px] text-slate-400 mb-3 pb-3 border-b border-slate-200">Assunto: <strong id="previewAssunto" class="text-slate-800">(sem assunto)</strong></p>
+                                    <div id="previewCorpo">Olá <strong>Maria</strong>, ...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ═══ HISTÓRICO ═══ -->
+                <div id="painelHistorico" class="cyber-panel glow-line rounded-2xl overflow-hidden">
+                    <div class="p-4 sm:p-5 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <h2 class="text-sm font-black text-white uppercase tracking-wide flex items-center gap-2">
+                            <i class="fas fa-clock-rotate-left text-cyan-400"></i> Campanhas enviadas
+                        </h2>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="filtrarCampanhas('')" data-filtro-status="" class="filtro-status-btn active px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-cyan-500/40 hover:text-cyan-300 transition">Todas</button>
+                            <button type="button" onclick="filtrarCampanhas('processando')" data-filtro-status="processando" class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-amber-500/40 hover:text-amber-300 transition">Processando</button>
+                            <button type="button" onclick="filtrarCampanhas('concluida')" data-filtro-status="concluida" class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-emerald-500/40 hover:text-emerald-300 transition">Sucesso</button>
+                            <button type="button" onclick="filtrarCampanhas('concluida_com_falhas')" data-filtro-status="concluida_com_falhas" class="filtro-status-btn px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-white/10 text-slate-300 hover:border-orange-500/40 hover:text-orange-300 transition">Com Falhas</button>
+                            <button onclick="carregarCampanhas(1)" class="toolbar-btn" title="Atualizar"><i class="fas fa-rotate"></i></button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="min-w-full divide-y divide-white/5">
+                            <thead>
+                                <tr class="bg-[#030e17]/70 backdrop-blur-sm text-cyan-400 uppercase text-[10px] font-black tracking-widest border-b border-white/5">
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Campanha</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Público</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Status</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Progresso</th>
+                                    <th class="py-3.5 px-4 sm:px-6 text-left whitespace-nowrap">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaCampanhas" class="divide-y divide-white/5 text-xs text-slate-300 font-medium">
+                                <tr><td colspan="5" class="py-6 px-6 text-center text-slate-500">Carregando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </main>
     </div>
 
-    <!-- Scripts de segurança / UX WhatsApp (novas funções) -->
-    <script>
-      (function () {
-        "use strict";
+<!-- Modal confirmação QR -->
+<div id="modalConfirmQr" class="fixed inset-0 z-[60] bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="confirm-panel cyber-panel rounded-2xl p-5 sm:p-6 max-w-md w-full border border-amber-500/40 relative">
+        <button type="button" onclick="fecharModalConfirmQr()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition"><i class="fas fa-times"></i></button>
+        <div class="flex items-start gap-3 mb-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-amber-400 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-white font-['Space_Grotesk'] mb-1">Atenção antes de conectar</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Confirme que você está ciente das regras de uso do WhatsApp da clínica.</p>
+            </div>
+        </div>
+        <div class="space-y-3 mb-5 text-xs text-slate-300 leading-relaxed">
+            <div class="flex gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <i class="fas fa-check-circle text-emerald-400 mt-0.5 flex-shrink-0"></i>
+                <span>O número será usado <strong class="text-white">exclusivamente</strong> para o consultório/clínica.</span>
+            </div>
+            <div class="flex gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <i class="fas fa-ban text-red-400 mt-0.5 flex-shrink-0"></i>
+                <span>Não irei utilizar este número em <strong class="text-red-300">grupos abertos, de spam ou de terceiros</strong>.</span>
+            </div>
+            <div class="flex gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+                <i class="fas fa-mobile-alt text-cyan-400 mt-0.5 flex-shrink-0"></i>
+                <span>Se estiver no celular, o ideal é gerar o QR no <strong class="text-cyan-300">computador</strong>.</span>
+            </div>
+        </div>
+        <label class="flex items-start gap-3 mb-5 cursor-pointer select-none p-3 rounded-xl border border-white/10 hover:border-emerald-500/30 transition">
+            <input type="checkbox" id="checkCienciaQr" class="confirm-check mt-0.5">
+            <span class="text-xs text-slate-300 leading-relaxed">Li e estou ciente. Concordo em usar este WhatsApp apenas para fins oficiais da clínica.</span>
+        </label>
+        <div class="flex flex-col sm:flex-row gap-2.5">
+            <button type="button" onclick="fecharModalConfirmQr()" class="flex-1 bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 font-bold py-3 rounded-xl text-xs uppercase tracking-wider transition">Cancelar</button>
+            <button type="button" id="btnConfirmarQr" onclick="confirmarEGerarQr()" disabled
+                class="flex-1 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-400 hover:to-emerald-400 text-white font-black py-3 rounded-xl text-xs uppercase tracking-wider transition opacity-40 cursor-not-allowed">
+                <i class="fas fa-qrcode mr-1"></i> Continuar e gerar QR
+            </button>
+        </div>
+    </div>
+</div>
 
-        /** Detecta se o dispositivo é mobile/tablet */
-        function isMobileDevice() {
-          return (
-            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-              navigator.userAgent
-            ) ||
-            (window.matchMedia &&
-              window.matchMedia("(max-width: 1023px)").matches)
-          );
+<script>
+(function () {
+  function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      || (window.matchMedia && window.matchMedia('(max-width: 1023px)').matches);
+  }
+  function verificarBannerMobile() {
+    var banner = document.getElementById('bannerMobileQr');
+    if (!banner) return;
+    if (isMobileDevice()) banner.classList.remove('hidden');
+    else banner.classList.add('hidden');
+  }
+  window.solicitarConfirmacaoQr = function () {
+    var modal = document.getElementById('modalConfirmQr');
+    var check = document.getElementById('checkCienciaQr');
+    var btn = document.getElementById('btnConfirmarQr');
+    if (!modal) return;
+    if (check) {
+      check.checked = false;
+      check.onchange = function () {
+        if (btn) {
+          btn.disabled = !check.checked;
+          btn.classList.toggle('opacity-40', !check.checked);
+          btn.classList.toggle('cursor-not-allowed', !check.checked);
         }
-
-        /** Exibe banner de aviso se estiver em mobile */
-        function verificarBannerMobile() {
-          const banner = document.getElementById("bannerMobileQr");
-          if (!banner) return;
-          if (isMobileDevice()) {
-            banner.classList.remove("hidden");
-          } else {
-            banner.classList.add("hidden");
-          }
-        }
-
-        /** Abre o modal de confirmação obrigatória antes de gerar o QR */
-        window.solicitarConfirmacaoQr = function () {
-          const modal = document.getElementById("modalConfirmQr");
-          const check = document.getElementById("checkCienciaQr");
-          const btn = document.getElementById("btnConfirmarQr");
-          if (!modal) return;
-
-          if (check) {
-            check.checked = false;
-            check.onchange = function () {
-              if (btn) {
-                btn.disabled = !check.checked;
-                btn.classList.toggle("opacity-40", !check.checked);
-                btn.classList.toggle("cursor-not-allowed", !check.checked);
-              }
-            };
-          }
-          if (btn) {
-            btn.disabled = true;
-            btn.classList.add("opacity-40", "cursor-not-allowed");
-          }
-          modal.classList.remove("hidden");
-        };
-
-        window.fecharModalConfirmQr = function () {
-          document.getElementById("modalConfirmQr")?.classList.add("hidden");
-        };
-
-        /** Após marcar o checkbox e confirmar, fecha o modal e gera o QR */
-        window.confirmarEGerarQr = function () {
-          const check = document.getElementById("checkCienciaQr");
-          if (!check || !check.checked) return;
-          fecharModalConfirmQr();
-          // Chama a função original do marketingScript.js
-          if (typeof conectarWhatsAppInstance === "function") {
-            conectarWhatsAppInstance();
-          }
-        };
-
-        // Fecha modal de confirmação com Escape
-        document.addEventListener("keydown", function (e) {
-          if (e.key === "Escape") {
-            fecharModalConfirmQr();
-          }
-        });
-
-        // Inicializa banner mobile
-        document.addEventListener("DOMContentLoaded", verificarBannerMobile);
-        window.addEventListener("resize", verificarBannerMobile);
-      })();
-    </script>
+      };
+    }
+    if (btn) { btn.disabled = true; btn.classList.add('opacity-40', 'cursor-not-allowed'); }
+    modal.classList.remove('hidden');
+  };
+  window.fecharModalConfirmQr = function () {
+    var m = document.getElementById('modalConfirmQr');
+    if (m) m.classList.add('hidden');
+  };
+  window.confirmarEGerarQr = function () {
+    var check = document.getElementById('checkCienciaQr');
+    if (!check || !check.checked) return;
+    fecharModalConfirmQr();
+    if (typeof conectarWhatsAppInstance === 'function') conectarWhatsAppInstance();
+  };
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') fecharModalConfirmQr();
+  });
+  document.addEventListener('DOMContentLoaded', verificarBannerMobile);
+  window.addEventListener('resize', verificarBannerMobile);
+})();
+</script>
 
     <script src="../ScriptGlobal/marketingScript.js"></script>
     <script src="../ScriptGlobal/FuncDataHora.js"></script>
     <script src="../ScriptGlobal/DarkMode.js"></script>
     <script src="../ScriptGlobal/verifiLog.js"></script>
     <script src="../ScriptGlobal/logout.js"></script>
-  </body>
+</body>
 </html>

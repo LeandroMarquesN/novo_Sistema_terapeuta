@@ -533,6 +533,7 @@ async function conectarWhatsAppInstance() {
 
   modal.classList.remove('hidden');
   container.innerHTML = '<span class="text-slate-800 text-xs font-semibold animate-pulse">Solicitando QR Code...</span>';
+  if (typeof atualizarVisualStatusWhatsApp === 'function') atualizarVisualStatusWhatsApp('connecting');
 
   try {
     const res = await fetch('/api/marketing/whatsapp/conectar', { headers });
@@ -555,18 +556,18 @@ async function conectarWhatsAppInstance() {
     if (data.qrcode) {
       const src = data.qrcode.startsWith('data:') ? data.qrcode : `data:image/png;base64,${data.qrcode}`;
       container.innerHTML = `<img src="${src}" alt="QR Code WhatsApp" class="w-48 h-48 object-contain mx-auto">`;
+      if (typeof atualizarVisualStatusWhatsApp === 'function') atualizarVisualStatusWhatsApp('connecting', data.telefone);
     } else if (data.status === 'open') {
       container.innerHTML = '<p class="text-xs text-emerald-600 font-bold">Instância já conectada!</p>';
-      const indicator = document.getElementById('statusIndicatorInstance');
-      const statusText = document.getElementById('statusInstanceText');
-      if (indicator) indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
-      if (statusText) statusText.textContent = 'WhatsApp conectado e pronto para disparos.';
+      if (typeof atualizarVisualStatusWhatsApp === 'function') atualizarVisualStatusWhatsApp('open', data.telefone);
     } else {
       container.innerHTML = '<p class="text-xs text-amber-600 font-semibold px-2">Nenhum QR Code retornado. Tente novamente em alguns segundos.</p>';
+      if (typeof atualizarVisualStatusWhatsApp === 'function') atualizarVisualStatusWhatsApp(data.status || 'close', data.telefone);
     }
   } catch (e) {
     console.error('[WHATSAPP] Erro:', e);
     container.innerHTML = '<p class="text-xs text-red-500 font-semibold">Erro ao comunicar com a Evolution API.</p>';
+    if (typeof atualizarVisualStatusWhatsApp === 'function') atualizarVisualStatusWhatsApp('close');
   }
 }
 
@@ -574,10 +575,69 @@ function fecharModalQrCode() {
   document.getElementById('modalQrCode')?.classList.add('hidden');
 }
 
+/**
+ * Atualiza o visual neon do status da instância WhatsApp.
+ * @param {'open'|'connecting'|'close'|string} status
+ * @param {string|null} telefone
+ */
+function atualizarVisualStatusWhatsApp(status, telefone = null) {
+  const badge = document.getElementById('waStatusBadge');
+  const label = document.getElementById('waStatusLabel');
+  const subtitle = document.getElementById('waStatusSubtitle');
+  const estadoEl = document.getElementById('waEstadoDisplay');
+  const indicator = document.getElementById('statusIndicatorInstance');
+
+  if (!badge || !label) return;
+
+  badge.classList.remove('wa-status-connected', 'wa-status-disconnected', 'wa-status-connecting');
+  const st = (status || '').toLowerCase();
+
+  if (st === 'open') {
+    badge.classList.add('wa-status-connected');
+    label.innerHTML = telefone
+      ? `WhatsApp Conectado e Operacional <span class="wa-status-phone opacity-90">· ${telefone}</span>`
+      : 'WhatsApp Conectado e Operacional';
+    if (subtitle) {
+      subtitle.className = 'wa-status-subtitle text-emerald-300/90';
+      subtitle.innerHTML = 'Sessão ativa. Disparos automáticos e lembretes de consultas estão <strong>habilitados</strong>.';
+    }
+    if (estadoEl) estadoEl.textContent = 'open';
+    if (indicator) indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+  } else if (st === 'connecting' || st === 'created') {
+    badge.classList.add('wa-status-connecting');
+    label.textContent = 'Conectando… aguarde a leitura do QR Code';
+    if (subtitle) {
+      subtitle.className = 'wa-status-subtitle text-cyan-300/90';
+      subtitle.innerHTML = 'Escaneie o QR Code no celular da clínica. Os disparos ficam pausados até a conexão ser estabelecida.';
+    }
+    if (estadoEl) estadoEl.textContent = st;
+    if (indicator) indicator.className = 'w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse';
+  } else {
+    badge.classList.add('wa-status-disconnected');
+    label.textContent = 'WhatsApp Desconectado — Necessário Conectar';
+    if (subtitle) {
+      subtitle.className = 'wa-status-subtitle text-amber-200/90';
+      subtitle.innerHTML = 'Disparos automáticos e lembretes de consultas estão <strong>pausados</strong> até que o QR Code seja lido.';
+    }
+    if (estadoEl) estadoEl.textContent = st || 'desconectado';
+    if (indicator) indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+  }
+
+  if (telefone) {
+    const telEl = document.getElementById('telefoneClinicaDisplay');
+    if (telEl) telEl.textContent = telefone;
+  }
+}
+
 async function carregarDadosInstanciaWhatsApp() {
   try {
+    atualizarVisualStatusWhatsApp('connecting');
+
     const res = await fetch('/api/marketing/whatsapp/conectar', { headers });
-    if (!res.ok) return;
+    if (!res.ok) {
+      atualizarVisualStatusWhatsApp('close');
+      return;
+    }
     const data = await res.json();
 
     if (data.instanceName) {
@@ -588,12 +648,12 @@ async function carregarDadosInstanciaWhatsApp() {
       const el = document.getElementById('telefoneClinicaDisplay');
       if (el) el.textContent = data.telefone;
     }
-    if (data.status === 'open') {
-      const indicator = document.getElementById('statusIndicatorInstance');
-      if (indicator) indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
-    }
+
+    const status = data.status || (data.qrcode ? 'connecting' : 'close');
+    atualizarVisualStatusWhatsApp(status, data.telefone || null);
   } catch (err) {
     console.error('Erro ao carregar dados da instância:', err);
+    atualizarVisualStatusWhatsApp('close');
   }
 }
 
