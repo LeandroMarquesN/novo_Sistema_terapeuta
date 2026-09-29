@@ -181,7 +181,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
     }
 
     const instanceName = `clinica_${clinicaId}`;
-    const evolutionApiUrl = process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com';
+    const evolutionApiUrl = (process.env.EVOLUTION_API_URL || 'https://medlm-evolution-api.onrender.com').replace(/\/$/, '');
     const evolutionApiKey = process.env.EVOLUTION_API_KEY;
 
     if (!evolutionApiKey) {
@@ -191,7 +191,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       });
     }
 
-    // 1. Garante existência da instância
+    // 1. Garante existência da instância com settings de segurança
     try {
       const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
         method: 'POST',
@@ -202,7 +202,15 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
         body: JSON.stringify({
           instanceName,
           qrcode: true,
-          integration: 'WHATSAPP-BAILEYS'
+          integration: 'WHATSAPP-BAILEYS',
+          // Segurança / anti-spam (boas práticas Evolution API)
+          rejectCall: true,
+          msgCall: 'Não aceitamos ligações. Por favor, envie uma mensagem de texto.',
+          groupsIgnore: true,
+          alwaysOnline: false,
+          readMessages: false,
+          readStatus: false,
+          syncFullHistory: false
         })
       });
 
@@ -216,6 +224,29 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
       return res.status(502).json({
         erro: `Não foi possível conectar à Evolution API (${evolutionApiUrl}).`
       });
+    }
+
+    // 1.1 Aplica/atualiza settings de segurança (mesmo se a instância já existia)
+    try {
+      await fetch(`${evolutionApiUrl}/settings/set/${instanceName}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: evolutionApiKey
+        },
+        body: JSON.stringify({
+          rejectCall: true,
+          msgCall: 'Não aceitamos ligações. Por favor, envie uma mensagem de texto.',
+          groupsIgnore: true,
+          alwaysOnline: false,
+          readMessages: false,
+          readStatus: false,
+          syncFullHistory: false
+        })
+      });
+      console.log(`[MARKETING] Settings de segurança aplicados em "${instanceName}".`);
+    } catch (errSettings) {
+      console.warn(`[MARKETING] Falha ao aplicar settings: ${errSettings.message}`);
     }
 
     // 2. Solicita conexão / QR
@@ -248,7 +279,7 @@ exports.conectarInstanciaWhatsApp = async (req, res) => {
           const qrData = await qrRes.json();
           qrcodeBase64 = qrData.base64 || qrData.qrcode?.base64 || qrData.code || null;
         }
-      } catch (_) {}
+      } catch (_) { }
     }
 
     res.json({

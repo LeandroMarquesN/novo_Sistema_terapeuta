@@ -3,8 +3,48 @@ require('dotenv').config();
 const db = require('../config/db');
 
 /**
+ * Aplica settings de segurança na instância (rejectCall + groupsIgnore).
+ * Chamado após create ou quando a instância já existe.
+ */
+async function aplicarSettingsSeguranca(instanceName, evolutionApiUrl, evolutionApiKey) {
+  try {
+    const res = await fetch(
+      `${evolutionApiUrl}/settings/set/${instanceName}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: evolutionApiKey
+        },
+        body: JSON.stringify({
+          rejectCall: true,
+          msgCall: 'Não aceitamos ligações. Por favor, envie uma mensagem de texto.',
+          groupsIgnore: true,
+          alwaysOnline: false,
+          readMessages: false,
+          readStatus: false,
+          syncFullHistory: false
+        })
+      }
+    );
+
+    if (res.ok) {
+      console.log(`[WHATSAPP] Settings de segurança aplicados em "${instanceName}" (rejectCall + groupsIgnore).`);
+    } else {
+      const corpo = await res.text().catch(() => '');
+      console.warn(
+        `[WHATSAPP] Não foi possível aplicar settings em "${instanceName}" (${res.status}): ${corpo.slice(0, 200)}`
+      );
+    }
+  } catch (err) {
+    console.warn(`[WHATSAPP] Falha ao aplicar settings de segurança: ${err.message}`);
+  }
+}
+
+/**
  * Garante que a instância existe e está pronta na Evolution API.
  * Se retornar 404 ou estado fechado/inativo, cria a instância automaticamente.
+ * Sempre aplica rejectCall: true e groupsIgnore: true.
  */
 async function garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey) {
   // 1. Verifica estado da conexão
@@ -22,13 +62,15 @@ async function garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey)
         stateData?.status ||
         null;
 
+      // Garante settings de segurança mesmo em instância já existente
+      await aplicarSettingsSeguranca(instanceName, evolutionApiUrl, evolutionApiKey);
+
       if (state === 'open') {
         console.log(`[WHATSAPP] Instância "${instanceName}" já está open.`);
         return { ok: true, state: 'open' };
       }
 
       console.log(`[WHATSAPP] Instância "${instanceName}" existe mas estado="${state}". Tentando reconnect...`);
-      // Tenta reconnect (gera QR se necessário — o envio ainda pode falhar até escanear)
       await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
         method: 'GET',
         headers: { apikey: evolutionApiKey }
@@ -37,7 +79,6 @@ async function garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey)
       return { ok: true, state: state || 'connecting' };
     }
 
-    // 404 ou outro erro → tenta criar
     if (stateRes.status === 404 || stateRes.status === 400) {
       console.log(`[WHATSAPP] Instância "${instanceName}" não encontrada (${stateRes.status}). Criando...`);
     } else {
@@ -47,7 +88,7 @@ async function garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey)
     console.warn(`[WHATSAPP] Falha ao consultar connectionState: ${errState.message}. Tentando criar instância...`);
   }
 
-  // 2. Cria a instância
+  // 2. Cria a instância com settings de segurança
   try {
     const createRes = await fetch(`${evolutionApiUrl}/instance/create`, {
       method: 'POST',
@@ -58,11 +99,18 @@ async function garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey)
       body: JSON.stringify({
         instanceName,
         qrcode: true,
-        integration: 'WHATSAPP-BAILEYS'
+        integration: 'WHATSAPP-BAILEYS',
+        // Segurança / anti-spam (boas práticas Evolution API)
+        rejectCall: true,
+        msgCall: 'Não aceitamos ligações. Por favor, envie uma mensagem de texto.',
+        groupsIgnore: true,
+        alwaysOnline: false,
+        readMessages: false,
+        readStatus: false,
+        syncFullHistory: false
       })
     });
 
-    // 403/409 costumam significar "já existe"
     if (!createRes.ok && ![403, 409].includes(createRes.status)) {
       const corpo = await createRes.text().catch(() => '');
       console.error(`[WHATSAPP] instance/create → ${createRes.status}: ${corpo}`);
@@ -74,7 +122,9 @@ async function garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey)
 
     console.log(`[WHATSAPP] Instância "${instanceName}" criada/garantida com sucesso.`);
 
-    // Solicita connect para gerar QR / iniciar sessão
+    // Aplica settings novamente (garantia extra em algumas versões da API)
+    await aplicarSettingsSeguranca(instanceName, evolutionApiUrl, evolutionApiKey);
+
     await fetch(`${evolutionApiUrl}/instance/connect/${instanceName}`, {
       method: 'GET',
       headers: { apikey: evolutionApiKey }
@@ -90,8 +140,33 @@ async function garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey)
 }
 
 /**
+ * Valida se o número é de um contato privado (não grupo).
+ * Rejeita JIDs de grupo (@g.us) e formatos inválidos.
+ */
+function validarNumeroPrivado(numero) {
+  const limpo = String(numero || '').replace(/\D/g, '');
+
+  if (!limpo || limpo.length < 10 || limpo.length > 15) {
+    throw new Error('Número de telefone inválido (deve ter entre 10 e 15 dígitos).');
+  }
+
+  const original = String(numero || '').toLowerCase();
+  if (
+    original.includes('@g.us') ||
+    original.includes('@broadcast') ||
+    original.includes('status@broadcast') ||
+    original.includes('@lid') ||
+    /grupo|group/i.test(original)
+  ) {
+    throw new Error('Envio permitido apenas para números privados de clientes. Grupos não são suportados.');
+  }
+
+  return limpo;
+}
+
+/**
  * Envia mensagem de WhatsApp via Evolution API.
- * Valida créditos, garante instância, formata números e abate 1 crédito após sucesso.
+ * Valida créditos, garante instância, formata números (apenas privados) e abate 1 crédito após sucesso.
  *
  * @param {number} clinicaId
  * @param {string} telefoneDestino
@@ -118,13 +193,14 @@ exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem, nomePacien
     throw new Error('A clínica não possui telefone oficial cadastrado (telefone_clinica).');
   }
 
-  // 2. Formatação do destinatário (Brasil)
-  let numero = String(telefoneDestino).replace(/\D/g, '');
-  if (numero.length < 10) {
-    throw new Error('Número de telefone inválido.');
-  }
+  // 2. Formatação e validação do destinatário (apenas número privado)
+  let numero = validarNumeroPrivado(telefoneDestino);
   if (!numero.startsWith('55')) {
     numero = `55${numero}`;
+  }
+
+  if (numero.length < 12 || numero.length > 15) {
+    throw new Error('Número de telefone inválido após formatação (esperado formato brasileiro com DDI 55).');
   }
 
   // 3. Personalização da mensagem (tag {{nome_paciente}})
@@ -132,11 +208,14 @@ exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem, nomePacien
   if (nomePaciente) {
     textoFinal = textoFinal.replace(/\{\{\s*nome_paciente\s*\}\}/gi, nomePaciente);
   }
-  // Remove HTML residual caso venha do editor
   textoFinal = textoFinal
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/?[^>]+(>|$)/g, '')
     .trim();
+
+  if (!textoFinal) {
+    throw new Error('Mensagem vazia após processamento.');
+  }
 
   const instanceName = `clinica_${clinicaId}`;
   const evolutionApiUrl = (process.env.EVOLUTION_API_URL || '').replace(/\/$/, '');
@@ -149,7 +228,7 @@ exports.enviarWhatsApp = async (clinicaId, telefoneDestino, mensagem, nomePacien
     throw new Error('EVOLUTION_API_KEY não configurada no servidor (.env).');
   }
 
-  // 4. Garante que a instância existe (cria se 404 / inativa)
+  // 4. Garante que a instância existe + aplica settings de segurança
   await garantirInstancia(instanceName, evolutionApiUrl, evolutionApiKey);
 
   const urlEnvio = `${evolutionApiUrl}/message/sendText/${instanceName}`;
