@@ -1,6 +1,6 @@
 # MedLM - Sistema Clínico Inteligente
 
-O **MedLM** é um SaaS clínico completo desenvolvido para otimizar a gestão de clínicas e o fluxo de atendimento médico. O sistema conta com controle de prontuários, agendamentos e automação inteligente por IA para padronização e suporte aos registros clínicos.
+O **MedLM** é um SaaS clínico completo desenvolvido do zero para otimizar a gestão de clínicas e o fluxo de atendimento médico. O sistema conta com controle de prontuários, agendamentos e automação inteligente por IA para padronização e suporte aos registros clínicos.
 
 > **Status do Projeto:** Em produção 🚀  
 > **Acesse a aplicação:** [https://www.medlm.com.br](https://www.medlm.com.br)
@@ -27,12 +27,11 @@ O projeto foi construído focando em escalabilidade, segurança e boas práticas
 
 ---
 
-## ⚙️ Como Executar o Projeto Localmente
+## 🔒 Sobre o Código
+*Este repositório possui código proprietário e restrito. Para demonstrações práticas de funcionamento, arquitetura e telas, acesse o sistema em produção através do link indicado no topo.*
 
-Se você deseja rodar o projeto em ambiente de desenvolvimento:
+---
 
-1. Clone o repositório:
+## 👨‍💻 Autor
 
-2
-   ```bash
-   git clone [https://github.com/SEU_USUARIO/medilm.git](https://github.com/SEU_USUARIO/medilm.git)
+Desenvolvido com foco em engenharia de software, arquitetura robusta e resolução de problemas reais de mercado.
