@@ -1,11 +1,11 @@
-[![MedLM - Sistema Clínico Inteligente](LINK_DA_SUA_IMAGEM_AQUI)](https://www.medilm.com.br)
+[![MedLM - Sistema Clínico Inteligente](https://raw.githubusercontent.com/LeandroMarquesN/novo_Sistema_terapeuta/refs/heads/main/IMG_5158.jpeg)](https://medlm.com.br)
 
 # MedLM - Sistema Clínico Inteligente
 
 O **MedLM** é um SaaS clínico completo desenvolvido do zero para otimizar a gestão de clínicas e o fluxo de atendimento médico. O sistema conta com controle de prontuários, agendamentos e automação inteligente por IA para padronização e suporte aos registros clínicos.
 
 > **Status do Projeto:** Em produção 🚀  
-> **Acesse a aplicação:** [https://www.medilm.com.br](https://www.medilm.com.br)
+> **Acesse a aplicação:** [https://medlm.com.br](https://medlm.com.br)
 
 ---
 
