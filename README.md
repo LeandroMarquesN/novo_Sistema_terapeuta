@@ -3,7 +3,7 @@
 O **MedLM** é um SaaS clínico completo desenvolvido para otimizar a gestão de clínicas e o fluxo de atendimento médico. O sistema conta com controle de prontuários, agendamentos e automação inteligente por IA para padronização e suporte aos registros clínicos.
 
 > **Status do Projeto:** Em produção 🚀  
-> **Acesse a aplicação:** [https://www.medilm.com.br](https://www.medilm.com.br)
+> **Acesse a aplicação:** [https://www.medlm.com.br](https://www.medlm.com.br)
 
 ---
 
